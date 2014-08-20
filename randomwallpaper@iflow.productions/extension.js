@@ -13,22 +13,9 @@ const Json = imports.gi.Json;
 // Filesystem
 const Gio = imports.gi.Gio;
 
-let button;
 
 function init() {
-  // UI
-  let icon = new St.Icon({ icon_name: 'system-run-symbolic',
-                           style_class: 'system-status-icon' });
-  
-  button = new PanelMenu.Button(0, "Random wallpaper");
-  button.actor.add_child(icon);
-  let menu_item = new PopupMenu.PopupMenuItem('Change Background')
-  button.menu.addMenuItem(menu_item, 0);
-  button.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
-  button.menu.addMenuItem(new PopupMenu.PopupMenuItem('trolololol'));
-
-  // add eventlistener
-  menu_item.actor.connect('button-press-event', _requestRandomImage);
+  global.log("INIT");
 }
 
 // fetch a random image url from desktopper.cc
@@ -81,8 +68,26 @@ function _setBackground(path){
   }
 }
 
+let button;
+
 function enable() {
   global.log("ENABLE");
+
+  // UI
+  let icon = new St.Icon({ icon_name: 'system-run-symbolic',
+                     style_class: 'system-status-icon' });
+  
+  button = new PanelMenu.Button(0, "Random wallpaper");
+  button.actor.add_child(icon);
+  let menu_item = new PopupMenu.PopupMenuItem('Change Background')
+  button.menu.addMenuItem(menu_item, 0);
+  button.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+  button.menu.addMenuItem(new PopupMenu.PopupMenuItem('trolololol'));
+
+  // add eventlistener
+  menu_item.actor.connect('button-press-event', _requestRandomImage);
+
+  // add to panel
   Main.panel.addToStatusArea("random-wallpaper-menu", button);
 }
 
