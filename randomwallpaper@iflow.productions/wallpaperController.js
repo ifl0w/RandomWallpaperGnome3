@@ -11,8 +11,12 @@ let WallpaperController = new Lang.Class({
 	Name: "WallpaperController",
 	extensionMeta: null,
 
+	wallpaperlocation: '',
+	historySize: 5,
+
 	_init: function(extensionMeta){
 		this.extensionMeta = extensionMeta;
+		this.wallpaperlocation = this.extensionMeta.path + '/wallpapers/';
 	},
 
 
@@ -39,22 +43,30 @@ let WallpaperController = new Lang.Class({
 	// copy file from uri to local direcotry
 	_writeToFile: function(uri){
 		let date = new Date();
+		let inputbuffer;
 
-		let output_file = Gio.file_new_for_path(this.extensionMeta.path + '/wallpapers/' + String(date.getTime()));
+		//extract the name from the desktopper url and add timestamp prefix
+		let name = date.getTime() + uri.substr(uri.lastIndexOf('.'));
+		
+		global.log(uri);
+		global.log(this.wallpaperlocation + String(name));
+
+		let output_file = Gio.file_new_for_path(this.wallpaperlocation + String(name));
 		let output_stream = output_file.create(0, null);
 
 		let input_file = Gio.file_new_for_uri(uri);
-		let input_stream = input_file.read(null);
 
+		let _this = this;
 
-		let fstream = input_file.copy(output_file, Gio.FileCopyFlags.OVERWRITE, null, function(){
+		input_file.load_contents_async(null, function(file, result){
+			let contents = file.load_contents_finish(result)[1];
+			output_stream.write(contents, null);
+			_this._setBackground(output_file.get_path());
+		});
+
+		/*let fstream = input_file.copy(output_file, Gio.FileCopyFlags.OVERWRITE, null, function(){
 		}, function(){
-		});  
-
-		global.log('========================');
-		global.log(output_file.get_path());
-		global.log('========================');
-		this._setBackground(output_file.get_path());
+		});  */
 	},
 
 
@@ -67,14 +79,54 @@ let WallpaperController = new Lang.Class({
 		if (background_setting.is_writable("picture-uri")){
 			// Set a new Background-Image (should show up immediately):
 			if (background_setting.set_string("picture-uri", "file://"+path) ){
+				//background_setting.apply();
 				Gio.Settings.sync(); // Necessary: http://stackoverflow.com/questions/9985140
-				background_setting.apply();
 			} else {
 				global.log("FAAILLEEDD");
 			}
 		} else {
 			global.log("FAAILLEEDD");
 		}
-		background_setting.apply();
+
+		this.deleteOldPictures();
+	},
+
+	getHistory: function () {
+		let directory = Gio.file_new_for_path(this.wallpaperlocation);
+		let enumerator = directory.enumerate_children('', Gio.FileQueryInfoFlags.NONE, null);
+		let fileinfo;
+		let history = [];
+
+		do {
+			fileinfo = enumerator.next_file(null);
+
+			if (!fileinfo) {
+				global.log("SHOUT!!!");
+				break;
+			};
+
+			let name = fileinfo.get_name();
+			
+			// ignore hidden files
+			if (name[0] != '.') {
+				history.push(fileinfo.get_name());
+			};
+
+		} while(fileinfo);
+
+		history.sort();
+
+		global.log(history);
+		return history;
+	},
+
+	deleteOldPictures: function() {
+		let history = this.getHistory();
+		let deleteFile;
+
+		while(history.length > this.historySize) {
+			deleteFile = Gio.file_new_for_path(this.wallpaperlocation + history.shift());
+			deleteFile.delete(null);
+		}
 	}
 });

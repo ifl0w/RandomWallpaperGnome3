@@ -7,3 +7,18 @@
     border-radius: 5px;
     padding: .5em;
 }
+
+.rwg_system_status_icon {
+	/*icon-size: 1.09em;*/
+	icon-size: 1em;
+	/*padding: 0 5px;*/
+	padding: 0 0;
+}
+
+.rwg-lable {
+	width: 100%;
+	font-weight: bold;
+	/*font-size: 110%;*/
+	text-align: left;
+	border: 0;
+}
