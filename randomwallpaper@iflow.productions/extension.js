@@ -18,85 +18,117 @@ let wallpaperController;
 let extensionMeta;
 
 function init(metaData) {
-  extensionMeta = metaData;
-  wallpaperController = new WallpaperController.WallpaperController(metaData);
-  global.log("INIT");
+	extensionMeta = metaData;
+	wallpaperController = new WallpaperController.WallpaperController(metaData);
+	global.log("INIT");
 }
 
 let panelEntry;
 
 let RandomWallpaperEntry = new Lang.Class({
-  Extends: PanelMenu.Button,
-  Name: "RandomWallpaperEntry",
+	Extends: PanelMenu.Button,
+	Name: "RandomWallpaperEntry",
 
-  _history: [],
+	_init: function(menuAlignment, nameText) {
+		this.parent(menuAlignment, nameText);
 
-  _init: function(menuAlignment, nameText){
-    this.parent(menuAlignment, nameText);
+		//let gicon = Gio.Icon.new_for_string(extensionMeta.path + "/images/shuffle-icon.svg");
 
-    //let gicon = Gio.Icon.new_for_string(extensionMeta.path + "/images/shuffle-icon.svg");
+		/*let icon = new St.Icon({ 
+		gicon: gicon,
+		style_class: 'rwg_status_icon' 
+	});*/
 
-    /*let icon = new St.Icon({ 
-      gicon: gicon,
-      style_class: 'rwg_status_icon' 
-    });*/
+		let icon = new St.Icon({
+			icon_name: 'preferences-desktop-wallpaper-symbolic',
+			style_class: 'rwg_system_status_icon'
+		});
 
-    let icon = new St.Icon({ 
-      icon_name: 'preferences-desktop-wallpaper-symbolic',
-      style_class: 'rwg_system_status_icon'
-    });
+		this.actor.add_child(icon);
 
-    this.actor.add_child(icon);
+		let menu_item = new PopupMenu.PopupMenuItem('New Wallpaper');
 
-    let menu_item = new PopupMenu.PopupMenuItem('Change Background');
-    let lable = new PopupMenu.PopupMenuItem('Change Background', { reactive: false, activate: false, hover: false, style_class: 'rwg-lable', can_focus: false });
+		this.menu.addMenuItem(menu_item, 1);
+		this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 
-    this.menu.addMenuItem(lable, 0);
-    this.menu.addMenuItem(menu_item, 1);
-    this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+		this.historySection = new PopupMenu.PopupMenuSection();
+		this.menu.addMenuItem(this.historySection);
 
-    this.historySection = new PopupMenu.PopupMenuSection();
-    this.menu.addMenuItem(this.historySection);
+		this.setHistoryList();
 
-    this.clearHistory();
+		this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 
-    this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+		//this.menu.addMenuItem(new CustomElements.DelaySlider(60));
 
-    this.menu.addMenuItem(new CustomElements.DelaySlider(60));
+		// add eventlistener
+		let _this = this;
+		menu_item.actor.connect('button-press-event', function() {
+			wallpaperController.fetchNewWallpaper(function() {
+				_this.setHistoryList();
+			});
+		});
 
-    // add eventlistener
-    menu_item.actor.connect('button-press-event', function() {
-      wallpaperController._requestRandomImage();
-    });
-  },
+		// when the popupmenu disapears, check if the wallpaper is the original and
+		// reset it if needed
+		this.menu.actor.connect('hide', function() {
+			wallpaperController.setWallpaper(_this.history[0]);
+		});
+	},
 
-  setHistoryList: function() {
-    this.historySection.addMenuItem(new PopupMenu.PopupMenuItem('Test Item 0'));
-    this.historySection.addMenuItem(new PopupMenu.PopupMenuItem('Test Item 1'));
-    this.historySection.addMenuItem(new PopupMenu.PopupMenuItem('Test Item 2'));
+	setHistoryList: function() {
+		this.historySection.removeAll();
 
-  },
+		let history = this.history = wallpaperController.getHistory();
 
-  clearHistory: function() {
-    this.historySection.removeAll();
-    
-    let empty = new PopupMenu.PopupMenuItem('No recent wallpaper ...', { reactive: false, activate: false, hover: false, style_class: 'rwg-lable', can_focus: false });
-    this.historySection.addMenuItem(empty);
-  },
+		if (!history.length) {
+			this.clearHistory();
+		};
+
+		for (var i = 0; i < history.length; i++) {
+			let historyid = history[i];
+			let tmp = new CustomElements.HistoryElement(historyid);
+
+			tmp.actor.connect('key-focus-in', function(actor) {
+				wallpaperController.previewWallpaper(historyid);
+			});
+
+			tmp.actor.connect('button-press-event', function(actor) {
+				wallpaperController.setWallpaper(historyid);
+				_this.setHistoryList();
+			});
+
+			this.historySection.addMenuItem(tmp);
+		};
+
+	},
+
+
+	clearHistory: function() {
+		this.historySection.removeAll();
+
+		let empty = new PopupMenu.PopupMenuItem('No recent wallpaper ...', {
+			reactive: false,
+			activate: false,
+			hover: false,
+			style_class: 'rwg-recent-lable',
+			can_focus: false
+		});
+		this.historySection.addMenuItem(empty);
+	},
 
 });
 
 function enable() {
-  global.log("ENABLE");
+	global.log("ENABLE");
 
-  // UI
-  panelEntry = new RandomWallpaperEntry(0, "Random wallpaper");  
+	// UI
+	panelEntry = new RandomWallpaperEntry(0, "Random wallpaper");
 
-  // add to panel
-  Main.panel.addToStatusArea("random-wallpaper-menu", panelEntry);
+	// add to panel
+	Main.panel.addToStatusArea("random-wallpaper-menu", panelEntry);
 }
 
 function disable() {
-  global.log("DISABLE");
-  panelEntry.destroy();
+	global.log("DISABLE");
+	panelEntry.destroy();
 }

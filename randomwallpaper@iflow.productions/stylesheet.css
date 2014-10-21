@@ -1,11 +1,11 @@
 
 .helloworld-label {
-    font-size: 36px;
-    font-weight: bold;
-    color: #ffffff;
-    background-color: rgba(10,10,10,0.7);
-    border-radius: 5px;
-    padding: .5em;
+	font-size: 36px;
+	font-weight: bold;
+	color: #ffffff;
+	background-color: rgba(10,10,10,0.7);
+	border-radius: 5px;
+	padding: .5em;
 }
 
 .rwg_system_status_icon {
@@ -19,6 +19,14 @@
 	width: 100%;
 	font-weight: bold;
 	/*font-size: 110%;*/
+	text-align: left;
+	border: 0;
+}
+
+.rwg-recent-lable {
+	width: 100%;
+	/*font-weight: bold;*/
+	font-size: 90%;
 	text-align: left;
 	border: 0;
 }
