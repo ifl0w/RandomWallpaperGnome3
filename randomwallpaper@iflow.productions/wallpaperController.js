@@ -107,7 +107,7 @@ let WallpaperController = new Lang.Class({
 		return false;
 	},
 
-	_setBackground: function(path){
+	_setBackground: function(path, callback){
 		let background_setting = new Gio.Settings({schema: "org.gnome.desktop.background"});
 	
 		/*
@@ -119,6 +119,10 @@ let WallpaperController = new Lang.Class({
 			// Set a new Background-Image (should show up immediately):
 			if (background_setting.set_string("picture-uri", "file://"+path) ){
 				Gio.Settings.sync(); // Necessary: http://stackoverflow.com/questions/9985140
+				// call callback if given
+				if (callback) {
+					callback();
+				};
 			} else {
 				global.log("FAAILLEEDD");
 			}
@@ -184,12 +188,12 @@ let WallpaperController = new Lang.Class({
 				// insert file into history
 				_this.history.unshift(historyid);
 
-				_this._setBackground(_this.wallpaperlocation + historyid);
-
-				// call callback if given
-				if (callback) {
-					callback();
-				};
+				_this._setBackground(_this.wallpaperlocation + historyid, function(){
+					// call callback if given
+					if (callback) {
+						callback();
+					};
+				});
 			});
 		});
 	},

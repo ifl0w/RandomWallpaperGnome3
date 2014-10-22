@@ -64,8 +64,8 @@ let RandomWallpaperEntry = new Lang.Class({
 		newWallpaperItem.actor.connect('button-press-event', function() {
 			_this.statusIcon.startLoading();
 			wallpaperController.fetchNewWallpaper(function() {
-				_this.statusIcon.stopLoading();
 				_this.setHistoryList();
+				_this.statusIcon.stopLoading();
 			});
 		});
 

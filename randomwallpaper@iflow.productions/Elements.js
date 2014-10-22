@@ -94,6 +94,7 @@ const StatusElement = new Lang.Class({
 	stopLoading: function() {
 		this.isLoading = false;
 		Tweener.removeTweens(this);
+		this.opacity = 255;
 	}
 
 });
