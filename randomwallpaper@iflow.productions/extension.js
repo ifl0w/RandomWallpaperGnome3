@@ -72,6 +72,7 @@ let RandomWallpaperEntry = new Lang.Class({
 		// reset it if needed
 		this.menu.actor.connect('hide', function() {
 			wallpaperController.setWallpaper(_this.history[0]);
+			_this.setHistoryList();
 		});
 	},
 
@@ -94,7 +95,6 @@ let RandomWallpaperEntry = new Lang.Class({
 
 			tmp.actor.connect('button-press-event', function(actor) {
 				wallpaperController.setWallpaper(historyid);
-				_this.setHistoryList();
 			});
 
 			this.historySection.addMenuItem(tmp);
