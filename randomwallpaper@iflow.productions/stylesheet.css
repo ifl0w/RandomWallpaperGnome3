@@ -1,26 +1,27 @@
 
-.helloworld-label {
-	font-size: 36px;
-	font-weight: bold;
-	color: #ffffff;
-	background-color: rgba(10,10,10,0.7);
-	border-radius: 5px;
-	padding: .5em;
-}
-
 .rwg_system_status_icon {
 	/*icon-size: 1.09em;*/
 	icon-size: 1em;
 	/*padding: 0 5px;*/
-	padding: 0 0;
+	padding: 0 0;	
+	position: absolute;
+    -webkit-animation:spin 4s linear infinite;
+    -moz-animation:spin 4s linear infinite;
+    animation:spin 4s linear infinite;
 }
 
-.rwg-lable {
-	width: 100%;
-	font-weight: bold;
-	/*font-size: 110%;*/
-	text-align: left;
-	border: 0;
+@-moz-keyframes spin { 
+	100% { -moz-transform: rotate(360deg); } 
+}
+@-webkit-keyframes spin { 
+	100% { -webkit-transform: rotate(360deg); } 
+}
+@keyframes spin { 
+	100% { -webkit-transform: rotate(360deg); transform:rotate(360deg); } 
+}
+
+.rwg-new-lable {
+	font-size: 130%;
 }
 
 .rwg-recent-lable {
@@ -29,4 +30,21 @@
 	font-size: 90%;
 	text-align: left;
 	border: 0;
+}
+
+.rwg-history-index {
+	padding-top: .35em;
+	font-size: 130%;
+	font-weight: lighter; 
+}
+
+.rwg-history-date {
+	/*padding-top: .35em;*/
+	font-size: 100%;
+}
+
+.rwg-history-time {
+	/*padding-top: .35em;*/
+	font-size: 100%;
+	font-weight: lighter; 
 }

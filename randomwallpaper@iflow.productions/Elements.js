@@ -2,13 +2,16 @@ const Lang = imports.lang;
 const PopupMenu = imports.ui.popupMenu;
 const St = imports.gi.St;
 const Slider = imports.ui.slider;
+const Tweener = imports.ui.tweener;
 
 const HistoryElement = new Lang.Class({
 	Name: 'HistoryElement',
 	Extends: PopupMenu.PopupBaseMenuItem,
 	historyId: null,
 
-	_init: function(historyId, params) {
+	_init: function(historyId, index, params) {
+		index = String(index)+'.' || '0.';
+
 		this.parent(params);
 
 		let timestamp = parseInt(historyId.slice(0, historyId.lastIndexOf('.')));
@@ -17,20 +20,82 @@ const HistoryElement = new Lang.Class({
 		let timeString = date.toLocaleTimeString();
 		let  dateString = date.toLocaleDateString();
 
+		this.label = new St.Label({ 
+			text: index,
+			style_class: 'rwg-history-index'
+		});
+		this.actor.add_child(this.label);
+
 		this._container = new St.BoxLayout({
 			vertical: true
 		});
 
-		this.label = new St.Label({ text: dateString });
-		this._container.add_child(this.label);
+		this.dateLabel = new St.Label({ 
+			text: dateString,
+			style_class: 'rwg-history-date'
+		});
+		this._container.add_child(this.dateLabel);
 
-		this.label = new St.Label({ text: timeString });
-		this._container.add_child(this.label);
+		this.timeLabel = new St.Label({ 
+			text: timeString,
+			style_class: 'rwg-history-time'
+		});
+		this._container.add_child(this.timeLabel);
 
 		this.historyId = historyId;
 
 		this.actor.add_child(this._container);
 	}
+});
+
+const StatusElement = new Lang.Class({
+	Name: 'StatusElement',
+	Extends: St.Icon,
+	
+	_init: function() {
+		
+		this.parent({
+			icon_name: 'preferences-desktop-wallpaper-symbolic',
+			style_class: 'rwg_system_status_icon'
+		});
+
+		let _this = this;
+
+		this.loadingTweenIn = {
+			opacity:20, 
+			time:1, 
+			transition:'easeInOutSine',
+			onComplete: function() {
+				Tweener.addTween(_this, _this.loadingTweenOut);
+			}
+		}
+
+		this.loadingTweenOut = {
+			opacity:255, 
+			time:1, 
+			transition:'easeInOutSine',
+			onComplete: function() {
+				if (_this.isLoading) {
+					Tweener.addTween(_this, _this.loadingTweenIn);
+				} else {
+					return false;					
+				}
+				return true;
+			}
+		}
+
+	},
+
+	startLoading: function() {
+		this.isLoading = true;
+		Tweener.addTween(this, this.loadingTweenOut);
+	},
+
+	stopLoading: function() {
+		this.isLoading = false;
+		Tweener.removeTweens(this);
+	}
+
 });
 
 // -------------------------------------------------------------------------------

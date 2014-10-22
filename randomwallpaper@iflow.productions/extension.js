@@ -10,6 +10,7 @@ const St = imports.gi.St;
 const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
 const CustomElements = Self.imports.Elements;
+const Tweener = imports.ui.tweener;
 
 // Filesystem
 const Gio = imports.gi.Gio;
@@ -39,16 +40,14 @@ let RandomWallpaperEntry = new Lang.Class({
 		style_class: 'rwg_status_icon' 
 	});*/
 
-		let icon = new St.Icon({
-			icon_name: 'preferences-desktop-wallpaper-symbolic',
-			style_class: 'rwg_system_status_icon'
+		this.statusIcon = new CustomElements.StatusElement();
+		this.actor.add_child(this.statusIcon);
+
+		let newWallpaperItem = new PopupMenu.PopupMenuItem('New Wallpaper', {
+			style_class: 'rwg-new-lable'
 		});
 
-		this.actor.add_child(icon);
-
-		let menu_item = new PopupMenu.PopupMenuItem('New Wallpaper');
-
-		this.menu.addMenuItem(menu_item, 1);
+		this.menu.addMenuItem(newWallpaperItem, 1);
 		this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 
 		this.historySection = new PopupMenu.PopupMenuSection();
@@ -62,8 +61,10 @@ let RandomWallpaperEntry = new Lang.Class({
 
 		// add eventlistener
 		let _this = this;
-		menu_item.actor.connect('button-press-event', function() {
+		newWallpaperItem.actor.connect('button-press-event', function() {
+			_this.statusIcon.startLoading();
 			wallpaperController.fetchNewWallpaper(function() {
+				_this.statusIcon.stopLoading();
 				_this.setHistoryList();
 			});
 		});
@@ -85,12 +86,16 @@ let RandomWallpaperEntry = new Lang.Class({
 			this.clearHistory();
 		};
 
-		for (var i = 0; i < history.length; i++) {
+		for (var i = 1; i < history.length; i++) {
 			let historyid = history[i];
-			let tmp = new CustomElements.HistoryElement(historyid);
+			let tmp = new CustomElements.HistoryElement(historyid, i);
 
 			tmp.actor.connect('key-focus-in', function(actor) {
 				wallpaperController.previewWallpaper(historyid);
+			});
+
+			tmp.actor.connect('button-press-event', function(actor) {
+				wallpaperController.setWallpaper(historyid);
 			});
 
 			tmp.actor.connect('button-press-event', function(actor) {
