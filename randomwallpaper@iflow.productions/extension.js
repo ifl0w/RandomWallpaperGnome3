@@ -33,35 +33,39 @@ let RandomWallpaperEntry = new Lang.Class({
 	_init: function(menuAlignment, nameText) {
 		this.parent(menuAlignment, nameText);
 
-		//let gicon = Gio.Icon.new_for_string(extensionMeta.path + "/images/shuffle-icon.svg");
-
-		/*let icon = new St.Icon({ 
-		gicon: gicon,
-		style_class: 'rwg_status_icon' 
-	});*/
-
+		// Panelmenu Icon
 		this.statusIcon = new CustomElements.StatusElement();
 		this.actor.add_child(this.statusIcon);
 
-		let newWallpaperItem = new PopupMenu.PopupMenuItem('New Wallpaper', {
+		// new wallpaper button
+		this.newWallpaperItem = new PopupMenu.PopupMenuItem('New Wallpaper', {
 			style_class: 'rwg-new-lable'
 		});
 
-		this.menu.addMenuItem(newWallpaperItem, 1);
+		this.menu.addMenuItem(this.newWallpaperItem);
+
 		this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 
+		// history section
 		this.historySection = new PopupMenu.PopupMenuSection();
 		this.menu.addMenuItem(this.historySection);
 
 		this.setHistoryList();
 
 		this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+		
+		// clear history button
+		this.clearHistoryItem = new PopupMenu.PopupMenuItem('Clear History');
+		this.menu.addMenuItem(this.clearHistoryItem);
 
 		//this.menu.addMenuItem(new CustomElements.DelaySlider(60));
 
-		// add eventlistener
+		/*
+			add eventlistener
+		*/
 		let _this = this;
-		newWallpaperItem.actor.connect('button-press-event', function() {
+		// new wallpaper event
+		this.newWallpaperItem.actor.connect('button-press-event', function() {
 			_this.statusIcon.startLoading();
 			wallpaperController.fetchNewWallpaper(function() {
 				_this.setHistoryList();
@@ -69,11 +73,20 @@ let RandomWallpaperEntry = new Lang.Class({
 			});
 		});
 
+		// clear history event
+		this.clearHistoryItem.actor.connect('button-press-event', function() {
+			wallpaperController.deleteHistory();
+		});
+
 		// when the popupmenu disapears, check if the wallpaper is the original and
 		// reset it if needed
 		this.menu.actor.connect('hide', function() {
-			wallpaperController.setWallpaper(_this.history[0]);
+			wallpaperController.setWallpaper(_this.history[0], true);
 			_this.setHistoryList();
+		});
+
+		this.menu.actor.connect('leave-event', function() {
+			wallpaperController.previewWallpaper(_this.history[0], 350, true);
 		});
 	},
 
@@ -82,33 +95,34 @@ let RandomWallpaperEntry = new Lang.Class({
 
 		let history = this.history = wallpaperController.getHistory();
 
-		if (!history.length) {
-			this.clearHistory();
+		if (history.length <= 1) {
+			this.clearHistoryList();
+			return;
 		};
 
 		for (var i = 1; i < history.length; i++) {
 			let historyid = history[i];
 			let tmp = new CustomElements.HistoryElement(historyid, i);
 
-			tmp.actor.connect('key-focus-in', function(actor) {
+			function onEnter(actor) {
 				wallpaperController.previewWallpaper(historyid);
-			});
+			}
 
-			tmp.actor.connect('button-press-event', function(actor) {
+			function onSelect(actor) {
 				wallpaperController.setWallpaper(historyid);
-			});
+			}
 
-			tmp.actor.connect('button-press-event', function(actor) {
-				wallpaperController.setWallpaper(historyid);
-			});
+			tmp.actor.connect('key-focus-in', onEnter);
+			tmp.actor.connect('enter-event', onEnter);
+			
+			tmp.actor.connect('button-press-event', onSelect);
 
 			this.historySection.addMenuItem(tmp);
 		};
 
 	},
 
-
-	clearHistory: function() {
+	clearHistoryList: function() {
 		this.historySection.removeAll();
 
 		let empty = new PopupMenu.PopupMenuItem('No recent wallpaper ...', {

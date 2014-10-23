@@ -175,14 +175,15 @@ let WallpaperController = new Lang.Class({
 		}
 	},
 
-	setWallpaper: function(historyEntry) {
-		historyEntry = this._setNewFileName(historyEntry);
+	setWallpaper: function(historyEntry, keepName) {
+		if (!keepName) {
+			historyEntry = this._setNewFileName(historyEntry);
+		}
 		this._setBackground(this.wallpaperlocation + historyEntry);
 	},
 
 	fetchNewWallpaper: function(callback) {
 		let _this = this;
-
 		this._requestRandomImageDesktopper(function(imageUrl){
 			_this._fetchFile(imageUrl, function(historyid, path) {
 				// insert file into history
@@ -198,17 +199,23 @@ let WallpaperController = new Lang.Class({
 		});
 	},
 
-	previewWallpaper: function(historyid) {
+	previewWallpaper: function(historyid, delay, setWallpaper) {
 		this.previewId = historyid;
 		let _this = this;
+
+		delay = delay || 200;
 
 		if (_this.timeout) {
 			return;
 		};
 
-		this.timeout = Mainloop.timeout_add(Mainloop.PRIORITY_DEFAULT, 250, function(){
+		this.timeout = Mainloop.timeout_add(Mainloop.PRIORITY_DEFAULT, delay, function(){
 			_this.timeout = null;
-			_this._setBackground(_this.wallpaperlocation + _this.previewId);
+			if (setWallpaper) {
+				_this.setWallpaper(_this.previewId, true);
+			} else {
+				_this._setBackground(_this.wallpaperlocation + _this.previewId);
+			}
 			return false;
 		});
 	},
@@ -218,6 +225,39 @@ let WallpaperController = new Lang.Class({
 
 	getHistory: function() {
 		return this.history;
+	},
+
+	deleteHistory: function() {
+		let firstHistoryElement = this.history[0];
+
+		if (firstHistoryElement)
+			this.history = [firstHistoryElement];
+
+		let directory = Gio.file_new_for_path(this.wallpaperlocation);
+		let enumerator = directory.enumerate_children('', Gio.FileQueryInfoFlags.NONE, null);
+		
+		let fileinfo;
+		let deleteFile;
+
+		do {
+			
+			fileinfo = enumerator.next_file(null);
+
+			if (!fileinfo) {
+				break;
+			};
+
+			let name = fileinfo.get_name();
+			
+			// ignore hidden files and first element
+			if (name[0] != '.' && name != firstHistoryElement) {
+				deleteFile = Gio.file_new_for_path(this.wallpaperlocation + name);
+				deleteFile.delete(null);
+			};
+
+		} while(fileinfo);
+
+		return true;
 	}
 
 });
