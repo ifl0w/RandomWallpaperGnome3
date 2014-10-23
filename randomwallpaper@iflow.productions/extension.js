@@ -65,7 +65,7 @@ let RandomWallpaperEntry = new Lang.Class({
 		*/
 		let _this = this;
 		// new wallpaper event
-		this.newWallpaperItem.actor.connect('button-press-event', function() {
+		this.newWallpaperItem.connect('activate', function() {
 			_this.statusIcon.startLoading();
 			wallpaperController.fetchNewWallpaper(function() {
 				_this.setHistoryList();
@@ -74,7 +74,7 @@ let RandomWallpaperEntry = new Lang.Class({
 		});
 
 		// clear history event
-		this.clearHistoryItem.actor.connect('button-press-event', function() {
+		this.clearHistoryItem.connect('activate', function() {
 			wallpaperController.deleteHistory();
 		});
 
@@ -86,8 +86,9 @@ let RandomWallpaperEntry = new Lang.Class({
 		});
 
 		this.menu.actor.connect('leave-event', function() {
-			wallpaperController.previewWallpaper(_this.history[0], 350, true);
+			wallpaperController.previewWallpaper(_this.history[0], 400, true);
 		});
+		
 	},
 
 	setHistoryList: function() {
@@ -100,6 +101,10 @@ let RandomWallpaperEntry = new Lang.Class({
 			return;
 		};
 
+		function onLeave(actor) {
+			wallpaperController.previewWallpaper(history[0], 400, true);				
+		}
+
 		for (var i = 1; i < history.length; i++) {
 			let historyid = history[i];
 			let tmp = new CustomElements.HistoryElement(historyid, i);
@@ -111,11 +116,13 @@ let RandomWallpaperEntry = new Lang.Class({
 			function onSelect(actor) {
 				wallpaperController.setWallpaper(historyid);
 			}
+			
 
 			tmp.actor.connect('key-focus-in', onEnter);
+			tmp.actor.connect('key-focus-out', onLeave);
 			tmp.actor.connect('enter-event', onEnter);
 			
-			tmp.actor.connect('button-press-event', onSelect);
+			tmp.connect('activate', onSelect);
 
 			this.historySection.addMenuItem(tmp);
 		};

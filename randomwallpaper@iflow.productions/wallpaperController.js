@@ -21,7 +21,7 @@ let WallpaperController = new Lang.Class({
 		this.extensionMeta = extensionMeta;
 		this.wallpaperlocation = this.extensionMeta.path + '/wallpapers/';
 		this.history = this._loadHistory();
-		this.currentWallpaper = this._getCurrentWallpaper();
+		this.currentWallpaper = this._getCurrentWallpaper();	
 	},
 
 
