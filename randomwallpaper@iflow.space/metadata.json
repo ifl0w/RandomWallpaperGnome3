@@ -1,0 +1,11 @@
+{
+	"shell-version": [
+				"3.12", 
+				"3.14", 
+				"3.16", 
+				"3.18"
+    ],
+	"uuid": "randomwallpaper@iflow.space",
+	"name": "Random Wallpaper",
+	"description": "Fetches a random wallpaper from desktopper.co and sets it as desktop background"
+}
