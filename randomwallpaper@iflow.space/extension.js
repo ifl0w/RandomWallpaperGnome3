@@ -101,22 +101,9 @@ let RandomWallpaperEntry = new Lang.Class({
 			return;
 		};
 
-		function onLeave(actor) {
-			wallpaperController.previewWallpaper(history[0], 400, true);				
-		}
-
 		for (var i = 1; i < history.length; i++) {
 			let historyid = history[i];
 			let tmp = new CustomElements.HistoryElement(historyid, i);
-
-			function onEnter(actor) {
-				wallpaperController.previewWallpaper(historyid);
-			}
-
-			function onSelect(actor) {
-				wallpaperController.setWallpaper(historyid);
-			}
-			
 
 			tmp.actor.connect('key-focus-in', onEnter);
 			tmp.actor.connect('key-focus-out', onLeave);
@@ -126,6 +113,18 @@ let RandomWallpaperEntry = new Lang.Class({
 
 			this.historySection.addMenuItem(tmp);
 		};
+
+		function onLeave(actor) {
+			wallpaperController.previewWallpaper(history[0], 400, true);
+		}
+
+		function onEnter(actor) {
+			wallpaperController.previewWallpaper(actor.historyId);
+		}
+
+		function onSelect(actor) {
+			wallpaperController.setWallpaper(actor.historyId);
+		}
 
 	},
 
