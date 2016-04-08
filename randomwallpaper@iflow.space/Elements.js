@@ -24,6 +24,7 @@ const HistoryElement = new Lang.Class({
 			text: index,
 			style_class: 'rwg-history-index'
 		});
+		
 		this.actor.add_child(this.label);
 
 		this._container = new St.BoxLayout({
@@ -43,6 +44,7 @@ const HistoryElement = new Lang.Class({
 		this._container.add_child(this.timeLabel);
 
 		this.historyId = historyId;
+		this.actor.historyId = historyId; // extend the actor with the historyId
 
 		this.actor.add_child(this._container);
 	}
