@@ -17,6 +17,9 @@ const Tweener = imports.ui.tweener;
 // Filesystem
 const Gio = imports.gi.Gio;
 
+// Settings
+const Convenience = Self.imports.convenience;
+
 let wallpaperController;
 let extensionMeta;
 
@@ -156,7 +159,8 @@ let RandomWallpaperEntry = new Lang.Class({
 
 function enable() {
 	// Extension enabled
-
+	this.settings = Convenience.getSettings();
+	
 	// UI
 	panelEntry = new RandomWallpaperEntry(0, "Random wallpaper");
 

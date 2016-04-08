@@ -8,6 +8,10 @@ const Json = imports.gi.Json;
 // Filesystem
 const Gio = imports.gi.Gio;
 
+//self
+const Self = imports.misc.extensionUtils.getCurrentExtension();
+const SourceAdapter = Self.imports.sourceAdapter;
+
 let WallpaperController = new Lang.Class({
 	Name: "WallpaperController",
 	extensionMeta: null,
@@ -16,38 +20,22 @@ let WallpaperController = new Lang.Class({
 	currentWallpaper: '',
 	historySize: 10,
 	history: [],
+	imageSourceAdapter: undefined,
 
 	_init: function(extensionMeta){
 		this.extensionMeta = extensionMeta;
 		this.wallpaperlocation = this.extensionMeta.path + '/wallpapers/';
 		this.history = this._loadHistory();
 		this.currentWallpaper = this._getCurrentWallpaper();	
+		this.imageSourceAdapter = new SourceAdapter.DesktopperAdapter();
+		this.imageSourceAdapter = new SourceAdapter.WallheavenAdapter();
 	},
 
-
 	/* 
-		fetch a random image url from desktopper.cc
-		and call callback function with the URL of the image
+		forwards the request to the adapter
 	*/
-	_requestRandomImageDesktopper: function(callback){
-		let session = new Soup.SessionAsync();
-		let message = Soup.Message.new('GET', 'https://api.desktoppr.co/1/wallpapers/random')
-
-		let parser = new Json.Parser();
-
-		var _this = this;
-
-		session.queue_message(message, function(session, message) {
-			parser.load_from_data(message.response_body.data, -1);
-
-			let data = parser.get_root().get_object()
-			let response = data.get_object_member('response');
-			let imageUrl = response.get_object_member('image').get_string_member('url');
-
-			if (callback) {
-				callback(imageUrl);
-			};
-		});
+	_requestRandomImageFromAdapter: function(callback){
+		this.imageSourceAdapter.requestRandomImage(callback);
 	},
 
 	/*
@@ -184,7 +172,7 @@ let WallpaperController = new Lang.Class({
 
 	fetchNewWallpaper: function(callback) {
 		let _this = this;
-		this._requestRandomImageDesktopper(function(imageUrl){
+		this._requestRandomImageFromAdapter(function(imageUrl){
 			_this._fetchFile(imageUrl, function(historyid, path) {
 				// insert file into history
 				_this.history.unshift(historyid);

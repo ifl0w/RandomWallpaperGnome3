@@ -1,0 +1,13 @@
+<schemalist gettext-domain="space.iflow.randomwallpaper">
+  <schema id="org.gnome.shell.extensions.space.iflow.randomwallpaper"
+      path="/org/gnome/shell/extensions/space/iflow/randomwallpaper/">
+
+    <key type="i" name="boot-wait">
+        <default>15</default>
+        <summary>Time to wait before first check (seconds)</summary>
+        <description>A first check is made this number of seconds after startup</description>
+        <range min="5" max="5000"/>
+    </key>
+
+  </schema>
+</schemalist>
