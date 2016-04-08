@@ -124,10 +124,10 @@ let WallpaperController = new Lang.Class({
 					callback();
 				};
 			} else {
-				global.log("FAAILLEEDD");
+				// TODO: error handling
 			}
 		} else {
-			global.log("FAAILLEEDD");
+			// TODO: error handling
 		}
 
 		this.deleteOldPictures();
