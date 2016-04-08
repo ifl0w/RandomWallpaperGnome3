@@ -24,7 +24,7 @@ const HistoryElement = new Lang.Class({
 			text: index,
 			style_class: 'rwg-history-index'
 		});
-		
+
 		this.actor.add_child(this.label);
 
 		this._container = new St.BoxLayout({
@@ -58,7 +58,7 @@ const StatusElement = new Lang.Class({
 		
 		this.parent({
 			icon_name: 'preferences-desktop-wallpaper-symbolic',
-			style_class: 'rwg_system_status_icon'
+			style_class: 'system-status-icon'
 		});
 
 		let _this = this;
