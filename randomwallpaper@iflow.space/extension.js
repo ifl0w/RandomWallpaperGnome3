@@ -21,7 +21,6 @@ let extensionMeta;
 function init(metaData) {
 	extensionMeta = metaData;
 	wallpaperController = new WallpaperController.WallpaperController(metaData);
-	global.log("INIT");
 }
 
 let panelEntry;
@@ -144,7 +143,7 @@ let RandomWallpaperEntry = new Lang.Class({
 });
 
 function enable() {
-	global.log("ENABLE");
+	// Extension enabled
 
 	// UI
 	panelEntry = new RandomWallpaperEntry(0, "Random wallpaper");
@@ -154,6 +153,6 @@ function enable() {
 }
 
 function disable() {
-	global.log("DISABLE");
+	// Extension disabled
 	panelEntry.destroy();
 }
