@@ -1,4 +1,6 @@
 const Lang = imports.lang;
+const GLib = imports.gi.GLib;
+const Shell = imports.gi.Shell;
 
 //self
 const Self = imports.misc.extensionUtils.getCurrentExtension();
@@ -57,6 +59,10 @@ let RandomWallpaperEntry = new Lang.Class({
 		this.clearHistoryItem = new PopupMenu.PopupMenuItem('Clear History');
 		this.menu.addMenuItem(this.clearHistoryItem);
 
+		// open wallpaper folder button
+		this.openFolder = new PopupMenu.PopupMenuItem('Open Wallpaper Folder');
+		this.menu.addMenuItem(this.openFolder);
+
 		//this.menu.addMenuItem(new CustomElements.DelaySlider(60));
 
 		/*
@@ -75,6 +81,13 @@ let RandomWallpaperEntry = new Lang.Class({
 		// clear history event
 		this.clearHistoryItem.connect('activate', function() {
 			wallpaperController.deleteHistory();
+		});
+
+		// Open Wallpaper Folder
+		this.openFolder.connect('activate', function(event) {
+			let now = new Date().getTime()/1000;
+			let uri = GLib.filename_to_uri(wallpaperController.wallpaperlocation, "");
+			Gio.AppInfo.launch_default_for_uri(uri, global.create_app_launch_context(now, -1))
 		});
 
 		// when the popupmenu disapears, check if the wallpaper is the original and
@@ -131,7 +144,6 @@ let RandomWallpaperEntry = new Lang.Class({
 		this.historySection.removeAll();
 
 		let empty = new PopupMenu.PopupMenuItem('No recent wallpaper ...', {
-			reactive: false,
 			activate: false,
 			hover: false,
 			style_class: 'rwg-recent-lable',
