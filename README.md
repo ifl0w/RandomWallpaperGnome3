@@ -3,13 +3,13 @@ RandomWallpaperGnome3
 
 Random Wallpapers for Gnome 3 is a gnome shell extension which fetches a random wallpaper from an online source and sets it as desktop background.
 
-## Installation
+## Installation 
 
-Open the commandline and type following lines
+Open the commandline and type the following lines:
 
 ```
 git clone git@github.com:ifl0w/RandomWallpaperGnome3.git
-ln -s RandomWallpaperGnome3/randomwallpaper@iflow.productions ~/.local/share/gnome-shell/extensions/
+cp RandomWallpaperGnome3/randomwallpaper@iflow.productions ~/.local/share/gnome-shell/extensions/
 ```
 
 Then open the command prompt (Alt+F2) end enter `r` without qotes.
