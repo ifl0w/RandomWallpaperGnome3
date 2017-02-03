@@ -6,7 +6,7 @@ const Json = imports.gi.Json;
 
 let DesktopperAdapter = new Lang.Class({
 	Name: "DesktopperAdapter",
-	/* 
+	/*
 		fetch a random image url from desktopper.cc
 		and call callback function with the URL of the image
 	*/
@@ -44,20 +44,20 @@ let WallheavenAdapter = new Lang.Class({
 		'resolutions': ['1920x1200','2560x1440'],
 	},
 
-	/* 
+	/*
 		fetch a random image url from wallheaven.cc with the given options
 		and call callback function with the URL of the image
 	*/
 	requestRandomImage: function(callback){
 		let session = new Soup.SessionAsync();
-		
+
 		let options = this.options;
 		let optionsString=""
 
 		for (var key in options) {
 			if (options.hasOwnProperty(key)) {
 				if (Array.isArray(options[key])) {
-					optionsString += key + "=" + options[key].join() + "&";	
+					optionsString += key + "=" + options[key].join() + "&";
 				} else {
 					optionsString += key + "=" + options[key] + "&";
 				}
@@ -67,14 +67,14 @@ let WallheavenAdapter = new Lang.Class({
 		optionsString = optionsString.slice(0,-1);
 
 		let url = 'http://alpha.wallhaven.cc/search?'+optionsString;
-		
+
 		let message = Soup.Message.new('GET', url);
 
 		var _this = this;
 
 		session.queue_message(message, function(session, message) {
 			let body = message.response_body.data;
-			let urlArray = body.match(new RegExp(/http:\/\/alpha.wallhaven.cc\/wallpaper\/[0-9]+/g));
+			let urlArray = body.match(new RegExp(/http[s]*:\/\/alpha.wallhaven.cc\/wallpaper\/[0-9]+/g));
 
 			// remove dublicates from array
 			let uniqueUrlArray = urlArray.filter(function(item, pos) {
@@ -90,7 +90,7 @@ let WallheavenAdapter = new Lang.Class({
 				let body = message.response_body.data;
 				let imageUrl = body.match(new RegExp(/\/\/wallpapers.wallhaven.cc\/wallpapers\/full\/.*?"/))[0];
 				imageUrl = imageUrl.slice(0,-1);
-				imageUrl = 'http:' + imageUrl;			
+				imageUrl = 'http:' + imageUrl;
 
 				if (callback) {
 					callback(imageUrl);
