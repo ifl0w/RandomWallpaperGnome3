@@ -20,7 +20,7 @@ const HistoryElement = new Lang.Class({
 		let timeString = date.toLocaleTimeString();
 		let  dateString = date.toLocaleDateString();
 
-		this.label = new St.Label({ 
+		this.label = new St.Label({
 			text: index,
 			style_class: 'rwg-history-index'
 		});
@@ -31,13 +31,13 @@ const HistoryElement = new Lang.Class({
 			vertical: true
 		});
 
-		this.dateLabel = new St.Label({ 
+		this.dateLabel = new St.Label({
 			text: dateString,
 			style_class: 'rwg-history-date'
 		});
 		this._container.add_child(this.dateLabel);
 
-		this.timeLabel = new St.Label({ 
+		this.timeLabel = new St.Label({
 			text: timeString,
 			style_class: 'rwg-history-time'
 		});
@@ -53,9 +53,9 @@ const HistoryElement = new Lang.Class({
 const StatusElement = new Lang.Class({
 	Name: 'StatusElement',
 	Extends: St.Icon,
-	
+
 	_init: function() {
-		
+
 		this.parent({
 			icon_name: 'preferences-desktop-wallpaper-symbolic',
 			style_class: 'system-status-icon'
@@ -64,8 +64,8 @@ const StatusElement = new Lang.Class({
 		let _this = this;
 
 		this.loadingTweenIn = {
-			opacity:20, 
-			time:1, 
+			opacity:20,
+			time:1,
 			transition:'easeInOutSine',
 			onComplete: function() {
 				Tweener.addTween(_this, _this.loadingTweenOut);
@@ -73,14 +73,14 @@ const StatusElement = new Lang.Class({
 		}
 
 		this.loadingTweenOut = {
-			opacity:255, 
-			time:1, 
+			opacity:255,
+			time:1,
 			transition:'easeInOutSine',
 			onComplete: function() {
 				if (_this.isLoading) {
 					Tweener.addTween(_this, _this.loadingTweenIn);
 				} else {
-					return false;					
+					return false;
 				}
 				return true;
 			}

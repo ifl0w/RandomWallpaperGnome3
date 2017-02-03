@@ -26,12 +26,12 @@ let WallpaperController = new Lang.Class({
 		this.extensionMeta = extensionMeta;
 		this.wallpaperlocation = this.extensionMeta.path + '/wallpapers/';
 		this.history = this._loadHistory();
-		this.currentWallpaper = this._getCurrentWallpaper();	
+		this.currentWallpaper = this._getCurrentWallpaper();
 		this.imageSourceAdapter = new SourceAdapter.DesktopperAdapter();
 		this.imageSourceAdapter = new SourceAdapter.WallheavenAdapter();
 	},
 
-	/* 
+	/*
 		forwards the request to the adapter
 	*/
 	_requestRandomImageFromAdapter: function(callback){
@@ -39,8 +39,8 @@ let WallpaperController = new Lang.Class({
 	},
 
 	/*
-		copy file from uri to local wallpaper direcotry	and calls 
-		the given callback with the name and the full filepath of 
+		copy file from uri to local wallpaper direcotry	and calls
+		the given callback with the name and the full filepath of
 		the written file as parameter.
 	*/
 	_fetchFile: function(uri, callback){
@@ -97,7 +97,7 @@ let WallpaperController = new Lang.Class({
 
 	_setBackground: function(path, callback){
 		let background_setting = new Gio.Settings({schema: "org.gnome.desktop.background"});
-	
+
 		/*
 			inspired from:
 			https://bitbucket.org/LukasKnuth/backslide/src/7e36a49fc5e1439fa9ed21e39b09b61eca8df41a/backslide@codeisland.org/settings.js?at=master
@@ -123,13 +123,13 @@ let WallpaperController = new Lang.Class({
 
 	_getCurrentWallpaper: function() {
 		let background_setting = new Gio.Settings({schema: "org.gnome.desktop.background"});
-		return background_setting.get_string("picture-uri");
+		return background_setting.get_string("picture-uri").replace(/^(file:\/\/)/, "");
 	},
 
 	_loadHistory: function () {
 		let directory = Gio.file_new_for_path(this.wallpaperlocation);
 		let enumerator = directory.enumerate_children('', Gio.FileQueryInfoFlags.NONE, null);
-		
+
 		let fileinfo;
 		let history = [];
 
@@ -141,7 +141,7 @@ let WallpaperController = new Lang.Class({
 			};
 
 			let name = fileinfo.get_name();
-			
+
 			// ignore hidden files
 			if (name[0] != '.') {
 				history.push(fileinfo.get_name());
@@ -168,6 +168,7 @@ let WallpaperController = new Lang.Class({
 			historyEntry = this._setNewFileName(historyEntry);
 		}
 		this._setBackground(this.wallpaperlocation + historyEntry);
+		this.currentWallpaper = this._getCurrentWallpaper();
 	},
 
 	fetchNewWallpaper: function(callback) {
@@ -187,20 +188,19 @@ let WallpaperController = new Lang.Class({
 		});
 	},
 
-	previewWallpaper: function(historyid, delay, setWallpaper) {
-		this.previewId = historyid;
-		let _this = this;
-
-		delay = delay || 200;
-
-		if (_this.timeout) {
+	_backgroundTimout: function(delay) {
+		if (this.timeout) {
 			return;
 		};
 
+		let _this = this;
+		delay = delay || 200;
+
 		this.timeout = Mainloop.timeout_add(Mainloop.PRIORITY_DEFAULT, delay, function(){
 			_this.timeout = null;
-			if (setWallpaper) {
-				_this.setWallpaper(_this.previewId, true);
+			if (_this._resetWallpaper) {
+				_this._setBackground(_this.currentWallpaper);
+				_this._resetWallpaper = false;
 			} else {
 				_this._setBackground(_this.wallpaperlocation + _this.previewId);
 			}
@@ -208,7 +208,16 @@ let WallpaperController = new Lang.Class({
 		});
 	},
 
+	previewWallpaper: function(historyid, delay) {
+		this.previewId = historyid;
+		this._resetWallpaper = false;
+
+		this._backgroundTimout(delay);
+	},
+
 	resetWallpaper: function() {
+		this._resetWallpaper = true;
+		this._backgroundTimout();
 	},
 
 	getHistory: function() {
@@ -223,12 +232,12 @@ let WallpaperController = new Lang.Class({
 
 		let directory = Gio.file_new_for_path(this.wallpaperlocation);
 		let enumerator = directory.enumerate_children('', Gio.FileQueryInfoFlags.NONE, null);
-		
+
 		let fileinfo;
 		let deleteFile;
 
 		do {
-			
+
 			fileinfo = enumerator.next_file(null);
 
 			if (!fileinfo) {
@@ -236,7 +245,7 @@ let WallpaperController = new Lang.Class({
 			};
 
 			let name = fileinfo.get_name();
-			
+
 			// ignore hidden files and first element
 			if (name[0] != '.' && name != firstHistoryElement) {
 				deleteFile = Gio.file_new_for_path(this.wallpaperlocation + name);
@@ -246,6 +255,10 @@ let WallpaperController = new Lang.Class({
 		} while(fileinfo);
 
 		return true;
+	},
+
+	menuShowHook: function() {
+		this.currentWallpaper = this._getCurrentWallpaper();
 	}
 
 });

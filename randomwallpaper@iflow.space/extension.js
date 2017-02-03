@@ -57,7 +57,7 @@ let RandomWallpaperEntry = new Lang.Class({
 		this.setHistoryList();
 
 		this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
-		
+
 		// clear history button
 		this.clearHistoryItem = new PopupMenu.PopupMenuItem('Clear History');
 		this.menu.addMenuItem(this.clearHistoryItem);
@@ -71,6 +71,7 @@ let RandomWallpaperEntry = new Lang.Class({
 		/*
 			add eventlistener
 		*/
+
 		let _this = this;
 		// new wallpaper event
 		this.newWallpaperItem.connect('activate', function() {
@@ -88,22 +89,25 @@ let RandomWallpaperEntry = new Lang.Class({
 
 		// Open Wallpaper Folder
 		this.openFolder.connect('activate', function(event) {
-			let now = new Date().getTime()/1000;
 			let uri = GLib.filename_to_uri(wallpaperController.wallpaperlocation, "");
-			Gio.AppInfo.launch_default_for_uri(uri, global.create_app_launch_context(now, -1))
+			Gio.AppInfo.launch_default_for_uri(uri, global.create_app_launch_context(0, -1))
+		});
+
+		this.menu.actor.connect('show', function() {
+			wallpaperController.menuShowHook();
 		});
 
 		// when the popupmenu disapears, check if the wallpaper is the original and
 		// reset it if needed
 		this.menu.actor.connect('hide', function() {
-			wallpaperController.setWallpaper(_this.history[0], true);
+			wallpaperController.resetWallpaper();
 			_this.setHistoryList();
 		});
 
-		this.menu.actor.connect('leave-event', function() {
-			wallpaperController.previewWallpaper(_this.history[0], 400, true);
+		this.menu.actor.connect('leave-event', function(e, t, a) {
+			wallpaperController.resetWallpaper();
 		});
-		
+
 	},
 
 	setHistoryList: function() {
@@ -123,14 +127,14 @@ let RandomWallpaperEntry = new Lang.Class({
 			tmp.actor.connect('key-focus-in', onEnter);
 			tmp.actor.connect('key-focus-out', onLeave);
 			tmp.actor.connect('enter-event', onEnter);
-			
+
 			tmp.connect('activate', onSelect);
 
 			this.historySection.addMenuItem(tmp);
 		};
 
 		function onLeave(actor) {
-			wallpaperController.previewWallpaper(history[0], 400, true);
+			wallpaperController.resetWallpaper();
 		}
 
 		function onEnter(actor) {
