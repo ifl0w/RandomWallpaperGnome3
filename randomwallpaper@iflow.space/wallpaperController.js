@@ -42,8 +42,8 @@ let WallpaperController = new Lang.Class({
 		this.imageSourceAdapter = new SourceAdapter.DesktopperAdapter();
 		this.imageSourceAdapter = new SourceAdapter.WallheavenAdapter();
 
-		if (autoFetch.active) {
-		
+		if (this.autoFetch.active) {
+
 		}
 	},
 
