@@ -1,13 +1,59 @@
-<schemalist gettext-domain="space.iflow.randomwallpaper">
-  <schema id="org.gnome.shell.extensions.space.iflow.randomwallpaper"
-      path="/org/gnome/shell/extensions/space/iflow/randomwallpaper/">
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist gettext-domain='gnome-shell-extensions'>
 
-    <key type="i" name="boot-wait">
-        <default>15</default>
-        <summary>Time to wait before first check (seconds)</summary>
-        <description>A first check is made this number of seconds after startup</description>
-        <range min="5" max="5000"/>
-    </key>
+    <enum id='org.gnome.shell.extensions.space.iflow.randomwallpaper.sources'>
+      <value value='0' nick='desktoppr'/>
+      <value value='1' nick='unsplash'/>
+      <value value='2' nick='wallheaven'/>
+    </enum>
 
-  </schema>
+    <schema path="/org/gnome/shell/extensions/space-iflow-randomwallpaper-sources/"
+      id='org.gnome.shell.extensions.space.iflow.randomwallpaper'>
+
+        <key type='i' name='history-length'>
+            <default>10</default>
+            <summary>History size</summary>
+            <description>Number of wallpapers stored locally</description>
+            <range min='2' max='100'/>
+        </key>
+
+        <key type='b' name='auto-fetch'>
+            <default>false</default>
+            <summary>Auto-Fetch</summary>
+            <description>Update the wallpaper based on a duration</description>
+        </key>
+
+        <key type='i' name='minutes'>
+            <default>30</default>
+            <summary>Duration</summary>
+            <description>Minutes to wait before a new wallpaper is fetched</description>
+            <range min='1' max='59'/>
+        </key>
+
+        <key type='i' name='hours'>
+            <default>1</default>
+            <summary>Duration</summary>
+            <description>Minutes to wait before a new wallpaper is fetched</description>
+            <range min='0' max='23'/>
+        </key>
+
+        <key name='source' enum='org.gnome.shell.extensions.space.iflow.randomwallpaper.sources'>
+          <default>'desktoppr'</default>
+          <summary>Wallpaper Source</summary>
+          <description>Describs the adapter that will be used.</description>
+        </key>
+
+        <key type='as' name='history'>
+            <default>[]</default>
+            <summary>History</summary>
+            <description>Stores the history objects as stringified JSONs</description>
+        </key>
+
+        <key type='i' name='minutes-elapsed'>
+            <default>0</default>
+            <summary>Elapsed Time</summary>
+            <description>The time that already elapsed.</description>
+        </key>
+
+    </schema>
 </schemalist>

@@ -11,6 +11,7 @@ const Gio = imports.gi.Gio;
 //self
 const Self = imports.misc.extensionUtils.getCurrentExtension();
 const SourceAdapter = Self.imports.sourceAdapter;
+const Convenience = Self.imports.convenience;
 
 let WallpaperController = new Lang.Class({
 	Name: "WallpaperController",
@@ -22,13 +23,38 @@ let WallpaperController = new Lang.Class({
 	history: [],
 	imageSourceAdapter: undefined,
 
+	autoFetch : {
+		active: false,
+		duration: 30,
+	},
+
 	_init: function(extensionMeta){
 		this.extensionMeta = extensionMeta;
 		this.wallpaperlocation = this.extensionMeta.path + '/wallpapers/';
+
+		this._settings = Convenience.getSettings();
+		this._settings.connect('changed', this._loadSettings.bind(this));
+		this._loadSettings();
+
 		this.history = this._loadHistory();
 		this.currentWallpaper = this._getCurrentWallpaper();
+
 		this.imageSourceAdapter = new SourceAdapter.DesktopperAdapter();
 		this.imageSourceAdapter = new SourceAdapter.WallheavenAdapter();
+
+		if (autoFetch.active) {
+		
+		}
+	},
+
+	_loadSettings: function() {
+		this.historySize = this._settings.get_int('history-length');
+		this.autoFetch.active = this._settings.get_boolean('auto-fetch');
+
+		let duration = 0;
+		duration += this._settings.get_int('minutes');
+		duration += this._settings.get_int('hours') * 60;
+		this.autoFetch.duration = duration;
 	},
 
 	/*
@@ -83,6 +109,8 @@ let WallpaperController = new Lang.Class({
 				file.move(newFile, Gio.FileCopyFlags.NONE, null, function(){
 				});
 
+				// TODO: error handling, what if move fails?
+
 				this.history[i] = name;
 
 				this.history.sort();
@@ -97,6 +125,7 @@ let WallpaperController = new Lang.Class({
 
 	_setBackground: function(path, callback){
 		let background_setting = new Gio.Settings({schema: "org.gnome.desktop.background"});
+		this.deleteOldPictures();
 
 		/*
 			inspired from:
@@ -118,7 +147,6 @@ let WallpaperController = new Lang.Class({
 			// TODO: error handling
 		}
 
-		this.deleteOldPictures();
 	},
 
 	_getCurrentWallpaper: function() {
@@ -156,6 +184,7 @@ let WallpaperController = new Lang.Class({
 	},
 
 	deleteOldPictures: function() {
+		this.historySize = this._settings.get_int('history-length');
 		let deleteFile;
 		while(this.history.length > this.historySize) {
 			deleteFile = Gio.file_new_for_path(this.wallpaperlocation + this.history.pop());

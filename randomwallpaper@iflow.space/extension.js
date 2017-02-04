@@ -164,7 +164,7 @@ let RandomWallpaperEntry = new Lang.Class({
 function enable() {
 	// Extension enabled
 	this.settings = Convenience.getSettings();
-	
+
 	// UI
 	panelEntry = new RandomWallpaperEntry(0, "Random wallpaper");
 
