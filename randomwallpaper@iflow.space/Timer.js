@@ -1,39 +1,53 @@
 const Lang = imports.lang;
 const GLib = imports.gi.GLib;
-const Convenience = Self.imports.convenience;
+const Prefs = Self.imports.settings;
 
 let AFTimer = new Lang.Class({
 
-  _timeout: null,
-  _timoutEndCallback: null,
+    _timeout: null,
+    _timoutEndCallback: null,
 
-  _init: function() {
-    this._settings = Convenience.getSettings();
-    this._settings.connect('changed::minutes_elapsed', this._loadSettings.bind(this));
-    this._settings.connect('changed::minutes_', this._loadSettings.bind(this));
-  }
-
-  registerCallback: function(callback) {
-    this._timoutEndCallback = callback;
-  }
-
-  start: function(delay) {
-    if (this._timeout) {
-      this.stop();
+    _init: function() {
+        this._settings = new Prefs.Settings();
+        // this._settings.observe('minutes_elapsed', function() { // TODO: determine what to do });
+        this._settings.observe('minutes', this._loadSettings.bind(this));
     }
 
-    // TODO: calc elapsed time
-    // TODO: check > 0
-
-    this._timeout = GLib.timeout_add(, delay, function() {
-
-    });
-  }
-
-  stop: function(delay, callback) {
-    if (_timeout) {
-      Glib.source_remove(_timeout)
+    _remainingMinutes: function() {
+        // TODO
     }
-  }
+
+    registerCallback: function(callback) {
+        this._timoutEndCallback = callback;
+    },
+
+    begin: function() {
+        if (this._timeout) {
+            this.pause();
+        }
+
+        //this._settings.get()
+
+        // TODO: calc elapsed time
+        // TODO: check > 0
+
+        this._timeout = GLib.timeout_add(Glib.PRIORITY_DEFAULT, delay, function() {
+            this._settings.set(minutes_elapsed)
+        }.bind(this));
+    },
+
+    stop: function() {
+        if (_timeout) {
+            Glib.source_remove(_timeout)
+            this._settings.set('minutes_elapsed', 'int', 0)
+        }
+    },
+
+    pause: function() {
+        if (_timeout) {
+            Glib.source_remove(_timeout)
+            this._settings.set('minutes_elapsed', 'int', this._remainingMinutes())
+        }
+    }
 
 });

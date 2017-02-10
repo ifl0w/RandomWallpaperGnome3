@@ -12,6 +12,7 @@ const Gio = imports.gi.Gio;
 const Self = imports.misc.extensionUtils.getCurrentExtension();
 const SourceAdapter = Self.imports.sourceAdapter;
 const Convenience = Self.imports.convenience;
+const Prefs = Self.imports.settings;
 
 let WallpaperController = new Lang.Class({
 	Name: "WallpaperController",
@@ -23,7 +24,7 @@ let WallpaperController = new Lang.Class({
 	history: [],
 	imageSourceAdapter: undefined,
 
-	autoFetch : {
+	_autoFetch : {
 		active: false,
 		duration: 30,
 	},
@@ -32,29 +33,38 @@ let WallpaperController = new Lang.Class({
 		this.extensionMeta = extensionMeta;
 		this.wallpaperlocation = this.extensionMeta.path + '/wallpapers/';
 
-		this._settings = Convenience.getSettings();
-		this._settings.connect('changed', this._loadSettings.bind(this));
-		this._loadSettings();
+		this._settings = new Prefs.Settings();
+		this._settings.observe('history-length', this._updateHistory.bind(this));
+		this._settings.observe('auto-fetch', this._updateAutoFetching.bind(this));
+		this._settings.observe('minutes', this._updateAutoFetching.bind(this));
+		this._settings.observe('hours', this._updateAutoFetching.bind(this));
+
+		this._updateHistory();
+		this._updateAutoFetching();
 
 		this.history = this._loadHistory();
 		this.currentWallpaper = this._getCurrentWallpaper();
 
 		this.imageSourceAdapter = new SourceAdapter.DesktopperAdapter();
 		this.imageSourceAdapter = new SourceAdapter.WallheavenAdapter();
-
-		if (this.autoFetch.active) {
-
-		}
 	},
 
-	_loadSettings: function() {
-		this.historySize = this._settings.get_int('history-length');
-		this.autoFetch.active = this._settings.get_boolean('auto-fetch');
+	_updateHistory: function() {
+		this.historySize = this._settings.get('history-length', 'int');
+	},
 
+	_updateAutoFetching: function() {
 		let duration = 0;
-		duration += this._settings.get_int('minutes');
-		duration += this._settings.get_int('hours') * 60;
-		this.autoFetch.duration = duration;
+		duration += this._settings.get('minutes', 'int');
+		duration += this._settings.get('hours', 'int') * 60;
+		this._autoFetch.duration = duration;
+		this._autoFetch.active = this._settings.get('auto-fetch', 'boolean');
+
+		if (this._autoFetch.active) {
+			// TODO: this._timer.begin(this._autoFetch.duration);
+		} else {
+			// TODO: this._timer.end(this._autoFetch.duration);
+		}
 	},
 
 	/*
@@ -184,7 +194,7 @@ let WallpaperController = new Lang.Class({
 	},
 
 	deleteOldPictures: function() {
-		this.historySize = this._settings.get_int('history-length');
+		this.historySize = this._settings.get('history-length', 'int');
 		let deleteFile;
 		while(this.history.length > this.historySize) {
 			deleteFile = Gio.file_new_for_path(this.wallpaperlocation + this.history.pop());

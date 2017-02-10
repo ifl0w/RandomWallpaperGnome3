@@ -1,0 +1,34 @@
+const Lang = imports.lang;
+const Glib = imports.gi.GLib;
+const Gio = imports.gi.Gio;
+
+const Self = imports.misc.extensionUtils.getCurrentExtension();
+const Convenience = Self.imports.convenience;
+
+let Settings = new Lang.Class({
+    Name: "Settings",
+
+    _init: function() {
+        this._settings = Convenience.getSettings();
+    },
+
+    observe: function(key, callback) {
+        this._settings.connect('changed::'+key, callback);
+    },
+
+    set: function(key, type, value) {
+        if (this._settings['set_'+type](key, value)){
+            Gio.Settings.sync(); // wait for write
+        } else {
+            throw "Could not set " + key + " (type: " + type + ") with the value " + value;
+        }
+    },
+
+    get: function(key, type) {
+        return this._settings['get_'+type](key);
+    },
+
+    getSourceAdapter: function() {
+        return null;
+    }
+});
