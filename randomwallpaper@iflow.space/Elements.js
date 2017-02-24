@@ -4,6 +4,9 @@ const St = imports.gi.St;
 const Slider = imports.ui.slider;
 const Tweener = imports.ui.tweener;
 
+const Self = imports.misc.extensionUtils.getCurrentExtension();
+const Timer = Self.imports.timer;
+
 const HistoryElement = new Lang.Class({
 	Name: 'HistoryElement',
 	Extends: PopupMenu.PopupBaseMenuItem,
@@ -47,6 +50,64 @@ const HistoryElement = new Lang.Class({
 		this.actor.historyId = historyId; // extend the actor with the historyId
 
 		this.actor.add_child(this._container);
+	}
+});
+
+/**
+ * Element for the New Wallpaper button and the remaining time for the auto fetch
+ * feature.
+ * The remaining time will only be displayed if the af-feature is activated.
+ *
+ * @type {Lang.Class}
+ */
+const NewWallpaperElement = new Lang.Class({
+	Name: 'NewWallpaperElement',
+	Extends: PopupMenu.PopupBaseMenuItem,
+
+	_init: function(params) {
+		this.parent(params);
+
+		this._timer = new Timer.AFTimer();
+
+		this._container = new St.BoxLayout({
+			vertical: true
+		});
+
+		this._newWPLabel = new St.Label({
+			text: 'New Wallpaper',
+			style_class: 'rwg-new-lable'
+		});
+		this._container.add_child(this._newWPLabel);
+
+		this._remainingLabel = new St.Label({
+			text: '1 minute remaining'
+		});
+		this._container.add_child(this._remainingLabel);
+
+		this.actor.add_child(this._container);
+	},
+
+	show: function() {
+		if (this._timer.isActive()) {
+			let remainingMinutes = this._timer.remainingMinutes();
+			let minutes = remainingMinutes % 60;
+			let hours = Math.floor(remainingMinutes / 60);
+
+			let hoursText = hours.toString();
+			hoursText += (hours == 1) ? ' hour' : ' hours';
+			let minText = minutes.toString();
+			minText += (minutes == 1) ? ' minute' : ' minutes';
+
+			if (hours >= 1) {
+				this._remainingLabel.text = '... ' + hoursText + ' and ' + minText + ' remaining.'
+			} else {
+				this._remainingLabel.text = '... ' + minText + ' remaining.'
+			}
+
+			this._remainingLabel.show();
+		} else {
+			this._remainingLabel.hide();
+		}
 	}
 });
 

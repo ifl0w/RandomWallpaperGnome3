@@ -42,9 +42,7 @@ let RandomWallpaperEntry = new Lang.Class({
 		this.actor.add_child(this.statusIcon);
 
 		// new wallpaper button
-		this.newWallpaperItem = new PopupMenu.PopupMenuItem('New Wallpaper', {
-			style_class: 'rwg-new-lable'
-		});
+		this.newWallpaperItem = new CustomElements.NewWallpaperElement();
 
 		this.menu.addMenuItem(this.newWallpaperItem);
 
@@ -67,19 +65,17 @@ let RandomWallpaperEntry = new Lang.Class({
 		this.menu.addMenuItem(this.openFolder);
 
 		//this.menu.addMenuItem(new CustomElements.DelaySlider(60));
-
 		/*
 			add eventlistener
 		*/
 
-		let _this = this;
+		wallpaperController.registerStartLoadingHook(this.statusIcon.startLoading.bind(this.statusIcon));
+		wallpaperController.registerStopLoadingHook(this.statusIcon.stopLoading.bind(this.statusIcon));
+		wallpaperController.registerStopLoadingHook(this.setHistoryList.bind(this));
+
 		// new wallpaper event
 		this.newWallpaperItem.connect('activate', function() {
-			_this.statusIcon.startLoading();
-			wallpaperController.fetchNewWallpaper(function() {
-				_this.setHistoryList();
-				_this.statusIcon.stopLoading();
-			});
+			wallpaperController.fetchNewWallpaper();
 		});
 
 		// clear history event
@@ -94,14 +90,15 @@ let RandomWallpaperEntry = new Lang.Class({
 		});
 
 		this.menu.actor.connect('show', function() {
+			this.newWallpaperItem.show();
 			wallpaperController.menuShowHook();
-		});
+		}.bind(this));
 
 		// when the popupmenu disapears, check if the wallpaper is the original and
 		// reset it if needed
-		this.menu.actor.connect('hide', function() {
+		this.menu.actor.connect('hide', () => {
 			wallpaperController.resetWallpaper();
-			_this.setHistoryList();
+			this.setHistoryList();
 		});
 
 		this.menu.actor.connect('leave-event', function(e, t, a) {
@@ -163,7 +160,6 @@ let RandomWallpaperEntry = new Lang.Class({
 
 function enable() {
 	// Extension enabled
-	this.settings = Convenience.getSettings();
 
 	// UI
 	panelEntry = new RandomWallpaperEntry(0, "Random wallpaper");

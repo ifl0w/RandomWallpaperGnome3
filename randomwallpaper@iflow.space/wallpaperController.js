@@ -13,6 +13,7 @@ const Self = imports.misc.extensionUtils.getCurrentExtension();
 const SourceAdapter = Self.imports.sourceAdapter;
 const Convenience = Self.imports.convenience;
 const Prefs = Self.imports.settings;
+const Timer = Self.imports.timer;
 
 let WallpaperController = new Lang.Class({
 	Name: "WallpaperController",
@@ -24,14 +25,22 @@ let WallpaperController = new Lang.Class({
 	history: [],
 	imageSourceAdapter: undefined,
 
+	_timer: null,
 	_autoFetch : {
 		active: false,
 		duration: 30,
 	},
 
+	// functions will be called uppon loading a new wallpaper
+	_startLoadingHooks: [],
+	// functions will be called when loading a new wallpaper stopped. If an error occured then the error will be passed as parameter.
+	_stopLoadingHooks: [],
+
 	_init: function(extensionMeta){
 		this.extensionMeta = extensionMeta;
 		this.wallpaperlocation = this.extensionMeta.path + '/wallpapers/';
+
+		this._timer = new Timer.AFTimer();
 
 		this._settings = new Prefs.Settings();
 		this._settings.observe('history-length', this._updateHistory.bind(this));
@@ -61,9 +70,10 @@ let WallpaperController = new Lang.Class({
 		this._autoFetch.active = this._settings.get('auto-fetch', 'boolean');
 
 		if (this._autoFetch.active) {
-			// TODO: this._timer.begin(this._autoFetch.duration);
+			this._timer.registerCallback(this.fetchNewWallpaper.bind(this));
+			this._timer.begin();
 		} else {
-			// TODO: this._timer.end(this._autoFetch.duration);
+			this._timer.end();
 		}
 	},
 
@@ -211,6 +221,11 @@ let WallpaperController = new Lang.Class({
 	},
 
 	fetchNewWallpaper: function(callback) {
+		this._startLoadingHooks.forEach((element) => {
+			element();
+		});
+		this._timer.begin(); // reset timer
+
 		let _this = this;
 		this._requestRandomImageFromAdapter(function(imageUrl){
 			_this._fetchFile(imageUrl, function(historyid, path) {
@@ -219,6 +234,9 @@ let WallpaperController = new Lang.Class({
 
 				_this._setBackground(_this.wallpaperlocation + historyid, function(){
 					// call callback if given
+					_this._stopLoadingHooks.forEach((element) => {
+						element(null);
+					});
 					if (callback) {
 						callback();
 					};
@@ -298,6 +316,17 @@ let WallpaperController = new Lang.Class({
 
 	menuShowHook: function() {
 		this.currentWallpaper = this._getCurrentWallpaper();
-	}
+	},
 
+	registerStartLoadingHook: function(fn) {
+		if (typeof fn === "function") {
+			this._startLoadingHooks.push(fn)
+		}
+	},
+
+	registerStopLoadingHook: function(fn) {
+		if (typeof fn === "function") {
+			this._stopLoadingHooks.push(fn)
+		}
+	}
 });

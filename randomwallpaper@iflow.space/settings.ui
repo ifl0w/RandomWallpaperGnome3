@@ -9,7 +9,7 @@
     <property name="page_increment">10</property>
   </object>
   <object class="GtkAdjustment" id="duration-minutes">
-    <property name="lower">5</property>
+    <property name="lower">1</property>
     <property name="upper">59</property>
     <property name="value">30</property>
     <property name="step_increment">1</property>
@@ -23,17 +23,14 @@
     <property name="page_increment">10</property>
   </object>
   <object class="GtkBox" id="main-widget">
+    <property name="width_request">500</property>
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="valign">start</property>
     <property name="margin_left">15</property>
     <property name="margin_right">15</property>
     <property name="margin_top">15</property>
     <property name="margin_bottom">15</property>
-    <property name="hexpand">True</property>
-    <property name="vexpand">True</property>
     <property name="orientation">vertical</property>
-    <property name="baseline_position">top</property>
     <child>
       <object class="GtkFrame">
         <property name="visible">True</property>
@@ -42,25 +39,27 @@
         <property name="shadow_type">in</property>
         <child>
           <object class="GtkGrid">
+            <property name="width_request">500</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="margin_left">10</property>
             <property name="margin_right">10</property>
             <property name="margin_top">10</property>
             <property name="margin_bottom">10</property>
+            <property name="hexpand">True</property>
             <property name="row_spacing">10</property>
-            <property name="column_homogeneous">True</property>
             <child>
               <object class="GtkGrid">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="hexpand">True</property>
                 <property name="column_spacing">10</property>
                 <property name="baseline_row">2</property>
                 <child>
                   <object class="GtkGrid">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="hexpand">False</property>
+                    <property name="hexpand">True</property>
                     <property name="column_homogeneous">True</property>
                     <child>
                       <object class="GtkLabel" id="source-label">
@@ -78,9 +77,10 @@
                       <object class="GtkLabel" id="source-description">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="halign">start</property>
+                        <property name="hexpand">True</property>
                         <property name="label" translatable="yes">The source that is used to fetch random wallpapers. You can select between desktoppr.co (default) and an experimental version of wallheaven.cc.</property>
                         <property name="wrap">True</property>
+                        <property name="max_width_chars">1</property>
                         <property name="xalign">0</property>
                         <style>
                           <class name="dim-label"/>
@@ -134,6 +134,7 @@
               <object class="GtkFrame">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="hexpand">True</property>
                 <property name="label_xalign">0</property>
                 <property name="shadow_type">in</property>
                 <child>
@@ -185,12 +186,13 @@
       </object>
       <packing>
         <property name="expand">False</property>
-        <property name="fill">True</property>
+        <property name="fill">False</property>
         <property name="position">1</property>
       </packing>
     </child>
     <child>
       <object class="GtkFrame">
+        <property name="width_request">500</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="label_xalign">0</property>
@@ -227,9 +229,10 @@
                   <object class="GtkLabel" id="history-size-description">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="halign">start</property>
+                    <property name="hexpand">True</property>
                     <property name="label" translatable="yes">The number of wallpapers that will be shown in the history and stored in the wallpaper folder of this extension.</property>
                     <property name="wrap">True</property>
+                    <property name="max_width_chars">1</property>
                     <property name="xalign">0</property>
                     <style>
                       <class name="dim-label"/>
@@ -279,12 +282,13 @@
       </object>
       <packing>
         <property name="expand">False</property>
-        <property name="fill">True</property>
+        <property name="fill">False</property>
         <property name="position">3</property>
       </packing>
     </child>
     <child>
       <object class="GtkFrame">
+        <property name="width_request">500</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="label_xalign">0</property>
@@ -309,7 +313,7 @@
                   <object class="GtkGrid">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="hexpand">False</property>
+                    <property name="hexpand">True</property>
                     <property name="column_homogeneous">True</property>
                     <child>
                       <object class="GtkLabel" id="af-label">
@@ -327,9 +331,11 @@
                       <object class="GtkLabel" id="af-description">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="halign">start</property>
+                        <property name="hexpand">True</property>
                         <property name="label" translatable="yes">Automatically fetch a new wallpaper based on a period.</property>
+                        <property name="use_underline">True</property>
                         <property name="wrap">True</property>
+                        <property name="max_width_chars">1</property>
                         <property name="xalign">0</property>
                         <style>
                           <class name="dim-label"/>
@@ -350,7 +356,6 @@
                   <object class="GtkBox">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="hexpand">True</property>
                     <property name="orientation">vertical</property>
                     <child>
                       <object class="GtkSwitch" id="af-switch">
