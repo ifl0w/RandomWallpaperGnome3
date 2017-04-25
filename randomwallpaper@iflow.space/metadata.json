@@ -1,11 +1,12 @@
 {
 	"shell-version": [
-				"3.12", 
-				"3.14", 
-				"3.16", 
+				"3.12",
+				"3.14",
+				"3.16",
 				"3.18",
 				"3.20",
-				"3.22"
+				"3.22",
+				"3.24"
     ],
 	"uuid": "randomwallpaper@iflow.space",
 	"name": "Random Wallpaper",
