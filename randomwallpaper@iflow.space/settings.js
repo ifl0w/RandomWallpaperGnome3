@@ -7,6 +7,7 @@ const Convenience = Self.imports.convenience;
 
 let Settings = new Lang.Class({
     Name: "Settings",
+	_settings: null,
 
     _init: function() {
         this._settings = Convenience.getSettings();
@@ -29,6 +30,7 @@ let Settings = new Lang.Class({
     },
 
     getSourceAdapter: function() {
+		global.log(this._settings.get_enum('source'));
         return null;
     }
 });

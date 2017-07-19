@@ -114,9 +114,9 @@
                     <property name="can_focus">False</property>
                     <property name="active_id">0</property>
                     <items>
-                      <item id="desktoppr" translatable="yes">desktoppr.co</item>
-                      <item id="unsplash" translatable="yes">unsplash.com</item>
-                      <item id="wallheaven" translatable="yes">alpha.wallheaven.cc</item>
+                      <item id="desktoppr">desktoppr.co</item>
+                      <item id="unsplash">unsplash.com (not implemented, defaults to desktopper)</item>
+                      <item id="wallheaven">alpha.wallheaven.cc (experimental)</item>
                     </items>
                   </object>
                   <packing>

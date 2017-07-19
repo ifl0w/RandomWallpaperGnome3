@@ -15,9 +15,12 @@ const Convenience = Self.imports.convenience;
 const Prefs = Self.imports.settings;
 const Timer = Self.imports.timer;
 
+const LoggerModule = Self.imports.logger;
+
 let WallpaperController = new Lang.Class({
 	Name: "WallpaperController",
 	extensionMeta: null,
+	logger: null,
 
 	wallpaperlocation: '',
 	currentWallpaper: '',
@@ -54,8 +57,10 @@ let WallpaperController = new Lang.Class({
 		this.history = this._loadHistory();
 		this.currentWallpaper = this._getCurrentWallpaper();
 
-		this.imageSourceAdapter = new SourceAdapter.DesktopperAdapter();
-		this.imageSourceAdapter = new SourceAdapter.WallheavenAdapter();
+		this._desktopperAdapter = new SourceAdapter.DesktopperAdapter();
+		this._wallheavenAdapter = new SourceAdapter.WallheavenAdapter();
+
+		this.logger = new LoggerModule.Logger('RWG3', 'WallpaperController');
 	},
 
 	_updateHistory: function() {
@@ -81,6 +86,19 @@ let WallpaperController = new Lang.Class({
 		forwards the request to the adapter
 	*/
 	_requestRandomImageFromAdapter: function(callback){
+		this.imageSourceAdapter = this._desktopperAdapter;
+		switch (this._settings.get('source', 'enum')) {
+		case 0:
+			this.imageSourceAdapter = this._desktopperAdapter;
+			break;
+		case 2:
+			this.imageSourceAdapter = this._wallheavenAdapter;
+			break;
+		default:
+			this.imageSourceAdapter = this._desktopperAdapter;
+			break;
+		}
+
 		this.imageSourceAdapter.requestRandomImage(callback);
 	},
 
@@ -110,7 +128,7 @@ let WallpaperController = new Lang.Class({
 			// call callback with the name and the full filepath of the written file as parameter
 			if (callback) {
 				callback(name, output_file.get_path());
-			};
+			}
 		});
 	},
 
@@ -138,7 +156,7 @@ let WallpaperController = new Lang.Class({
 
 				return name;
 			}
-		};
+		}
 
 		return false;
 	},
@@ -159,7 +177,7 @@ let WallpaperController = new Lang.Class({
 				// call callback if given
 				if (callback) {
 					callback();
-				};
+				}
 			} else {
 				// TODO: error handling
 			}
@@ -186,14 +204,14 @@ let WallpaperController = new Lang.Class({
 
 			if (!fileinfo) {
 				break;
-			};
+			}
 
 			let name = fileinfo.get_name();
 
 			// ignore hidden files
 			if (name[0] != '.') {
 				history.push(fileinfo.get_name());
-			};
+			}
 
 		} while(fileinfo);
 
@@ -227,8 +245,10 @@ let WallpaperController = new Lang.Class({
 		this._timer.begin(); // reset timer
 
 		let _this = this;
-		this._requestRandomImageFromAdapter(function(imageUrl){
-			_this._fetchFile(imageUrl, function(historyid, path) {
+		this._requestRandomImageFromAdapter((imageUrl) => {
+			this.logger.debug("Requesting image: "+imageUrl);
+
+			_this._fetchFile(imageUrl, (historyid, path) => {
 				// insert file into history
 				_this.history.unshift(historyid);
 
@@ -239,7 +259,7 @@ let WallpaperController = new Lang.Class({
 					});
 					if (callback) {
 						callback();
-					};
+					}
 				});
 			});
 		});
@@ -248,7 +268,7 @@ let WallpaperController = new Lang.Class({
 	_backgroundTimout: function(delay) {
 		if (this.timeout) {
 			return;
-		};
+		}
 
 		let _this = this;
 		delay = delay || 200;
