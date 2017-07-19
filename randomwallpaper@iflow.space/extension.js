@@ -11,7 +11,7 @@ const Main = imports.ui.main;
 const St = imports.gi.St;
 const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
-const CustomElements = Self.imports.Elements;
+const CustomElements = Self.imports.elements;
 const Tweener = imports.ui.tweener;
 
 // Filesystem
