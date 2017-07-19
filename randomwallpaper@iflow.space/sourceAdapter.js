@@ -1,11 +1,29 @@
 const Lang = imports.lang;
+const Self = imports.misc.extensionUtils.getCurrentExtension();
 
 // network requests
 const Soup = imports.gi.Soup;
 const Json = imports.gi.Json;
 
+const LoggerModule = Self.imports.logger;
+
+let BaseAdapter = new Lang.Class({
+	Name: "BaseAdapter",
+
+	logge: null,
+
+	_init: function () {
+		this.logger = new LoggerModule.Logger('RWG3', 'BaseAdapter');
+	},
+
+	requestRandomImage: function () {
+		this.logger.error("requestRandomImage not implemented")
+	}
+});
+
 let DesktopperAdapter = new Lang.Class({
 	Name: "DesktopperAdapter",
+	Extends: BaseAdapter,
 	/*
 	 fetch a random image url from desktopper.cc
 	 and call callback function with the URL of the image
@@ -34,6 +52,7 @@ let DesktopperAdapter = new Lang.Class({
 
 let WallheavenAdapter = new Lang.Class({
 	Name: "WallheavenAdapter",
+	Extends: BaseAdapter,
 
 	// query options
 	options: {
