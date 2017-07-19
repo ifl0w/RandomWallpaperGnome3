@@ -9,8 +9,7 @@ Open the commandline and type the following lines:
 
 ```
 git clone git@github.com:ifl0w/RandomWallpaperGnome3.git
-cd ~/.local/share/gnome-shell/extensions/
-ln -s /path/to/source/randomwallpaper@iflow.productions .
+cp -r RandomWallpaperGnome3/randomwallpaper@iflow.space ~/.local/share/gnome-shell/extensions/
 ```
 
 Then open the command prompt (Alt+F2) end enter `r` without qotes.
