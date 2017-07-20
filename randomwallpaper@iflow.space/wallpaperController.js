@@ -118,7 +118,7 @@ let WallpaperController = new Lang.Class({
 		let input_file = Gio.file_new_for_uri(uri);
 
 		input_file.load_contents_async(null, (file, result) => {
-			let contents = file.load_contents_finish(result)[1];
+			let contents = file.load_contents_finish(result)[1]; // TODO: error handling. This failes due to: "An unexpected TLS packet was received."
 			output_stream.write(contents, null);
 
 			// call callback with the name and the full filepath of the written file as parameter

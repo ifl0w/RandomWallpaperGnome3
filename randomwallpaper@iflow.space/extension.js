@@ -68,6 +68,10 @@ let RandomWallpaperEntry = new Lang.Class({
 		this.openFolder = new PopupMenu.PopupMenuItem('Open Wallpaper Folder');
 		this.menu.addMenuItem(this.openFolder);
 
+		// settings button
+		this.openSettings = new PopupMenu.PopupMenuItem('Settings');
+		this.menu.addMenuItem(this.openSettings);
+
 		//this.menu.addMenuItem(new CustomElements.DelaySlider(60));
 		/*
 			add eventlistener
@@ -91,6 +95,17 @@ let RandomWallpaperEntry = new Lang.Class({
 		this.openFolder.connect('activate', function(event) {
 			let uri = GLib.filename_to_uri(wallpaperController.wallpaperlocation, "");
 			Gio.AppInfo.launch_default_for_uri(uri, global.create_app_launch_context(0, -1))
+		});
+
+		this.openSettings.connect("activate", function(){
+			// call gnome settings tool for this extension
+			let app = Shell.AppSystem.get_default().lookup_app("gnome-shell-extension-prefs.desktop");
+			if( app!=null ) {
+				// only works in Gnome >= 3.12
+				let info = app.get_app_info();
+				let timestamp = global.display.get_current_time_roundtrip();
+				info.launch_uris([Self.uuid], global.create_app_launch_context(timestamp, -1));
+			}
 		});
 
 		this.menu.actor.connect('show', function() {
