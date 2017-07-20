@@ -52,6 +52,11 @@ let RandomWallpaperEntry = new Lang.Class({
 
 		this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 
+		// current background section
+		this.currentBackgroundSection = new PopupMenu.PopupMenuSection();
+		this.menu.addMenuItem(this.currentBackgroundSection);
+		this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+
 		// history section
 		this.historySection = new PopupMenu.PopupMenuSection();
 		this.menu.addMenuItem(this.historySection);
@@ -72,7 +77,6 @@ let RandomWallpaperEntry = new Lang.Class({
 		this.openSettings = new PopupMenu.PopupMenuItem('Settings');
 		this.menu.addMenuItem(this.openSettings);
 
-		//this.menu.addMenuItem(new CustomElements.DelaySlider(60));
 		/*
 			add eventlistener
 		*/
@@ -126,7 +130,21 @@ let RandomWallpaperEntry = new Lang.Class({
 
 	},
 
+	setCurrentBackgroundElement: function () {
+		this.currentBackgroundSection.removeAll();
+
+		let historyController = wallpaperController.getHistoryController();
+		let history = historyController.history;
+
+		if (history.length > 0) {
+			let currentImage = new CustomElements.CurrentImageElement(history[0]);
+			this.currentBackgroundSection.addMenuItem(currentImage);
+		}
+	},
+
 	setHistoryList: function() {
+		this.setCurrentBackgroundElement();
+
 		this.historySection.removeAll();
 
 		let historyController = wallpaperController.getHistoryController();

@@ -1,7 +1,6 @@
 const Lang = imports.lang;
 const PopupMenu = imports.ui.popupMenu;
 const St = imports.gi.St;
-const Slider = imports.ui.slider;
 const Tweener = imports.ui.tweener;
 const Util = imports.misc.util;
 
@@ -14,9 +13,7 @@ const HistoryElement = new Lang.Class({
 	historyEntry: null,
 
 	_init: function (historyEntry, index) {
-		index = String(index) + '.' || '0.';
-
-		this.parent("", true);
+		this.parent("", false);
 
 		let timestamp = historyEntry.timestamp;
 		let date = new Date(timestamp);
@@ -24,12 +21,19 @@ const HistoryElement = new Lang.Class({
 		let timeString = date.toLocaleTimeString();
 		let dateString = date.toLocaleDateString();
 
-		this.realLabel = new St.Label({
-			text: index,
+		let prefixText;
+		if (index === 0) {
+			prefixtext = "Current Background";
+		} else {
+			prefixtext = String(index) + '.';
+		}
+		this.prefixLabel = new St.Label({
+			text: prefixtext,
 			style_class: 'rwg-history-index'
 		});
 
-		this.actor.insert_child_below(this.realLabel, this.label);
+		this.actor.insert_child_above(this.prefixLabel, this.label);
+		this.label.destroy();
 
 		this._container = new St.BoxLayout({
 			vertical: true
@@ -50,7 +54,9 @@ const HistoryElement = new Lang.Class({
 		this.historyEntry = historyEntry;
 		this.actor.historyId = historyEntry.id; // extend the actor with the historyId
 
-		this.actor.insert_child_above(this._container, this.realLabel);
+		if (index !== 0) {
+			this.actor.insert_child_above(this._container, this.prefixLabel);
+		}
 
 		if (this.historyEntry.source && this.historyEntry.source !== null) {
 
@@ -85,6 +91,15 @@ const HistoryElement = new Lang.Class({
 			this.menu.addMenuItem(new PopupMenu.PopupMenuItem('Unknown source.'));
 		}
 
+	}
+});
+
+const CurrentImageElement = new Lang.Class({
+	Name: 'CurrentImageElement',
+	Extends: HistoryElement,
+
+	_init: function(historyElement) {
+		this.parent(historyElement, 0);
 	}
 });
 
