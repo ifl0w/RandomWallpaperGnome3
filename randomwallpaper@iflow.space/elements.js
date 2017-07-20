@@ -3,32 +3,33 @@ const PopupMenu = imports.ui.popupMenu;
 const St = imports.gi.St;
 const Slider = imports.ui.slider;
 const Tweener = imports.ui.tweener;
+const Util = imports.misc.util;
 
 const Self = imports.misc.extensionUtils.getCurrentExtension();
 const Timer = Self.imports.timer;
 
 const HistoryElement = new Lang.Class({
 	Name: 'HistoryElement',
-	Extends: PopupMenu.PopupBaseMenuItem,
-	historyId: null,
+	Extends: PopupMenu.PopupSubMenuMenuItem,
+	historyEntry: null,
 
-	_init: function(historyId, index, params) {
-		index = String(index)+'.' || '0.';
+	_init: function (historyEntry, index) {
+		index = String(index) + '.' || '0.';
 
-		this.parent(params);
+		this.parent("", true);
 
-		let timestamp = parseInt(historyId.slice(0, historyId.lastIndexOf('.')));
+		let timestamp = historyEntry.timestamp;
 		let date = new Date(timestamp);
 
 		let timeString = date.toLocaleTimeString();
-		let  dateString = date.toLocaleDateString();
+		let dateString = date.toLocaleDateString();
 
-		this.label = new St.Label({
+		this.realLabel = new St.Label({
 			text: index,
 			style_class: 'rwg-history-index'
 		});
 
-		this.actor.add_child(this.label);
+		this.actor.insert_child_below(this.realLabel, this.label);
 
 		this._container = new St.BoxLayout({
 			vertical: true
@@ -46,10 +47,44 @@ const HistoryElement = new Lang.Class({
 		});
 		this._container.add_child(this.timeLabel);
 
-		this.historyId = historyId;
-		this.actor.historyId = historyId; // extend the actor with the historyId
+		this.historyEntry = historyEntry;
+		this.actor.historyId = historyEntry.id; // extend the actor with the historyId
 
-		this.actor.add_child(this._container);
+		this.actor.insert_child_above(this._container, this.realLabel);
+
+		if (this.historyEntry.source && this.historyEntry.source !== null) {
+
+			if (this.historyEntry.source.author !== null
+				&& this.historyEntry.source.authorUrl !== null) {
+				this.authorItem = new PopupMenu.PopupMenuItem('Image By: ' + this.historyEntry.source.author);
+				this.authorItem.connect('activate', () => {
+					Util.spawn(['xdg-open', this.historyEntry.source.authorUrl]);
+				});
+
+				this.menu.addMenuItem(this.authorItem);
+			}
+
+			if (this.historyEntry.source.source !== null
+				&& this.historyEntry.source.sourceUrl !== null) {
+				this.sourceItem = new PopupMenu.PopupMenuItem('Image From: ' + this.historyEntry.source.source);
+				this.sourceItem.connect('activate', () => {
+					Util.spawn(['xdg-open', this.historyEntry.source.sourceUrl]);
+				});
+
+				this.menu.addMenuItem(this.sourceItem);
+			}
+
+			this.imageUrlItem = new PopupMenu.PopupMenuItem('Open Image In Browser');
+			this.imageUrlItem.connect('activate', () => {
+				Util.spawn(['xdg-open', this.historyEntry.source.imageUrl]);
+			});
+
+			this.menu.addMenuItem(this.imageUrlItem);
+
+		} else {
+			this.menu.addMenuItem(new PopupMenu.PopupMenuItem('Unknown source.'));
+		}
+
 	}
 });
 
@@ -64,7 +99,7 @@ const NewWallpaperElement = new Lang.Class({
 	Name: 'NewWallpaperElement',
 	Extends: PopupMenu.PopupBaseMenuItem,
 
-	_init: function(params) {
+	_init: function (params) {
 		this.parent(params);
 
 		this._timer = new Timer.AFTimer();
@@ -87,7 +122,7 @@ const NewWallpaperElement = new Lang.Class({
 		this.actor.add_child(this._container);
 	},
 
-	show: function() {
+	show: function () {
 		if (this._timer.isActive()) {
 			let remainingMinutes = this._timer.remainingMinutes();
 			let minutes = remainingMinutes % 60;
@@ -115,7 +150,7 @@ const StatusElement = new Lang.Class({
 	Name: 'StatusElement',
 	Extends: St.Icon,
 
-	_init: function() {
+	_init: function () {
 
 		this.parent({
 			icon_name: 'preferences-desktop-wallpaper-symbolic',
@@ -125,19 +160,19 @@ const StatusElement = new Lang.Class({
 		let _this = this;
 
 		this.loadingTweenIn = {
-			opacity:20,
-			time:1,
-			transition:'easeInOutSine',
-			onComplete: function() {
+			opacity: 20,
+			time: 1,
+			transition: 'easeInOutSine',
+			onComplete: function () {
 				Tweener.addTween(_this, _this.loadingTweenOut);
 			}
-		}
+		};
 
 		this.loadingTweenOut = {
-			opacity:255,
-			time:1,
-			transition:'easeInOutSine',
-			onComplete: function() {
+			opacity: 255,
+			time: 1,
+			transition: 'easeInOutSine',
+			onComplete: function () {
 				if (_this.isLoading) {
 					Tweener.addTween(_this, _this.loadingTweenIn);
 				} else {
@@ -149,112 +184,15 @@ const StatusElement = new Lang.Class({
 
 	},
 
-	startLoading: function() {
+	startLoading: function () {
 		this.isLoading = true;
 		Tweener.addTween(this, this.loadingTweenOut);
 	},
 
-	stopLoading: function() {
+	stopLoading: function () {
 		this.isLoading = false;
 		Tweener.removeTweens(this);
 		this.opacity = 255;
 	}
 
 });
-
-// -------------------------------------------------------------------------------
-
-// borrowed from: https://github.com/eonpatapon/gnome-shell-extensions-mediaplayer
-const SliderItem = new Lang.Class({
-	Name: 'SliderItem',
-	Extends: PopupMenu.PopupBaseMenuItem,
-
-	_init: function(value) {
-		this.parent();
-
-		this._box = new St.Table({style_class: 'slider-item'});
-
-		this._slider = new Slider.Slider(value);
-
-		this._box.add(this._slider.actor, {row: 0, col: 2, x_expand: true});
-		this.actor.add(this._box, {span: -1, expand: true});
-	},
-
-	setValue: function(value) {
-		this._slider.setValue(value);
-	},
-
-	getValue: function() {
-		return this._slider._getCurrentValue();
-	},
-
-	setIcon: function(icon) {
-		this._icon.icon_name = icon + '-symbolic';
-	},
-
-	connect: function(signal, callback) {
-		this._slider.connect(signal, callback);
-	}
-});
-
-
-/**
- * Widget for setting the delay for the next Wallpaper-change.
- * @type {Lang.Class}
- */
-const DelaySlider = new Lang.Class({
-	Name: 'DelaySlider',
-	Extends: SliderItem,
-
-	_MINUTES_MAX: 59,
-	_MINUTES_MIN: 5,
-	_HOURS_MAX: 48,
-	_HOURS_MIN: 1,
-
-	/**
-	 * Construct a new Widget.
-	 * @private
-	 */
-	_init: function(minutes){
-		this.parent(0, ''); // value MUST be specified!
-		this.setMinutes(minutes); // Set the real value.
-	},
-
-	/**
-	 * Set the value of the slider to x minutes.
-	 * @param minutes the value in minutes between _MINUTES_MAX and _MINUTES_MIN
-	 */
-	setMinutes: function(minutes){
-		// Validate:
-		if (isNaN(minutes) || minutes < this._MINUTES_MIN || minutes > this._HOURS_MAX*60){
-			throw TypeError("'minutes' should be an integer between "
-				+this._MINUTES_MIN+" and "+this._HOURS_MAX*60);
-		}
-
-		let value = 0;
-		if (minutes <= this._MINUTES_MAX){
-			value = (minutes - this._MINUTES_MIN) / (this._MINUTES_MAX - this._MINUTES_MIN) / 2;
-		} else {
-			value = (((minutes / 60) - this._HOURS_MIN) / (this._HOURS_MAX - this._HOURS_MIN) / 2) + 0.5;
-		}
-
-		this.setValue(value);
-	},
-
-	/**
-	 * Get the value in minutes from the slider.
-	 * @return int the value in minutes.
-	 */
-	getMinutes: function(){
-		let minutes = 0;
-		if (this.getValue() < 0.5) {
-			minutes = this._MINUTES_MIN + (this.getValue() * 2) * (this._MINUTES_MAX - this._MINUTES_MIN);
-		} else {
-			minutes = (this._HOURS_MIN + (this.getValue() - 0.5) * 2 * (this._HOURS_MAX - this._HOURS_MIN)) * 60;
-		}
-
-		return (minutes < this._MINUTES_MIN) ? this._MINUTES_MIN : Math.floor(minutes);
-	}
-});
-
-// -------------------------------------------------------------------------------

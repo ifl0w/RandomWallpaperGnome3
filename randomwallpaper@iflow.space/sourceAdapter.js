@@ -5,6 +5,8 @@ const Self = imports.misc.extensionUtils.getCurrentExtension();
 const Soup = imports.gi.Soup;
 const Json = imports.gi.Json;
 
+const HistoryModule = Self.imports.history;
+
 const LoggerModule = Self.imports.logger;
 
 let BaseAdapter = new Lang.Class({
@@ -16,15 +18,22 @@ let BaseAdapter = new Lang.Class({
 		this.logger = new LoggerModule.Logger('RWG3', 'BaseAdapter');
 	},
 
-	requestRandomImage: function () {
-		this.logger.error("requestRandomImage not implemented")
+	/**
+	 * Retrieves a new url for an image and calls the given callback with an HistoryEntry as parameter.
+	 * @param callback
+	 */
+	requestRandomImage: function (callback) {
+		this.logger.error("requestRandomImage not implemented");
+
+		callback(null);
 	},
 
 	fileName: function(uri)
 	{
 		let base = new String(uri).substring(uri.lastIndexOf('/') + 1);
 		return base;
-	}
+	},
+
 });
 
 let DesktopperAdapter = new Lang.Class({
@@ -48,7 +57,9 @@ let DesktopperAdapter = new Lang.Class({
 			let imageUrl = response.get_object_member('image').get_string_member('url');
 
 			if (callback) {
-				callback(imageUrl);
+				let historyEntry = new HistoryModule.HistoryEntry(null, 'desktopper.co', imageUrl);
+				historyEntry.source.sourceUrl = 'https://www.desktoppr.co/';
+				callback(historyEntry);
 			}
 		});
 	}
@@ -114,7 +125,9 @@ let WallheavenAdapter = new Lang.Class({
 				imageUrl = 'http:' + imageUrl;
 
 				if (callback) {
-					callback(imageUrl);
+					let historyEntry = new HistoryModule.HistoryEntry(null, 'wallhaven.cc', imageUrl);
+					historyEntry.source.sourceUrl = 'https://alpha.wallhaven.cc/';
+					callback(historyEntry);
 				}
 			})
 

@@ -139,7 +139,7 @@ let RandomWallpaperEntry = new Lang.Class({
 
 		for (let i = 1; i < history.length; i++) {
 			let historyid = history[i].id;
-			let tmp = new CustomElements.HistoryElement(historyid, i);
+			let tmp = new CustomElements.HistoryElement(history[i], i);
 
 			tmp.actor.connect('key-focus-in', onEnter);
 			tmp.actor.connect('key-focus-out', onLeave);

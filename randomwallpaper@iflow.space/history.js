@@ -14,13 +14,18 @@ let HistoryEntry = new Lang.Class({
 	timestamp: null,
 	id: null,
 	path: null,
-	src: null,
+	source: null,
 
-	_init: function(historyId, path, src) {
+	_init: function(author, source, url) {
 		this.timestamp = new Date().getTime();
-		this.id = historyId;
-		this.path = path;
-		this.src = src;
+
+		this.source = {
+			author: author,
+			authorUrl: null,
+			source: source,
+			sourceUrl: null,
+			imageUrl: url
+		};
 	},
 });
 

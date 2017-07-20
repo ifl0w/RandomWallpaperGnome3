@@ -176,11 +176,12 @@ let WallpaperController = new Lang.Class({
 		});
 		this._timer.begin(); // reset timer
 
-		this._requestRandomImageFromAdapter((imageUrl) => {
-			this.logger.info("Requesting image: "+imageUrl);
+		this._requestRandomImageFromAdapter((historyElement) => {
+			this.logger.info("Requesting image: "+historyElement.source.imageUrl);
 
-			this._fetchFile(imageUrl, (historyid, path) => {
-				let historyElement = new HistoryModule.HistoryEntry(historyid, path, imageUrl);
+			this._fetchFile(historyElement.source.imageUrl, (historyId, path) => {
+				historyElement.path = path;
+				historyElement.id = historyId;
 
 				this._setBackground(path, () => {
 					// insert file into history
