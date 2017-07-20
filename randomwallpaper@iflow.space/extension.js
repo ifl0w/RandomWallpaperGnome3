@@ -6,6 +6,8 @@ const Shell = imports.gi.Shell;
 const Self = imports.misc.extensionUtils.getCurrentExtension();
 const WallpaperController = Self.imports.wallpaperController;
 
+const LoggerModule = Self.imports.logger;
+
 // UI Imports
 const Main = imports.ui.main;
 const St = imports.gi.St;
@@ -33,9 +35,11 @@ let panelEntry;
 let RandomWallpaperEntry = new Lang.Class({
 	Extends: PanelMenu.Button,
 	Name: "RandomWallpaperEntry",
+	logger: null,
 
 	_init: function(menuAlignment, nameText) {
 		this.parent(menuAlignment, nameText);
+		this.logger = new LoggerModule.Logger('RWG3', 'RandomWallpaperEntry');
 
 		// Panelmenu Icon
 		this.statusIcon = new CustomElements.StatusElement();
@@ -110,15 +114,16 @@ let RandomWallpaperEntry = new Lang.Class({
 	setHistoryList: function() {
 		this.historySection.removeAll();
 
-		let history = this.history = wallpaperController.getHistory();
+		let historyController = wallpaperController.getHistoryController();
+		let history = historyController.history;
 
 		if (history.length <= 1) {
 			this.clearHistoryList();
 			return;
-		};
+		}
 
-		for (var i = 1; i < history.length; i++) {
-			let historyid = history[i];
+		for (let i = 1; i < history.length; i++) {
+			let historyid = history[i].id;
 			let tmp = new CustomElements.HistoryElement(historyid, i);
 
 			tmp.actor.connect('key-focus-in', onEnter);
@@ -128,7 +133,7 @@ let RandomWallpaperEntry = new Lang.Class({
 			tmp.connect('activate', onSelect);
 
 			this.historySection.addMenuItem(tmp);
-		};
+		}
 
 		function onLeave(actor) {
 			wallpaperController.resetWallpaper();

@@ -9,8 +9,8 @@ const LoggerModule = Self.imports.logger;
 
 let BaseAdapter = new Lang.Class({
 	Name: "BaseAdapter",
+	logger: null,
 
-	logge: null,
 
 	_init: function () {
 		this.logger = new LoggerModule.Logger('RWG3', 'BaseAdapter');
@@ -18,6 +18,12 @@ let BaseAdapter = new Lang.Class({
 
 	requestRandomImage: function () {
 		this.logger.error("requestRandomImage not implemented")
+	},
+
+	fileName: function(uri)
+	{
+		let base = new String(uri).substring(uri.lastIndexOf('/') + 1);
+		return base;
 	}
 });
 
@@ -34,9 +40,7 @@ let DesktopperAdapter = new Lang.Class({
 
 		let parser = new Json.Parser();
 
-		var _this = this;
-
-		session.queue_message(message, function (session, message) {
+		session.queue_message(message, (session, message) => {
 			parser.load_from_data(message.response_body.data, -1);
 
 			let data = parser.get_root().get_object();
@@ -73,7 +77,7 @@ let WallheavenAdapter = new Lang.Class({
 		let options = this.options;
 		let optionsString = "";
 
-		for (var key in options) {
+		for (let key in options) {
 			if (options.hasOwnProperty(key)) {
 				if (Array.isArray(options[key])) {
 					optionsString += key + "=" + options[key].join() + "&";
@@ -89,9 +93,7 @@ let WallheavenAdapter = new Lang.Class({
 
 		let message = Soup.Message.new('GET', url);
 
-		var _this = this;
-
-		session.queue_message(message, function (session, message) {
+		session.queue_message(message, (session, message) => {
 			let body = message.response_body.data;
 			let urlArray = body.match(new RegExp(/http[s]*:\/\/alpha.wallhaven.cc\/wallpaper\/[0-9]+/g));
 
@@ -101,11 +103,11 @@ let WallheavenAdapter = new Lang.Class({
 			});
 
 			// get a random entry from the array
-			var url = uniqueUrlArray[Math.floor(Math.random() * uniqueUrlArray.length)];
+			let url = uniqueUrlArray[Math.floor(Math.random() * uniqueUrlArray.length)];
 
 			message = Soup.Message.new('GET', url);
 
-			session.queue_message(message, function () {
+			session.queue_message(message, () => {
 				let body = message.response_body.data;
 				let imageUrl = body.match(new RegExp(/\/\/wallpapers.wallhaven.cc\/wallpapers\/full\/.*?"/))[0];
 				imageUrl = imageUrl.slice(0, -1);

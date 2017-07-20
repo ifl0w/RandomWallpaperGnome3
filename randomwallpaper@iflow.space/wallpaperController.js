@@ -14,6 +14,7 @@ const SourceAdapter = Self.imports.sourceAdapter;
 const Convenience = Self.imports.convenience;
 const Prefs = Self.imports.settings;
 const Timer = Self.imports.timer;
+const HistoryModule = Self.imports.history;
 
 const LoggerModule = Self.imports.logger;
 
@@ -24,9 +25,8 @@ let WallpaperController = new Lang.Class({
 
 	wallpaperlocation: '',
 	currentWallpaper: '',
-	historySize: 10,
-	history: [],
-	imageSourceAdapter: undefined,
+	_historyController: null,
+	imageSourceAdapter: null,
 
 	_timer: null,
 	_autoFetch : {
@@ -44,6 +44,7 @@ let WallpaperController = new Lang.Class({
 		this.wallpaperlocation = this.extensionMeta.path + '/wallpapers/';
 
 		this._timer = new Timer.AFTimer();
+		this._historyController = new HistoryModule.HistoryController(this.wallpaperlocation);
 
 		this._settings = new Prefs.Settings();
 		this._settings.observe('history-length', this._updateHistory.bind(this));
@@ -54,7 +55,6 @@ let WallpaperController = new Lang.Class({
 		this._updateHistory();
 		this._updateAutoFetching();
 
-		this.history = this._loadHistory();
 		this.currentWallpaper = this._getCurrentWallpaper();
 
 		this._desktopperAdapter = new SourceAdapter.DesktopperAdapter();
@@ -64,7 +64,7 @@ let WallpaperController = new Lang.Class({
 	},
 
 	_updateHistory: function() {
-		this.historySize = this._settings.get('history-length', 'int');
+		this._historyController.load();
 	},
 
 	_updateAutoFetching: function() {
@@ -108,20 +108,16 @@ let WallpaperController = new Lang.Class({
 		the written file as parameter.
 	*/
 	_fetchFile: function(uri, callback){
+		//extract the name from the url and
 		let date = new Date();
-		let inputbuffer;
-
-		//extract the name from the desktopper url and add timestamp prefix
-		let name = date.getTime() + uri.substr(uri.lastIndexOf('.'));
+		let name = date.getTime()+'_'+this.imageSourceAdapter.fileName(uri); // timestamp ensures uniqueness
 
 		let output_file = Gio.file_new_for_path(this.wallpaperlocation + String(name));
 		let output_stream = output_file.create(0, null);
 
 		let input_file = Gio.file_new_for_uri(uri);
 
-		let _this = this;
-
-		input_file.load_contents_async(null, function(file, result){
+		input_file.load_contents_async(null, (file, result) => {
 			let contents = file.load_contents_finish(result)[1];
 			output_stream.write(contents, null);
 
@@ -132,38 +128,8 @@ let WallpaperController = new Lang.Class({
 		});
 	},
 
-	/*
-		Set a new timestamp as name for the given file
-		and adapt the history
-	*/
-	_setNewFileName: function(historyid) {
-		let date = new Date();
-		let file = Gio.file_new_for_path(this.wallpaperlocation + historyid);
-		let name = date.getTime() + historyid.substr(historyid.lastIndexOf('.'));
-		let newFile = Gio.file_new_for_path(this.wallpaperlocation + name);
-
-		for (var i = 0; i < this.history.length; i++) {
-			if(this.history[i] == historyid) {
-				file.move(newFile, Gio.FileCopyFlags.NONE, null, function(){
-				});
-
-				// TODO: error handling, what if move fails?
-
-				this.history[i] = name;
-
-				this.history.sort();
-				this.history.reverse();
-
-				return name;
-			}
-		}
-
-		return false;
-	},
-
 	_setBackground: function(path, callback){
 		let background_setting = new Gio.Settings({schema: "org.gnome.desktop.background"});
-		this.deleteOldPictures();
 
 		/*
 			inspired from:
@@ -192,50 +158,16 @@ let WallpaperController = new Lang.Class({
 		return background_setting.get_string("picture-uri").replace(/^(file:\/\/)/, "");
 	},
 
-	_loadHistory: function () {
-		let directory = Gio.file_new_for_path(this.wallpaperlocation);
-		let enumerator = directory.enumerate_children('', Gio.FileQueryInfoFlags.NONE, null);
+	setWallpaper: function(historyId) {
+		let historyElement = this._historyController.get(historyId);
 
-		let fileinfo;
-		let history = [];
-
-		do {
-			fileinfo = enumerator.next_file(null);
-
-			if (!fileinfo) {
-				break;
-			}
-
-			let name = fileinfo.get_name();
-
-			// ignore hidden files
-			if (name[0] != '.') {
-				history.push(fileinfo.get_name());
-			}
-
-		} while(fileinfo);
-
-		history.sort();
-		history.reverse();
-
-		return history;
-	},
-
-	deleteOldPictures: function() {
-		this.historySize = this._settings.get('history-length', 'int');
-		let deleteFile;
-		while(this.history.length > this.historySize) {
-			deleteFile = Gio.file_new_for_path(this.wallpaperlocation + this.history.pop());
-			deleteFile.delete(null);
+		if(this._historyController.promoteToActive(historyElement.id)) {
+			this._setBackground(historyElement.path);
+			this.currentWallpaper = this._getCurrentWallpaper();
+		} else {
+			this.logger.warn("The history id ("+historyElement.id+") could not be found.")
+			// TODO: Error handling	history id not found.
 		}
-	},
-
-	setWallpaper: function(historyEntry, keepName) {
-		if (!keepName) {
-			historyEntry = this._setNewFileName(historyEntry);
-		}
-		this._setBackground(this.wallpaperlocation + historyEntry);
-		this.currentWallpaper = this._getCurrentWallpaper();
 	},
 
 	fetchNewWallpaper: function(callback) {
@@ -244,17 +176,18 @@ let WallpaperController = new Lang.Class({
 		});
 		this._timer.begin(); // reset timer
 
-		let _this = this;
 		this._requestRandomImageFromAdapter((imageUrl) => {
-			this.logger.debug("Requesting image: "+imageUrl);
+			this.logger.info("Requesting image: "+imageUrl);
 
-			_this._fetchFile(imageUrl, (historyid, path) => {
-				// insert file into history
-				_this.history.unshift(historyid);
+			this._fetchFile(imageUrl, (historyid, path) => {
+				let historyElement = new HistoryModule.HistoryEntry(historyid, path, imageUrl);
 
-				_this._setBackground(_this.wallpaperlocation + historyid, function(){
+				this._setBackground(path, () => {
+					// insert file into history
+					this._historyController.insert(historyElement);
+
 					// call callback if given
-					_this._stopLoadingHooks.forEach((element) => {
+					this._stopLoadingHooks.forEach((element) => {
 						element(null);
 					});
 					if (callback) {
@@ -270,16 +203,15 @@ let WallpaperController = new Lang.Class({
 			return;
 		}
 
-		let _this = this;
 		delay = delay || 200;
 
-		this.timeout = Mainloop.timeout_add(Mainloop.PRIORITY_DEFAULT, delay, function(){
-			_this.timeout = null;
-			if (_this._resetWallpaper) {
-				_this._setBackground(_this.currentWallpaper);
-				_this._resetWallpaper = false;
+		this.timeout = Mainloop.timeout_add(Mainloop.PRIORITY_DEFAULT, delay, () => {
+			this.timeout = null;
+			if (this._resetWallpaper) {
+				this._setBackground(this.currentWallpaper);
+				this._resetWallpaper = false;
 			} else {
-				_this._setBackground(_this.wallpaperlocation + _this.previewId);
+				this._setBackground(this.wallpaperlocation + this.previewId);
 			}
 			return false;
 		});
@@ -297,41 +229,12 @@ let WallpaperController = new Lang.Class({
 		this._backgroundTimout();
 	},
 
-	getHistory: function() {
-		return this.history;
+	getHistoryController: function() {
+		return this._historyController;
 	},
 
 	deleteHistory: function() {
-		let firstHistoryElement = this.history[0];
-
-		if (firstHistoryElement)
-			this.history = [firstHistoryElement];
-
-		let directory = Gio.file_new_for_path(this.wallpaperlocation);
-		let enumerator = directory.enumerate_children('', Gio.FileQueryInfoFlags.NONE, null);
-
-		let fileinfo;
-		let deleteFile;
-
-		do {
-
-			fileinfo = enumerator.next_file(null);
-
-			if (!fileinfo) {
-				break;
-			};
-
-			let name = fileinfo.get_name();
-
-			// ignore hidden files and first element
-			if (name[0] != '.' && name != firstHistoryElement) {
-				deleteFile = Gio.file_new_for_path(this.wallpaperlocation + name);
-				deleteFile.delete(null);
-			};
-
-		} while(fileinfo);
-
-		return true;
+		this._historyController.clear();
 	},
 
 	menuShowHook: function() {
