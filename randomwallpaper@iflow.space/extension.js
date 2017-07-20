@@ -6,12 +6,14 @@ const Shell = imports.gi.Shell;
 const Self = imports.misc.extensionUtils.getCurrentExtension();
 const WallpaperController = Self.imports.wallpaperController;
 
+const LoggerModule = Self.imports.logger;
+
 // UI Imports
 const Main = imports.ui.main;
 const St = imports.gi.St;
 const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
-const CustomElements = Self.imports.Elements;
+const CustomElements = Self.imports.elements;
 const Tweener = imports.ui.tweener;
 
 // Filesystem
@@ -33,9 +35,11 @@ let panelEntry;
 let RandomWallpaperEntry = new Lang.Class({
 	Extends: PanelMenu.Button,
 	Name: "RandomWallpaperEntry",
+	logger: null,
 
 	_init: function(menuAlignment, nameText) {
 		this.parent(menuAlignment, nameText);
+		this.logger = new LoggerModule.Logger('RWG3', 'RandomWallpaperEntry');
 
 		// Panelmenu Icon
 		this.statusIcon = new CustomElements.StatusElement();
@@ -46,6 +50,11 @@ let RandomWallpaperEntry = new Lang.Class({
 
 		this.menu.addMenuItem(this.newWallpaperItem);
 
+		this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+
+		// current background section
+		this.currentBackgroundSection = new PopupMenu.PopupMenuSection();
+		this.menu.addMenuItem(this.currentBackgroundSection);
 		this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 
 		// history section
@@ -64,7 +73,10 @@ let RandomWallpaperEntry = new Lang.Class({
 		this.openFolder = new PopupMenu.PopupMenuItem('Open Wallpaper Folder');
 		this.menu.addMenuItem(this.openFolder);
 
-		//this.menu.addMenuItem(new CustomElements.DelaySlider(60));
+		// settings button
+		this.openSettings = new PopupMenu.PopupMenuItem('Settings');
+		this.menu.addMenuItem(this.openSettings);
+
 		/*
 			add eventlistener
 		*/
@@ -89,6 +101,17 @@ let RandomWallpaperEntry = new Lang.Class({
 			Gio.AppInfo.launch_default_for_uri(uri, global.create_app_launch_context(0, -1))
 		});
 
+		this.openSettings.connect("activate", function(){
+			// call gnome settings tool for this extension
+			let app = Shell.AppSystem.get_default().lookup_app("gnome-shell-extension-prefs.desktop");
+			if( app!=null ) {
+				// only works in Gnome >= 3.12
+				let info = app.get_app_info();
+				let timestamp = global.display.get_current_time_roundtrip();
+				info.launch_uris([Self.uuid], global.create_app_launch_context(timestamp, -1));
+			}
+		});
+
 		this.menu.actor.connect('show', function() {
 			this.newWallpaperItem.show();
 			wallpaperController.menuShowHook();
@@ -107,19 +130,34 @@ let RandomWallpaperEntry = new Lang.Class({
 
 	},
 
+	setCurrentBackgroundElement: function () {
+		this.currentBackgroundSection.removeAll();
+
+		let historyController = wallpaperController.getHistoryController();
+		let history = historyController.history;
+
+		if (history.length > 0) {
+			let currentImage = new CustomElements.CurrentImageElement(history[0]);
+			this.currentBackgroundSection.addMenuItem(currentImage);
+		}
+	},
+
 	setHistoryList: function() {
+		this.setCurrentBackgroundElement();
+
 		this.historySection.removeAll();
 
-		let history = this.history = wallpaperController.getHistory();
+		let historyController = wallpaperController.getHistoryController();
+		let history = historyController.history;
 
 		if (history.length <= 1) {
 			this.clearHistoryList();
 			return;
-		};
+		}
 
-		for (var i = 1; i < history.length; i++) {
-			let historyid = history[i];
-			let tmp = new CustomElements.HistoryElement(historyid, i);
+		for (let i = 1; i < history.length; i++) {
+			let historyid = history[i].id;
+			let tmp = new CustomElements.HistoryElement(history[i], i);
 
 			tmp.actor.connect('key-focus-in', onEnter);
 			tmp.actor.connect('key-focus-out', onLeave);
@@ -128,7 +166,7 @@ let RandomWallpaperEntry = new Lang.Class({
 			tmp.connect('activate', onSelect);
 
 			this.historySection.addMenuItem(tmp);
-		};
+		}
 
 		function onLeave(actor) {
 			wallpaperController.resetWallpaper();

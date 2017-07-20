@@ -6,31 +6,37 @@ const Self = imports.misc.extensionUtils.getCurrentExtension();
 const Convenience = Self.imports.convenience;
 
 let Settings = new Lang.Class({
-    Name: "Settings",
+	Name: "Settings",
 	_settings: null,
 
-    _init: function() {
-        this._settings = Convenience.getSettings();
-    },
+	/**
+	 * Settings object.
+	 *
+	 * @param [schema]
+	 * @private
+	 */
+	_init: function (schema) {
+		this._settings = Convenience.getSettings(schema);
+	},
 
-    observe: function(key, callback) {
-        this._settings.connect('changed::'+key, callback);
-    },
+	observe: function (key, callback) {
+		this._settings.connect('changed::' + key, callback);
+	},
 
-    set: function(key, type, value) {
-        if (this._settings['set_'+type](key, value)){
-            Gio.Settings.sync(); // wait for write
-        } else {
-            throw "Could not set " + key + " (type: " + type + ") with the value " + value;
-        }
-    },
+	set: function (key, type, value) {
+		if (this._settings['set_' + type](key, value)) {
+			Gio.Settings.sync(); // wait for write
+		} else {
+			throw "Could not set " + key + " (type: " + type + ") with the value " + value;
+		}
+	},
 
-    get: function(key, type) {
-        return this._settings['get_'+type](key);
-    },
+	get: function (key, type) {
+		return this._settings['get_' + type](key);
+	},
 
-    getSourceAdapter: function() {
+	getSourceAdapter: function () {
 		global.log(this._settings.get_enum('source'));
-        return null;
-    }
+		return null;
+	}
 });
