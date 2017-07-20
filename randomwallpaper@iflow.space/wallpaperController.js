@@ -58,6 +58,7 @@ let WallpaperController = new Lang.Class({
 		this.currentWallpaper = this._getCurrentWallpaper();
 
 		this._desktopperAdapter = new SourceAdapter.DesktopperAdapter();
+		this._unsplashAdapter = new SourceAdapter.UnsplashAdapter();
 		this._wallheavenAdapter = new SourceAdapter.WallheavenAdapter();
 
 		this.logger = new LoggerModule.Logger('RWG3', 'WallpaperController');
@@ -90,6 +91,9 @@ let WallpaperController = new Lang.Class({
 		switch (this._settings.get('source', 'enum')) {
 		case 0:
 			this.imageSourceAdapter = this._desktopperAdapter;
+			break;
+		case 1:
+			this.imageSourceAdapter = this._unsplashAdapter;
 			break;
 		case 2:
 			this.imageSourceAdapter = this._wallheavenAdapter;

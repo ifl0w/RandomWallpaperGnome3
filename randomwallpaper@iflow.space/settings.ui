@@ -115,7 +115,7 @@
                     <property name="active_id">0</property>
                     <items>
                       <item id="desktoppr">desktoppr.co</item>
-                      <item id="unsplash">unsplash.com (not implemented, defaults to desktopper)</item>
+                      <item id="unsplash">unsplash.com (experimental)</item>
                       <item id="wallheaven">alpha.wallheaven.cc (experimental)</item>
                     </items>
                   </object>

@@ -39,10 +39,7 @@ let BaseAdapter = new Lang.Class({
 let DesktopperAdapter = new Lang.Class({
 	Name: "DesktopperAdapter",
 	Extends: BaseAdapter,
-	/*
-	 fetch a random image url from desktopper.cc
-	 and call callback function with the URL of the image
-	 */
+
 	requestRandomImage: function (callback) {
 		let session = new Soup.SessionAsync();
 		let message = Soup.Message.new('GET', 'https://api.desktoppr.co/1/wallpapers/random');
@@ -59,6 +56,41 @@ let DesktopperAdapter = new Lang.Class({
 			if (callback) {
 				let historyEntry = new HistoryModule.HistoryEntry(null, 'desktopper.co', imageUrl);
 				historyEntry.source.sourceUrl = 'https://www.desktoppr.co/';
+				callback(historyEntry);
+			}
+		});
+	}
+});
+
+let UnsplashAdapter = new Lang.Class({
+	Name: "UnsplashAdapter",
+	Extends: BaseAdapter,
+
+	sourceName: 'Unsplash',
+	sourceUrl: 'https://unsplash.com/',
+
+	requestRandomImage: function (callback) {
+		let session = new Soup.SessionAsync();
+		let url = 'https://api.unsplash.com/photos/random';
+		url += '?client_id=64daf439e9b579dd566620c0b07022706522d87b255d06dd01d5470b7f193b8d';
+		let message = Soup.Message.new('GET', url);
+
+		let utmParameters = '?utm_source=RandomWallpaperGnome3&utm_medium=referral&utm_campaign=api-credit';
+
+		session.queue_message(message, (session, message) => {
+			let data = JSON.parse(message.response_body.data);
+
+			let imageUrl = data.links.download;
+			let authorName = data.user.name;
+			let authorUrl = data.user.links.html;
+
+			this.logger.debug(authorName);
+			this.logger.debug(authorUrl);
+
+			if (callback) {
+				let historyEntry = new HistoryModule.HistoryEntry(authorName, this.sourceName, imageUrl+utmParameters);
+				historyEntry.source.sourceUrl = this.sourceUrl+utmParameters;
+				historyEntry.source.authorUrl = authorUrl+utmParameters;
 				callback(historyEntry);
 			}
 		});
