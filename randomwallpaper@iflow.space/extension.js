@@ -168,6 +168,8 @@ let RandomWallpaperEntry = new Lang.Class({
 			this.historySection.addMenuItem(tmp);
 		}
 
+		let _this = this;
+
 		function onLeave(actor) {
 			wallpaperController.resetWallpaper();
 		}
@@ -175,9 +177,8 @@ let RandomWallpaperEntry = new Lang.Class({
 		function onEnter(actor) {
 			wallpaperController.previewWallpaper(actor.historyId);
 		}
-
 		function onSelect(actor) {
-			wallpaperController.setWallpaper(actor.historyId);
+			wallpaperController.setWallpaper(actor.historyEntry.id);
 		}
 
 	},

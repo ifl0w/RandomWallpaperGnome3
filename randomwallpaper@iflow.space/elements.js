@@ -12,6 +12,8 @@ const HistoryElement = new Lang.Class({
 	Extends: PopupMenu.PopupSubMenuMenuItem,
 	historyEntry: null,
 
+	setAsWallpaperItem: null,
+
 	_init: function (historyEntry, index) {
 		this.parent("", false);
 
@@ -87,6 +89,12 @@ const HistoryElement = new Lang.Class({
 
 			this.menu.addMenuItem(this.imageUrlItem);
 
+			this.setAsWallpaperItem = new PopupMenu.PopupMenuItem('Set As Wallpaper');
+			this.setAsWallpaperItem.connect('activate', () => {
+				this.emit('activate');
+			});
+
+			this.menu.addMenuItem(this.setAsWallpaperItem);
 		} else {
 			this.menu.addMenuItem(new PopupMenu.PopupMenuItem('Unknown source.'));
 		}
@@ -98,8 +106,12 @@ const CurrentImageElement = new Lang.Class({
 	Name: 'CurrentImageElement',
 	Extends: HistoryElement,
 
-	_init: function(historyElement) {
+	_init: function (historyElement) {
 		this.parent(historyElement, 0);
+
+		if (this.setAsWallpaperItem !== null) {
+			this.setAsWallpaperItem.destroy();
+		}
 	}
 });
 
