@@ -3,6 +3,8 @@ RandomWallpaperGnome3
 
 Random Wallpapers for Gnome 3 is a gnome shell extension which fetches a random wallpaper from an online source and sets it as desktop background.
 
+![Screenshot](/assets/screenshot.png)
+
 ## Installation (symlink to repository)
 Run `git clone git@github.com:ifl0w/RandomWallpaperGnome3.git` to clone the repository.
 Run `./install.sh` to make a symbolic link from the extensions folder to the git repository.
