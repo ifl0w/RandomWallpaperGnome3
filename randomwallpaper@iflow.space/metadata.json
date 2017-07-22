@@ -11,6 +11,7 @@
 	"uuid": "randomwallpaper@iflow.space",
 	"settings-schema": "org.gnome.shell.extensions.space.iflow.randomwallpaper",
 	"name": "Random Wallpaper",
-	"description": "Fetches a random wallpaper from desktopper.co and sets it as desktop background",
-	"version": 1.1
+	"description": "Fetches a random wallpaper from an online source and sets it as desktop background. \nThe desktop background can be updated periodically or manually.",
+	"version": "2.0.1",
+	"url": "https://github.com/ifl0w/RandomWallpaperGnome3"
 }

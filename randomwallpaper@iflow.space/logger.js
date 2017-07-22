@@ -22,7 +22,7 @@ let Logger = new Lang.Class({
 		this._log("INFO", message);
 	},
 
-	warning: function (message) {
+	warn: function (message) {
 		this._log("WARNING", message);
 	},
 

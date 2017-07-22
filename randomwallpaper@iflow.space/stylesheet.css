@@ -1,9 +1,7 @@
 
 .rwg_system_status_icon {
-	/*icon-size: 1.09em;*/
 	icon-size: 1em;
-	/*padding: 0 5px;*/
-	padding: 0 0;	
+	padding: 0 0;
 	position: absolute;
     -webkit-animation:spin 4s linear infinite;
     -moz-animation:spin 4s linear infinite;
@@ -26,25 +24,23 @@
 
 .rwg-recent-lable {
 	width: 100%;
-	/*font-weight: bold;*/
 	font-size: 90%;
 	text-align: left;
 	border: 0;
 }
 
 .rwg-history-index {
+	text-align: left;
 	padding-top: .35em;
 	font-size: 130%;
-	font-weight: lighter; 
+	font-weight: lighter;
 }
 
 .rwg-history-date {
-	/*padding-top: .35em;*/
 	font-size: 100%;
 }
 
 .rwg-history-time {
-	/*padding-top: .35em;*/
 	font-size: 100%;
 	font-weight: lighter; 
 }

@@ -12,6 +12,11 @@ const Gettext = imports.gettext.domain('space.iflow.randomwallpaper');
 //const _ = Gettext.gettext;
 
 const RWG_SETTINGS_SCHEMA = 'org.gnome.shell.extensions.space.iflow.randomwallpaper';
+const RWG_SETTINGS_SCHEMA_DESKTOPPER = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.desktopper';
+const RWG_SETTINGS_SCHEMA_UNSPLASH = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.unsplash';
+const RWG_SETTINGS_SCHEMA_WALLHEAVEN = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.wallheaven';
+
+const LoggerModule = Self.imports.logger;
 
 function init() {
 	//Convenience.initTranslations();
@@ -28,12 +33,39 @@ function buildPrefsWidget() {
 /* UI Setup */
 const RandomWallpaperSettings = new Lang.Class({
 	Name: 'RandomWallpaper.Settings',
+	logger: null,
+
+	currentSourceSettingsWidget: null,
+
+	noSettings: null,
+	desktopperSettings: null,
+	unsplashSettings: null,
+	wallheavenSettings: null,
 
 	_init: function () {
 		this._settings = Convenience.getSettings(RWG_SETTINGS_SCHEMA);
 		this._builder = new Gtk.Builder();
 		//this._builder.set_translation_domain(Self.metadata['gettext-domain']);
 		this._builder.add_from_file(Self.path + '/settings.ui');
+
+		this.logger = new LoggerModule.Logger('RWG3', 'RandomWallpaper.Settings');
+
+		this.noSettings = this._builder.get_object('no-settings');
+
+		// Desktopper Settings
+		this._desktopper_settings = Convenience.getSettings(RWG_SETTINGS_SCHEMA_DESKTOPPER);
+		this.desktopperSettings = this._builder.get_object('desktopper-settings');
+		this.bindDesktopper();
+
+		// Unsplash Settings
+		this._unsplash_settings = Convenience.getSettings(RWG_SETTINGS_SCHEMA_UNSPLASH);
+		this.unsplashSettings = this._builder.get_object('unsplash-settings');
+		this.bindUnsplash();
+
+		// Wallheaven Settings
+		this._wallheaven_settings = Convenience.getSettings(RWG_SETTINGS_SCHEMA_WALLHEAVEN);
+		this.wallheavenSettings = this._builder.get_object('wallheaven-settings');
+		this.bindWallheaven();
 
 		this._toggleAfSliders();
 
@@ -42,6 +74,31 @@ const RandomWallpaperSettings = new Lang.Class({
 		this._builder.get_object('af-switch').connect('notify::active', function (toggleSwitch) {
 			this._toggleAfSliders();
 		}.bind(this));
+
+		this._builder.get_object('source-combo').connect('changed', (sourceCombo) => {
+			let container = this._builder.get_object('source-settings-frame');
+			if (this.currentSourceSettingsWidget !== null) {
+				container.remove(this.currentSourceSettingsWidget);
+			}
+
+			switch (sourceCombo.active) {
+				case 0: // desktopper
+					this.currentSourceSettingsWidget = this.desktopperSettings;
+					break;
+				case 1: // unsplash
+					this.currentSourceSettingsWidget = this.unsplashSettings;
+					break;
+				case 2: // wallheaven
+					this.currentSourceSettingsWidget = this.wallheavenSettings;
+					break;
+				default:
+					this.currentSourceSettingsWidget = this.noSettings;
+					break;
+			}
+
+			container.add(this.currentSourceSettingsWidget);
+
+		});
 
 		this._settings.bind('history-length',
 			this._builder.get_object('history-length'),
@@ -73,6 +130,66 @@ const RandomWallpaperSettings = new Lang.Class({
 			this._builder.get_object('duration-slider-hours').set_sensitive(false);
 			this._builder.get_object('duration-slider-minutes').set_sensitive(false);
 		}
+	},
+
+	bindDesktopper: function () {
+		this._desktopper_settings.bind('allow-unsafe',
+			this._builder.get_object('desktopper-allow-unsafe'),
+			'active',
+			Gio.SettingsBindFlags.DEFAULT);
+	},
+
+	bindUnsplash: function () {
+		this._unsplash_settings.bind('unsplash-keyword',
+			this._builder.get_object('unsplash-keyword'),
+			'text',
+			Gio.SettingsBindFlags.DEFAULT);
+		this._unsplash_settings.bind('username',
+			this._builder.get_object('unsplash-username'),
+			'text',
+			Gio.SettingsBindFlags.DEFAULT);
+
+		this._unsplash_settings.bind('image-width',
+			this._builder.get_object('unsplash-image-width'),
+			'value',
+			Gio.SettingsBindFlags.DEFAULT);
+		this._unsplash_settings.bind('image-height',
+			this._builder.get_object('unsplash-image-height'),
+			'value',
+			Gio.SettingsBindFlags.DEFAULT);
+	},
+
+	bindWallheaven: function () {
+		this._wallheaven_settings.bind('wallheaven-keyword',
+			this._builder.get_object('wallheaven-keyword'),
+			'text',
+			Gio.SettingsBindFlags.DEFAULT);
+		this._wallheaven_settings.bind('resolutions',
+			this._builder.get_object('wallheaven-resolutions'),
+			'text',
+			Gio.SettingsBindFlags.DEFAULT);
+
+		this._wallheaven_settings.bind('category-general',
+			this._builder.get_object('wallheaven-category-general'),
+			'active',
+			Gio.SettingsBindFlags.DEFAULT);
+		this._wallheaven_settings.bind('category-anime',
+			this._builder.get_object('wallheaven-category-anime'),
+			'active',
+			Gio.SettingsBindFlags.DEFAULT);
+		this._wallheaven_settings.bind('category-people',
+			this._builder.get_object('wallheaven-category-people'),
+			'active',
+			Gio.SettingsBindFlags.DEFAULT);
+
+		this._wallheaven_settings.bind('allow-sfw',
+			this._builder.get_object('wallheaven-allow-sfw'),
+			'active',
+			Gio.SettingsBindFlags.DEFAULT);
+		this._wallheaven_settings.bind('allow-sketchy',
+			this._builder.get_object('wallheaven-allow-sketchy'),
+			'active',
+			Gio.SettingsBindFlags.DEFAULT);
 	}
 
 });

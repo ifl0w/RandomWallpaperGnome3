@@ -2,13 +2,13 @@
 <schemalist gettext-domain='gnome-shell-extensions'>
 
     <enum id='org.gnome.shell.extensions.space.iflow.randomwallpaper.sources'>
-      <value value='0' nick='desktoppr'/>
-      <value value='1' nick='unsplash'/>
-      <value value='2' nick='wallheaven'/>
+        <value value='0' nick='desktoppr'/>
+        <value value='1' nick='unsplash'/>
+        <value value='2' nick='wallheaven'/>
     </enum>
 
     <schema path="/org/gnome/shell/extensions/space-iflow-randomwallpaper-sources/"
-      id='org.gnome.shell.extensions.space.iflow.randomwallpaper'>
+            id='org.gnome.shell.extensions.space.iflow.randomwallpaper'>
 
         <key type='i' name='history-length'>
             <default>10</default>
@@ -38,9 +38,9 @@
         </key>
 
         <key name='source' enum='org.gnome.shell.extensions.space.iflow.randomwallpaper.sources'>
-          <default>'desktoppr'</default>
-          <summary>Wallpaper Source</summary>
-          <description>Describs the adapter that will be used.</description>
+            <default>'desktoppr'</default>
+            <summary>Wallpaper Source</summary>
+            <description>Describs the adapter that will be used.</description>
         </key>
 
         <key type='as' name='history'>
@@ -55,5 +55,78 @@
             <description>The time that already elapsed.</description>
         </key>
 
+    </schema>
+
+    <schema path="/org/gnome/shell/extensions/space-iflow-randomwallpaper-sources/"
+            id='org.gnome.shell.extensions.space.iflow.randomwallpaper.desktopper'>
+        <key type='b' name='allow-unsafe'>
+            <default>false</default>
+            <summary>Allow Unsafe</summary>
+            <description>Weather the extension should fetch images that are rated as unsafe.</description>
+        </key>
+    </schema>
+
+    <schema path="/org/gnome/shell/extensions/space-iflow-randomwallpaper-sources/"
+            id='org.gnome.shell.extensions.space.iflow.randomwallpaper.unsplash'>
+        <key type='s' name='unsplash-keyword'>
+            <default>""</default>
+            <summary>Keyword</summary>
+            <description>The keyword will be used to search images.</description>
+        </key>
+        <key type='s' name='username'>
+            <default>""</default>
+            <summary>Username</summary>
+            <description>Only fetch random images of a given user.</description>
+        </key>
+        <key type='i' name='image-width'>
+            <default>1920</default>
+            <summary>Image Width</summary>
+            <description>The width of the image.</description>
+        </key>
+        <key type='i' name='image-height'>
+            <default>1080</default>
+            <summary>Image Width</summary>
+            <description>The height of the image.</description>
+        </key>
+    </schema>
+
+    <schema path="/org/gnome/shell/extensions/space-iflow-randomwallpaper-sources/"
+            id='org.gnome.shell.extensions.space.iflow.randomwallpaper.wallheaven'>
+        <key type='s' name='wallheaven-keyword'>
+            <default>""</default>
+            <summary>Keyword</summary>
+            <description>The keyword will be used to search images.</description>
+        </key>
+        <key type='s' name='resolutions'>
+            <default>"1920x1200, 1920x1080, 2560x1440, 2560x1600, 3840x1080"</default>
+            <summary>Resolutions</summary>
+            <description>The acceptable resolutions.</description>
+        </key>
+        <key type='b' name='allow-sfw'>
+            <default>true</default>
+            <summary>SFW</summary>
+            <description>Weather safe images are allowed.</description>
+        </key>
+        <key type='b' name='allow-sketchy'>
+            <default>false</default>
+            <summary>Sketchy</summary>
+            <description>Weather sketchy images are allowed.</description>
+        </key>
+
+        <key type='b' name='category-general'>
+            <default>true</default>
+            <summary>Category General</summary>
+            <description>Weather the general category should be searched.</description>
+        </key>
+        <key type='b' name='category-anime'>
+            <default>true</default>
+            <summary>Category Anime</summary>
+            <description>Weather the anime category should be searched.</description>
+        </key>
+        <key type='b' name='category-people'>
+            <default>true</default>
+            <summary>Category People</summary>
+            <description>Weather the people category should be searched.</description>
+        </key>
     </schema>
 </schemalist>
