@@ -120,6 +120,10 @@ const RandomWallpaperSettings = new Lang.Class({
 			this._builder.get_object('af-switch'),
 			'active',
 			Gio.SettingsBindFlags.DEFAULT);
+		this._settings.bind('change-lock-screen',
+			this._builder.get_object('change-lock-screen'),
+			'active',
+			Gio.SettingsBindFlags.DEFAULT);
 	},
 
 	_toggleAfSliders: function () {
