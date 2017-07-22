@@ -54,6 +54,7 @@
     <property name="margin_top">15</property>
     <property name="margin_bottom">15</property>
     <property name="orientation">vertical</property>
+    <property name="spacing">10</property>
     <child>
       <object class="GtkFrame">
         <property name="visible">True</property>
@@ -101,7 +102,7 @@
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="hexpand">True</property>
-                        <property name="label" translatable="yes">The source that is used to fetch random wallpapers. You can select between desktoppr.co (default) and an experimental version of wallheaven.cc.</property>
+                        <property name="label" translatable="yes">The source that is used to fetch random wallpapers. You can select between desktoppr.co (default) and an experimental version of wallheaven.cc and unsplash.com.</property>
                         <property name="wrap">True</property>
                         <property name="max_width_chars">1</property>
                         <property name="xalign">0</property>
@@ -185,19 +186,6 @@
       <packing>
         <property name="expand">False</property>
         <property name="fill">True</property>
-        <property name="position">0</property>
-      </packing>
-    </child>
-    <child>
-      <object class="GtkSeparator">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="margin_top">10</property>
-        <property name="margin_bottom">10</property>
-      </object>
-      <packing>
-        <property name="expand">False</property>
-        <property name="fill">False</property>
         <property name="position">1</property>
       </packing>
     </child>
@@ -285,15 +273,97 @@
       </packing>
     </child>
     <child>
-      <object class="GtkSeparator">
+      <object class="GtkFrame">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="margin_top">10</property>
-        <property name="margin_bottom">10</property>
+        <property name="label_xalign">0</property>
+        <property name="shadow_type">in</property>
+        <child>
+          <object class="GtkGrid">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="margin_left">10</property>
+            <property name="margin_right">10</property>
+            <property name="margin_top">10</property>
+            <property name="margin_bottom">10</property>
+            <property name="column_spacing">10</property>
+            <property name="baseline_row">2</property>
+            <child>
+              <object class="GtkGrid">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="hexpand">True</property>
+                <property name="column_homogeneous">True</property>
+                <child>
+                  <object class="GtkLabel" id="change-lock-screen-label">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="halign">start</property>
+                    <property name="label" translatable="yes">Change lock screen</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">0</property>
+                    <property name="top_attach">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="change-lock-screen-description">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="hexpand">True</property>
+                    <property name="label" translatable="yes">Also change the gnome lock screen image to the new wallpaper.</property>
+                    <property name="use_underline">True</property>
+                    <property name="wrap">True</property>
+                    <property name="max_width_chars">1</property>
+                    <property name="xalign">0</property>
+                    <style>
+                      <class name="dim-label"/>
+                    </style>
+                  </object>
+                  <packing>
+                    <property name="left_attach">0</property>
+                    <property name="top_attach">1</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkBox">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="orientation">vertical</property>
+                <child>
+                  <object class="GtkSwitch" id="change-lock-screen">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="halign">end</property>
+                    <property name="valign">start</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="top_attach">0</property>
+              </packing>
+            </child>
+          </object>
+        </child>
+        <child type="label_item">
+          <placeholder/>
+        </child>
       </object>
       <packing>
         <property name="expand">False</property>
-        <property name="fill">False</property>
+        <property name="fill">True</property>
         <property name="position">3</property>
       </packing>
     </child>
