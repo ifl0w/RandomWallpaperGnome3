@@ -30,9 +30,9 @@ Now you should be able to activate the extension through the gnome-tweak-tool.
 Run `./install uninstall` to delete the symbolic link.
 If you installed the extension manually you have to delete the extension folder with `rm -rf ~/.local/share/gnome-shell/extensions/randomwallpaper@iflow.space`.
 
-## Debuging
-Debuging can be started via `sh debug.sh`. Information can be printed with `global.log()`.
-To debug the prefs.js use `sh debug.sh perfs`. In this case you should print debug messages with `print()`.
+## Debugging
+Extension output can be followed with `./debug.sh`. Information should be printed using the existing logger class but can also be printed with `global.log()` (not recommended).
+To debug the prefs.js use `./debug.sh perfs`.
 
 ## Compiling schemas
-This can be done with the command: `glib-compile-schemas schemas/`
+This can be done with the command: `glib-compile-schemas randomwallpaper@iflow.space/schemas/`
