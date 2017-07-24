@@ -11,7 +11,7 @@ let Logger = new Lang.Class({
 	},
 
 	_log: function(level, message) {
-		global.log(`${this._prefix} [${level}] >> ${this._callingClass} :: ${message}`);
+		global.log(this._prefix + " [" + level + "] >> " + this._callingClass + " :: " + message);
 	},
 
 	debug: function (message) {

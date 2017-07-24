@@ -109,7 +109,7 @@ let HistoryController = new Lang.Class({
 	 * Clear the history and delete all photos except the current one.
 	 * @returns {boolean}
 	 */
-	clear() {
+	clear: function() {
 		let firstHistoryElement = this.history[0];
 
 		if (firstHistoryElement)
