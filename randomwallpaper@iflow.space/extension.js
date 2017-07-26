@@ -121,10 +121,10 @@ let RandomWallpaperEntry = new Lang.Class({
 		// reset it if needed
 		this.menu.actor.connect('hide', () => {
 			wallpaperController.resetWallpaper();
-			this.setHistoryList();
+			this.setHistoryList(); // TODO: move this call to a new background changed hook (because overhead on close)
 		});
 
-		this.menu.actor.connect('leave-event', function(e, t, a) {
+		this.menu.actor.connect('leave-event', () => {
 			wallpaperController.resetWallpaper();
 		});
 

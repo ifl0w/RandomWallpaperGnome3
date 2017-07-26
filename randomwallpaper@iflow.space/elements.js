@@ -3,19 +3,30 @@ const PopupMenu = imports.ui.popupMenu;
 const St = imports.gi.St;
 const Tweener = imports.ui.tweener;
 const Util = imports.misc.util;
+const GdkPixbuf = imports.gi.GdkPixbuf;
+const Clutter = imports.gi.Clutter;
+const Cogl = imports.gi.Cogl;
+
+// Filesystem
+const Gio = imports.gi.Gio;
 
 const Self = imports.misc.extensionUtils.getCurrentExtension();
+const LoggerModule = Self.imports.logger;
 const Timer = Self.imports.timer;
 
 const HistoryElement = new Lang.Class({
 	Name: 'HistoryElement',
 	Extends: PopupMenu.PopupSubMenuMenuItem,
+	logger: null,
 	historyEntry: null,
 
 	setAsWallpaperItem: null,
+	previewItem: null,
+	_previewActor: null,
 
 	_init: function (historyEntry, index) {
 		this.parent("", false);
+		this.logger = new LoggerModule.Logger('RWG3', 'HistoryElement');
 
 		let timestamp = historyEntry.timestamp;
 		let date = new Date(timestamp);
@@ -25,12 +36,12 @@ const HistoryElement = new Lang.Class({
 
 		let prefixText;
 		if (index === 0) {
-			prefixtext = "Current Background";
+			prefixText = "Current Background";
 		} else {
-			prefixtext = String(index) + '.';
+			prefixText = String(index) + '.';
 		}
 		this.prefixLabel = new St.Label({
-			text: prefixtext,
+			text: prefixText,
 			style_class: 'rwg-history-index'
 		});
 
@@ -60,8 +71,9 @@ const HistoryElement = new Lang.Class({
 			this.actor.insert_child_above(this._container, this.prefixLabel);
 		}
 
-		if (this.historyEntry.source && this.historyEntry.source !== null) {
+		this.menu.addMenuItem( new PopupMenu.PopupBaseMenuItem({can_focus: false, reactive: false})); // theme independent spacing
 
+		if (this.historyEntry.source && this.historyEntry.source !== null) {
 			if (this.historyEntry.source.author !== null
 				&& this.historyEntry.source.authorUrl !== null) {
 				this.authorItem = new PopupMenu.PopupMenuItem('Image By: ' + this.historyEntry.source.author);
@@ -88,17 +100,53 @@ const HistoryElement = new Lang.Class({
 			});
 
 			this.menu.addMenuItem(this.imageUrlItem);
-
-			this.setAsWallpaperItem = new PopupMenu.PopupMenuItem('Set As Wallpaper');
-			this.setAsWallpaperItem.connect('activate', () => {
-				this.emit('activate');
-			});
-
-			this.menu.addMenuItem(this.setAsWallpaperItem);
 		} else {
 			this.menu.addMenuItem(new PopupMenu.PopupMenuItem('Unknown source.'));
 		}
 
+		this.setAsWallpaperItem = new PopupMenu.PopupMenuItem('Set As Wallpaper');
+		this.setAsWallpaperItem.connect('activate', () => {
+			this.emit('activate');
+		});
+
+		this.previewItem = new PopupMenu.PopupBaseMenuItem({can_focus: false, reactive: false});
+		this.menu.addMenuItem(new PopupMenu.PopupBaseMenuItem({can_focus: false, reactive: false})); // theme independent spacing
+		this.menu.addMenuItem(this.setAsWallpaperItem);
+		this.menu.addMenuItem(this.previewItem);
+		this.menu.addMenuItem(new PopupMenu.PopupBaseMenuItem({can_focus: false, reactive: false})); // theme independent spacing
+
+		/*
+			Load the image on first opening of the sub menu instead of during creation of the history list.
+		 */
+		this.menu.connect('open-state-changed', (self, open) => {
+			if (open) {
+				if (this._previewActor !== null) {
+					return;
+				}
+
+				try {
+					let width = 250; // TODO: get width or add option in settings.
+					let pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(this.historyEntry.path, width, -1, true);
+					let height = pixbuf.get_height();
+
+					let image = new Clutter.Image();
+					let pixelFormat = pixbuf.get_has_alpha() ? Cogl.PixelFormat.RGBA_8888 : Cogl.PixelFormat.RGB_888;
+					image.set_data(
+						pixbuf.get_pixels(),
+						pixelFormat,
+						width,
+						height,
+						pixbuf.get_rowstride()
+					);
+					this._previewActor = new Clutter.Actor({height: height, width: width});
+					this._previewActor.set_content(image);
+
+					this.previewItem.actor.add_actor(this._previewActor);
+				} catch (exeption) {
+					this.logger.error(exeption);
+				}
+			}
+		})
 	}
 });
 
