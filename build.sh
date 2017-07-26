@@ -1,7 +1,7 @@
 #!/bin/bash
 
-BASEDIR='randomwallpaper@iflow.space'
-ZIPNAME='random-wallpaper-gnome3.zip'
+BASEDIR="randomwallpaper@iflow.space"
+ZIPNAME="$BASEDIR.zip"
 
 rm $ZIPNAME
 rm $BASEDIR/schemas/gschemas.compiled

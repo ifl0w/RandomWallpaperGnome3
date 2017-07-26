@@ -1,9 +1,5 @@
 {
 	"shell-version": [
-				"3.12",
-				"3.14",
-				"3.16",
-				"3.18",
 				"3.20",
 				"3.22",
 				"3.24"
@@ -12,6 +8,6 @@
 	"settings-schema": "org.gnome.shell.extensions.space.iflow.randomwallpaper",
 	"name": "Random Wallpaper",
 	"description": "Fetches a random wallpaper from an online source and sets it as desktop background. \nThe desktop background can be updated periodically or manually.",
-	"version": "2.0.1",
+	"version": "2.1.0",
 	"url": "https://github.com/ifl0w/RandomWallpaperGnome3"
 }
