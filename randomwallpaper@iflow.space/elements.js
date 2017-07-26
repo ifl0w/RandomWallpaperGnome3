@@ -36,12 +36,12 @@ const HistoryElement = new Lang.Class({
 
 		let prefixText;
 		if (index === 0) {
-			prefixtext = "Current Background";
+			prefixText = "Current Background";
 		} else {
-			prefixtext = String(index) + '.';
+			prefixText = String(index) + '.';
 		}
 		this.prefixLabel = new St.Label({
-			text: prefixtext,
+			text: prefixText,
 			style_class: 'rwg-history-index'
 		});
 
