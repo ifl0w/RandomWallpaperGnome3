@@ -93,6 +93,7 @@ let UnsplashAdapter = new Lang.Class({
 	options: {
 		'username': '',
 		'query': '',
+		'featured': true,
 		'w': 1920,
 		'h': 1080,
 	},
