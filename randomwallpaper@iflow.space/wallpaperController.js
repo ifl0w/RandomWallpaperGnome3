@@ -178,7 +178,8 @@ let WallpaperController = new Lang.Class({
 		 */
 		if (settings.is_writable("picture-uri")) {
 			// Set a new Background-Image (should show up immediately):
-			if (settings.set_string("picture-uri", path)) {
+			let rc = settings.set_string("picture-uri", path);
+			if (rc) {
 				Gio.Settings.sync(); // Necessary: http://stackoverflow.com/questions/9985140
 
 				// call callback if given

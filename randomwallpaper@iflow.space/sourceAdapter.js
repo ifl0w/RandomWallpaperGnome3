@@ -95,6 +95,7 @@ let UnsplashAdapter = new Lang.Class({
 		'query': '',
 		'w': 1920,
 		'h': 1080,
+		'featured': false
 	},
 
 	_init: function () {
@@ -152,12 +153,14 @@ let UnsplashAdapter = new Lang.Class({
 		this.options.query = this._settings.get('unsplash-keyword', 'string');
 
 		this.options.username = this._settings.get('username', 'string');
-		if (this.options.username[0] === '@') {
+		if (this.options.username && this.options.username[0] === '@') {
 			this.options.username = this.options.username.substring(1); // remove @ prefix
 		}
 
 		this.options.w = this._settings.get('image-width', 'int');
 		this.options.h = this._settings.get('image-height', 'int');
+
+		this.options.featured = this._settings.get('featured-only', 'boolean');
 	}
 });
 

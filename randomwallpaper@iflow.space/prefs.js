@@ -161,6 +161,10 @@ const RandomWallpaperSettings = new Lang.Class({
 			this._builder.get_object('unsplash-image-height'),
 			'value',
 			Gio.SettingsBindFlags.DEFAULT);
+		this._unsplash_settings.bind('featured-only',
+			this._builder.get_object('unsplash-featured-only'),
+			'active',
+			Gio.SettingsBindFlags.DEFAULT);
 	},
 
 	bindWallheaven: function () {

@@ -94,6 +94,11 @@
             <summary>Image Width</summary>
             <description>The height of the image.</description>
         </key>
+        <key type='b' name='featured-only'>
+            <default>false</default>
+            <summary>Featured images only</summary>
+            <description>This results in a smaller wallpaper pool but the images are considered to have higher quality.</description>
+        </key>
     </schema>
 
     <schema path="/org/gnome/shell/extensions/space-iflow-randomwallpaper-sources/"
