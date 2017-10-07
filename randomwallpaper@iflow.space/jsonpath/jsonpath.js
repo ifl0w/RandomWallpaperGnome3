@@ -29,32 +29,49 @@ let JSONPathParser = function () {
 
 		if (startParentheses === -1) {
 
-			if (!keyString.empty && !inputObject.hasOwnProperty(keyString)) {
+			let targetObject = this._getTargetObject(inputObject, keyString);
+			if (targetObject == null) {
 				return null;
 			}
 
-			return this.access(inputObject[keyString], inputStringTail)
+			return this.access(targetObject, inputStringTail)
 
 		} else {
 
 			let indexString = keyString.slice(startParentheses+1, keyString.length-1);
 			keyString = keyString.slice(0, startParentheses);
 
-			if (!keyString.empty && !inputObject.hasOwnProperty(keyString)) {
+			let targetObject = this._getTargetObject(inputObject, keyString);
+			if (targetObject == null) {
 				return null;
 			}
 
 			switch (indexString) {
 			case "@random":
-				return this.access(this.randomElement(inputObject[keyString]), inputStringTail);
+				return this.access(this.randomElement(targetObject), inputStringTail);
 				// add special keywords here
 			default:
 				// expecting integer
-				return this.access(inputObject[keyString][parseInt(indexString)], inputStringTail);
+				return this.access(targetObject[parseInt(indexString)], inputStringTail);
 			}
 
 		}
 
+	};
+
+	/**
+	 * Check validity of the key string and return the target object or null.
+	 * @param inputObject
+	 * @param keyString
+	 * @returns {*}
+	 * @private
+	 */
+	this._getTargetObject = function (inputObject, keyString) {
+		if (!keyString.empty && keyString !== "$" && !inputObject.hasOwnProperty(keyString)) {
+			return null;
+		}
+
+		return (keyString === "$") ? inputObject : inputObject[keyString];
 	};
 
 	/**

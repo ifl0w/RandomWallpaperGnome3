@@ -35,7 +35,11 @@ let BaseAdapter = new Lang.Class({
 	},
 
 	fileName: function (uri) {
-		let base = new String(uri).substring(uri.lastIndexOf('/') + 1);
+		let base = decodeURIComponent(uri);
+		base = base.substring(base.lastIndexOf('/') + 1);
+		if(base.indexOf('?') >= 0) {
+			base = base.substr(0, base.indexOf('?'));
+		}
 		return base;
 	},
 
@@ -64,7 +68,6 @@ let DesktopperAdapter = new Lang.Class({
 			url += '?safe_filter=safe';
 		}
 		url = encodeURI(url);
-		this.logger.debug("Base URL: " + url);
 
 		let message = Soup.Message.new('GET', url);
 
@@ -114,7 +117,6 @@ let UnsplashAdapter = new Lang.Class({
 		let url = 'https://api.unsplash.com/photos/random?' + optionsString;
 		url += 'client_id=64daf439e9b579dd566620c0b07022706522d87b255d06dd01d5470b7f193b8d';
 		url = encodeURI(url);
-		this.logger.debug("Base URL: " + url);
 
 		let message = Soup.Message.new('GET', url);
 
@@ -193,7 +195,6 @@ let WallheavenAdapter = new Lang.Class({
 		let optionsString = this._generateOptionsString();
 		let url = 'http://alpha.wallhaven.cc/search?' + optionsString;
 		url = encodeURI(url);
-		this.logger.debug("Base URL: " + url);
 
 		let message = Soup.Message.new('GET', url);
 
@@ -275,62 +276,33 @@ let GenericJsonAdapter = new Lang.Class({
 	Extends: BaseAdapter,
 
 	_settings: null,
+	_jsonPathParser: null,
 
 	_init: function () {
 		this.parent();
-
+		this._jsonPathParser = new JSONPath.JSONPathParser();
 		this._settings = new SettingsModule.Settings(RWG_SETTINGS_SCHEMA_GENERIC_JSON);
 	},
 
 	requestRandomImage: function (callback) {
-		this.logger.debug(JSONPath);
-
-		let session = new Soup.SessionAsync();
-
-		let url = 'https://api.desktoppr.co/1/wallpapers/random';
-		let allowUnsafe = this._settings.get('allow-unsafe', 'boolean');
-		if (allowUnsafe) {
-			url += '?safe_filter=all';
-		} else {
-			url += '?safe_filter=safe';
-		}
-		url = encodeURI(url);
-		this.logger.debug("Base URL: " + url);
-
-		let message = Soup.Message.new('GET', url);
-
-		session.queue_message(message, (session, message) => {
-			let data = JSON.parse(message.response_body.data);
-			let response = data.response;
-			let imageUrl = encodeURI(response.image.url);
-
-			if (callback) {
-				let historyEntry = new HistoryModule.HistoryEntry(null, 'desktopper.co', imageUrl);
-				historyEntry.source.sourceUrl = 'https://www.desktoppr.co/';
-				callback(historyEntry);
-			}
-		});
-
-		/*
 		let session = new Soup.SessionAsync();
 
 		let url = this._settings.get("generic-json-request-url", "string");
 		url = encodeURI(url);
-		this.logger.debug("Base URL: " + url);
 
 		let message = Soup.Message.new('GET', url);
 
 		session.queue_message(message, (session, message) => {
-			let data = JSON.parse(message.response_body.data);
-			let response = data.response;
-			let imageUrl = encodeURI(response.image.url);
+			let response = JSON.parse(message.response_body.data);
+			let JSONPath = this._settings.get("generic-json-response-path", "string");
+			let imageUrl = this._jsonPathParser.access(response, JSONPath);
 
 			if (callback) {
-				let historyEntry = new HistoryModule.HistoryEntry(null, 'desktopper.co', imageUrl);
-				historyEntry.source.sourceUrl = 'https://www.desktoppr.co/';
+				let historyEntry = new HistoryModule.HistoryEntry(null, 'Generic JSON Source', imageUrl);
+				historyEntry.source.sourceUrl = imageUrl;
 				callback(historyEntry);
 			}
 		});
-		*/
+
 	}
 });
