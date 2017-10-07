@@ -107,7 +107,6 @@ const RandomWallpaperSettings = new Lang.Class({
 			}
 
 			container.add(this.currentSourceSettingsWidget);
-			container.getParent
 		});
 
 		this._settings.bind('history-length',
