@@ -160,6 +160,11 @@
             <summary>JSON Path</summary>
             <description>The JSON path that describes the picture URL.</description>
         </key>
+        <key type='s' name='generic-json-url-prefix'>
+            <default>""</default>
+            <summary>Image URL prefix</summary>
+            <description>This prefix is added to the final image URL.</description>
+        </key>
     </schema>
 
 </schemalist>

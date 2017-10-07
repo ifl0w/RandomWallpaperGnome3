@@ -224,6 +224,10 @@ const RandomWallpaperSettings = new Lang.Class({
 			this._builder.get_object('generic-json-response-path'),
 			'text',
 			Gio.SettingsBindFlags.DEFAULT);
+		this._generic_json_settings.bind('generic-json-url-prefix',
+			this._builder.get_object('generic-json-url-prefix'),
+			'text',
+			Gio.SettingsBindFlags.DEFAULT);
 	}
 
 });

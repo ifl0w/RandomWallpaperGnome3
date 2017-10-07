@@ -296,6 +296,7 @@ let GenericJsonAdapter = new Lang.Class({
 			let response = JSON.parse(message.response_body.data);
 			let JSONPath = this._settings.get("generic-json-response-path", "string");
 			let imageUrl = this._jsonPathParser.access(response, JSONPath);
+			imageUrl = this._settings.get("generic-json-url-prefix", "string")+imageUrl;
 
 			if (callback) {
 				let historyEntry = new HistoryModule.HistoryEntry(null, 'Generic JSON Source', imageUrl);
