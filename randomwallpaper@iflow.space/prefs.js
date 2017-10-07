@@ -131,6 +131,10 @@ var RandomWallpaperSettings = class {
 			this._builder.get_object('hide-panel-icon'),
 			'active',
 			Gio.SettingsBindFlags.DEFAULT);
+		this._settings.bind('fetch-on-startup',
+			this._builder.get_object('fetch-on-startup'),
+			'active',
+			Gio.SettingsBindFlags.DEFAULT);
 
 		this._wallpaperController = new WallpaperController.WallpaperController();
 		this._bindButtons();
