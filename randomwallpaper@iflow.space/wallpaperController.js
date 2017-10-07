@@ -60,6 +60,7 @@ let WallpaperController = new Lang.Class({
 		this._desktopperAdapter = new SourceAdapter.DesktopperAdapter();
 		this._unsplashAdapter = new SourceAdapter.UnsplashAdapter();
 		this._wallheavenAdapter = new SourceAdapter.WallheavenAdapter();
+		this._genericJsonAdapter = new SourceAdapter.GenericJsonAdapter();
 
 		this.logger = new LoggerModule.Logger('RWG3', 'WallpaperController');
 	},
@@ -97,6 +98,9 @@ let WallpaperController = new Lang.Class({
 				break;
 			case 2:
 				this.imageSourceAdapter = this._wallheavenAdapter;
+				break;
+			case 3:
+				this.imageSourceAdapter = this._genericJsonAdapter;
 				break;
 			default:
 				this.imageSourceAdapter = this._desktopperAdapter;
@@ -178,7 +182,8 @@ let WallpaperController = new Lang.Class({
 		 */
 		if (settings.is_writable("picture-uri")) {
 			// Set a new Background-Image (should show up immediately):
-			if (settings.set_string("picture-uri", path)) {
+			let rc = settings.set_string("picture-uri", path);
+			if (rc) {
 				Gio.Settings.sync(); // Necessary: http://stackoverflow.com/questions/9985140
 
 				// call callback if given
@@ -240,7 +245,7 @@ let WallpaperController = new Lang.Class({
 		});
 	},
 
-	_backgroundTimout: function (delay) {
+	_backgroundTimeout: function (delay) {
 		if (this.timeout) {
 			return;
 		}
@@ -260,15 +265,19 @@ let WallpaperController = new Lang.Class({
 	},
 
 	previewWallpaper: function (historyid, delay) {
-		this.previewId = historyid;
-		this._resetWallpaper = false;
+		if (!this._settings.get('disable-hover-preview', 'boolean')) {
+			this.previewId = historyid;
+			this._resetWallpaper = false;
 
-		this._backgroundTimout(delay);
+			this._backgroundTimeout(delay);
+		}
 	},
 
 	resetWallpaper: function () {
-		this._resetWallpaper = true;
-		this._backgroundTimout();
+		if (!this._settings.get('disable-hover-preview', 'boolean')) {
+			this._resetWallpaper = true;
+			this._backgroundTimeout();
+		}
 	},
 
 	getHistoryController: function () {
