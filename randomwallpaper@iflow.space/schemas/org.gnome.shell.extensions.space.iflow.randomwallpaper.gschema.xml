@@ -62,6 +62,12 @@
             <description>Weather the gnome lock screen should also be set to the new wallpaper.</description>
         </key>
 
+        <key type='b' name='disable-hover-preview'>
+            <default>false</default>
+            <summary>Disable hover preview</summary>
+            <description>Disables the preview of the background while hovering the history list</description>
+        </key>
+
     </schema>
 
     <schema path="/org/gnome/shell/extensions/space-iflow-randomwallpaper-sources/"

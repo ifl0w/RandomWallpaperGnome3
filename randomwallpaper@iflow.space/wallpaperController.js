@@ -245,7 +245,7 @@ let WallpaperController = new Lang.Class({
 		});
 	},
 
-	_backgroundTimout: function (delay) {
+	_backgroundTimeout: function (delay) {
 		if (this.timeout) {
 			return;
 		}
@@ -265,15 +265,19 @@ let WallpaperController = new Lang.Class({
 	},
 
 	previewWallpaper: function (historyid, delay) {
-		this.previewId = historyid;
-		this._resetWallpaper = false;
+		if (!this._settings.get('disable-hover-preview', 'boolean')) {
+			this.previewId = historyid;
+			this._resetWallpaper = false;
 
-		this._backgroundTimout(delay);
+			this._backgroundTimeout(delay);
+		}
 	},
 
 	resetWallpaper: function () {
-		this._resetWallpaper = true;
-		this._backgroundTimout();
+		if (!this._settings.get('disable-hover-preview', 'boolean')) {
+			this._resetWallpaper = true;
+			this._backgroundTimeout();
+		}
 	},
 
 	getHistoryController: function () {

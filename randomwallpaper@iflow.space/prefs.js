@@ -134,6 +134,10 @@ const RandomWallpaperSettings = new Lang.Class({
 			this._builder.get_object('change-lock-screen'),
 			'active',
 			Gio.SettingsBindFlags.DEFAULT);
+		this._settings.bind('disable-hover-preview',
+			this._builder.get_object('disable-hover-preview'),
+			'active',
+			Gio.SettingsBindFlags.DEFAULT);
 	},
 
 	_toggleAfSliders: function () {
