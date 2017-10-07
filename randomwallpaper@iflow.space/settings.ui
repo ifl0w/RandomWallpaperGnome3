@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.20.0 -->
+<!-- Generated with glade 3.20.1 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
   <object class="GtkBox" id="desktopper-settings">
@@ -37,6 +37,122 @@
     <property name="value">30</property>
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
+  </object>
+  <object class="GtkBox" id="generic-json-settings">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="margin_left">10</property>
+    <property name="margin_right">10</property>
+    <property name="margin_top">10</property>
+    <property name="margin_bottom">10</property>
+    <property name="orientation">vertical</property>
+    <property name="spacing">10</property>
+    <child>
+      <object class="GtkLabel" id="generic-json-settings-description">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="halign">start</property>
+        <property name="label" translatable="yes">This feature requires some know how but many different wallpaper providers can be used with this generic JSON source.
+You have to specify an URL to a JSON response and a path to the target picture url within the JSON response.</property>
+        <property name="wrap">True</property>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="fill">True</property>
+        <property name="position">0</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkLinkButton" id="generic-json-docs-link">
+        <property name="label" translatable="yes">button</property>
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="receives_default">True</property>
+        <property name="halign">start</property>
+        <property name="relief">none</property>
+        <property name="uri">https://github.com/ifl0w/RandomWallpaperGnome3/wiki/Generic-JSON-Source</property>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="fill">True</property>
+        <property name="position">1</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkBox">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkLabel">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="halign">start</property>
+            <property name="label" translatable="yes">Request URL</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkEntry" id="generic-json-request-url">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="placeholder_text" translatable="yes">Request URL</property>
+            <property name="input_purpose">url</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="fill">True</property>
+        <property name="position">2</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkBox">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkLabel">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="halign">start</property>
+            <property name="label" translatable="yes">JSON Path</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkEntry" id="generic-json-response-path">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="placeholder_text" translatable="yes">JSON Path</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="fill">True</property>
+        <property name="position">3</property>
+      </packing>
+    </child>
   </object>
   <object class="GtkAdjustment" id="history-length">
     <property name="lower">1</property>
@@ -161,8 +277,9 @@
                                     <property name="active_id">0</property>
                                     <items>
                                       <item id="desktoppr">desktoppr.co</item>
-                                      <item id="unsplash">unsplash.com (experimental)</item>
-                                      <item id="wallheaven">alpha.wallheaven.cc (experimental)</item>
+                                      <item id="unsplash">unsplash.com</item>
+                                      <item id="wallheaven">alpha.wallheaven.cc</item>
+                                      <item id="genericJSON" translatable="yes">Generic JSON</item>
                                     </items>
                                   </object>
                                   <packing>
@@ -177,7 +294,7 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkFrame" id="source-settings-frame">
+                              <object class="GtkFrame" id="source-settings-container">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <property name="hexpand">True</property>

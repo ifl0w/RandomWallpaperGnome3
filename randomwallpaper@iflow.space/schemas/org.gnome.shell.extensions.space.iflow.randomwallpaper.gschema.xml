@@ -5,6 +5,7 @@
         <value value='0' nick='desktoppr'/>
         <value value='1' nick='unsplash'/>
         <value value='2' nick='wallheaven'/>
+        <value value='3' nick='genericJSON'/>
     </enum>
 
     <schema path="/org/gnome/shell/extensions/space-iflow-randomwallpaper-sources/"
@@ -140,4 +141,19 @@
             <description>Weather the people category should be searched.</description>
         </key>
     </schema>
+
+    <schema path="/org/gnome/shell/extensions/space-iflow-randomwallpaper-sources/"
+            id='org.gnome.shell.extensions.space.iflow.randomwallpaper.genericJSON'>
+        <key type='s' name='generic-json-request-url'>
+            <default>""</default>
+            <summary>The request URL</summary>
+            <description>The URL where the JSON will be requested.</description>
+        </key>
+        <key type='s' name='generic-json-response-path'>
+            <default>""</default>
+            <summary>JSON Path</summary>
+            <description>The JSON path that describes the picture URL.</description>
+        </key>
+    </schema>
+
 </schemalist>

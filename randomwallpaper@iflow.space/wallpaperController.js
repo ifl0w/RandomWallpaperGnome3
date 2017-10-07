@@ -60,6 +60,7 @@ let WallpaperController = new Lang.Class({
 		this._desktopperAdapter = new SourceAdapter.DesktopperAdapter();
 		this._unsplashAdapter = new SourceAdapter.UnsplashAdapter();
 		this._wallheavenAdapter = new SourceAdapter.WallheavenAdapter();
+		this._genericJsonAdapter = new SourceAdapter.GenericJsonAdapter();
 
 		this.logger = new LoggerModule.Logger('RWG3', 'WallpaperController');
 	},
@@ -97,6 +98,9 @@ let WallpaperController = new Lang.Class({
 				break;
 			case 2:
 				this.imageSourceAdapter = this._wallheavenAdapter;
+				break;
+			case 3:
+				this.imageSourceAdapter = this._genericJsonAdapter;
 				break;
 			default:
 				this.imageSourceAdapter = this._desktopperAdapter;

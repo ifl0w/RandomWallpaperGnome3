@@ -8,11 +8,13 @@ const Json = imports.gi.Json;
 const RWG_SETTINGS_SCHEMA_DESKTOPPER = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.desktopper';
 const RWG_SETTINGS_SCHEMA_UNSPLASH = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.unsplash';
 const RWG_SETTINGS_SCHEMA_WALLHEAVEN = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.wallheaven';
+const RWG_SETTINGS_SCHEMA_GENERIC_JSON = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.genericJSON';
 
 const SettingsModule = Self.imports.settings;
 const HistoryModule = Self.imports.history;
 
 const LoggerModule = Self.imports.logger;
+const JSONPath = Self.imports.jsonpath.jsonpath;
 
 let BaseAdapter = new Lang.Class({
 	Name: "BaseAdapter",
@@ -265,5 +267,70 @@ let WallheavenAdapter = new Lang.Class({
 		purity.push(+this._settings.get('allow-sketchy', 'boolean'));
 		purity.push(0); // required by wallheaven
 		this.options.purity = purity.join('');
+	}
+});
+
+let GenericJsonAdapter = new Lang.Class({
+	Name: "GenericJsonAdapter",
+	Extends: BaseAdapter,
+
+	_settings: null,
+
+	_init: function () {
+		this.parent();
+
+		this._settings = new SettingsModule.Settings(RWG_SETTINGS_SCHEMA_GENERIC_JSON);
+	},
+
+	requestRandomImage: function (callback) {
+		this.logger.debug(JSONPath);
+
+		let session = new Soup.SessionAsync();
+
+		let url = 'https://api.desktoppr.co/1/wallpapers/random';
+		let allowUnsafe = this._settings.get('allow-unsafe', 'boolean');
+		if (allowUnsafe) {
+			url += '?safe_filter=all';
+		} else {
+			url += '?safe_filter=safe';
+		}
+		url = encodeURI(url);
+		this.logger.debug("Base URL: " + url);
+
+		let message = Soup.Message.new('GET', url);
+
+		session.queue_message(message, (session, message) => {
+			let data = JSON.parse(message.response_body.data);
+			let response = data.response;
+			let imageUrl = encodeURI(response.image.url);
+
+			if (callback) {
+				let historyEntry = new HistoryModule.HistoryEntry(null, 'desktopper.co', imageUrl);
+				historyEntry.source.sourceUrl = 'https://www.desktoppr.co/';
+				callback(historyEntry);
+			}
+		});
+
+		/*
+		let session = new Soup.SessionAsync();
+
+		let url = this._settings.get("generic-json-request-url", "string");
+		url = encodeURI(url);
+		this.logger.debug("Base URL: " + url);
+
+		let message = Soup.Message.new('GET', url);
+
+		session.queue_message(message, (session, message) => {
+			let data = JSON.parse(message.response_body.data);
+			let response = data.response;
+			let imageUrl = encodeURI(response.image.url);
+
+			if (callback) {
+				let historyEntry = new HistoryModule.HistoryEntry(null, 'desktopper.co', imageUrl);
+				historyEntry.source.sourceUrl = 'https://www.desktoppr.co/';
+				callback(historyEntry);
+			}
+		});
+		*/
 	}
 });
