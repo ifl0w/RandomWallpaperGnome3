@@ -53,7 +53,8 @@
         <property name="can_focus">False</property>
         <property name="halign">start</property>
         <property name="label" translatable="yes">This feature requires some know how but many different wallpaper providers can be used with this generic JSON source.
-You have to specify an URL to a JSON response and a path to the target picture url within the JSON response.</property>
+You have to specify an URL to a JSON response and a path to the target image URL within the JSON response. 
+You can also define a prefix that will be added to the image URL.</property>
         <property name="wrap">True</property>
       </object>
       <packing>
@@ -277,7 +278,7 @@ You have to specify an URL to a JSON response and a path to the target picture u
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
                                         <property name="hexpand">True</property>
-                                        <property name="label" translatable="yes">The source that is used to fetch random wallpapers. You can select between desktoppr.co (default) and an experimental version of wallheaven.cc and unsplash.com.</property>
+                                        <property name="label" translatable="yes">The source that is used to fetch random wallpapers. You can select between unsplash.com, desktoppr.co, wallheaven.cc and a generic JSON source for experienced users.</property>
                                         <property name="wrap">True</property>
                                         <property name="max_width_chars">1</property>
                                         <property name="xalign">0</property>
@@ -313,8 +314,8 @@ You have to specify an URL to a JSON response and a path to the target picture u
                                     <property name="can_focus">False</property>
                                     <property name="active_id">0</property>
                                     <items>
-                                      <item id="desktoppr">desktoppr.co</item>
                                       <item id="unsplash">unsplash.com</item>
+                                      <item id="desktoppr">desktoppr.co</item>
                                       <item id="wallheaven">alpha.wallheaven.cc</item>
                                       <item id="genericJSON" translatable="yes">Generic JSON</item>
                                     </items>

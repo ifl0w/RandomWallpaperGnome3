@@ -91,10 +91,10 @@ let WallpaperController = new Lang.Class({
 		this.imageSourceAdapter = this._desktopperAdapter;
 		switch (this._settings.get('source', 'enum')) {
 			case 0:
-				this.imageSourceAdapter = this._desktopperAdapter;
+				this.imageSourceAdapter = this._unsplashAdapter;
 				break;
 			case 1:
-				this.imageSourceAdapter = this._unsplashAdapter;
+				this.imageSourceAdapter = this._desktopperAdapter;
 				break;
 			case 2:
 				this.imageSourceAdapter = this._wallheavenAdapter;
