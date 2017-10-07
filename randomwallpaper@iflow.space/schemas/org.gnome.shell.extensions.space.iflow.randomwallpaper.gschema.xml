@@ -2,16 +2,17 @@
 <schemalist gettext-domain='gnome-shell-extensions'>
 
     <enum id='org.gnome.shell.extensions.space.iflow.randomwallpaper.sources'>
-        <value value='0' nick='desktoppr'/>
-        <value value='1' nick='unsplash'/>
+        <value value='0' nick='unsplash'/>
+        <value value='1' nick='desktoppr'/>
         <value value='2' nick='wallheaven'/>
+        <value value='3' nick='genericJSON'/>
     </enum>
 
     <schema path="/org/gnome/shell/extensions/space-iflow-randomwallpaper-sources/"
             id='org.gnome.shell.extensions.space.iflow.randomwallpaper'>
 
         <key type='i' name='history-length'>
-            <default>10</default>
+            <default>5</default>
             <summary>History size</summary>
             <description>Number of wallpapers stored locally</description>
             <range min='2' max='100'/>
@@ -38,9 +39,9 @@
         </key>
 
         <key name='source' enum='org.gnome.shell.extensions.space.iflow.randomwallpaper.sources'>
-            <default>'desktoppr'</default>
+            <default>'unsplash'</default>
             <summary>Wallpaper Source</summary>
-            <description>Describs the adapter that will be used.</description>
+            <description>Describes the adapter that will be used.</description>
         </key>
 
         <key type='as' name='history'>
@@ -59,6 +60,12 @@
             <default>false</default>
             <summary>Change lock screen</summary>
             <description>Weather the gnome lock screen should also be set to the new wallpaper.</description>
+        </key>
+
+        <key type='b' name='disable-hover-preview'>
+            <default>false</default>
+            <summary>Disable hover preview</summary>
+            <description>Disables the preview of the background while hovering the history list</description>
         </key>
 
     </schema>
@@ -93,6 +100,11 @@
             <default>1080</default>
             <summary>Image Width</summary>
             <description>The height of the image.</description>
+        </key>
+        <key type='b' name='featured-only'>
+            <default>false</default>
+            <summary>Featured images only</summary>
+            <description>This results in a smaller wallpaper pool but the images are considered to have higher quality.</description>
         </key>
     </schema>
 
@@ -135,4 +147,24 @@
             <description>Weather the people category should be searched.</description>
         </key>
     </schema>
+
+    <schema path="/org/gnome/shell/extensions/space-iflow-randomwallpaper-sources/"
+            id='org.gnome.shell.extensions.space.iflow.randomwallpaper.genericJSON'>
+        <key type='s' name='generic-json-request-url'>
+            <default>""</default>
+            <summary>The request URL</summary>
+            <description>The URL where the JSON will be requested.</description>
+        </key>
+        <key type='s' name='generic-json-response-path'>
+            <default>""</default>
+            <summary>JSON Path</summary>
+            <description>The JSON path that describes the picture URL.</description>
+        </key>
+        <key type='s' name='generic-json-url-prefix'>
+            <default>""</default>
+            <summary>Image URL prefix</summary>
+            <description>This prefix is added to the final image URL.</description>
+        </key>
+    </schema>
+
 </schemalist>

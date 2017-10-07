@@ -15,6 +15,7 @@ const RWG_SETTINGS_SCHEMA = 'org.gnome.shell.extensions.space.iflow.randomwallpa
 const RWG_SETTINGS_SCHEMA_DESKTOPPER = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.desktopper';
 const RWG_SETTINGS_SCHEMA_UNSPLASH = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.unsplash';
 const RWG_SETTINGS_SCHEMA_WALLHEAVEN = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.wallheaven';
+const RWG_SETTINGS_SCHEMA_GENERIC_JSON = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.genericJSON';
 
 const LoggerModule = Self.imports.logger;
 
@@ -41,6 +42,7 @@ const RandomWallpaperSettings = new Lang.Class({
 	desktopperSettings: null,
 	unsplashSettings: null,
 	wallheavenSettings: null,
+	genericJsonSettings: null,
 
 	_init: function () {
 		this._settings = Convenience.getSettings(RWG_SETTINGS_SCHEMA);
@@ -67,6 +69,11 @@ const RandomWallpaperSettings = new Lang.Class({
 		this.wallheavenSettings = this._builder.get_object('wallheaven-settings');
 		this.bindWallheaven();
 
+		// Generic JSON Settings
+		this._generic_json_settings = Convenience.getSettings(RWG_SETTINGS_SCHEMA_GENERIC_JSON);
+		this.genericJsonSettings = this._builder.get_object('generic-json-settings');
+		this.bindGenericJSON();
+
 		this._toggleAfSliders();
 
 		this.widget = this._builder.get_object('main-widget');
@@ -76,20 +83,23 @@ const RandomWallpaperSettings = new Lang.Class({
 		}.bind(this));
 
 		this._builder.get_object('source-combo').connect('changed', (sourceCombo) => {
-			let container = this._builder.get_object('source-settings-frame');
+			let container = this._builder.get_object('source-settings-container');
 			if (this.currentSourceSettingsWidget !== null) {
 				container.remove(this.currentSourceSettingsWidget);
 			}
 
 			switch (sourceCombo.active) {
-				case 0: // desktopper
-					this.currentSourceSettingsWidget = this.desktopperSettings;
-					break;
-				case 1: // unsplash
+				case 0: // unsplash
 					this.currentSourceSettingsWidget = this.unsplashSettings;
+					break;
+				case 1: // desktopper
+					this.currentSourceSettingsWidget = this.desktopperSettings;
 					break;
 				case 2: // wallheaven
 					this.currentSourceSettingsWidget = this.wallheavenSettings;
+					break;
+				case 3: // generic JSON
+					this.currentSourceSettingsWidget = this.genericJsonSettings;
 					break;
 				default:
 					this.currentSourceSettingsWidget = this.noSettings;
@@ -97,7 +107,7 @@ const RandomWallpaperSettings = new Lang.Class({
 			}
 
 			container.add(this.currentSourceSettingsWidget);
-
+			container.getParent
 		});
 
 		this._settings.bind('history-length',
@@ -122,6 +132,10 @@ const RandomWallpaperSettings = new Lang.Class({
 			Gio.SettingsBindFlags.DEFAULT);
 		this._settings.bind('change-lock-screen',
 			this._builder.get_object('change-lock-screen'),
+			'active',
+			Gio.SettingsBindFlags.DEFAULT);
+		this._settings.bind('disable-hover-preview',
+			this._builder.get_object('disable-hover-preview'),
 			'active',
 			Gio.SettingsBindFlags.DEFAULT);
 	},
@@ -161,6 +175,10 @@ const RandomWallpaperSettings = new Lang.Class({
 			this._builder.get_object('unsplash-image-height'),
 			'value',
 			Gio.SettingsBindFlags.DEFAULT);
+		this._unsplash_settings.bind('featured-only',
+			this._builder.get_object('unsplash-featured-only'),
+			'active',
+			Gio.SettingsBindFlags.DEFAULT);
 	},
 
 	bindWallheaven: function () {
@@ -193,6 +211,22 @@ const RandomWallpaperSettings = new Lang.Class({
 		this._wallheaven_settings.bind('allow-sketchy',
 			this._builder.get_object('wallheaven-allow-sketchy'),
 			'active',
+			Gio.SettingsBindFlags.DEFAULT);
+	},
+
+	bindGenericJSON: function () {
+		this._builder.get_object('generic-json-docs-link').set_label("More information here");
+		this._generic_json_settings.bind('generic-json-request-url',
+			this._builder.get_object('generic-json-request-url'),
+			'text',
+			Gio.SettingsBindFlags.DEFAULT);
+		this._generic_json_settings.bind('generic-json-response-path',
+			this._builder.get_object('generic-json-response-path'),
+			'text',
+			Gio.SettingsBindFlags.DEFAULT);
+		this._generic_json_settings.bind('generic-json-url-prefix',
+			this._builder.get_object('generic-json-url-prefix'),
+			'text',
 			Gio.SettingsBindFlags.DEFAULT);
 	}
 
