@@ -2,8 +2,8 @@
 <schemalist gettext-domain='gnome-shell-extensions'>
 
     <enum id='org.gnome.shell.extensions.space.iflow.randomwallpaper.sources'>
-        <value value='0' nick='desktoppr'/>
-        <value value='1' nick='unsplash'/>
+        <value value='0' nick='unsplash'/>
+        <value value='1' nick='desktoppr'/>
         <value value='2' nick='wallheaven'/>
         <value value='3' nick='genericJSON'/>
     </enum>
@@ -12,7 +12,7 @@
             id='org.gnome.shell.extensions.space.iflow.randomwallpaper'>
 
         <key type='i' name='history-length'>
-            <default>10</default>
+            <default>5</default>
             <summary>History size</summary>
             <description>Number of wallpapers stored locally</description>
             <range min='2' max='100'/>
@@ -39,9 +39,9 @@
         </key>
 
         <key name='source' enum='org.gnome.shell.extensions.space.iflow.randomwallpaper.sources'>
-            <default>'desktoppr'</default>
+            <default>'unsplash'</default>
             <summary>Wallpaper Source</summary>
-            <description>Describs the adapter that will be used.</description>
+            <description>Describes the adapter that will be used.</description>
         </key>
 
         <key type='as' name='history'>

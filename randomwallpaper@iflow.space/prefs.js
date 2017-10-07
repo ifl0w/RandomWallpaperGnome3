@@ -89,11 +89,11 @@ const RandomWallpaperSettings = new Lang.Class({
 			}
 
 			switch (sourceCombo.active) {
-				case 0: // desktopper
-					this.currentSourceSettingsWidget = this.desktopperSettings;
-					break;
-				case 1: // unsplash
+				case 0: // unsplash
 					this.currentSourceSettingsWidget = this.unsplashSettings;
+					break;
+				case 1: // desktopper
+					this.currentSourceSettingsWidget = this.desktopperSettings;
 					break;
 				case 2: // wallheaven
 					this.currentSourceSettingsWidget = this.wallheavenSettings;
