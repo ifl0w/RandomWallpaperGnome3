@@ -5,7 +5,7 @@ const Gio = imports.gi.Gio;
 const Self = imports.misc.extensionUtils.getCurrentExtension();
 const Convenience = Self.imports.convenience;
 
-let Settings = new Lang.Class({
+var Settings = new Lang.Class({
 	Name: "Settings",
 	_settings: null,
 

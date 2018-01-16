@@ -16,7 +16,7 @@ const HistoryModule = Self.imports.history;
 const LoggerModule = Self.imports.logger;
 const JSONPath = Self.imports.jsonpath.jsonpath;
 
-let BaseAdapter = new Lang.Class({
+var BaseAdapter = new Lang.Class({
 	Name: "BaseAdapter",
 	logger: null,
 
@@ -37,7 +37,7 @@ let BaseAdapter = new Lang.Class({
 	fileName: function (uri) {
 		let base = decodeURIComponent(uri);
 		base = base.substring(base.lastIndexOf('/') + 1);
-		if(base.indexOf('?') >= 0) {
+		if (base.indexOf('?') >= 0) {
 			base = base.substr(0, base.indexOf('?'));
 		}
 		return base;
@@ -45,7 +45,7 @@ let BaseAdapter = new Lang.Class({
 
 });
 
-let DesktopperAdapter = new Lang.Class({
+var DesktopperAdapter = new Lang.Class({
 	Name: "DesktopperAdapter",
 	Extends: BaseAdapter,
 
@@ -85,7 +85,7 @@ let DesktopperAdapter = new Lang.Class({
 	}
 });
 
-let UnsplashAdapter = new Lang.Class({
+var UnsplashAdapter = new Lang.Class({
 	Name: "UnsplashAdapter",
 	Extends: BaseAdapter,
 
@@ -114,27 +114,36 @@ let UnsplashAdapter = new Lang.Class({
 
 		this._readOptionsFromSettings();
 		let optionsString = this._generateOptionsString();
-		let url = 'https://api.unsplash.com/photos/random?' + optionsString;
-		url += 'client_id=64daf439e9b579dd566620c0b07022706522d87b255d06dd01d5470b7f193b8d';
+		let clientParam = 'client_id=64daf439e9b579dd566620c0b07022706522d87b255d06dd01d5470b7f193b8d';
+
+		let url = 'https://api.unsplash.com/photos/random?' + optionsString + clientParam;
 		url = encodeURI(url);
 
 		let message = Soup.Message.new('GET', url);
 
-		let utmParameters = '?utm_source=RandomWallpaperGnome3&utm_medium=referral&utm_campaign=api-credit';
+		let utmParameters = 'utm_source=RandomWallpaperGnome3&utm_medium=referral&utm_campaign=api-credit';
 
 		session.queue_message(message, (session, message) => {
 			let data = JSON.parse(message.response_body.data);
 
-			let imageUrl = encodeURI(data.links.download + utmParameters);
 			let authorName = data.user.name;
 			let authorUrl = encodeURI(data.user.links.html);
 
-			if (callback) {
-				let historyEntry = new HistoryModule.HistoryEntry(authorName, this.sourceName, encodeURI(imageUrl));
-				historyEntry.source.sourceUrl = encodeURI(this.sourceUrl + utmParameters);
-				historyEntry.source.authorUrl = encodeURI(authorUrl + utmParameters);
-				callback(historyEntry);
-			}
+			let downloadLocation = data.links.download_location + '?' + clientParam;
+			let downloadMessage = Soup.Message.new('GET', downloadLocation);
+
+			session.queue_message(downloadMessage, (session, message) => {
+				let downloadData = JSON.parse(message.response_body.data);
+
+				let imageUrl = encodeURI(downloadData.url + '&' + utmParameters);
+
+				if (callback) {
+					let historyEntry = new HistoryModule.HistoryEntry(authorName, this.sourceName, encodeURI(imageUrl));
+					historyEntry.source.sourceUrl = encodeURI(this.sourceUrl + '?' + utmParameters);
+					historyEntry.source.authorUrl = encodeURI(authorUrl + '?' + utmParameters);
+					callback(historyEntry);
+				}
+			});
 		});
 	},
 
@@ -168,7 +177,7 @@ let UnsplashAdapter = new Lang.Class({
 	}
 });
 
-let WallheavenAdapter = new Lang.Class({
+var WallheavenAdapter = new Lang.Class({
 	Name: "WallheavenAdapter",
 	Extends: BaseAdapter,
 	_settings: null,
@@ -271,7 +280,7 @@ let WallheavenAdapter = new Lang.Class({
 	}
 });
 
-let GenericJsonAdapter = new Lang.Class({
+var GenericJsonAdapter = new Lang.Class({
 	Name: "GenericJsonAdapter",
 	Extends: BaseAdapter,
 
@@ -296,7 +305,7 @@ let GenericJsonAdapter = new Lang.Class({
 			let response = JSON.parse(message.response_body.data);
 			let JSONPath = this._settings.get("generic-json-response-path", "string");
 			let imageUrl = this._jsonPathParser.access(response, JSONPath);
-			imageUrl = this._settings.get("generic-json-url-prefix", "string")+imageUrl;
+			imageUrl = this._settings.get("generic-json-url-prefix", "string") + imageUrl;
 
 			if (callback) {
 				let historyEntry = new HistoryModule.HistoryEntry(null, 'Generic JSON Source', imageUrl);
