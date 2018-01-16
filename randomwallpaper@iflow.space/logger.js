@@ -1,6 +1,6 @@
 const Lang = imports.lang;
 
-let Logger = new Lang.Class({
+var Logger = new Lang.Class({
 	Name: "Logger",
 	_prefix: null,
 	_callingClass: null,

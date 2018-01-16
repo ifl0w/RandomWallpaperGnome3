@@ -9,7 +9,7 @@ const Prefs = Self.imports.settings;
 
 const LoggerModule = Self.imports.logger;
 
-let HistoryEntry = new Lang.Class({
+var HistoryEntry = new Lang.Class({
 	Name: "HistoryEntry",
 	timestamp: null,
 	id: null,
@@ -29,7 +29,7 @@ let HistoryEntry = new Lang.Class({
 	},
 });
 
-let HistoryController = new Lang.Class({
+var HistoryController = new Lang.Class({
 	Name: "HistoryController",
 	_settings: null,
 	_wallpaperlocation: null,

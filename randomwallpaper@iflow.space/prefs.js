@@ -32,7 +32,7 @@ function buildPrefsWidget() {
 }
 
 /* UI Setup */
-const RandomWallpaperSettings = new Lang.Class({
+var RandomWallpaperSettings = new Lang.Class({
 	Name: 'RandomWallpaper.Settings',
 	logger: null,
 

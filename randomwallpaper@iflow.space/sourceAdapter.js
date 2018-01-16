@@ -16,7 +16,7 @@ const HistoryModule = Self.imports.history;
 const LoggerModule = Self.imports.logger;
 const JSONPath = Self.imports.jsonpath.jsonpath;
 
-let BaseAdapter = new Lang.Class({
+var BaseAdapter = new Lang.Class({
 	Name: "BaseAdapter",
 	logger: null,
 
@@ -45,7 +45,7 @@ let BaseAdapter = new Lang.Class({
 
 });
 
-let DesktopperAdapter = new Lang.Class({
+var DesktopperAdapter = new Lang.Class({
 	Name: "DesktopperAdapter",
 	Extends: BaseAdapter,
 
@@ -85,7 +85,7 @@ let DesktopperAdapter = new Lang.Class({
 	}
 });
 
-let UnsplashAdapter = new Lang.Class({
+var UnsplashAdapter = new Lang.Class({
 	Name: "UnsplashAdapter",
 	Extends: BaseAdapter,
 
@@ -177,7 +177,7 @@ let UnsplashAdapter = new Lang.Class({
 	}
 });
 
-let WallheavenAdapter = new Lang.Class({
+var WallheavenAdapter = new Lang.Class({
 	Name: "WallheavenAdapter",
 	Extends: BaseAdapter,
 	_settings: null,
@@ -280,7 +280,7 @@ let WallheavenAdapter = new Lang.Class({
 	}
 });
 
-let GenericJsonAdapter = new Lang.Class({
+var GenericJsonAdapter = new Lang.Class({
 	Name: "GenericJsonAdapter",
 	Extends: BaseAdapter,
 

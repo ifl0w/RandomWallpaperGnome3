@@ -7,7 +7,7 @@ const Prefs = Self.imports.settings;
 let _afTimerInstance = null;
 
 // Singleton implementation of _AFTimer
-let AFTimer = function() {
+var AFTimer = function() {
     if (!_afTimerInstance) {
         _afTimerInstance = new _AFTimer();
     }
@@ -20,7 +20,7 @@ let AFTimer = function() {
  * TODO: find way to store elapsed time on shutdown/logout/gnome-shell-restart/etc.
  * @type {Lang}
  */
-let _AFTimer = new Lang.Class({
+var _AFTimer = new Lang.Class({
     Name: 'AFTimer',
 
     _timeout: null,

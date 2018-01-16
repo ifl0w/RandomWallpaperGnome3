@@ -18,7 +18,7 @@ const HistoryModule = Self.imports.history;
 
 const LoggerModule = Self.imports.logger;
 
-let WallpaperController = new Lang.Class({
+var WallpaperController = new Lang.Class({
 	Name: "WallpaperController",
 	extensionMeta: null,
 	logger: null,

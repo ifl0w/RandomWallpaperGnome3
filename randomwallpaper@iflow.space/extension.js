@@ -24,15 +24,28 @@ const Convenience = Self.imports.convenience;
 
 let wallpaperController;
 let extensionMeta;
+let panelEntry;
 
 function init(metaData) {
 	extensionMeta = metaData;
 	wallpaperController = new WallpaperController.WallpaperController(metaData);
 }
 
-let panelEntry;
+function enable() {
+	// enable Extension
+	// UI
+	panelEntry = new RandomWallpaperEntry(0, "Random wallpaper");
 
-let RandomWallpaperEntry = new Lang.Class({
+	// add to panel
+	Main.panel.addToStatusArea("random-wallpaper-menu", panelEntry);
+}
+
+function disable() {
+	// disable Extension
+	panelEntry.destroy();
+}
+
+var RandomWallpaperEntry = new Lang.Class({
 	Extends: PanelMenu.Button,
 	Name: "RandomWallpaperEntry",
 	logger: null,
@@ -80,7 +93,6 @@ let RandomWallpaperEntry = new Lang.Class({
 		/*
 			add eventlistener
 		*/
-
 		wallpaperController.registerStartLoadingHook(this.statusIcon.startLoading.bind(this.statusIcon));
 		wallpaperController.registerStopLoadingHook(this.statusIcon.stopLoading.bind(this.statusIcon));
 		wallpaperController.registerStopLoadingHook(this.setHistoryList.bind(this));
@@ -168,8 +180,6 @@ let RandomWallpaperEntry = new Lang.Class({
 			this.historySection.addMenuItem(tmp);
 		}
 
-		let _this = this;
-
 		function onLeave(actor) {
 			wallpaperController.resetWallpaper();
 		}
@@ -196,18 +206,3 @@ let RandomWallpaperEntry = new Lang.Class({
 	},
 
 });
-
-function enable() {
-	// Extension enabled
-
-	// UI
-	panelEntry = new RandomWallpaperEntry(0, "Random wallpaper");
-
-	// add to panel
-	Main.panel.addToStatusArea("random-wallpaper-menu", panelEntry);
-}
-
-function disable() {
-	// Extension disabled
-	panelEntry.destroy();
-}

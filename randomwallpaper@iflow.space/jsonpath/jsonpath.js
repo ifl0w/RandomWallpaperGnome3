@@ -1,4 +1,4 @@
-let JSONPathParser = function () {
+var JSONPathParser = function () {
 
 	/**
 	 * Access a simple json path expression of an object.

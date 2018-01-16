@@ -14,7 +14,7 @@ const Self = imports.misc.extensionUtils.getCurrentExtension();
 const LoggerModule = Self.imports.logger;
 const Timer = Self.imports.timer;
 
-const HistoryElement = new Lang.Class({
+var HistoryElement = new Lang.Class({
 	Name: 'HistoryElement',
 	Extends: PopupMenu.PopupSubMenuMenuItem,
 	logger: null,
@@ -150,7 +150,7 @@ const HistoryElement = new Lang.Class({
 	}
 });
 
-const CurrentImageElement = new Lang.Class({
+var CurrentImageElement = new Lang.Class({
 	Name: 'CurrentImageElement',
 	Extends: HistoryElement,
 
@@ -170,7 +170,7 @@ const CurrentImageElement = new Lang.Class({
  *
  * @type {Lang.Class}
  */
-const NewWallpaperElement = new Lang.Class({
+var NewWallpaperElement = new Lang.Class({
 	Name: 'NewWallpaperElement',
 	Extends: PopupMenu.PopupBaseMenuItem,
 
@@ -221,7 +221,7 @@ const NewWallpaperElement = new Lang.Class({
 	}
 });
 
-const StatusElement = new Lang.Class({
+var StatusElement = new Lang.Class({
 	Name: 'StatusElement',
 	Extends: St.Icon,
 
