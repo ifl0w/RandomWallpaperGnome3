@@ -114,7 +114,7 @@ var UnsplashAdapter = new Lang.Class({
 
 		this._readOptionsFromSettings();
 		let optionsString = this._generateOptionsString();
-		let clientParam = 'client_id=2e4e49adee7dcaf75515d383086909e1ed5f0b08db60becf8ec58bc63cbc418a';
+		let clientParam = 'client_id=64daf439e9b579dd566620c0b07022706522d87b255d06dd01d5470b7f193b8d';
 
 		let url = 'https://api.unsplash.com/photos/random?' + optionsString + clientParam;
 		url = encodeURI(url);
