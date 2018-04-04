@@ -19,7 +19,7 @@ __Installing this way has various advantages:__
 Open the commandline and type the following lines:
 
 ```
-git clone git@github.com:ifl0w/RandomWallpaperGnome3.git
+git clone https://github.com/ifl0w/RandomWallpaperGnome3.git
 cp -r RandomWallpaperGnome3/randomwallpaper@iflow.space ~/.local/share/gnome-shell/extensions/
 ```
 
