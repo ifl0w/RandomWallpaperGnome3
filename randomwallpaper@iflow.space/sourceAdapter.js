@@ -7,7 +7,7 @@ const Json = imports.gi.Json;
 
 const RWG_SETTINGS_SCHEMA_DESKTOPPER = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.desktopper';
 const RWG_SETTINGS_SCHEMA_UNSPLASH = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.unsplash';
-const RWG_SETTINGS_SCHEMA_WALLHEAVEN = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.wallheaven';
+const RWG_SETTINGS_SCHEMA_WALLHAVEN = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.wallhaven';
 const RWG_SETTINGS_SCHEMA_GENERIC_JSON = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.genericJSON';
 
 const SettingsModule = Self.imports.settings;
@@ -74,10 +74,10 @@ var DesktopperAdapter = new Lang.Class({
 		session.queue_message(message, (session, message) => {
 			let data = JSON.parse(message.response_body.data);
 			let response = data.response;
-			let imageUrl = encodeURI(response.image.url);
+			let imageDownloadUrl = encodeURI(response.image.url);
 
 			if (callback) {
-				let historyEntry = new HistoryModule.HistoryEntry(null, 'desktopper.co', imageUrl);
+				let historyEntry = new HistoryModule.HistoryEntry(null, 'desktopper.co', imageDownloadUrl);
 				historyEntry.source.sourceUrl = 'https://www.desktoppr.co/';
 				callback(historyEntry);
 			}
@@ -128,6 +128,7 @@ var UnsplashAdapter = new Lang.Class({
 
 			let authorName = data.user.name;
 			let authorUrl = encodeURI(data.user.links.html);
+			let imageLinkUrl = encodeURI(data.urls.raw + '&' + utmParameters);
 
 			let downloadLocation = data.links.download_location + '?' + clientParam;
 			let downloadMessage = Soup.Message.new('GET', downloadLocation);
@@ -135,12 +136,11 @@ var UnsplashAdapter = new Lang.Class({
 			session.queue_message(downloadMessage, (session, message) => {
 				let downloadData = JSON.parse(message.response_body.data);
 
-				let imageUrl = encodeURI(downloadData.url + '&' + utmParameters);
-
 				if (callback) {
-					let historyEntry = new HistoryModule.HistoryEntry(authorName, this.sourceName, encodeURI(imageUrl));
+					let historyEntry = new HistoryModule.HistoryEntry(authorName, this.sourceName, encodeURI(downloadData.url));
 					historyEntry.source.sourceUrl = encodeURI(this.sourceUrl + '?' + utmParameters);
 					historyEntry.source.authorUrl = encodeURI(authorUrl + '?' + utmParameters);
+					historyEntry.source.imageLinkUrl = imageLinkUrl;
 					callback(historyEntry);
 				}
 			});
@@ -177,8 +177,8 @@ var UnsplashAdapter = new Lang.Class({
 	}
 });
 
-var WallheavenAdapter = new Lang.Class({
-	Name: "WallheavenAdapter",
+var WallhavenAdapter = new Lang.Class({
+	Name: "WallhavenAdapter",
 	Extends: BaseAdapter,
 	_settings: null,
 
@@ -194,7 +194,7 @@ var WallheavenAdapter = new Lang.Class({
 	_init: function () {
 		this.parent();
 
-		this._settings = new SettingsModule.Settings(RWG_SETTINGS_SCHEMA_WALLHEAVEN);
+		this._settings = new SettingsModule.Settings(RWG_SETTINGS_SCHEMA_WALLHAVEN);
 	},
 
 	requestRandomImage: function (callback) {
@@ -223,14 +223,15 @@ var WallheavenAdapter = new Lang.Class({
 
 			session.queue_message(message, () => {
 				let body = message.response_body.data;
-				let imageUrl = body.match(new RegExp(/\/\/wallpapers.wallhaven.cc\/wallpapers\/full\/.*?"/))[0];
-				imageUrl = imageUrl.slice(0, -1);
-				imageUrl = 'http:' + imageUrl;
-				imageUrl = encodeURI(imageUrl);
+				let imageDownloadUrl = body.match(new RegExp(/\/\/wallpapers.wallhaven.cc\/wallpapers\/full\/.*?"/))[0];
+				imageDownloadUrl = imageDownloadUrl.slice(0, -1);
+				imageDownloadUrl = 'http:' + imageDownloadUrl;
+				imageDownloadUrl = encodeURI(imageDownloadUrl);
 
 				if (callback) {
-					let historyEntry = new HistoryModule.HistoryEntry(null, 'wallhaven.cc', imageUrl);
+					let historyEntry = new HistoryModule.HistoryEntry(null, 'wallhaven.cc', imageDownloadUrl);
 					historyEntry.source.sourceUrl = 'https://alpha.wallhaven.cc/';
+					historyEntry.source.imageLinkUrl = url;
 					callback(historyEntry);
 				}
 			})
@@ -259,7 +260,7 @@ var WallheavenAdapter = new Lang.Class({
 	},
 
 	_readOptionsFromSettings: function () {
-		this.options.q = this._settings.get('wallheaven-keyword', 'string');
+		this.options.q = this._settings.get('wallhaven-keyword', 'string');
 
 		this.options.resolutions = this._settings.get('resolutions', 'string').split(',');
 		this.options.resolutions = this.options.resolutions.map((elem) => {
@@ -275,7 +276,7 @@ var WallheavenAdapter = new Lang.Class({
 		let purity = [];
 		purity.push(+this._settings.get('allow-sfw', 'boolean'));
 		purity.push(+this._settings.get('allow-sketchy', 'boolean'));
-		purity.push(0); // required by wallheaven
+		purity.push(0); // required by wallhaven
 		this.options.purity = purity.join('');
 	}
 });
@@ -304,12 +305,12 @@ var GenericJsonAdapter = new Lang.Class({
 		session.queue_message(message, (session, message) => {
 			let response = JSON.parse(message.response_body.data);
 			let JSONPath = this._settings.get("generic-json-response-path", "string");
-			let imageUrl = this._jsonPathParser.access(response, JSONPath);
-			imageUrl = this._settings.get("generic-json-url-prefix", "string") + imageUrl;
+			let imageDownloadUrl = this._jsonPathParser.access(response, JSONPath);
+			imageDownloadUrl = this._settings.get("generic-json-url-prefix", "string") + imageDownloadUrl;
 
 			if (callback) {
-				let historyEntry = new HistoryModule.HistoryEntry(null, 'Generic JSON Source', imageUrl);
-				historyEntry.source.sourceUrl = imageUrl;
+				let historyEntry = new HistoryModule.HistoryEntry(null, 'Generic JSON Source', imageDownloadUrl);
+				historyEntry.source.sourceUrl = imageDownloadUrl;
 				callback(historyEntry);
 			}
 		});

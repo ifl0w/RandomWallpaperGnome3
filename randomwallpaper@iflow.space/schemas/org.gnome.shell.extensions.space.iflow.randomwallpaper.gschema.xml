@@ -4,7 +4,7 @@
     <enum id='org.gnome.shell.extensions.space.iflow.randomwallpaper.sources'>
         <value value='0' nick='unsplash'/>
         <value value='1' nick='desktoppr'/>
-        <value value='2' nick='wallheaven'/>
+        <value value='2' nick='wallhaven'/>
         <value value='3' nick='genericJSON'/>
     </enum>
 
@@ -109,8 +109,8 @@
     </schema>
 
     <schema path="/org/gnome/shell/extensions/space-iflow-randomwallpaper-sources/"
-            id='org.gnome.shell.extensions.space.iflow.randomwallpaper.wallheaven'>
-        <key type='s' name='wallheaven-keyword'>
+            id='org.gnome.shell.extensions.space.iflow.randomwallpaper.wallhaven'>
+        <key type='s' name='wallhaven-keyword'>
             <default>""</default>
             <summary>Keyword</summary>
             <description>The keyword will be used to search images.</description>

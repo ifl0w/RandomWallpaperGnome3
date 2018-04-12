@@ -24,7 +24,8 @@ var HistoryEntry = new Lang.Class({
 			authorUrl: null,
 			source: source,
 			sourceUrl: null,
-			imageUrl: url
+			imageDownloadUrl: url, // URL used for downloading the image
+			imageLinkUrl: url // URL used for linking back to the website of the image
 		};
 	},
 });

@@ -59,7 +59,7 @@ var WallpaperController = new Lang.Class({
 
 		this._desktopperAdapter = new SourceAdapter.DesktopperAdapter();
 		this._unsplashAdapter = new SourceAdapter.UnsplashAdapter();
-		this._wallheavenAdapter = new SourceAdapter.WallheavenAdapter();
+		this._wallhavenAdapter = new SourceAdapter.WallhavenAdapter();
 		this._genericJsonAdapter = new SourceAdapter.GenericJsonAdapter();
 
 		this.logger = new LoggerModule.Logger('RWG3', 'WallpaperController');
@@ -97,7 +97,7 @@ var WallpaperController = new Lang.Class({
 				this.imageSourceAdapter = this._desktopperAdapter;
 				break;
 			case 2:
-				this.imageSourceAdapter = this._wallheavenAdapter;
+				this.imageSourceAdapter = this._wallhavenAdapter;
 				break;
 			case 3:
 				this.imageSourceAdapter = this._genericJsonAdapter;
@@ -223,9 +223,9 @@ var WallpaperController = new Lang.Class({
 		this._timer.begin(); // reset timer
 
 		this._requestRandomImageFromAdapter((historyElement) => {
-			this.logger.info("Requesting image: " + historyElement.source.imageUrl);
+			this.logger.info("Requesting image: " + historyElement.source.imageDownloadUrl);
 
-			this._fetchFile(historyElement.source.imageUrl, (historyId, path) => {
+			this._fetchFile(historyElement.source.imageDownloadUrl, (historyId, path) => {
 				historyElement.path = path;
 				historyElement.id = historyId;
 
