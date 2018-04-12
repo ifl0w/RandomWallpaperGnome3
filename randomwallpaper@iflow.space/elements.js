@@ -96,7 +96,7 @@ var HistoryElement = new Lang.Class({
 
 			this.imageUrlItem = new PopupMenu.PopupMenuItem('Open Image In Browser');
 			this.imageUrlItem.connect('activate', () => {
-				Util.spawn(['xdg-open', this.historyEntry.source.imageUrl]);
+				Util.spawn(['xdg-open', this.historyEntry.source.imageLinkUrl]);
 			});
 
 			this.menu.addMenuItem(this.imageUrlItem);

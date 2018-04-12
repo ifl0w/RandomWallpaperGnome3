@@ -223,9 +223,9 @@ var WallpaperController = new Lang.Class({
 		this._timer.begin(); // reset timer
 
 		this._requestRandomImageFromAdapter((historyElement) => {
-			this.logger.info("Requesting image: " + historyElement.source.imageUrl);
+			this.logger.info("Requesting image: " + historyElement.source.imageDownloadUrl);
 
-			this._fetchFile(historyElement.source.imageUrl, (historyId, path) => {
+			this._fetchFile(historyElement.source.imageDownloadUrl, (historyId, path) => {
 				historyElement.path = path;
 				historyElement.id = historyId;
 
