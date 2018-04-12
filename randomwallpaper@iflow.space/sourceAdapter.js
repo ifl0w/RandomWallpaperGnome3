@@ -7,7 +7,7 @@ const Json = imports.gi.Json;
 
 const RWG_SETTINGS_SCHEMA_DESKTOPPER = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.desktopper';
 const RWG_SETTINGS_SCHEMA_UNSPLASH = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.unsplash';
-const RWG_SETTINGS_SCHEMA_WALLHEAVEN = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.wallheaven';
+const RWG_SETTINGS_SCHEMA_WALLHAVEN = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.wallhaven';
 const RWG_SETTINGS_SCHEMA_GENERIC_JSON = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.genericJSON';
 
 const SettingsModule = Self.imports.settings;
@@ -177,8 +177,8 @@ var UnsplashAdapter = new Lang.Class({
 	}
 });
 
-var WallheavenAdapter = new Lang.Class({
-	Name: "WallheavenAdapter",
+var WallhavenAdapter = new Lang.Class({
+	Name: "WallhavenAdapter",
 	Extends: BaseAdapter,
 	_settings: null,
 
@@ -194,7 +194,7 @@ var WallheavenAdapter = new Lang.Class({
 	_init: function () {
 		this.parent();
 
-		this._settings = new SettingsModule.Settings(RWG_SETTINGS_SCHEMA_WALLHEAVEN);
+		this._settings = new SettingsModule.Settings(RWG_SETTINGS_SCHEMA_WALLHAVEN);
 	},
 
 	requestRandomImage: function (callback) {
@@ -231,6 +231,7 @@ var WallheavenAdapter = new Lang.Class({
 				if (callback) {
 					let historyEntry = new HistoryModule.HistoryEntry(null, 'wallhaven.cc', imageDownloadUrl);
 					historyEntry.source.sourceUrl = 'https://alpha.wallhaven.cc/';
+					historyEntry.source.imageLinkUrl = url;
 					callback(historyEntry);
 				}
 			})
@@ -259,7 +260,7 @@ var WallheavenAdapter = new Lang.Class({
 	},
 
 	_readOptionsFromSettings: function () {
-		this.options.q = this._settings.get('wallheaven-keyword', 'string');
+		this.options.q = this._settings.get('wallhaven-keyword', 'string');
 
 		this.options.resolutions = this._settings.get('resolutions', 'string').split(',');
 		this.options.resolutions = this.options.resolutions.map((elem) => {
@@ -275,7 +276,7 @@ var WallheavenAdapter = new Lang.Class({
 		let purity = [];
 		purity.push(+this._settings.get('allow-sfw', 'boolean'));
 		purity.push(+this._settings.get('allow-sketchy', 'boolean'));
-		purity.push(0); // required by wallheaven
+		purity.push(0); // required by wallhaven
 		this.options.purity = purity.join('');
 	}
 });

@@ -278,7 +278,7 @@ You can also define a prefix that will be added to the image URL.</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
                                         <property name="hexpand">True</property>
-                                        <property name="label" translatable="yes">The source that is used to fetch random wallpapers. You can select between unsplash.com, desktoppr.co, wallheaven.cc and a generic JSON source for experienced users.</property>
+                                        <property name="label" translatable="yes">The source that is used to fetch random wallpapers. You can select between unsplash.com, desktoppr.co, wallhaven.cc and a generic JSON source for experienced users.</property>
                                         <property name="wrap">True</property>
                                         <property name="max_width_chars">1</property>
                                         <property name="xalign">0</property>
@@ -316,7 +316,7 @@ You can also define a prefix that will be added to the image URL.</property>
                                     <items>
                                       <item id="unsplash">unsplash.com</item>
                                       <item id="desktoppr">desktoppr.co</item>
-                                      <item id="wallheaven">alpha.wallheaven.cc</item>
+                                      <item id="wallhaven">alpha.wallhaven.cc</item>
                                       <item id="genericJSON" translatable="yes">Generic JSON</item>
                                     </items>
                                   </object>
@@ -1187,7 +1187,7 @@ You can also define a prefix that will be added to the image URL.</property>
       </packing>
     </child>
   </object>
-  <object class="GtkBox" id="wallheaven-settings">
+  <object class="GtkBox" id="wallhaven-settings">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="margin_left">10</property>
@@ -1209,7 +1209,7 @@ You can also define a prefix that will be added to the image URL.</property>
       </packing>
     </child>
     <child>
-      <object class="GtkEntry" id="wallheaven-keyword">
+      <object class="GtkEntry" id="wallhaven-keyword">
         <property name="visible">True</property>
         <property name="can_focus">True</property>
         <property name="margin_bottom">10</property>
@@ -1241,7 +1241,7 @@ You can also define a prefix that will be added to the image URL.</property>
         <property name="margin_bottom">10</property>
         <property name="layout_style">start</property>
         <child>
-          <object class="GtkCheckButton" id="wallheaven-allow-sfw">
+          <object class="GtkCheckButton" id="wallhaven-allow-sfw">
             <property name="label" translatable="yes">SFW (Safe for work)</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
@@ -1255,7 +1255,7 @@ You can also define a prefix that will be added to the image URL.</property>
           </packing>
         </child>
         <child>
-          <object class="GtkCheckButton" id="wallheaven-allow-sketchy">
+          <object class="GtkCheckButton" id="wallhaven-allow-sketchy">
             <property name="label" translatable="yes">Sketchy</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
@@ -1295,7 +1295,7 @@ You can also define a prefix that will be added to the image URL.</property>
         <property name="margin_bottom">10</property>
         <property name="layout_style">start</property>
         <child>
-          <object class="GtkCheckButton" id="wallheaven-category-general">
+          <object class="GtkCheckButton" id="wallhaven-category-general">
             <property name="label" translatable="yes">General</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
@@ -1309,7 +1309,7 @@ You can also define a prefix that will be added to the image URL.</property>
           </packing>
         </child>
         <child>
-          <object class="GtkCheckButton" id="wallheaven-category-anime">
+          <object class="GtkCheckButton" id="wallhaven-category-anime">
             <property name="label" translatable="yes">Anime</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
@@ -1323,7 +1323,7 @@ You can also define a prefix that will be added to the image URL.</property>
           </packing>
         </child>
         <child>
-          <object class="GtkCheckButton" id="wallheaven-category-people">
+          <object class="GtkCheckButton" id="wallhaven-category-people">
             <property name="label" translatable="yes">People</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
@@ -1357,7 +1357,7 @@ You can also define a prefix that will be added to the image URL.</property>
       </packing>
     </child>
     <child>
-      <object class="GtkEntry" id="wallheaven-resolutions">
+      <object class="GtkEntry" id="wallhaven-resolutions">
         <property name="visible">True</property>
         <property name="can_focus">True</property>
         <property name="placeholder_text" translatable="yes">1920x1080, 1920x1200</property>

@@ -14,7 +14,7 @@ const Gettext = imports.gettext.domain('space.iflow.randomwallpaper');
 const RWG_SETTINGS_SCHEMA = 'org.gnome.shell.extensions.space.iflow.randomwallpaper';
 const RWG_SETTINGS_SCHEMA_DESKTOPPER = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.desktopper';
 const RWG_SETTINGS_SCHEMA_UNSPLASH = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.unsplash';
-const RWG_SETTINGS_SCHEMA_WALLHEAVEN = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.wallheaven';
+const RWG_SETTINGS_SCHEMA_WALLHAVEN = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.wallhaven';
 const RWG_SETTINGS_SCHEMA_GENERIC_JSON = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.genericJSON';
 
 const LoggerModule = Self.imports.logger;
@@ -41,7 +41,7 @@ var RandomWallpaperSettings = new Lang.Class({
 	noSettings: null,
 	desktopperSettings: null,
 	unsplashSettings: null,
-	wallheavenSettings: null,
+	wallhavenSettings: null,
 	genericJsonSettings: null,
 
 	_init: function () {
@@ -64,10 +64,10 @@ var RandomWallpaperSettings = new Lang.Class({
 		this.unsplashSettings = this._builder.get_object('unsplash-settings');
 		this.bindUnsplash();
 
-		// Wallheaven Settings
-		this._wallheaven_settings = Convenience.getSettings(RWG_SETTINGS_SCHEMA_WALLHEAVEN);
-		this.wallheavenSettings = this._builder.get_object('wallheaven-settings');
-		this.bindWallheaven();
+		// Wallhaven Settings
+		this._wallhaven_settings = Convenience.getSettings(RWG_SETTINGS_SCHEMA_WALLHAVEN);
+		this.wallhavenSettings = this._builder.get_object('wallhaven-settings');
+		this.bindWallhaven();
 
 		// Generic JSON Settings
 		this._generic_json_settings = Convenience.getSettings(RWG_SETTINGS_SCHEMA_GENERIC_JSON);
@@ -95,8 +95,8 @@ var RandomWallpaperSettings = new Lang.Class({
 				case 1: // desktopper
 					this.currentSourceSettingsWidget = this.desktopperSettings;
 					break;
-				case 2: // wallheaven
-					this.currentSourceSettingsWidget = this.wallheavenSettings;
+				case 2: // wallhaven
+					this.currentSourceSettingsWidget = this.wallhavenSettings;
 					break;
 				case 3: // generic JSON
 					this.currentSourceSettingsWidget = this.genericJsonSettings;
@@ -180,35 +180,35 @@ var RandomWallpaperSettings = new Lang.Class({
 			Gio.SettingsBindFlags.DEFAULT);
 	},
 
-	bindWallheaven: function () {
-		this._wallheaven_settings.bind('wallheaven-keyword',
-			this._builder.get_object('wallheaven-keyword'),
+	bindWallhaven: function () {
+		this._wallhaven_settings.bind('wallhaven-keyword',
+			this._builder.get_object('wallhaven-keyword'),
 			'text',
 			Gio.SettingsBindFlags.DEFAULT);
-		this._wallheaven_settings.bind('resolutions',
-			this._builder.get_object('wallheaven-resolutions'),
+		this._wallhaven_settings.bind('resolutions',
+			this._builder.get_object('wallhaven-resolutions'),
 			'text',
 			Gio.SettingsBindFlags.DEFAULT);
 
-		this._wallheaven_settings.bind('category-general',
-			this._builder.get_object('wallheaven-category-general'),
+		this._wallhaven_settings.bind('category-general',
+			this._builder.get_object('wallhaven-category-general'),
 			'active',
 			Gio.SettingsBindFlags.DEFAULT);
-		this._wallheaven_settings.bind('category-anime',
-			this._builder.get_object('wallheaven-category-anime'),
+		this._wallhaven_settings.bind('category-anime',
+			this._builder.get_object('wallhaven-category-anime'),
 			'active',
 			Gio.SettingsBindFlags.DEFAULT);
-		this._wallheaven_settings.bind('category-people',
-			this._builder.get_object('wallheaven-category-people'),
+		this._wallhaven_settings.bind('category-people',
+			this._builder.get_object('wallhaven-category-people'),
 			'active',
 			Gio.SettingsBindFlags.DEFAULT);
 
-		this._wallheaven_settings.bind('allow-sfw',
-			this._builder.get_object('wallheaven-allow-sfw'),
+		this._wallhaven_settings.bind('allow-sfw',
+			this._builder.get_object('wallhaven-allow-sfw'),
 			'active',
 			Gio.SettingsBindFlags.DEFAULT);
-		this._wallheaven_settings.bind('allow-sketchy',
-			this._builder.get_object('wallheaven-allow-sketchy'),
+		this._wallhaven_settings.bind('allow-sketchy',
+			this._builder.get_object('wallhaven-allow-sketchy'),
 			'active',
 			Gio.SettingsBindFlags.DEFAULT);
 	},
