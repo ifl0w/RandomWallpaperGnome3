@@ -40,6 +40,8 @@ var WallpaperController = new Lang.Class({
 	_stopLoadingHooks: [],
 
 	_init: function (extensionMeta) {
+		this.logger = new LoggerModule.Logger('RWG3', 'WallpaperController');
+
 		this.extensionMeta = extensionMeta;
 		this.wallpaperlocation = this.extensionMeta.path + '/wallpapers/';
 
@@ -61,8 +63,6 @@ var WallpaperController = new Lang.Class({
 		this._unsplashAdapter = new SourceAdapter.UnsplashAdapter();
 		this._wallhavenAdapter = new SourceAdapter.WallhavenAdapter();
 		this._genericJsonAdapter = new SourceAdapter.GenericJsonAdapter();
-
-		this.logger = new LoggerModule.Logger('RWG3', 'WallpaperController');
 	},
 
 	_updateHistory: function () {
@@ -78,9 +78,9 @@ var WallpaperController = new Lang.Class({
 
 		if (this._autoFetch.active) {
 			this._timer.registerCallback(this.fetchNewWallpaper.bind(this));
-			this._timer.begin();
+			this._timer.start(this._autoFetch.duration);
 		} else {
-			this._timer.end();
+			this._timer.stop();
 		}
 	},
 
@@ -220,7 +220,7 @@ var WallpaperController = new Lang.Class({
 		this._startLoadingHooks.forEach((element) => {
 			element();
 		});
-		this._timer.begin(); // reset timer
+		this._timer.reset(); // reset timer
 
 		this._requestRandomImageFromAdapter((historyElement) => {
 			this.logger.info("Requesting image: " + historyElement.source.imageDownloadUrl);

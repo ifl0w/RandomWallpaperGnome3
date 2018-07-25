@@ -50,10 +50,10 @@
             <description>Stores the history objects as stringified JSONs</description>
         </key>
 
-        <key type='i' name='minutes-elapsed'>
+        <key type='x' name='timer-last-trigger'>
             <default>0</default>
-            <summary>Elapsed Time</summary>
-            <description>The time that already elapsed.</description>
+            <summary>Timestamp of the last timer trigger.</summary>
+            <description>A JS timestamp of the last timer callback trigger. Zero if no last change registered.</description>
         </key>
 
         <key type='b' name='change-lock-screen'>

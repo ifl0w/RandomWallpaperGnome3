@@ -43,6 +43,10 @@ function enable() {
 function disable() {
 	// disable Extension
 	panelEntry.destroy();
+
+	// cleanup the timer singleton
+	let timer = new Timer.AFTimer();
+	timer.cleanup();
 }
 
 var RandomWallpaperEntry = new Lang.Class({
