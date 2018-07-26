@@ -16,6 +16,8 @@ const PopupMenu = imports.ui.popupMenu;
 const CustomElements = Self.imports.elements;
 const Tweener = imports.ui.tweener;
 
+const Timer = Self.imports.timer;
+
 // Filesystem
 const Gio = imports.gi.Gio;
 
