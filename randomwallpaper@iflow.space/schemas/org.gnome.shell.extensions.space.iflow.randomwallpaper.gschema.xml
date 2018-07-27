@@ -8,7 +8,7 @@
         <value value='3' nick='genericJSON'/>
     </enum>
 
-    <schema path="/org/gnome/shell/extensions/space-iflow-randomwallpaper-sources/"
+    <schema path="/org/gnome/shell/extensions/space-iflow-randomwallpaper/"
             id='org.gnome.shell.extensions.space.iflow.randomwallpaper'>
 
         <key type='i' name='history-length'>
@@ -71,7 +71,7 @@
 
     </schema>
 
-    <schema path="/org/gnome/shell/extensions/space-iflow-randomwallpaper-sources/"
+    <schema path="/org/gnome/shell/extensions/space-iflow-randomwallpaper/desktopper/"
             id='org.gnome.shell.extensions.space.iflow.randomwallpaper.desktopper'>
         <key type='b' name='allow-unsafe'>
             <default>false</default>
@@ -80,7 +80,7 @@
         </key>
     </schema>
 
-    <schema path="/org/gnome/shell/extensions/space-iflow-randomwallpaper-sources/"
+    <schema path="/org/gnome/shell/extensions/space-iflow-randomwallpaper/unsplash/"
             id='org.gnome.shell.extensions.space.iflow.randomwallpaper.unsplash'>
         <key type='s' name='unsplash-keyword'>
             <default>""</default>
@@ -116,7 +116,7 @@
         </key>
     </schema>
 
-    <schema path="/org/gnome/shell/extensions/space-iflow-randomwallpaper-sources/"
+    <schema path="/org/gnome/shell/extensions/space-iflow-randomwallpaper/wallhaven/"
             id='org.gnome.shell.extensions.space.iflow.randomwallpaper.wallhaven'>
         <key type='s' name='wallhaven-keyword'>
             <default>""</default>
@@ -156,7 +156,7 @@
         </key>
     </schema>
 
-    <schema path="/org/gnome/shell/extensions/space-iflow-randomwallpaper-sources/"
+    <schema path="/org/gnome/shell/extensions/space-iflow-randomwallpaper/genericJSON/"
             id='org.gnome.shell.extensions.space.iflow.randomwallpaper.genericJSON'>
         <key type='s' name='generic-json-request-url'>
             <default>""</default>
