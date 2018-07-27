@@ -71,7 +71,7 @@ var HistoryElement = new Lang.Class({
 			this.actor.insert_child_above(this._container, this.prefixLabel);
 		}
 
-		this.menu.addMenuItem( new PopupMenu.PopupBaseMenuItem({can_focus: false, reactive: false})); // theme independent spacing
+		this.menu.addMenuItem(new PopupMenu.PopupBaseMenuItem({can_focus: false, reactive: false})); // theme independent spacing
 
 		if (this.historyEntry.source && this.historyEntry.source !== null) {
 			if (this.historyEntry.source.author !== null

@@ -5,12 +5,12 @@ var Logger = new Lang.Class({
 	_prefix: null,
 	_callingClass: null,
 
-	_init: function(prefix, callingClass) {
+	_init: function (prefix, callingClass) {
 		this._prefix = prefix;
 		this._callingClass = callingClass;
 	},
 
-	_log: function(level, message) {
+	_log: function (level, message) {
 		global.log(this._prefix + " [" + level + "] >> " + this._callingClass + " :: " + message);
 	},
 

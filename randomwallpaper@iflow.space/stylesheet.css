@@ -1,46 +1,55 @@
 
 .rwg_system_status_icon {
-	icon-size: 1em;
-	padding: 0 0;
-	position: absolute;
-    -webkit-animation:spin 4s linear infinite;
-    -moz-animation:spin 4s linear infinite;
-    animation:spin 4s linear infinite;
+    icon-size: 1em;
+    padding: 0 0;
+    position: absolute;
+    -webkit-animation: spin 4s linear infinite;
+    -moz-animation: spin 4s linear infinite;
+    animation: spin 4s linear infinite;
 }
 
-@-moz-keyframes spin { 
-	100% { -moz-transform: rotate(360deg); } 
+@-moz-keyframes spin {
+    100% {
+        -moz-transform: rotate(360deg);
+    }
 }
-@-webkit-keyframes spin { 
-	100% { -webkit-transform: rotate(360deg); } 
+
+@-webkit-keyframes spin {
+    100% {
+        -webkit-transform: rotate(360deg);
+    }
 }
-@keyframes spin { 
-	100% { -webkit-transform: rotate(360deg); transform:rotate(360deg); } 
+
+@keyframes spin {
+    100% {
+        -webkit-transform: rotate(360deg);
+        transform: rotate(360deg);
+    }
 }
 
 .rwg-new-lable {
-	font-size: 130%;
+    font-size: 130%;
 }
 
 .rwg-recent-lable {
-	width: 100%;
-	font-size: 90%;
-	text-align: left;
-	border: 0;
+    width: 100%;
+    font-size: 90%;
+    text-align: left;
+    border: 0;
 }
 
 .rwg-history-index {
-	text-align: left;
-	padding-top: .35em;
-	font-size: 130%;
-	font-weight: lighter;
+    text-align: left;
+    padding-top: .35em;
+    font-size: 130%;
+    font-weight: lighter;
 }
 
 .rwg-history-date {
-	font-size: 100%;
+    font-size: 100%;
 }
 
 .rwg-history-time {
-	font-size: 100%;
-	font-weight: lighter; 
+    font-size: 100%;
+    font-weight: lighter;
 }

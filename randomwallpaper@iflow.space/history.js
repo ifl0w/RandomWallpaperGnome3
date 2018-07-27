@@ -16,7 +16,7 @@ var HistoryEntry = new Lang.Class({
 	path: null,
 	source: null,
 
-	_init: function(author, source, url) {
+	_init: function (author, source, url) {
 		this.timestamp = new Date().getTime();
 
 		this.source = {
@@ -39,7 +39,7 @@ var HistoryController = new Lang.Class({
 	size: 10,
 	history: [],
 
-	_init: function(wallpaperlocation) {
+	_init: function (wallpaperlocation) {
 		this.logger = new LoggerModule.Logger('RWG3', 'HistoryController');
 
 		this._settings = new Prefs.Settings();
@@ -48,7 +48,7 @@ var HistoryController = new Lang.Class({
 		this.load();
 	},
 
-	insert: function(historyElement) {
+	insert: function (historyElement) {
 		this.history.unshift(historyElement);
 		this._deleteOldPictures();
 		this.save();
@@ -59,14 +59,16 @@ var HistoryController = new Lang.Class({
 	 * @param id
 	 * @returns {boolean}
 	 */
-	promoteToActive: function(id) {
+	promoteToActive: function (id) {
 		let element = this.get(id);
 		if (element === null) {
 			return false;
 		}
 
 		element.timestamp = new Date().getTime();
-		this.history = this.history.sort((elem1, elem2) => { return elem1.timestamp < elem2.timestamp });
+		this.history = this.history.sort((elem1, elem2) => {
+			return elem1.timestamp < elem2.timestamp
+		});
 		this.save();
 
 		return true;
@@ -77,7 +79,7 @@ var HistoryController = new Lang.Class({
 	 * @param id
 	 * @returns {*}
 	 */
-	get: function(id) {
+	get: function (id) {
 		for (let elem of this.history) {
 			if (elem.id == id) {
 				return elem;
@@ -90,7 +92,7 @@ var HistoryController = new Lang.Class({
 	/**
 	 * Load the history from the gschema
 	 */
-	load: function() {
+	load: function () {
 		this.size = this._settings.get('history-length', 'int');
 		let stringHistory = this._settings.get('history', 'strv');
 		this.history = stringHistory.map(elem => {
@@ -101,8 +103,10 @@ var HistoryController = new Lang.Class({
 	/**
 	 * Save the history to the gschema
 	 */
-	save: function() {
-		let stringHistory = this.history.map(elem => { return JSON.stringify(elem) });
+	save: function () {
+		let stringHistory = this.history.map(elem => {
+			return JSON.stringify(elem)
+		});
 		this._settings.set('history', 'strv', stringHistory);
 	},
 
@@ -110,7 +114,7 @@ var HistoryController = new Lang.Class({
 	 * Clear the history and delete all photos except the current one.
 	 * @returns {boolean}
 	 */
-	clear: function() {
+	clear: function () {
 		let firstHistoryElement = this.history[0];
 
 		if (firstHistoryElement)
@@ -138,7 +142,7 @@ var HistoryController = new Lang.Class({
 				deleteFile.delete(null);
 			}
 
-		} while(fileinfo);
+		} while (fileinfo);
 
 		this.save();
 		return true;
@@ -148,10 +152,10 @@ var HistoryController = new Lang.Class({
 	 * Delete all pictures that have no slot in the history.
 	 * @private
 	 */
-	_deleteOldPictures: function() {
+	_deleteOldPictures: function () {
 		this.size = this._settings.get('history-length', 'int');
 		let deleteFile;
-		while(this.history.length > this.size) {
+		while (this.history.length > this.size) {
 			deleteFile = Gio.file_new_for_path(this.history.pop().path);
 			deleteFile.delete(null);
 		}

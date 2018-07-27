@@ -176,7 +176,7 @@ var WallpaperController = new Lang.Class({
 	 * @param callback
 	 * @private
 	 */
-	_setPictureUriOfSettingsObject: function(settings, path, callback) {
+	_setPictureUriOfSettingsObject: function (settings, path, callback) {
 		/*
 		 inspired from:
 		 https://bitbucket.org/LukasKnuth/backslide/src/7e36a49fc5e1439fa9ed21e39b09b61eca8df41a/backslide@codeisland.org/settings.js?at=master

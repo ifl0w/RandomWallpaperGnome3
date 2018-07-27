@@ -56,7 +56,7 @@ var RandomWallpaperEntry = new Lang.Class({
 	Name: "RandomWallpaperEntry",
 	logger: null,
 
-	_init: function(menuAlignment, nameText) {
+	_init: function (menuAlignment, nameText) {
 		this.parent(menuAlignment, nameText);
 		this.logger = new LoggerModule.Logger('RWG3', 'RandomWallpaperEntry');
 
@@ -104,25 +104,25 @@ var RandomWallpaperEntry = new Lang.Class({
 		wallpaperController.registerStopLoadingHook(this.setHistoryList.bind(this));
 
 		// new wallpaper event
-		this.newWallpaperItem.connect('activate', function() {
+		this.newWallpaperItem.connect('activate', function () {
 			wallpaperController.fetchNewWallpaper();
 		});
 
 		// clear history event
-		this.clearHistoryItem.connect('activate', function() {
+		this.clearHistoryItem.connect('activate', function () {
 			wallpaperController.deleteHistory();
 		});
 
 		// Open Wallpaper Folder
-		this.openFolder.connect('activate', function(event) {
+		this.openFolder.connect('activate', function (event) {
 			let uri = GLib.filename_to_uri(wallpaperController.wallpaperlocation, "");
 			Gio.AppInfo.launch_default_for_uri(uri, global.create_app_launch_context(0, -1))
 		});
 
-		this.openSettings.connect("activate", function(){
+		this.openSettings.connect("activate", function () {
 			// call gnome settings tool for this extension
 			let app = Shell.AppSystem.get_default().lookup_app("gnome-shell-extension-prefs.desktop");
-			if( app!=null ) {
+			if (app != null) {
 				// only works in Gnome >= 3.12
 				let info = app.get_app_info();
 				let timestamp = global.display.get_current_time_roundtrip();
@@ -130,7 +130,7 @@ var RandomWallpaperEntry = new Lang.Class({
 			}
 		});
 
-		this.menu.actor.connect('show', function() {
+		this.menu.actor.connect('show', function () {
 			this.newWallpaperItem.show();
 			wallpaperController.menuShowHook();
 		}.bind(this));
@@ -160,7 +160,7 @@ var RandomWallpaperEntry = new Lang.Class({
 		}
 	},
 
-	setHistoryList: function() {
+	setHistoryList: function () {
 		this.setCurrentBackgroundElement();
 
 		this.historySection.removeAll();
@@ -193,13 +193,14 @@ var RandomWallpaperEntry = new Lang.Class({
 		function onEnter(actor) {
 			wallpaperController.previewWallpaper(actor.historyId);
 		}
+
 		function onSelect(actor) {
 			wallpaperController.setWallpaper(actor.historyEntry.id);
 		}
 
 	},
 
-	clearHistoryList: function() {
+	clearHistoryList: function () {
 		this.historySection.removeAll();
 
 		let empty = new PopupMenu.PopupMenuItem('No recent wallpaper ...', {
