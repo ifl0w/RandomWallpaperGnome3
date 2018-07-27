@@ -54,15 +54,15 @@ var WallpaperController = new Lang.Class({
 		this._settings.observe('minutes', this._updateAutoFetching.bind(this));
 		this._settings.observe('hours', this._updateAutoFetching.bind(this));
 
-		this._updateHistory();
-		this._updateAutoFetching();
-
-		this.currentWallpaper = this._getCurrentWallpaper();
-
 		this._desktopperAdapter = new SourceAdapter.DesktopperAdapter();
 		this._unsplashAdapter = new SourceAdapter.UnsplashAdapter();
 		this._wallhavenAdapter = new SourceAdapter.WallhavenAdapter();
 		this._genericJsonAdapter = new SourceAdapter.GenericJsonAdapter();
+
+		this._updateHistory();
+		this._updateAutoFetching();
+
+		this.currentWallpaper = this._getCurrentWallpaper();
 	},
 
 	_updateHistory: function () {
@@ -78,7 +78,8 @@ var WallpaperController = new Lang.Class({
 
 		if (this._autoFetch.active) {
 			this._timer.registerCallback(this.fetchNewWallpaper.bind(this));
-			this._timer.start(this._autoFetch.duration);
+			this._timer.setMinutes(this._autoFetch.duration);
+			this._timer.start();
 		} else {
 			this._timer.stop();
 		}
@@ -220,6 +221,7 @@ var WallpaperController = new Lang.Class({
 		this._startLoadingHooks.forEach((element) => {
 			element();
 		});
+
 		this._timer.reset(); // reset timer
 
 		this._requestRandomImageFromAdapter((historyElement) => {

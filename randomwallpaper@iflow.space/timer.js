@@ -22,12 +22,15 @@ var AFTimer = function() {
  */
 var _AFTimer = new Lang.Class({
     Name: 'AFTimer',
+	logger: null,
 
     _timeout: null,
     _timoutEndCallback: null,
     _minutes: 30,
 
     _init: function() {
+		this.logger = new LoggerModule.Logger('RWG3', 'Timer');
+
         this._settings = new Prefs.Settings();
     },
 
@@ -37,43 +40,59 @@ var _AFTimer = new Lang.Class({
 
     remainingMinutes: function() {
         let minutesElapsed = this._minutesElapsed();
-        let diff = this._minutes - minutesElapsed;
-        return Math.max(diff, 0);
+		let remainder = minutesElapsed % this._minutes;
+		return Math.max(this._minutes - remainder, 0);
     },
 
     registerCallback: function(callback) {
         this._timoutEndCallback = callback;
     },
 
-    /**
-     * Starts a new timer with the given minutes.
+	/**
+     * Sets the minutes of the timer.
      *
-     * @param minutes
+	 * @param minutes
+	 */
+	setMinutes: function(minutes) {
+		this._minutes = minutes;
+	},
+
+    /**
+     * Start the timer.
+     *
      * @return void
      */
-    start: function(minutes) {
-        this.cleanup();
+    start: function() {
+		this.cleanup();
 
-        this._minutes = minutes;
-        let lastChanged = this._settings.get('timer-last-trigger', 'int64');
-        if (lastChanged === 0) {
+        let last = this._settings.get('timer-last-trigger', 'int64');
+        if (last === 0) {
             this.reset();
         }
 
-        let millisToWait = this.remainingMinutes() * 60 * 1000;
-        this._timeout = GLib.timeout_add(GLib.PRIORITY_DEFAULT, millisToWait, () => {
+		let millisRemaining = this.remainingMinutes() * 60 * 1000;
+
+		// set new wallpaper if the interval was surpassed and set the timestamp to when it should have been updated
+		if (this._surpassedInterval()) {
+			if (this._timoutEndCallback) {
+				this._timoutEndCallback();
+			}
+			let millisOverdue = (this._minutes * 60 * 1000) - millisRemaining;
+			this._settings.set('timer-last-trigger', 'int64', Date.now() - millisOverdue);
+		}
+
+		// actual timer function
+		this._timeout = GLib.timeout_add(GLib.PRIORITY_DEFAULT, millisRemaining, () => {
             if (this._timoutEndCallback) {
                 this._timoutEndCallback();
             }
 
-            this._settings.set('timer-last-trigger', 'int64', new Date().getTime());
-
-            this.start(minutes); // restart timer
+            this.start(); // restart timer
         });
     },
 
     /**
-     * Stop the timer and set elapsed minutes to 0.
+     * Stop the timer.
      *
      * @return void
      */
@@ -105,15 +124,29 @@ var _AFTimer = new Lang.Class({
     },
 
     _minutesElapsed: function() {
-        let now = new Date().getTime();
-        let lastChanged = this._settings.get('timer-last-trigger', 'int64');
+        let now = Date.now();
+        let last = this._settings.get('timer-last-trigger', 'int64');
 
-        if (lastChanged === 0) {
+        if (last === 0) {
             return 0;
         }
 
-        let elapsed = Math.max(now - lastChanged, 0);
+        let elapsed = Math.max(now - last, 0);
         return Math.floor(elapsed / (60 * 1000));
-    }
+    },
+
+	_surpassedInterval: function() {
+		let now = Date.now();
+		let last = this._settings.get('timer-last-trigger', 'int64');
+		let diff = now - last;
+		let intervalLength = this._minutes * 60 * 1000;
+
+		if (diff > intervalLength) {
+			return true;
+		}
+
+    	return false;
+	}
+
 
 });
