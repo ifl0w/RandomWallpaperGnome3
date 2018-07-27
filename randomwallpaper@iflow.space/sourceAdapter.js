@@ -35,13 +35,27 @@ var BaseAdapter = new Lang.Class({
 	},
 
 	fileName: function (uri) {
-		let base = decodeURIComponent(uri);
-		base = base.substring(base.lastIndexOf('/') + 1);
+		while (this._isURIEncoded(uri)) {
+			uri = decodeURIComponent(uri);
+		}
+
+		let base = uri.substring(uri.lastIndexOf('/') + 1);
 		if (base.indexOf('?') >= 0) {
 			base = base.substr(0, base.indexOf('?'));
 		}
 		return base;
 	},
+
+	_isURIEncoded: function (uri) {
+		uri = uri || '';
+
+		try {
+			return uri !== decodeURIComponent(uri);
+		} catch(err) {
+			this.logger.error(err);
+			return false;
+		}
+	}
 
 });
 
