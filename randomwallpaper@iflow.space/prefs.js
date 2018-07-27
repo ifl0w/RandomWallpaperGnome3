@@ -161,11 +161,14 @@ var RandomWallpaperSettings = new Lang.Class({
 			this._builder.get_object('unsplash-keyword'),
 			'text',
 			Gio.SettingsBindFlags.DEFAULT);
-		this._unsplash_settings.bind('username',
+		this._unsplash_settings.bind('unsplash-username',
 			this._builder.get_object('unsplash-username'),
 			'text',
 			Gio.SettingsBindFlags.DEFAULT);
-
+		this._unsplash_settings.bind('unsplash-collections',
+			this._builder.get_object('unsplash-collections'),
+			'text',
+			Gio.SettingsBindFlags.DEFAULT);
 		this._unsplash_settings.bind('image-width',
 			this._builder.get_object('unsplash-image-width'),
 			'value',

@@ -87,10 +87,15 @@
             <summary>Keyword</summary>
             <description>The keyword will be used to search images.</description>
         </key>
-        <key type='s' name='username'>
+        <key type='s' name='unsplash-username'>
             <default>""</default>
             <summary>Username</summary>
             <description>Only fetch random images of a given user.</description>
+        </key>
+        <key type='s' name='unsplash-collections'>
+            <default>""</default>
+            <summary>Collections</summary>
+            <description>Only fetch random images from a comma separated list of collections.</description>
         </key>
         <key type='i' name='image-width'>
             <default>1920</default>

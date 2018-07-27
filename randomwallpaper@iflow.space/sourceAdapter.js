@@ -51,7 +51,7 @@ var BaseAdapter = new Lang.Class({
 
 		try {
 			return uri !== decodeURIComponent(uri);
-		} catch(err) {
+		} catch (err) {
 			this.logger.error(err);
 			return false;
 		}
@@ -112,6 +112,7 @@ var UnsplashAdapter = new Lang.Class({
 	options: {
 		'username': '',
 		'query': '',
+		'collections': [],
 		'w': 1920,
 		'h': 1080,
 		'featured': false
@@ -179,10 +180,15 @@ var UnsplashAdapter = new Lang.Class({
 	_readOptionsFromSettings: function () {
 		this.options.query = this._settings.get('unsplash-keyword', 'string');
 
-		this.options.username = this._settings.get('username', 'string');
+		this.options.username = this._settings.get('unsplash-username', 'string');
 		if (this.options.username && this.options.username[0] === '@') {
 			this.options.username = this.options.username.substring(1); // remove @ prefix
 		}
+
+		this.options.collections = this._settings.get('unsplash-collections', 'string').split(',').map(
+			(elem) => {
+				return elem.trim();
+			});
 
 		this.options.w = this._settings.get('image-width', 'int');
 		this.options.h = this._settings.get('image-height', 'int');

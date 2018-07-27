@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.20.1 -->
+<!-- Generated with glade 3.22.1 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
   <object class="GtkBox" id="desktopper-settings">
@@ -1007,7 +1007,7 @@ You can also define a prefix that will be added to the image URL.</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="halign">start</property>
-        <property name="label" translatable="yes">Keyword</property>
+        <property name="label" translatable="yes">Collections</property>
       </object>
       <packing>
         <property name="expand">False</property>
@@ -1016,16 +1016,42 @@ You can also define a prefix that will be added to the image URL.</property>
       </packing>
     </child>
     <child>
-      <object class="GtkEntry" id="unsplash-keyword">
+      <object class="GtkEntry" id="unsplash-collections">
         <property name="visible">True</property>
         <property name="can_focus">True</property>
         <property name="margin_bottom">10</property>
-        <property name="placeholder_text" translatable="yes">Enter a keyword ...</property>
+        <property name="placeholder_text" translatable="yes">ID1, ID2, ...</property>
       </object>
       <packing>
         <property name="expand">False</property>
         <property name="fill">True</property>
         <property name="position">3</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkLabel">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="halign">start</property>
+        <property name="label" translatable="yes">Keyword</property>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="fill">True</property>
+        <property name="position">4</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkEntry" id="unsplash-keyword">
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="margin_bottom">10</property>
+        <property name="placeholder_text" translatable="yes">Some keyword ...</property>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="fill">True</property>
+        <property name="position">5</property>
       </packing>
     </child>
     <child>
@@ -1116,7 +1142,7 @@ You can also define a prefix that will be added to the image URL.</property>
       <packing>
         <property name="expand">False</property>
         <property name="fill">True</property>
-        <property name="position">4</property>
+        <property name="position">6</property>
       </packing>
     </child>
     <child>
@@ -1183,7 +1209,7 @@ You can also define a prefix that will be added to the image URL.</property>
         <property name="expand">False</property>
         <property name="fill">True</property>
         <property name="padding">10</property>
-        <property name="position">5</property>
+        <property name="position">7</property>
       </packing>
     </child>
   </object>
