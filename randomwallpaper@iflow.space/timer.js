@@ -87,6 +87,7 @@ var _AFTimer = new Lang.Class({
 				this._timoutEndCallback();
 			}
 
+			this.reset(); // reset timer
 			this.start(); // restart timer
 		});
 	},
