@@ -8,6 +8,8 @@ const ExtensionUtils = imports.misc.extensionUtils;
 const Self = ExtensionUtils.getCurrentExtension();
 const Convenience = Self.imports.convenience;
 
+const WallpaperController = Self.imports.wallpaperController;
+
 const Gettext = imports.gettext.domain('space.iflow.randomwallpaper');
 //const _ = Gettext.gettext;
 
@@ -19,7 +21,7 @@ const RWG_SETTINGS_SCHEMA_GENERIC_JSON = 'org.gnome.shell.extensions.space.iflow
 
 const LoggerModule = Self.imports.logger;
 
-function init() {
+function init(metaData) {
 	//Convenience.initTranslations();
 }
 
@@ -43,6 +45,8 @@ var RandomWallpaperSettings = new Lang.Class({
 	unsplashSettings: null,
 	wallhavenSettings: null,
 	genericJsonSettings: null,
+
+	_wallpaperController: null,
 
 	_init: function () {
 		this._settings = Convenience.getSettings(RWG_SETTINGS_SCHEMA);
@@ -141,6 +145,9 @@ var RandomWallpaperSettings = new Lang.Class({
 			this._builder.get_object('hide-panel-icon'),
 			'active',
 			Gio.SettingsBindFlags.DEFAULT);
+
+		this._wallpaperController = new WallpaperController.WallpaperController();
+		this._bindButtons();
 	},
 
 	_toggleAfSliders: function () {
@@ -234,6 +241,29 @@ var RandomWallpaperSettings = new Lang.Class({
 			this._builder.get_object('generic-json-url-prefix'),
 			'text',
 			Gio.SettingsBindFlags.DEFAULT);
+	},
+
+	_bindButtons: function () {
+		let newWallpaperButton = this._builder.get_object('request-new-wallpaper');
+		newWallpaperButton.connect('clicked', () => {
+			let text = newWallpaperButton.get_label();
+			newWallpaperButton.set_label("Loading ...");
+
+			this._wallpaperController.fetchNewWallpaper(()=>{
+				this._wallpaperController.update();
+				newWallpaperButton.set_label(text);
+			});
+		});
+
+		this._builder.get_object('clear-history').connect('clicked', () => {
+			this._wallpaperController.update();
+			this._wallpaperController.deleteHistory();
+		});
+
+		this._builder.get_object('open-wallpaper-folder').connect('clicked', () => {
+			let uri = GLib.filename_to_uri(this._wallpaperController.wallpaperlocation, "");
+			Gio.AppInfo.launch_default_for_uri(uri, Gio.AppLaunchContext.new());
+		});
 	}
 
 });

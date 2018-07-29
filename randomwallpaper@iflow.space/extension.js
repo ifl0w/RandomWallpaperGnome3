@@ -25,16 +25,14 @@ const Gio = imports.gi.Gio;
 const Prefs = Self.imports.settings;
 
 let wallpaperController;
-let extensionMeta;
 let panelEntry;
 
 let settings;
 let hidePanelIconHandler = null;
 
 function init(metaData) {
-	extensionMeta = metaData;
 	settings = new Prefs.Settings();
-	wallpaperController = new WallpaperController.WallpaperController(metaData);
+	wallpaperController = new WallpaperController.WallpaperController();
 }
 
 function enable() {
@@ -154,15 +152,15 @@ var RandomWallpaperEntry = new Lang.Class({
 		});
 
 		this.menu.actor.connect('show', function () {
+			wallpaperController.update();
+			this.setHistoryList(); // TODO: move this call to a new background changed hook (because overhead on close)
 			this.newWallpaperItem.show();
-			wallpaperController.menuShowHook();
 		}.bind(this));
 
 		// when the popupmenu disapears, check if the wallpaper is the original and
 		// reset it if needed
 		this.menu.actor.connect('hide', () => {
 			wallpaperController.resetWallpaper();
-			this.setHistoryList(); // TODO: move this call to a new background changed hook (because overhead on close)
 		});
 
 		this.menu.actor.connect('leave-event', () => {

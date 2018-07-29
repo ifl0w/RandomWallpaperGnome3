@@ -20,7 +20,6 @@ const LoggerModule = Self.imports.logger;
 
 var WallpaperController = new Lang.Class({
 	Name: "WallpaperController",
-	extensionMeta: null,
 	logger: null,
 
 	wallpaperlocation: '',
@@ -39,11 +38,9 @@ var WallpaperController = new Lang.Class({
 	// functions will be called when loading a new wallpaper stopped. If an error occured then the error will be passed as parameter.
 	_stopLoadingHooks: [],
 
-	_init: function (extensionMeta) {
+	_init: function () {
 		this.logger = new LoggerModule.Logger('RWG3', 'WallpaperController');
-
-		this.extensionMeta = extensionMeta;
-		this.wallpaperlocation = this.extensionMeta.path + '/wallpapers/';
+		this.wallpaperlocation = Self.path + '/wallpapers/';
 
 		this._timer = new Timer.AFTimer();
 		this._historyController = new HistoryModule.HistoryController(this.wallpaperlocation);
@@ -235,6 +232,8 @@ var WallpaperController = new Lang.Class({
 					// insert file into history
 					this._historyController.insert(historyElement);
 
+					this.currentWallpaper = this._getCurrentWallpaper();
+
 					// call callback if given
 					this._stopLoadingHooks.forEach((element) => {
 						element(null);
@@ -290,7 +289,8 @@ var WallpaperController = new Lang.Class({
 		this._historyController.clear();
 	},
 
-	menuShowHook: function () {
+	update: function () {
+		this._updateHistory();
 		this.currentWallpaper = this._getCurrentWallpaper();
 	},
 

@@ -108,6 +108,7 @@ var HistoryController = new Lang.Class({
 			return JSON.stringify(elem)
 		});
 		this._settings.set('history', 'strv', stringHistory);
+		Gio.Settings.sync();
 	},
 
 	/**
