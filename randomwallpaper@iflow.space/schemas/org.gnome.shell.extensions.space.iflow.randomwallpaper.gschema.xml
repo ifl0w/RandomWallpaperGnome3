@@ -69,6 +69,12 @@
             <description>Disables the preview of the background while hovering the history list</description>
         </key>
 
+        <key type='b' name='hide-panel-icon'>
+            <default>false</default>
+            <summary>Hide the panel icon</summary>
+            <description>Removes the panel icon from the gnome shell.</description>
+        </key>
+
     </schema>
 
     <schema path="/org/gnome/shell/extensions/space-iflow-randomwallpaper/desktopper/"

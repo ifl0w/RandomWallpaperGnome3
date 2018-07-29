@@ -22,33 +22,56 @@ const Timer = Self.imports.timer;
 const Gio = imports.gi.Gio;
 
 // Settings
-const Convenience = Self.imports.convenience;
+const Prefs = Self.imports.settings;
 
 let wallpaperController;
 let extensionMeta;
 let panelEntry;
 
+let settings;
+let hidePanelIconHandler = null;
+
 function init(metaData) {
 	extensionMeta = metaData;
+	settings = new Prefs.Settings();
 	wallpaperController = new WallpaperController.WallpaperController(metaData);
 }
 
 function enable() {
 	// enable Extension
+
 	// UI
 	panelEntry = new RandomWallpaperEntry(0, "Random wallpaper");
 
 	// add to panel
 	Main.panel.addToStatusArea("random-wallpaper-menu", panelEntry);
+
+	hidePanelIconHandler = settings.observe('hide-panel-icon', updatePanelMenuVisibility);
+	updatePanelMenuVisibility();
 }
 
 function disable() {
 	// disable Extension
 	panelEntry.destroy();
 
+	// remove all signal handlers
+	if (hidePanelIconHandler !== null) {
+		settings.disconnect(hidePanelIconHandler);
+	}
+
 	// cleanup the timer singleton
 	let timer = new Timer.AFTimer();
 	timer.cleanup();
+}
+
+function updatePanelMenuVisibility(isVisible) {
+
+	if (settings.get('hide-panel-icon', 'boolean')) {
+		panelEntry.actor.hide();
+	} else {
+		panelEntry.actor.show();
+	}
+
 }
 
 var RandomWallpaperEntry = new Lang.Class({
