@@ -6,6 +6,7 @@ const Util = imports.misc.util;
 const GdkPixbuf = imports.gi.GdkPixbuf;
 const Clutter = imports.gi.Clutter;
 const Cogl = imports.gi.Cogl;
+const Gtk = imports.gi.Gtk;
 
 // Filesystem
 const Gio = imports.gi.Gio;
@@ -72,6 +73,7 @@ var HistoryElement = new Lang.Class({
 		}
 
 		this.menu.addMenuItem(new PopupMenu.PopupBaseMenuItem({can_focus: false, reactive: false})); // theme independent spacing
+		this.menu.actor.add_style_class_name("rwg-history-element-content");
 
 		if (this.historyEntry.source && this.historyEntry.source !== null) {
 			if (this.historyEntry.source.author !== null
@@ -271,3 +273,21 @@ var StatusElement = new Lang.Class({
 	}
 
 });
+
+var HistorySection = new Lang.Class({
+	Name: 'HistorySection',
+	Extends: PopupMenu.PopupMenuSection,
+
+	_init: function () {
+		this.parent();
+
+		this.actor = new St.ScrollView({
+			hscrollbar_policy: Gtk.PolicyType.NEVER,
+			vscrollbar_policy: Gtk.PolicyType.AUTOMATIC
+		});
+
+		this.actor.add_actor(this.box);
+	},
+
+});
+

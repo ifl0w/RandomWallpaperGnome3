@@ -98,7 +98,7 @@ var RandomWallpaperEntry = new Lang.Class({
 		this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 
 		// history section
-		this.historySection = new PopupMenu.PopupMenuSection();
+		this.historySection = new CustomElements.HistorySection();
 		this.menu.addMenuItem(this.historySection);
 
 		this.setHistoryList();
