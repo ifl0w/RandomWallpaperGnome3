@@ -77,6 +77,11 @@ var RandomWallpaperEntry = new Lang.Class({
 	Name: "RandomWallpaperEntry",
 	logger: null,
 
+	/**
+	 * Cache HistoryElements for performance of long histories.
+	 */
+	_historySectionCache: {},
+
 	_init: function (menuAlignment, nameText) {
 		this.parent(menuAlignment, nameText);
 		this.logger = new LoggerModule.Logger('RWG3', 'RandomWallpaperEntry');
@@ -184,28 +189,38 @@ var RandomWallpaperEntry = new Lang.Class({
 	setHistoryList: function () {
 		this.setCurrentBackgroundElement();
 
-		this.historySection.removeAll();
-
 		let historyController = wallpaperController.getHistoryController();
 		let history = historyController.history;
+		this.historySection.clearSection();
 
 		if (history.length <= 1) {
 			this.clearHistoryList();
 			return;
 		}
 
+		let existingHistoryElements = [];
 		for (let i = 1; i < history.length; i++) {
-			let historyid = history[i].id;
-			let tmp = new CustomElements.HistoryElement(history[i], i);
+			let historyID = history[i].id;
+			let tmp;
 
-			tmp.actor.connect('key-focus-in', onEnter);
-			tmp.actor.connect('key-focus-out', onLeave);
-			tmp.actor.connect('enter-event', onEnter);
+			if (!(historyID in this._historySectionCache)) {
+				tmp = new CustomElements.HistoryElement(history[i], i);
 
-			tmp.connect('activate', onSelect);
+				tmp.actor.connect('key-focus-in', onEnter);
+				tmp.actor.connect('key-focus-out', onLeave);
+				tmp.actor.connect('enter-event', onEnter);
 
-			this.historySection.addMenuItem(tmp);
+				tmp.connect('activate', onSelect);
+				this._historySectionCache[historyID] = tmp;
+			} else {
+				tmp = this._historySectionCache[historyID];
+				tmp.setIndex(i);
+			}
+
+			existingHistoryElements.push(historyID)
+			this.historySection.addMenuItem(tmp, i-1);
 		}
+		this._cleanupHistoryCache(existingHistoryElements);
 
 		function onLeave(actor) {
 			wallpaperController.resetWallpaper();
@@ -221,7 +236,16 @@ var RandomWallpaperEntry = new Lang.Class({
 
 	},
 
+	_cleanupHistoryCache: function(existingIDs) {
+		let destroyIDs = Object.keys(this._historySectionCache).filter((i) => existingIDs.indexOf(i) === -1);
+
+		destroyIDs.map(id => {
+			delete this._historySectionCache[id];
+		});
+	},
+
 	clearHistoryList: function () {
+		this._cleanupHistoryCache([]);
 		this.historySection.removeAll();
 
 		let empty = new PopupMenu.PopupMenuItem('No recent wallpaper ...', {

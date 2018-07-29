@@ -149,7 +149,12 @@ var HistoryElement = new Lang.Class({
 				}
 			}
 		})
-	}
+	},
+
+	setIndex: function(index) {
+		this.prefixLabel.set_text(String(index));
+	},
+
 });
 
 var CurrentImageElement = new Lang.Class({
@@ -288,6 +293,13 @@ var HistorySection = new Lang.Class({
 
 		this.actor.add_actor(this.box);
 	},
+
+	/**
+	 * Clears the history section without destroying the child actors.
+	 */
+	clearSection: function() {
+		this.box.remove_all_children();
+	}
 
 });
 

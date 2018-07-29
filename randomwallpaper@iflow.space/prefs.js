@@ -249,6 +249,7 @@ var RandomWallpaperSettings = new Lang.Class({
 			let text = newWallpaperButton.get_label();
 			newWallpaperButton.set_label("Loading ...");
 
+			this._wallpaperController.update();
 			this._wallpaperController.fetchNewWallpaper(()=>{
 				this._wallpaperController.update();
 				newWallpaperButton.set_label(text);
