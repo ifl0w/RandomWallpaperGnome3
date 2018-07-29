@@ -112,7 +112,7 @@ var WallpaperController = new Lang.Class({
 	 * copy file from uri to local wallpaper directory and calls the given callback with the name and the full filepath
 	 * of the written file as parameter.
 	 * @param uri
-	 * @param callback
+	 * @param callback(name, path, error)
 	 * @private
 	 */
 	_fetchFile: function (uri, callback) {
@@ -120,14 +120,32 @@ var WallpaperController = new Lang.Class({
 		let date = new Date();
 		let name = date.getTime() + '_' + this.imageSourceAdapter.fileName(uri); // timestamp ensures uniqueness
 
-		let output_file = Gio.file_new_for_path(this.wallpaperlocation + String(name));
-		let output_stream = output_file.create(0, null);
+		let output_file, output_stream, input_file;
 
-		let input_file = Gio.file_new_for_uri(uri);
+		try {
+			output_file = Gio.file_new_for_path(this.wallpaperlocation + String(name));
+			output_stream = output_file.create(0, null);
+
+			input_file = Gio.file_new_for_uri(uri);
+		} catch (e) {
+			if (callback) {
+				callback(null, null, e);
+			}
+			return;
+		}
 
 		input_file.load_contents_async(null, (file, result) => {
-			let contents = file.load_contents_finish(result)[1]; // TODO: error handling. This failes due to: "An unexpected TLS packet was received."
-			output_stream.write(contents, null);
+			let contents = null;
+
+			try {
+				contents = file.load_contents_finish(result)[1];
+				output_stream.write(contents, null);
+			} catch (e) {
+				if (callback) {
+					callback(null, null, e);
+				}
+				return;
+			}
 
 			// call callback with the name and the full filepath of the written file as parameter
 			if (callback) {
@@ -190,10 +208,10 @@ var WallpaperController = new Lang.Class({
 				}
 
 			} else {
-				// TODO: error handling
+				this._bailOutWithCallback("Could not set lock screen wallpaper.", callback);
 			}
 		} else {
-			// TODO: error handling
+			this._bailOutWithCallback("Could not set wallpaper.", callback);
 		}
 	},
 
@@ -221,23 +239,32 @@ var WallpaperController = new Lang.Class({
 
 		this._timer.reset(); // reset timer
 
-		this._requestRandomImageFromAdapter((historyElement) => {
+		this._requestRandomImageFromAdapter((historyElement, error) => {
+			if (historyElement == null || error) {
+				this._bailOutWithCallback("Could not fetch wallpaper location.", callback);
+				this._stopLoadingHooks.map(element => element(null));
+				return;
+			}
+
 			this.logger.info("Requesting image: " + historyElement.source.imageDownloadUrl);
 
-			this._fetchFile(historyElement.source.imageDownloadUrl, (historyId, path) => {
+			this._fetchFile(historyElement.source.imageDownloadUrl, (historyId, path, error) => {
+				if (error) {
+					this._bailOutWithCallback("Could not load new wallpaper.", callback);
+					this._stopLoadingHooks.map(element => element(null));
+					return;
+				}
+
 				historyElement.path = path;
 				historyElement.id = historyId;
 
 				this._setBackground(path, () => {
 					// insert file into history
 					this._historyController.insert(historyElement);
-
 					this.currentWallpaper = this._getCurrentWallpaper();
 
-					// call callback if given
-					this._stopLoadingHooks.forEach((element) => {
-						element(null);
-					});
+					this._stopLoadingHooks.map(element => element(null));
+
 					if (callback) {
 						callback();
 					}
@@ -303,6 +330,14 @@ var WallpaperController = new Lang.Class({
 	registerStopLoadingHook: function (fn) {
 		if (typeof fn === "function") {
 			this._stopLoadingHooks.push(fn)
+		}
+	},
+
+	_bailOutWithCallback: function (msg, callback) {
+		this.logger.error(msg);
+
+		if (callback) {
+			callback();
 		}
 	}
 });

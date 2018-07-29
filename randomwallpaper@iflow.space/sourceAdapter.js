@@ -26,12 +26,12 @@ var BaseAdapter = new Lang.Class({
 
 	/**
 	 * Retrieves a new url for an image and calls the given callback with an HistoryEntry as parameter.
-	 * @param callback
+	 * The history element will be null and the error will be set if an error occurred.
+	 *
+	 * @param callback(historyElement, error)
 	 */
 	requestRandomImage: function (callback) {
-		this.logger.error("requestRandomImage not implemented");
-
-		callback(null);
+		this._error("requestRandomImage not implemented", callback);
 	},
 
 	fileName: function (uri) {
@@ -54,6 +54,15 @@ var BaseAdapter = new Lang.Class({
 		} catch (err) {
 			this.logger.error(err);
 			return false;
+		}
+	},
+
+	_error: function (err, callback) {
+		let error = {"error": err};
+		this.logger.error(JSON.stringify(error));
+
+		if (callback) {
+			callback(null, error);
 		}
 	}
 
@@ -85,15 +94,25 @@ var DesktopperAdapter = new Lang.Class({
 
 		let message = Soup.Message.new('GET', url);
 
-		session.queue_message(message, (session, message) => {
-			let data = JSON.parse(message.response_body.data);
-			let response = data.response;
-			let imageDownloadUrl = encodeURI(response.image.url);
+		if (message === null) {
+			this._error("Could not create request.", callback);
+			return;
+		}
 
-			if (callback) {
-				let historyEntry = new HistoryModule.HistoryEntry(null, 'desktopper.co', imageDownloadUrl);
-				historyEntry.source.sourceUrl = 'https://www.desktoppr.co/';
-				callback(historyEntry);
+		session.queue_message(message, (session, message) => {
+			try {
+				let data = JSON.parse(message.response_body.data);
+				let response = data.response;
+				let imageDownloadUrl = encodeURI(response.image.url);
+
+				if (callback) {
+					let historyEntry = new HistoryModule.HistoryEntry(null, 'desktopper.co', imageDownloadUrl);
+					historyEntry.source.sourceUrl = 'https://www.desktoppr.co/';
+					callback(historyEntry);
+				}
+			} catch (e) {
+				this._error("Could not create request. (" + e + ")", callback);
+				return;
 			}
 		});
 	}
@@ -136,27 +155,51 @@ var UnsplashAdapter = new Lang.Class({
 
 		let message = Soup.Message.new('GET', url);
 
+		if (message === null) {
+			this._error("Could not create request.", callback);
+			return;
+		}
+
 		let utmParameters = 'utm_source=RandomWallpaperGnome3&utm_medium=referral&utm_campaign=api-credit';
 
 		session.queue_message(message, (session, message) => {
-			let data = JSON.parse(message.response_body.data);
+			let downloadMessage = null;
+			let authorName, authorUrl, imageLinkUrl;
 
-			let authorName = data.user.name;
-			let authorUrl = encodeURI(data.user.links.html);
-			let imageLinkUrl = encodeURI(data.urls.raw + '&' + utmParameters);
+			try {
+				let data = JSON.parse(message.response_body.data);
 
-			let downloadLocation = data.links.download_location + '?' + clientParam;
-			let downloadMessage = Soup.Message.new('GET', downloadLocation);
+				authorName = data.user.name;
+				authorUrl = encodeURI(data.user.links.html);
+				imageLinkUrl = encodeURI(data.urls.raw + '&' + utmParameters);
+
+				let downloadLocation = data.links.download_location + '?' + clientParam;
+				downloadMessage = Soup.Message.new('GET', downloadLocation);
+			} catch (e) {
+				this._error("Unexpected response. (" + e + ")", callback);
+				return;
+			}
+
+			if (message === null) {
+				this._error("Could not create request.", callback);
+				return;
+			}
 
 			session.queue_message(downloadMessage, (session, message) => {
-				let downloadData = JSON.parse(message.response_body.data);
+				try {
+					let downloadData = JSON.parse(message.response_body.data);
 
-				if (callback) {
-					let historyEntry = new HistoryModule.HistoryEntry(authorName, this.sourceName, encodeURI(downloadData.url));
-					historyEntry.source.sourceUrl = encodeURI(this.sourceUrl + '?' + utmParameters);
-					historyEntry.source.authorUrl = encodeURI(authorUrl + '?' + utmParameters);
-					historyEntry.source.imageLinkUrl = imageLinkUrl;
-					callback(historyEntry);
+					if (callback) {
+						let historyEntry = new HistoryModule.HistoryEntry(authorName, this.sourceName, encodeURI(downloadData.url));
+						historyEntry.source.sourceUrl = encodeURI(this.sourceUrl + '?' + utmParameters);
+						historyEntry.source.authorUrl = encodeURI(authorUrl + '?' + utmParameters);
+						historyEntry.source.imageLinkUrl = imageLinkUrl;
+						callback(historyEntry);
+					}
+				} catch (e) {
+					log("RWG3", e);
+					this._error("Unexpected response. (" + e + ")", callback);
+					return;
 				}
 			});
 		});
@@ -241,21 +284,30 @@ var WallhavenAdapter = new Lang.Class({
 
 			message = Soup.Message.new('GET', url);
 
-			session.queue_message(message, () => {
-				let body = message.response_body.data;
-				let imageDownloadUrl = body.match(new RegExp(/\/\/wallpapers.wallhaven.cc\/wallpapers\/full\/.*?"/))[0];
-				imageDownloadUrl = imageDownloadUrl.slice(0, -1);
-				imageDownloadUrl = 'http:' + imageDownloadUrl;
-				imageDownloadUrl = encodeURI(imageDownloadUrl);
+			if (message === null) {
+				this._error("Could not create request.", callback);
+				return;
+			}
 
-				if (callback) {
-					let historyEntry = new HistoryModule.HistoryEntry(null, 'wallhaven.cc', imageDownloadUrl);
-					historyEntry.source.sourceUrl = 'https://alpha.wallhaven.cc/';
-					historyEntry.source.imageLinkUrl = url;
-					callback(historyEntry);
+			session.queue_message(message, () => {
+				try {
+					let body = message.response_body.data;
+					let imageDownloadUrl = body.match(new RegExp(/\/\/wallpapers.wallhaven.cc\/wallpapers\/full\/.*?"/))[0];
+					imageDownloadUrl = imageDownloadUrl.slice(0, -1);
+					imageDownloadUrl = 'http:' + imageDownloadUrl;
+					imageDownloadUrl = encodeURI(imageDownloadUrl);
+
+					if (callback) {
+						let historyEntry = new HistoryModule.HistoryEntry(null, 'wallhaven.cc', imageDownloadUrl);
+						historyEntry.source.sourceUrl = 'https://alpha.wallhaven.cc/';
+						historyEntry.source.imageLinkUrl = url;
+						callback(historyEntry);
+					}
+				} catch (e) {
+					this._error("Unexpected response. (" + e + ")", callback);
+					return;
 				}
 			})
-
 
 		});
 	},
@@ -322,16 +374,26 @@ var GenericJsonAdapter = new Lang.Class({
 
 		let message = Soup.Message.new('GET', url);
 
-		session.queue_message(message, (session, message) => {
-			let response = JSON.parse(message.response_body.data);
-			let JSONPath = this._settings.get("generic-json-response-path", "string");
-			let imageDownloadUrl = this._jsonPathParser.access(response, JSONPath);
-			imageDownloadUrl = this._settings.get("generic-json-url-prefix", "string") + imageDownloadUrl;
+		if (message === null) {
+			this._error("Could not create request.", callback);
+			return;
+		}
 
-			if (callback) {
-				let historyEntry = new HistoryModule.HistoryEntry(null, 'Generic JSON Source', imageDownloadUrl);
-				historyEntry.source.sourceUrl = imageDownloadUrl;
-				callback(historyEntry);
+		session.queue_message(message, (session, message) => {
+			try {
+				let response = JSON.parse(message.response_body.data);
+				let JSONPath = this._settings.get("generic-json-response-path", "string");
+				let imageDownloadUrl = this._jsonPathParser.access(response, JSONPath);
+				imageDownloadUrl = this._settings.get("generic-json-url-prefix", "string") + imageDownloadUrl;
+
+				if (callback) {
+					let historyEntry = new HistoryModule.HistoryEntry(null, 'Generic JSON Source', imageDownloadUrl);
+					historyEntry.source.sourceUrl = imageDownloadUrl;
+					callback(historyEntry);
+				}
+			} catch (e) {
+				this._error("Unexpected response. (" + e + ")", callback);
+				return;
 			}
 		});
 
