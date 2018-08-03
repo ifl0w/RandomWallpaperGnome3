@@ -197,7 +197,6 @@ var UnsplashAdapter = new Lang.Class({
 						callback(historyEntry);
 					}
 				} catch (e) {
-					log("RWG3", e);
 					this._error("Unexpected response. (" + e + ")", callback);
 					return;
 				}

@@ -245,14 +245,16 @@ var RandomWallpaperSettings = new Lang.Class({
 
 	_bindButtons: function () {
 		let newWallpaperButton = this._builder.get_object('request-new-wallpaper');
+		let origNewWallpaperText = newWallpaperButton.get_label();
 		newWallpaperButton.connect('clicked', () => {
-			let text = newWallpaperButton.get_label();
 			newWallpaperButton.set_label("Loading ...");
+			newWallpaperButton.set_sensitive(false);
 
 			this._wallpaperController.update();
 			this._wallpaperController.fetchNewWallpaper(()=>{
 				this._wallpaperController.update();
-				newWallpaperButton.set_label(text);
+				newWallpaperButton.set_label(origNewWallpaperText);
+				newWallpaperButton.set_sensitive(true);
 			});
 		});
 
