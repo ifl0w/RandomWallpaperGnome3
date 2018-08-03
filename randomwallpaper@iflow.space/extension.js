@@ -152,8 +152,6 @@ var RandomWallpaperEntry = new Lang.Class({
 		});
 
 		this.menu.actor.connect('show', function () {
-			wallpaperController.update();
-			this.setHistoryList(); // TODO: move this call to a new background changed hook (because overhead on close)
 			this.newWallpaperItem.show();
 		}.bind(this));
 
@@ -167,6 +165,7 @@ var RandomWallpaperEntry = new Lang.Class({
 			wallpaperController.resetWallpaper();
 		});
 
+		settings.observe('history', this.setHistoryList.bind(this));
 	},
 
 	setCurrentBackgroundElement: function () {
@@ -182,6 +181,7 @@ var RandomWallpaperEntry = new Lang.Class({
 	},
 
 	setHistoryList: function () {
+		wallpaperController.update();
 		this.setCurrentBackgroundElement();
 
 		this.historySection.removeAll();
