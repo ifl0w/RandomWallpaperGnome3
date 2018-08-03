@@ -246,7 +246,11 @@ var StatusElement = new Lang.Class({
 			time: 1,
 			transition: 'easeInOutSine',
 			onComplete: function () {
-				Tweener.addTween(_this, _this.loadingTweenOut);
+				try {
+					Tweener.addTween(_this, _this.loadingTweenOut);
+				} catch (e) {
+					// swollow (not really important)
+				}
 			}
 		};
 
@@ -256,7 +260,11 @@ var StatusElement = new Lang.Class({
 			transition: 'easeInOutSine',
 			onComplete: function () {
 				if (_this.isLoading) {
-					Tweener.addTween(_this, _this.loadingTweenIn);
+					try {
+						Tweener.addTween(_this, _this.loadingTweenIn);
+					} catch (e) {
+						// swollow (not really important)
+					}
 				} else {
 					return false;
 				}
@@ -283,6 +291,13 @@ var HistorySection = new Lang.Class({
 	Name: 'HistorySection',
 	Extends: PopupMenu.PopupMenuSection,
 
+	/**
+	 * Cache HistoryElements for performance of long histories.
+	 */
+	_historySectionCache: {},
+
+	_historyCache: [],
+
 	_init: function () {
 		this.parent();
 
@@ -294,12 +309,63 @@ var HistorySection = new Lang.Class({
 		this.actor.add_actor(this.box);
 	},
 
-	/**
-	 * Clears the history section without destroying the child actors.
-	 */
-	clearSection: function() {
-		this.box.remove_all_children();
-	}
+	updateList: function(history, onEnter, onLeave, onSelect) {
+		if (this._historyCache.length <= 1) {
+			this.removeAll(); // remove empty history element
+		}
+
+		let existingHistoryElements = [];
+
+		for (let i = 1; i < history.length; i++) {
+			let historyID = history[i].id;
+			let tmp;
+
+			if (!(historyID in this._historySectionCache)) {
+				tmp = new HistoryElement(history[i], i);
+
+				tmp.actor.connect('key-focus-in', onEnter);
+				tmp.actor.connect('key-focus-out', onLeave);
+				tmp.actor.connect('enter-event', onEnter);
+
+				tmp.connect('activate', onSelect);
+				this._historySectionCache[historyID] = tmp;
+
+				this.addMenuItem(tmp, i-1);
+			} else {
+				tmp = this._historySectionCache[historyID];
+				tmp.setIndex(i);
+			}
+
+			existingHistoryElements.push(historyID);
+		}
+
+		this._cleanupHistoryCache(existingHistoryElements);
+		this._historyCache = history;
+	},
+
+	_cleanupHistoryCache: function(existingIDs) {
+		let destroyIDs = Object.keys(this._historySectionCache).filter((i) => existingIDs.indexOf(i) === -1);
+
+		destroyIDs.map(id => {
+			this._historySectionCache[id].destroy();
+			delete this._historySectionCache[id];
+		});
+	},
+
+	clear() {
+		this._cleanupHistoryCache([]);
+		this.removeAll();
+		this.addMenuItem(
+			new PopupMenu.PopupMenuItem('No recent wallpaper ...', {
+				activate: false,
+				hover: false,
+				style_class: 'rwg-recent-lable',
+				can_focus: false
+			})
+		);
+
+		this._historyCache = [];
+	},
 
 });
 
