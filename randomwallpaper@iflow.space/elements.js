@@ -352,7 +352,7 @@ var HistorySection = new Lang.Class({
 		});
 	},
 
-	clear() {
+	clear: function() {
 		this._cleanupHistoryCache([]);
 		this.removeAll();
 		this.addMenuItem(
