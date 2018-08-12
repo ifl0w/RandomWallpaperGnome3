@@ -8,6 +8,7 @@ const Json = imports.gi.Json;
 const RWG_SETTINGS_SCHEMA_DESKTOPPER = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.desktopper';
 const RWG_SETTINGS_SCHEMA_UNSPLASH = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.unsplash';
 const RWG_SETTINGS_SCHEMA_WALLHAVEN = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.wallhaven';
+const RWG_SETTINGS_SCHEMA_REDDIT = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.reddit';
 const RWG_SETTINGS_SCHEMA_GENERIC_JSON = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.genericJSON';
 
 const SettingsModule = Self.imports.settings;
@@ -349,6 +350,59 @@ var WallhavenAdapter = new Lang.Class({
 		purity.push(+this._settings.get('allow-sketchy', 'boolean'));
 		purity.push(0); // required by wallhaven
 		this.options.purity = purity.join('');
+	}
+});
+
+var RedditAdapter = new Lang.Class({
+	Name: "RedditAdapter",
+	Extends: BaseAdapter,
+
+	_settings: null,
+
+	_init: function () {
+		this.parent();
+		this._settings = new SettingsModule.Settings(RWG_SETTINGS_SCHEMA_REDDIT);
+	},
+
+	requestRandomImage: function (callback) {
+		let session = new Soup.SessionAsync();
+
+    const subreddits = this._settings.get('subreddits', 'string').split(',').map(s => s.trim()).join('+');
+    const require_sfw = this._settings.get('allow-sfw', 'boolean');
+    const url = encodeURI(`https://www.reddit.com/r/${subreddits}.json`);
+
+		let message = Soup.Message.new('GET', url);
+
+		if (message === null) {
+      this._error("Could not create request.", callback);
+      return;
+		}
+
+		session.queue_message(message, (session, message) => {
+			try {
+        const submissions = JSON.parse(message.response_body.data).data.children.filter(child => {
+          if(child.data.post_hint !== 'image') return false;
+          if(require_sfw) return child.data.over_18 === false;
+          return true;
+        });
+        if(submissions.length === 0) {
+          this._error("No suitable submissions found!", callback);
+          return;
+        }
+        const random = Math.floor(Math.random() * submissions.length);
+        const submission = submissions[random].data;
+        const imageDownloadUrl = submission.preview.images[0].source.url;
+
+				if (callback) {
+					let historyEntry = new HistoryModule.HistoryEntry(null, 'reddit', imageDownloadUrl);
+          historyEntry.source.sourceUrl = 'https://www.reddit.com/' + submission.permalink;
+					callback(historyEntry);
+				}
+			} catch (e) {
+				this._error("Could not create request. (" + e + ")", callback);
+				return;
+			}
+		});
 	}
 });
 

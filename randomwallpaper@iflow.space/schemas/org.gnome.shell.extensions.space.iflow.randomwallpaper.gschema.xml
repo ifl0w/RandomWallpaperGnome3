@@ -5,7 +5,8 @@
         <value value='0' nick='unsplash'/>
         <value value='1' nick='desktoppr'/>
         <value value='2' nick='wallhaven'/>
-        <value value='3' nick='genericJSON'/>
+        <value value='3' nick='reddit'/>
+        <value value='4' nick='genericJSON'/>
     </enum>
 
     <schema path="/org/gnome/shell/extensions/space-iflow-randomwallpaper/"
@@ -159,6 +160,20 @@
             <default>true</default>
             <summary>Category People</summary>
             <description>Weather the people category should be searched.</description>
+        </key>
+    </schema>
+
+    <schema path="/org/gnome/shell/extensions/space-iflow-randomwallpaper/reddit/"
+            id='org.gnome.shell.extensions.space.iflow.randomwallpaper.reddit'>
+        <key type='s' name='subreddits'>
+            <default>""</default>
+            <summary>Subreddits</summary>
+            <description>These subreddits will be searched.</description>
+        </key>
+        <key type='b' name='allow-sfw'>
+            <default>false</default>
+            <summary>SFW</summary>
+            <description>Whether safe images are allowed.</description>
         </key>
     </schema>
 
