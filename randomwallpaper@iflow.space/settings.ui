@@ -811,10 +811,10 @@ You can also define a prefix that will be added to the image URL.</property>
                                 <property name="can_focus">False</property>
                                 <property name="active_id">0</property>
                                 <items>
-                                  <item id="unsplash">unsplash.com</item>
-                                  <item id="desktoppr">desktoppr.co</item>
-                                  <item id="wallhaven">alpha.wallhaven.cc</item>
-                                  <item id="reddit">reddit</item>
+                                  <item id="unsplash">Unsplash</item>
+                                  <item id="desktoppr">Desktoppr</item>
+                                  <item id="wallhaven">Wallhaven</item>
+                                  <item id="reddit">Reddit</item>
                                   <item id="genericJSON" translatable="yes">Generic JSON</item>
                                 </items>
                               </object>

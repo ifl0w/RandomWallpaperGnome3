@@ -107,7 +107,7 @@ var DesktopperAdapter = new Lang.Class({
 				let imageDownloadUrl = encodeURI(response.image.url);
 
 				if (callback) {
-					let historyEntry = new HistoryModule.HistoryEntry(null, 'desktopper.co', imageDownloadUrl);
+					let historyEntry = new HistoryModule.HistoryEntry(null, 'Desktopper', imageDownloadUrl);
 					historyEntry.source.sourceUrl = 'https://www.desktoppr.co/';
 					callback(historyEntry);
 				}
@@ -298,7 +298,7 @@ var WallhavenAdapter = new Lang.Class({
 					imageDownloadUrl = encodeURI(imageDownloadUrl);
 
 					if (callback) {
-						let historyEntry = new HistoryModule.HistoryEntry(null, 'wallhaven.cc', imageDownloadUrl);
+						let historyEntry = new HistoryModule.HistoryEntry(null, 'Wallhaven', imageDownloadUrl);
 						historyEntry.source.sourceUrl = 'https://alpha.wallhaven.cc/';
 						historyEntry.source.imageLinkUrl = url;
 						callback(historyEntry);
@@ -394,7 +394,7 @@ var RedditAdapter = new Lang.Class({
 				const imageDownloadUrl = submission.preview.images[0].source.url;
 
 				if (callback) {
-					let historyEntry = new HistoryModule.HistoryEntry(null, 'reddit', imageDownloadUrl);
+					let historyEntry = new HistoryModule.HistoryEntry(null, 'Reddit', imageDownloadUrl);
 					historyEntry.source.sourceUrl = 'https://www.reddit.com/' + submission.subreddit_name_prefixed;
 					historyEntry.source.imageLinkUrl = 'https://www.reddit.com/' + submission.permalink;
 					callback(historyEntry);
