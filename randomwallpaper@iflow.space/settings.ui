@@ -199,6 +199,93 @@ You can also define a prefix that will be added to the image URL.</property>
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
   </object>
+  <object class="GtkLabel" id="no-settings">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="margin_left">10</property>
+    <property name="margin_right">10</property>
+    <property name="margin_top">10</property>
+    <property name="margin_bottom">10</property>
+    <property name="label" translatable="yes">No Settings Available</property>
+    <style>
+      <class name="dim-label"/>
+    </style>
+  </object>
+  <object class="GtkImage" id="open-icon">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-open</property>
+  </object>
+  <object class="GtkBox" id="reddit-settings">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="margin_left">10</property>
+    <property name="margin_right">10</property>
+    <property name="margin_top">10</property>
+    <property name="margin_bottom">10</property>
+    <property name="orientation">vertical</property>
+    <child>
+      <object class="GtkLabel">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="halign">start</property>
+        <property name="label" translatable="yes">Subreddits (separate with a comma)</property>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="fill">True</property>
+        <property name="position">0</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkEntry" id="reddit-subreddits">
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="placeholder_text" translatable="yes">e.g.: wallpaper, wallpapers, minimalwallpaper</property>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="fill">True</property>
+        <property name="position">1</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkButtonBox">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="layout_style">start</property>
+        <child>
+          <object class="GtkCheckButton" id="reddit-allow-sfw">
+            <property name="label" translatable="yes">SFW (Safe for work)</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">False</property>
+            <property name="draw_indicator">True</property>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="fill">True</property>
+        <property name="position">2</property>
+      </packing>
+    </child>
+  </object>
+  <object class="GtkImage" id="refresh-icon">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-refresh</property>
+  </object>
+  <object class="GtkImage" id="refresh-icon1">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-delete</property>
+  </object>
   <object class="GtkNotebook" id="main-widget">
     <property name="width_request">400</property>
     <property name="height_request">600</property>
@@ -320,7 +407,7 @@ You can also define a prefix that will be added to the image URL.</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
                                     <property name="hexpand">True</property>
-                                    <property name="label" translatable="yes">Also change the gnome lock screen image to the new wallpaper.</property>
+                                    <property name="label" translatable="yes">Change the gnome lock screen image to the new wallpaper.</property>
                                     <property name="use_underline">True</property>
                                     <property name="wrap">True</property>
                                     <property name="max_width_chars">1</property>
@@ -546,7 +633,7 @@ You can also define a prefix that will be added to the image URL.</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
                                     <property name="hexpand">True</property>
-                                    <property name="label" translatable="yes">Disable the desktop preview of the background while hovering the history items. Try enabeling if you encounter crashes or laggs of the gnome shell while using the extension.</property>
+                                    <property name="label" translatable="yes">Disable the desktop preview of the background while hovering the history items. Try enabling if you encounter crashes or lags of the gnome-shell while using the extension.</property>
                                     <property name="use_underline">True</property>
                                     <property name="wrap">True</property>
                                     <property name="max_width_chars">1</property>
@@ -688,7 +775,7 @@ You can also define a prefix that will be added to the image URL.</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
                                     <property name="hexpand">True</property>
-                                    <property name="label" translatable="yes">The source that is used to fetch random wallpapers. You can select between unsplash.com, desktoppr.co, wallhaven.cc and a generic JSON source for experienced users.</property>
+                                    <property name="label" translatable="yes">The source that is used to fetch random wallpapers. You can select between built-in ones or the generic JSON source for experienced users.</property>
                                     <property name="wrap">True</property>
                                     <property name="max_width_chars">1</property>
                                     <property name="xalign">0</property>
@@ -724,9 +811,10 @@ You can also define a prefix that will be added to the image URL.</property>
                                 <property name="can_focus">False</property>
                                 <property name="active_id">0</property>
                                 <items>
-                                  <item id="unsplash">unsplash.com</item>
-                                  <item id="desktoppr">desktoppr.co</item>
-                                  <item id="wallhaven">alpha.wallhaven.cc</item>
+                                  <item id="unsplash">Unsplash</item>
+                                  <item id="desktoppr">Desktoppr</item>
+                                  <item id="wallhaven">Wallhaven</item>
+                                  <item id="reddit">Reddit</item>
                                   <item id="genericJSON" translatable="yes">Generic JSON</item>
                                 </items>
                               </object>
@@ -1057,7 +1145,7 @@ You can also define a prefix that will be added to the image URL.</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
                                         <property name="hexpand">True</property>
-                                        <property name="label" translatable="yes">Automatically fetch a new wallpaper based on a period.</property>
+                                        <property name="label" translatable="yes">Automatically fetch new wallpapers based on an interval.</property>
                                         <property name="use_underline">True</property>
                                         <property name="wrap">True</property>
                                         <property name="max_width_chars">1</property>
@@ -1212,33 +1300,6 @@ You can also define a prefix that will be added to the image URL.</property>
         <property name="tab_fill">False</property>
       </packing>
     </child>
-  </object>
-  <object class="GtkLabel" id="no-settings">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="margin_left">10</property>
-    <property name="margin_right">10</property>
-    <property name="margin_top">10</property>
-    <property name="margin_bottom">10</property>
-    <property name="label" translatable="yes">No Settings Available</property>
-    <style>
-      <class name="dim-label"/>
-    </style>
-  </object>
-  <object class="GtkImage" id="open-icon">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="stock">gtk-open</property>
-  </object>
-  <object class="GtkImage" id="refresh-icon">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="stock">gtk-refresh</property>
-  </object>
-  <object class="GtkImage" id="refresh-icon1">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="stock">gtk-delete</property>
   </object>
   <object class="GtkAdjustment" id="unsplash-image-height">
     <property name="lower">1</property>
@@ -1456,7 +1517,7 @@ You can also define a prefix that will be added to the image URL.</property>
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">This results in a smaller wallpaper pool but the images are considered to have higher quality.</property>
+                <property name="label" translatable="yes">This option results in a smaller wallpaper pool, but the images are considered to be of higher quality.</property>
                 <property name="wrap">True</property>
                 <property name="max_width_chars">1</property>
                 <property name="xalign">0</property>

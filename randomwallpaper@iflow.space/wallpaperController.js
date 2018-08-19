@@ -54,6 +54,7 @@ var WallpaperController = new Lang.Class({
 		this._desktopperAdapter = new SourceAdapter.DesktopperAdapter();
 		this._unsplashAdapter = new SourceAdapter.UnsplashAdapter();
 		this._wallhavenAdapter = new SourceAdapter.WallhavenAdapter();
+		this._redditAdapter = new SourceAdapter.RedditAdapter();
 		this._genericJsonAdapter = new SourceAdapter.GenericJsonAdapter();
 
 		this._updateHistory();
@@ -98,6 +99,9 @@ var WallpaperController = new Lang.Class({
 				this.imageSourceAdapter = this._wallhavenAdapter;
 				break;
 			case 3:
+				this.imageSourceAdapter = this._redditAdapter;
+				break;
+			case 4:
 				this.imageSourceAdapter = this._genericJsonAdapter;
 				break;
 			default:
