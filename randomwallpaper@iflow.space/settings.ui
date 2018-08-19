@@ -241,7 +241,7 @@ You can also define a prefix that will be added to the image URL.</property>
       <object class="GtkEntry" id="reddit-subreddits">
         <property name="visible">True</property>
         <property name="can_focus">True</property>
-        <property name="placeholder_text" translatable="yes">wallpaper, wallpapers, earthporn</property>
+        <property name="placeholder_text" translatable="yes">e.g.: wallpaper, wallpapers, minimalwallpaper</property>
       </object>
       <packing>
         <property name="expand">False</property>
@@ -407,7 +407,7 @@ You can also define a prefix that will be added to the image URL.</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
                                     <property name="hexpand">True</property>
-                                    <property name="label" translatable="yes">Also change the gnome lock screen image to the new wallpaper.</property>
+                                    <property name="label" translatable="yes">Change the gnome lock screen image to the new wallpaper.</property>
                                     <property name="use_underline">True</property>
                                     <property name="wrap">True</property>
                                     <property name="max_width_chars">1</property>
@@ -633,7 +633,7 @@ You can also define a prefix that will be added to the image URL.</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
                                     <property name="hexpand">True</property>
-                                    <property name="label" translatable="yes">Disable the desktop preview of the background while hovering the history items. Try enabeling if you encounter crashes or laggs of the gnome shell while using the extension.</property>
+                                    <property name="label" translatable="yes">Disable the desktop preview of the background while hovering the history items. Try enabling if you encounter crashes or lags of the gnome-shell while using the extension.</property>
                                     <property name="use_underline">True</property>
                                     <property name="wrap">True</property>
                                     <property name="max_width_chars">1</property>
@@ -775,7 +775,7 @@ You can also define a prefix that will be added to the image URL.</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
                                     <property name="hexpand">True</property>
-                                    <property name="label" translatable="yes">The source that is used to fetch random wallpapers. You can select between unsplash.com, desktoppr.co, wallhaven.cc and a generic JSON source for experienced users.</property>
+                                    <property name="label" translatable="yes">The source that is used to fetch random wallpapers. You can select between built-in ones or the generic JSON source for experienced users.</property>
                                     <property name="wrap">True</property>
                                     <property name="max_width_chars">1</property>
                                     <property name="xalign">0</property>
@@ -1145,7 +1145,7 @@ You can also define a prefix that will be added to the image URL.</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
                                         <property name="hexpand">True</property>
-                                        <property name="label" translatable="yes">Automatically fetch a new wallpaper based on a period.</property>
+                                        <property name="label" translatable="yes">Automatically fetch new wallpapers based on an interval.</property>
                                         <property name="use_underline">True</property>
                                         <property name="wrap">True</property>
                                         <property name="max_width_chars">1</property>
@@ -1517,7 +1517,7 @@ You can also define a prefix that will be added to the image URL.</property>
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">This results in a smaller wallpaper pool but the images are considered to have higher quality.</property>
+                <property name="label" translatable="yes">This option results in a smaller wallpaper pool, but the images are considered to be of higher quality.</property>
                 <property name="wrap">True</property>
                 <property name="max_width_chars">1</property>
                 <property name="xalign">0</property>
