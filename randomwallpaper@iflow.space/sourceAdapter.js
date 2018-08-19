@@ -395,7 +395,8 @@ var RedditAdapter = new Lang.Class({
 
 				if (callback) {
 					let historyEntry = new HistoryModule.HistoryEntry(null, 'reddit', imageDownloadUrl);
-					historyEntry.source.sourceUrl = 'https://www.reddit.com/' + submission.permalink;
+					historyEntry.source.sourceUrl = 'https://www.reddit.com/' + submission.subreddit_name_prefixed;
+					historyEntry.source.imageLinkUrl = 'https://www.reddit.com/' + submission.permalink;
 					callback(historyEntry);
 				}
 			} catch (e) {
