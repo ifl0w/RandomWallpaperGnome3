@@ -20,7 +20,11 @@ var Settings = new Lang.Class({
 	},
 
 	observe: function (key, callback) {
-		this._settings.connect('changed::' + key, callback);
+		return this._settings.connect('changed::' + key, callback);
+	},
+
+	disconnect: function (handler) {
+		return this._settings.disconnect(handler);
 	},
 
 	set: function (key, type, value) {
@@ -33,10 +37,5 @@ var Settings = new Lang.Class({
 
 	get: function (key, type) {
 		return this._settings['get_' + type](key);
-	},
-
-	getSourceAdapter: function () {
-		global.log(this._settings.get_enum('source'));
-		return null;
 	}
 });

@@ -8,7 +8,7 @@ var JSONPathParser = function () {
 	 * @param inputString the json path expression
 	 * @returns {*}
 	 */
-	this.access = function(inputObject, inputString) {
+	this.access = function (inputObject, inputString) {
 		if (inputObject === null || inputObject === undefined) {
 			return null;
 		}
@@ -23,7 +23,7 @@ var JSONPathParser = function () {
 		}
 
 		let keyString = inputString.slice(0, startDot);
-		let inputStringTail = inputString.slice(startDot+1);
+		let inputStringTail = inputString.slice(startDot + 1);
 
 		let startParentheses = keyString.indexOf('[');
 
@@ -38,7 +38,7 @@ var JSONPathParser = function () {
 
 		} else {
 
-			let indexString = keyString.slice(startParentheses+1, keyString.length-1);
+			let indexString = keyString.slice(startParentheses + 1, keyString.length - 1);
 			keyString = keyString.slice(0, startParentheses);
 
 			let targetObject = this._getTargetObject(inputObject, keyString);
@@ -47,12 +47,12 @@ var JSONPathParser = function () {
 			}
 
 			switch (indexString) {
-			case "@random":
-				return this.access(this.randomElement(targetObject), inputStringTail);
+				case "@random":
+					return this.access(this.randomElement(targetObject), inputStringTail);
 				// add special keywords here
-			default:
-				// expecting integer
-				return this.access(targetObject[parseInt(indexString)], inputStringTail);
+				default:
+					// expecting integer
+					return this.access(targetObject[parseInt(indexString)], inputStringTail);
 			}
 
 		}
@@ -80,9 +80,9 @@ var JSONPathParser = function () {
 	 * @param inputObject
 	 * @returns {*}
 	 */
-	this.randomElement = function(inputObject) {
+	this.randomElement = function (inputObject) {
 		let keys = Object.keys(inputObject);
-		let randomIndex = Math.floor(Math.random()*keys.length);
+		let randomIndex = Math.floor(Math.random() * keys.length);
 
 		return inputObject[keys[randomIndex]];
 	}

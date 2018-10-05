@@ -3,116 +3,146 @@ const GLib = imports.gi.GLib;
 
 const Self = imports.misc.extensionUtils.getCurrentExtension();
 const Prefs = Self.imports.settings;
+const LoggerModule = Self.imports.logger;
 
 let _afTimerInstance = null;
 
 // Singleton implementation of _AFTimer
-var AFTimer = function() {
-    if (!_afTimerInstance) {
-        _afTimerInstance = new _AFTimer();
-    }
-    return _afTimerInstance;
+var AFTimer = function () {
+	if (!_afTimerInstance) {
+		_afTimerInstance = new _AFTimer();
+	}
+	return _afTimerInstance;
 };
 
 /**
  * Timer for the auto fetch feature.
  *
- * TODO: find way to store elapsed time on shutdown/logout/gnome-shell-restart/etc.
  * @type {Lang}
  */
 var _AFTimer = new Lang.Class({
-    Name: 'AFTimer',
+	Name: 'AFTimer',
+	logger: null,
 
-    _timeout: null,
-    _timoutEndCallback: null,
-    _timestamp: null,
+	_timeout: null,
+	_timoutEndCallback: null,
+	_minutes: 30,
 
-    _init: function() {
-        this._settings = new Prefs.Settings();
-    },
+	_init: function () {
+		this.logger = new LoggerModule.Logger('RWG3', 'Timer');
 
-    /**
-     * Side effect is that the elapsed minutes will be stored in the GSettings.
-     */
-    _minutesElapsed: function() {
-        let timestamp = this._timestamp;
-        if (!timestamp) {
-            return 0;
-        }
+		this._settings = new Prefs.Settings();
+	},
 
-        let now = new Date().getTime();
-        let elapsed = this._settings.get('minutes-elapsed', 'int');
+	isActive: function () {
+		return this._settings.get('auto-fetch', 'boolean');
+	},
 
-        let diffMin = Math.floor((now-timestamp)/(60*1000));
+	remainingMinutes: function () {
+		let minutesElapsed = this._minutesElapsed();
+		let remainder = minutesElapsed % this._minutes;
+		return Math.max(this._minutes - remainder, 0);
+	},
 
-        if (diffMin >= 1) {
-            elapsed += diffMin;
-            this._settings.set('minutes-elapsed', 'int', elapsed);
-            this._timestamp += diffMin*60*1000;
-        }
+	registerCallback: function (callback) {
+		this._timoutEndCallback = callback;
+	},
 
-        return elapsed;
-    },
+	/**
+	 * Sets the minutes of the timer.
+	 *
+	 * @param minutes
+	 */
+	setMinutes: function (minutes) {
+		this._minutes = minutes;
+	},
 
-    isActive: function () {
-        return this._settings.get('auto-fetch', 'boolean');
-    },
+	/**
+	 * Start the timer.
+	 *
+	 * @return void
+	 */
+	start: function () {
+		this.cleanup();
 
-    remainingMinutes: function() {
-        let hours = this._settings.get('hours', 'int');
-        let minutes = hours * 60 + this._settings.get('minutes', 'int');
-        let minutesElapsed = this._minutesElapsed();
+		let last = this._settings.get('timer-last-trigger', 'int64');
+		if (last === 0) {
+			this.reset();
+		}
 
-        return (minutes - minutesElapsed);
-    },
+		let millisRemaining = this.remainingMinutes() * 60 * 1000;
 
-    registerCallback: function(callback) {
-        this._timoutEndCallback = callback;
-    },
+		// set new wallpaper if the interval was surpassed and set the timestamp to when it should have been updated
+		if (this._surpassedInterval()) {
+			if (this._timoutEndCallback) {
+				this._timoutEndCallback();
+			}
+			let millisOverdue = (this._minutes * 60 * 1000) - millisRemaining;
+			this._settings.set('timer-last-trigger', 'int64', Date.now() - millisOverdue);
+		}
 
-    /**
-     * Starts a new timer.
-     *
-     * @return void
-     */
-    begin: function() {
-        this.end(); // stop any running timer
+		// actual timer function
+		this._timeout = GLib.timeout_add(GLib.PRIORITY_DEFAULT, millisRemaining, () => {
+			if (this._timoutEndCallback) {
+				this._timoutEndCallback();
+			}
 
-        this._timestamp = new Date().getTime();
+			this.reset(); // reset timer
+			this.start(); // restart timer
+		});
+	},
 
-        let millisToWait = this.remainingMinutes() * 60 * 1000;
-        if (millisToWait <= 0) {
-            return;
-        }
+	/**
+	 * Stop the timer.
+	 *
+	 * @return void
+	 */
+	stop: function () {
+		this._settings.set('timer-last-trigger', 'int64', 0);
+		this.cleanup();
+	},
 
-        this._timeout = GLib.timeout_add(GLib.PRIORITY_DEFAULT, millisToWait, function() {
-            this.end();
-            if (this._timoutEndCallback) {
-                this._timoutEndCallback();
-            }
-            this.begin(); // restart timer
-        }.bind(this));
-    },
+	/**
+	 * Cleanup the timeout callback if it exists.
+	 *
+	 * @return void
+	 */
+	cleanup: function () {
+		if (this._timeout) { // only remove if a timeout is active
+			GLib.source_remove(this._timeout);
+			this._timeout = null;
+		}
+	},
 
-    /**
-     * Stop the timer and set elapsed minutes to 0.
-     *
-     * @return void
-     */
-    end: function() {
-        this._settings.set('minutes-elapsed', 'int', 0);
-        if (this._timeout) {
-            GLib.source_remove(this._timeout)
-            this._timeout = null;
-        }
-    },
+	/**
+	 * Reset the timer.
+	 *
+	 * @return void
+	 */
+	reset: function () {
+		this._settings.set('timer-last-trigger', 'int64', new Date().getTime());
+		this.cleanup();
+	},
 
-    // currently not used
-    pause: function() {
-        if (this._timeout) {
-            GLib.source_remove(this._timeout)
-            this._minutesElapsed();
-        }
-    }
+	_minutesElapsed: function () {
+		let now = Date.now();
+		let last = this._settings.get('timer-last-trigger', 'int64');
+
+		if (last === 0) {
+			return 0;
+		}
+
+		let elapsed = Math.max(now - last, 0);
+		return Math.floor(elapsed / (60 * 1000));
+	},
+
+	_surpassedInterval: function () {
+		let now = Date.now();
+		let last = this._settings.get('timer-last-trigger', 'int64');
+		let diff = now - last;
+		let intervalLength = this._minutes * 60 * 1000;
+
+		return diff > intervalLength;
+	}
 
 });

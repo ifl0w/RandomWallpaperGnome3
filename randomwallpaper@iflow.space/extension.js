@@ -16,33 +16,60 @@ const PopupMenu = imports.ui.popupMenu;
 const CustomElements = Self.imports.elements;
 const Tweener = imports.ui.tweener;
 
+const Timer = Self.imports.timer;
+
 // Filesystem
 const Gio = imports.gi.Gio;
 
 // Settings
-const Convenience = Self.imports.convenience;
+const Prefs = Self.imports.settings;
 
 let wallpaperController;
-let extensionMeta;
 let panelEntry;
 
+let settings;
+let hidePanelIconHandler = null;
+
 function init(metaData) {
-	extensionMeta = metaData;
-	wallpaperController = new WallpaperController.WallpaperController(metaData);
+	settings = new Prefs.Settings();
+	wallpaperController = new WallpaperController.WallpaperController();
 }
 
 function enable() {
 	// enable Extension
+
 	// UI
 	panelEntry = new RandomWallpaperEntry(0, "Random wallpaper");
 
 	// add to panel
 	Main.panel.addToStatusArea("random-wallpaper-menu", panelEntry);
+
+	hidePanelIconHandler = settings.observe('hide-panel-icon', updatePanelMenuVisibility);
+	updatePanelMenuVisibility();
 }
 
 function disable() {
 	// disable Extension
 	panelEntry.destroy();
+
+	// remove all signal handlers
+	if (hidePanelIconHandler !== null) {
+		settings.disconnect(hidePanelIconHandler);
+	}
+
+	// cleanup the timer singleton
+	let timer = new Timer.AFTimer();
+	timer.cleanup();
+}
+
+function updatePanelMenuVisibility(isVisible) {
+
+	if (settings.get('hide-panel-icon', 'boolean')) {
+		panelEntry.actor.hide();
+	} else {
+		panelEntry.actor.show();
+	}
+
 }
 
 var RandomWallpaperEntry = new Lang.Class({
@@ -50,7 +77,7 @@ var RandomWallpaperEntry = new Lang.Class({
 	Name: "RandomWallpaperEntry",
 	logger: null,
 
-	_init: function(menuAlignment, nameText) {
+	_init: function (menuAlignment, nameText) {
 		this.parent(menuAlignment, nameText);
 		this.logger = new LoggerModule.Logger('RWG3', 'RandomWallpaperEntry');
 
@@ -71,7 +98,7 @@ var RandomWallpaperEntry = new Lang.Class({
 		this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 
 		// history section
-		this.historySection = new PopupMenu.PopupMenuSection();
+		this.historySection = new CustomElements.HistorySection();
 		this.menu.addMenuItem(this.historySection);
 
 		this.setHistoryList();
@@ -98,25 +125,25 @@ var RandomWallpaperEntry = new Lang.Class({
 		wallpaperController.registerStopLoadingHook(this.setHistoryList.bind(this));
 
 		// new wallpaper event
-		this.newWallpaperItem.connect('activate', function() {
+		this.newWallpaperItem.connect('activate', function () {
 			wallpaperController.fetchNewWallpaper();
 		});
 
 		// clear history event
-		this.clearHistoryItem.connect('activate', function() {
+		this.clearHistoryItem.connect('activate', function () {
 			wallpaperController.deleteHistory();
 		});
 
 		// Open Wallpaper Folder
-		this.openFolder.connect('activate', function(event) {
+		this.openFolder.connect('activate', function (event) {
 			let uri = GLib.filename_to_uri(wallpaperController.wallpaperlocation, "");
 			Gio.AppInfo.launch_default_for_uri(uri, global.create_app_launch_context(0, -1))
 		});
 
-		this.openSettings.connect("activate", function(){
+		this.openSettings.connect("activate", function () {
 			// call gnome settings tool for this extension
 			let app = Shell.AppSystem.get_default().lookup_app("gnome-shell-extension-prefs.desktop");
-			if( app!=null ) {
+			if (app != null) {
 				// only works in Gnome >= 3.12
 				let info = app.get_app_info();
 				let timestamp = global.display.get_current_time_roundtrip();
@@ -124,22 +151,21 @@ var RandomWallpaperEntry = new Lang.Class({
 			}
 		});
 
-		this.menu.actor.connect('show', function() {
+		this.menu.actor.connect('show', function () {
 			this.newWallpaperItem.show();
-			wallpaperController.menuShowHook();
 		}.bind(this));
 
 		// when the popupmenu disapears, check if the wallpaper is the original and
 		// reset it if needed
 		this.menu.actor.connect('hide', () => {
 			wallpaperController.resetWallpaper();
-			this.setHistoryList(); // TODO: move this call to a new background changed hook (because overhead on close)
 		});
 
 		this.menu.actor.connect('leave-event', () => {
 			wallpaperController.resetWallpaper();
 		});
 
+		settings.observe('history', this.setHistoryList.bind(this));
 	},
 
 	setCurrentBackgroundElement: function () {
@@ -154,10 +180,9 @@ var RandomWallpaperEntry = new Lang.Class({
 		}
 	},
 
-	setHistoryList: function() {
+	setHistoryList: function () {
+		wallpaperController.update();
 		this.setCurrentBackgroundElement();
-
-		this.historySection.removeAll();
 
 		let historyController = wallpaperController.getHistoryController();
 		let history = historyController.history;
@@ -167,19 +192,6 @@ var RandomWallpaperEntry = new Lang.Class({
 			return;
 		}
 
-		for (let i = 1; i < history.length; i++) {
-			let historyid = history[i].id;
-			let tmp = new CustomElements.HistoryElement(history[i], i);
-
-			tmp.actor.connect('key-focus-in', onEnter);
-			tmp.actor.connect('key-focus-out', onLeave);
-			tmp.actor.connect('enter-event', onEnter);
-
-			tmp.connect('activate', onSelect);
-
-			this.historySection.addMenuItem(tmp);
-		}
-
 		function onLeave(actor) {
 			wallpaperController.resetWallpaper();
 		}
@@ -187,22 +199,16 @@ var RandomWallpaperEntry = new Lang.Class({
 		function onEnter(actor) {
 			wallpaperController.previewWallpaper(actor.historyId);
 		}
+
 		function onSelect(actor) {
 			wallpaperController.setWallpaper(actor.historyEntry.id);
 		}
 
+		this.historySection.updateList(history, onEnter, onLeave, onSelect);
 	},
 
-	clearHistoryList: function() {
-		this.historySection.removeAll();
-
-		let empty = new PopupMenu.PopupMenuItem('No recent wallpaper ...', {
-			activate: false,
-			hover: false,
-			style_class: 'rwg-recent-lable',
-			can_focus: false
-		});
-		this.historySection.addMenuItem(empty);
+	clearHistoryList: function () {
+		this.historySection.clear();
 	},
 
 });

@@ -5,10 +5,11 @@
         <value value='0' nick='unsplash'/>
         <value value='1' nick='desktoppr'/>
         <value value='2' nick='wallhaven'/>
-        <value value='3' nick='genericJSON'/>
+        <value value='3' nick='reddit'/>
+        <value value='4' nick='genericJSON'/>
     </enum>
 
-    <schema path="/org/gnome/shell/extensions/space-iflow-randomwallpaper-sources/"
+    <schema path="/org/gnome/shell/extensions/space-iflow-randomwallpaper/"
             id='org.gnome.shell.extensions.space.iflow.randomwallpaper'>
 
         <key type='i' name='history-length'>
@@ -50,10 +51,11 @@
             <description>Stores the history objects as stringified JSONs</description>
         </key>
 
-        <key type='i' name='minutes-elapsed'>
+        <key type='x' name='timer-last-trigger'>
             <default>0</default>
-            <summary>Elapsed Time</summary>
-            <description>The time that already elapsed.</description>
+            <summary>Timestamp of the last timer trigger.</summary>
+            <description>A JS timestamp of the last timer callback trigger. Zero if no last change registered.
+            </description>
         </key>
 
         <key type='b' name='change-lock-screen'>
@@ -68,9 +70,15 @@
             <description>Disables the preview of the background while hovering the history list</description>
         </key>
 
+        <key type='b' name='hide-panel-icon'>
+            <default>false</default>
+            <summary>Hide the panel icon</summary>
+            <description>Removes the panel icon from the gnome shell.</description>
+        </key>
+
     </schema>
 
-    <schema path="/org/gnome/shell/extensions/space-iflow-randomwallpaper-sources/"
+    <schema path="/org/gnome/shell/extensions/space-iflow-randomwallpaper/desktopper/"
             id='org.gnome.shell.extensions.space.iflow.randomwallpaper.desktopper'>
         <key type='b' name='allow-unsafe'>
             <default>false</default>
@@ -79,17 +87,22 @@
         </key>
     </schema>
 
-    <schema path="/org/gnome/shell/extensions/space-iflow-randomwallpaper-sources/"
+    <schema path="/org/gnome/shell/extensions/space-iflow-randomwallpaper/unsplash/"
             id='org.gnome.shell.extensions.space.iflow.randomwallpaper.unsplash'>
         <key type='s' name='unsplash-keyword'>
             <default>""</default>
             <summary>Keyword</summary>
             <description>The keyword will be used to search images.</description>
         </key>
-        <key type='s' name='username'>
+        <key type='s' name='unsplash-username'>
             <default>""</default>
             <summary>Username</summary>
             <description>Only fetch random images of a given user.</description>
+        </key>
+        <key type='s' name='unsplash-collections'>
+            <default>""</default>
+            <summary>Collections</summary>
+            <description>Only fetch random images from a comma separated list of collections.</description>
         </key>
         <key type='i' name='image-width'>
             <default>1920</default>
@@ -104,11 +117,13 @@
         <key type='b' name='featured-only'>
             <default>false</default>
             <summary>Featured images only</summary>
-            <description>This results in a smaller wallpaper pool but the images are considered to have higher quality.</description>
+            <description>This results in a smaller wallpaper pool but the images are considered to have higher
+                quality.
+            </description>
         </key>
     </schema>
 
-    <schema path="/org/gnome/shell/extensions/space-iflow-randomwallpaper-sources/"
+    <schema path="/org/gnome/shell/extensions/space-iflow-randomwallpaper/wallhaven/"
             id='org.gnome.shell.extensions.space.iflow.randomwallpaper.wallhaven'>
         <key type='s' name='wallhaven-keyword'>
             <default>""</default>
@@ -148,7 +163,21 @@
         </key>
     </schema>
 
-    <schema path="/org/gnome/shell/extensions/space-iflow-randomwallpaper-sources/"
+    <schema path="/org/gnome/shell/extensions/space-iflow-randomwallpaper/reddit/"
+            id='org.gnome.shell.extensions.space.iflow.randomwallpaper.reddit'>
+        <key type='s' name='subreddits'>
+            <default>""</default>
+            <summary>Subreddits</summary>
+            <description>These subreddits will be searched.</description>
+        </key>
+        <key type='b' name='allow-sfw'>
+            <default>false</default>
+            <summary>SFW</summary>
+            <description>Whether safe images are allowed.</description>
+        </key>
+    </schema>
+
+    <schema path="/org/gnome/shell/extensions/space-iflow-randomwallpaper/genericJSON/"
             id='org.gnome.shell.extensions.space.iflow.randomwallpaper.genericJSON'>
         <key type='s' name='generic-json-request-url'>
             <default>""</default>

@@ -20,7 +20,6 @@ const LoggerModule = Self.imports.logger;
 
 var WallpaperController = new Lang.Class({
 	Name: "WallpaperController",
-	extensionMeta: null,
 	logger: null,
 
 	wallpaperlocation: '',
@@ -39,9 +38,9 @@ var WallpaperController = new Lang.Class({
 	// functions will be called when loading a new wallpaper stopped. If an error occured then the error will be passed as parameter.
 	_stopLoadingHooks: [],
 
-	_init: function (extensionMeta) {
-		this.extensionMeta = extensionMeta;
-		this.wallpaperlocation = this.extensionMeta.path + '/wallpapers/';
+	_init: function () {
+		this.logger = new LoggerModule.Logger('RWG3', 'WallpaperController');
+		this.wallpaperlocation = Self.path + '/wallpapers/';
 
 		this._timer = new Timer.AFTimer();
 		this._historyController = new HistoryModule.HistoryController(this.wallpaperlocation);
@@ -52,17 +51,16 @@ var WallpaperController = new Lang.Class({
 		this._settings.observe('minutes', this._updateAutoFetching.bind(this));
 		this._settings.observe('hours', this._updateAutoFetching.bind(this));
 
+		this._desktopperAdapter = new SourceAdapter.DesktopperAdapter();
+		this._unsplashAdapter = new SourceAdapter.UnsplashAdapter();
+		this._wallhavenAdapter = new SourceAdapter.WallhavenAdapter();
+		this._redditAdapter = new SourceAdapter.RedditAdapter();
+		this._genericJsonAdapter = new SourceAdapter.GenericJsonAdapter();
+
 		this._updateHistory();
 		this._updateAutoFetching();
 
 		this.currentWallpaper = this._getCurrentWallpaper();
-
-		this._desktopperAdapter = new SourceAdapter.DesktopperAdapter();
-		this._unsplashAdapter = new SourceAdapter.UnsplashAdapter();
-		this._wallhavenAdapter = new SourceAdapter.WallhavenAdapter();
-		this._genericJsonAdapter = new SourceAdapter.GenericJsonAdapter();
-
-		this.logger = new LoggerModule.Logger('RWG3', 'WallpaperController');
 	},
 
 	_updateHistory: function () {
@@ -78,9 +76,10 @@ var WallpaperController = new Lang.Class({
 
 		if (this._autoFetch.active) {
 			this._timer.registerCallback(this.fetchNewWallpaper.bind(this));
-			this._timer.begin();
+			this._timer.setMinutes(this._autoFetch.duration);
+			this._timer.start();
 		} else {
-			this._timer.end();
+			this._timer.stop();
 		}
 	},
 
@@ -100,6 +99,9 @@ var WallpaperController = new Lang.Class({
 				this.imageSourceAdapter = this._wallhavenAdapter;
 				break;
 			case 3:
+				this.imageSourceAdapter = this._redditAdapter;
+				break;
+			case 4:
 				this.imageSourceAdapter = this._genericJsonAdapter;
 				break;
 			default:
@@ -114,7 +116,7 @@ var WallpaperController = new Lang.Class({
 	 * copy file from uri to local wallpaper directory and calls the given callback with the name and the full filepath
 	 * of the written file as parameter.
 	 * @param uri
-	 * @param callback
+	 * @param callback(name, path, error)
 	 * @private
 	 */
 	_fetchFile: function (uri, callback) {
@@ -122,14 +124,32 @@ var WallpaperController = new Lang.Class({
 		let date = new Date();
 		let name = date.getTime() + '_' + this.imageSourceAdapter.fileName(uri); // timestamp ensures uniqueness
 
-		let output_file = Gio.file_new_for_path(this.wallpaperlocation + String(name));
-		let output_stream = output_file.create(0, null);
+		let output_file, output_stream, input_file;
 
-		let input_file = Gio.file_new_for_uri(uri);
+		try {
+			output_file = Gio.file_new_for_path(this.wallpaperlocation + String(name));
+			output_stream = output_file.create(0, null);
+
+			input_file = Gio.file_new_for_uri(uri);
+		} catch (e) {
+			if (callback) {
+				callback(null, null, e);
+			}
+			return;
+		}
 
 		input_file.load_contents_async(null, (file, result) => {
-			let contents = file.load_contents_finish(result)[1]; // TODO: error handling. This failes due to: "An unexpected TLS packet was received."
-			output_stream.write(contents, null);
+			let contents = null;
+
+			try {
+				contents = file.load_contents_finish(result)[1];
+				output_stream.write(contents, null);
+			} catch (e) {
+				if (callback) {
+					callback(null, null, e);
+				}
+				return;
+			}
 
 			// call callback with the name and the full filepath of the written file as parameter
 			if (callback) {
@@ -175,7 +195,7 @@ var WallpaperController = new Lang.Class({
 	 * @param callback
 	 * @private
 	 */
-	_setPictureUriOfSettingsObject: function(settings, path, callback) {
+	_setPictureUriOfSettingsObject: function (settings, path, callback) {
 		/*
 		 inspired from:
 		 https://bitbucket.org/LukasKnuth/backslide/src/7e36a49fc5e1439fa9ed21e39b09b61eca8df41a/backslide@codeisland.org/settings.js?at=master
@@ -192,10 +212,10 @@ var WallpaperController = new Lang.Class({
 				}
 
 			} else {
-				// TODO: error handling
+				this._bailOutWithCallback("Could not set lock screen wallpaper.", callback);
 			}
 		} else {
-			// TODO: error handling
+			this._bailOutWithCallback("Could not set wallpaper.", callback);
 		}
 	},
 
@@ -220,23 +240,35 @@ var WallpaperController = new Lang.Class({
 		this._startLoadingHooks.forEach((element) => {
 			element();
 		});
-		this._timer.begin(); // reset timer
 
-		this._requestRandomImageFromAdapter((historyElement) => {
+		this._timer.reset(); // reset timer
+
+		this._requestRandomImageFromAdapter((historyElement, error) => {
+			if (historyElement == null || error) {
+				this._bailOutWithCallback("Could not fetch wallpaper location.", callback);
+				this._stopLoadingHooks.map(element => element(null));
+				return;
+			}
+
 			this.logger.info("Requesting image: " + historyElement.source.imageDownloadUrl);
 
-			this._fetchFile(historyElement.source.imageDownloadUrl, (historyId, path) => {
+			this._fetchFile(historyElement.source.imageDownloadUrl, (historyId, path, error) => {
+				if (error) {
+					this._bailOutWithCallback("Could not load new wallpaper.", callback);
+					this._stopLoadingHooks.map(element => element(null));
+					return;
+				}
+
 				historyElement.path = path;
 				historyElement.id = historyId;
 
 				this._setBackground(path, () => {
 					// insert file into history
 					this._historyController.insert(historyElement);
+					this.currentWallpaper = this._getCurrentWallpaper();
 
-					// call callback if given
-					this._stopLoadingHooks.forEach((element) => {
-						element(null);
-					});
+					this._stopLoadingHooks.map(element => element(null));
+
 					if (callback) {
 						callback();
 					}
@@ -288,7 +320,8 @@ var WallpaperController = new Lang.Class({
 		this._historyController.clear();
 	},
 
-	menuShowHook: function () {
+	update: function () {
+		this._updateHistory();
 		this.currentWallpaper = this._getCurrentWallpaper();
 	},
 
@@ -301,6 +334,14 @@ var WallpaperController = new Lang.Class({
 	registerStopLoadingHook: function (fn) {
 		if (typeof fn === "function") {
 			this._stopLoadingHooks.push(fn)
+		}
+	},
+
+	_bailOutWithCallback: function (msg, callback) {
+		this.logger.error(msg);
+
+		if (callback) {
+			callback();
 		}
 	}
 });
