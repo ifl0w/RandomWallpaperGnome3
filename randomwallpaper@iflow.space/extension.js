@@ -184,27 +184,12 @@ var RandomWallpaperEntry = new Lang.Class({
 		wallpaperController.update();
 		this.setCurrentBackgroundElement();
 
-		this.historySection.removeAll();
-
 		let historyController = wallpaperController.getHistoryController();
 		let history = historyController.history;
 
 		if (history.length <= 1) {
 			this.clearHistoryList();
 			return;
-		}
-
-		for (let i = 1; i < history.length; i++) {
-			let historyid = history[i].id;
-			let tmp = new CustomElements.HistoryElement(history[i], i);
-
-			tmp.actor.connect('key-focus-in', onEnter);
-			tmp.actor.connect('key-focus-out', onLeave);
-			tmp.actor.connect('enter-event', onEnter);
-
-			tmp.connect('activate', onSelect);
-
-			this.historySection.addMenuItem(tmp);
 		}
 
 		function onLeave(actor) {
@@ -219,18 +204,11 @@ var RandomWallpaperEntry = new Lang.Class({
 			wallpaperController.setWallpaper(actor.historyEntry.id);
 		}
 
+		this.historySection.updateList(history, onEnter, onLeave, onSelect);
 	},
 
 	clearHistoryList: function () {
-		this.historySection.removeAll();
-
-		let empty = new PopupMenu.PopupMenuItem('No recent wallpaper ...', {
-			activate: false,
-			hover: false,
-			style_class: 'rwg-recent-lable',
-			can_focus: false
-		});
-		this.historySection.addMenuItem(empty);
+		this.historySection.clear();
 	},
 
 });
