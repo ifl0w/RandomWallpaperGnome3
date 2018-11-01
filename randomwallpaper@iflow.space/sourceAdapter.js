@@ -364,6 +364,10 @@ var RedditAdapter = new Lang.Class({
 		this._settings = new SettingsModule.Settings(RWG_SETTINGS_SCHEMA_REDDIT);
 	},
 
+	_ampDecode: function(string) {
+		return string.replace(/\&amp;/g,'&');
+	},
+
 	requestRandomImage: function (callback) {
 		let session = new Soup.SessionAsync();
 
@@ -391,7 +395,7 @@ var RedditAdapter = new Lang.Class({
 				}
 				const random = Math.floor(Math.random() * submissions.length);
 				const submission = submissions[random].data;
-				const imageDownloadUrl = submission.preview.images[0].source.url;
+				const imageDownloadUrl = this._ampDecode(submission.preview.images[0].source.url);
 
 				if (callback) {
 					let historyEntry = new HistoryModule.HistoryEntry(null, 'Reddit', imageDownloadUrl);
