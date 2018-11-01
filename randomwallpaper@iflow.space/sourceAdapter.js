@@ -369,7 +369,7 @@ var RedditAdapter = new Lang.Class({
 
 		const subreddits = this._settings.get('subreddits', 'string').split(',').map(s => s.trim()).join('+');
 		const require_sfw = this._settings.get('allow-sfw', 'boolean');
-		const url = encodeURI(`https://www.reddit.com/r/${subreddits}.json`);
+		const url = encodeURI('https://www.reddit.com/r/' + subreddits + '.json');
 
 		let message = Soup.Message.new('GET', url);
 
