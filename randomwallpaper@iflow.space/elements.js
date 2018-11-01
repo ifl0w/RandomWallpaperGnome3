@@ -230,11 +230,11 @@ var NewWallpaperElement = new Lang.Class({
 
 var StatusElement = new Lang.Class({
 	Name: 'StatusElement',
-	Extends: St.Icon,
+
+	icon: null,
 
 	_init: function () {
-
-		this.parent({
+		this.icon = new St.Icon({
 			icon_name: 'preferences-desktop-wallpaper-symbolic',
 			style_class: 'system-status-icon'
 		});
@@ -243,11 +243,11 @@ var StatusElement = new Lang.Class({
 
 		this.loadingTweenIn = {
 			opacity: 20,
-			time: 1,
+			time: 2,
 			transition: 'easeInOutSine',
 			onComplete: function () {
 				try {
-					Tweener.addTween(_this, _this.loadingTweenOut);
+					Tweener.addTween(_this.icon, _this.loadingTweenOut);
 				} catch (e) {
 					// swollow (not really important)
 				}
@@ -261,7 +261,7 @@ var StatusElement = new Lang.Class({
 			onComplete: function () {
 				if (_this.isLoading) {
 					try {
-						Tweener.addTween(_this, _this.loadingTweenIn);
+						Tweener.addTween(_this.icon, _this.loadingTweenIn);
 					} catch (e) {
 						// swollow (not really important)
 					}
@@ -276,13 +276,13 @@ var StatusElement = new Lang.Class({
 
 	startLoading: function () {
 		this.isLoading = true;
-		Tweener.addTween(this, this.loadingTweenOut);
+		Tweener.addTween(this.icon, this.loadingTweenOut);
 	},
 
 	stopLoading: function () {
 		this.isLoading = false;
-		Tweener.removeTweens(this);
-		this.opacity = 255;
+		Tweener.removeTweens(this.icon);
+		this.icon.opacity = 255;
 	}
 
 });

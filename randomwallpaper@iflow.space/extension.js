@@ -84,7 +84,7 @@ var RandomWallpaperEntry = new Lang.Class({
 
 		// Panelmenu Icon
 		this.statusIcon = new CustomElements.StatusElement();
-		this.actor.add_child(this.statusIcon);
+		this.actor.add_child(this.statusIcon.icon);
 
 		// new wallpaper button
 		this.newWallpaperItem = new CustomElements.NewWallpaperElement();
