@@ -50,6 +50,7 @@ function enable() {
 
 function disable() {
 	// disable Extension
+	panelEntry.clearHistoryList();
 	panelEntry.destroy();
 
 	// remove all signal handlers
