@@ -172,7 +172,7 @@ var UnsplashAdapter = new Lang.Class({
 
 				authorName = data.user.name;
 				authorUrl = encodeURI(data.user.links.html);
-				imageLinkUrl = encodeURI(data.urls.raw + '&' + utmParameters);
+				imageLinkUrl = encodeURI(data.links.html);
 
 				let downloadLocation = data.links.download_location + '?' + clientParam;
 				downloadMessage = Soup.Message.new('GET', downloadLocation);
@@ -194,7 +194,7 @@ var UnsplashAdapter = new Lang.Class({
 						let historyEntry = new HistoryModule.HistoryEntry(authorName, this.sourceName, encodeURI(downloadData.url));
 						historyEntry.source.sourceUrl = encodeURI(this.sourceUrl + '?' + utmParameters);
 						historyEntry.source.authorUrl = encodeURI(authorUrl + '?' + utmParameters);
-						historyEntry.source.imageLinkUrl = imageLinkUrl;
+						historyEntry.source.imageLinkUrl = imageLinkUrl + '?' + utmParameters;
 						callback(historyEntry);
 					}
 				} catch (e) {
@@ -364,12 +364,16 @@ var RedditAdapter = new Lang.Class({
 		this._settings = new SettingsModule.Settings(RWG_SETTINGS_SCHEMA_REDDIT);
 	},
 
+	_ampDecode: function(string) {
+		return string.replace(/\&amp;/g,'&');
+	},
+
 	requestRandomImage: function (callback) {
 		let session = new Soup.SessionAsync();
 
 		const subreddits = this._settings.get('subreddits', 'string').split(',').map(s => s.trim()).join('+');
 		const require_sfw = this._settings.get('allow-sfw', 'boolean');
-		const url = encodeURI(`https://www.reddit.com/r/${subreddits}.json`);
+		const url = encodeURI('https://www.reddit.com/r/' + subreddits + '.json');
 
 		let message = Soup.Message.new('GET', url);
 
@@ -391,7 +395,7 @@ var RedditAdapter = new Lang.Class({
 				}
 				const random = Math.floor(Math.random() * submissions.length);
 				const submission = submissions[random].data;
-				const imageDownloadUrl = submission.preview.images[0].source.url;
+				const imageDownloadUrl = this._ampDecode(submission.preview.images[0].source.url);
 
 				if (callback) {
 					let historyEntry = new HistoryModule.HistoryEntry(null, 'Reddit', imageDownloadUrl);
