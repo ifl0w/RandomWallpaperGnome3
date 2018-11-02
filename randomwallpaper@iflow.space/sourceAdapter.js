@@ -172,7 +172,7 @@ var UnsplashAdapter = new Lang.Class({
 
 				authorName = data.user.name;
 				authorUrl = encodeURI(data.user.links.html);
-				imageLinkUrl = encodeURI(data.urls.raw + '&' + utmParameters);
+				imageLinkUrl = encodeURI(data.links.html);
 
 				let downloadLocation = data.links.download_location + '?' + clientParam;
 				downloadMessage = Soup.Message.new('GET', downloadLocation);
@@ -194,7 +194,7 @@ var UnsplashAdapter = new Lang.Class({
 						let historyEntry = new HistoryModule.HistoryEntry(authorName, this.sourceName, encodeURI(downloadData.url));
 						historyEntry.source.sourceUrl = encodeURI(this.sourceUrl + '?' + utmParameters);
 						historyEntry.source.authorUrl = encodeURI(authorUrl + '?' + utmParameters);
-						historyEntry.source.imageLinkUrl = imageLinkUrl;
+						historyEntry.source.imageLinkUrl = imageLinkUrl + '?' + utmParameters;
 						callback(historyEntry);
 					}
 				} catch (e) {
