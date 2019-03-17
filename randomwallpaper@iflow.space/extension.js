@@ -10,13 +10,13 @@ let wallpaperController;
 let panelMenu;
 let logger;
 
-function init(metaData) {
-	logger = new LoggerModule.Logger("RWG3", "Main");
-	wallpaperController = new WallpaperController.WallpaperController();
-}
+function init(metaData) { }
 
 function enable() {
 	// enable Extension
+	logger = new LoggerModule.Logger("RWG3", "Main");
+	wallpaperController = new WallpaperController.WallpaperController();
+
 	logger.info("Enable extension.");
 	panelMenu = new RandomWallpaperMenu.RandomWallpaperMenu(wallpaperController);
 	panelMenu.init();
