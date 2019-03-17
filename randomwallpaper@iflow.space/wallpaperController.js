@@ -1,9 +1,4 @@
-const Lang = imports.lang;
 const Mainloop = imports.gi.GLib;
-
-// network requests
-const Soup = imports.gi.Soup;
-const Json = imports.gi.Json;
 
 // Filesystem
 const Gio = imports.gi.Gio;
@@ -11,36 +6,28 @@ const Gio = imports.gi.Gio;
 //self
 const Self = imports.misc.extensionUtils.getCurrentExtension();
 const SourceAdapter = Self.imports.sourceAdapter;
-const Convenience = Self.imports.convenience;
 const Prefs = Self.imports.settings;
 const Timer = Self.imports.timer;
 const HistoryModule = Self.imports.history;
 
 const LoggerModule = Self.imports.logger;
 
-var WallpaperController = new Lang.Class({
-	Name: "WallpaperController",
-	logger: null,
+var WallpaperController = class {
 
-	wallpaperlocation: '',
-	currentWallpaper: '',
-	_historyController: null,
-	imageSourceAdapter: null,
-
-	_timer: null,
-	_autoFetch: {
-		active: false,
-		duration: 30,
-	},
-
-	// functions will be called uppon loading a new wallpaper
-	_startLoadingHooks: [],
-	// functions will be called when loading a new wallpaper stopped. If an error occured then the error will be passed as parameter.
-	_stopLoadingHooks: [],
-
-	_init: function () {
+	constructor() {
 		this.logger = new LoggerModule.Logger('RWG3', 'WallpaperController');
 		this.wallpaperlocation = Self.path + '/wallpapers/';
+		this.imageSourceAdapter = null;
+
+		this._autoFetch = {
+			active: false,
+			duration: 30,
+		};
+
+		// functions will be called uppon loading a new wallpaper
+		this._startLoadingHooks = [];
+		// functions will be called when loading a new wallpaper stopped. If an error occured then the error will be passed as parameter.
+		this._stopLoadingHooks = [];
 
 		this._timer = new Timer.AFTimer();
 		this._historyController = new HistoryModule.HistoryController(this.wallpaperlocation);
@@ -61,13 +48,13 @@ var WallpaperController = new Lang.Class({
 		this._updateAutoFetching();
 
 		this.currentWallpaper = this._getCurrentWallpaper();
-	},
+	}
 
-	_updateHistory: function () {
+	_updateHistory() {
 		this._historyController.load();
-	},
+	}
 
-	_updateAutoFetching: function () {
+	_updateAutoFetching() {
 		let duration = 0;
 		duration += this._settings.get('minutes', 'int');
 		duration += this._settings.get('hours', 'int') * 60;
@@ -81,12 +68,12 @@ var WallpaperController = new Lang.Class({
 		} else {
 			this._timer.stop();
 		}
-	},
+	}
 
 	/*
 	 forwards the request to the adapter
 	 */
-	_requestRandomImageFromAdapter: function (callback) {
+	_requestRandomImageFromAdapter(callback) {
 		this.imageSourceAdapter = this._desktopperAdapter;
 		switch (this._settings.get('source', 'enum')) {
 			case 0:
@@ -110,7 +97,7 @@ var WallpaperController = new Lang.Class({
 		}
 
 		this.imageSourceAdapter.requestRandomImage(callback);
-	},
+	}
 
 	/**
 	 * copy file from uri to local wallpaper directory and calls the given callback with the name and the full filepath
@@ -119,7 +106,7 @@ var WallpaperController = new Lang.Class({
 	 * @param callback(name, path, error)
 	 * @private
 	 */
-	_fetchFile: function (uri, callback) {
+	_fetchFile(uri, callback) {
 		//extract the name from the url and
 		let date = new Date();
 		let name = date.getTime() + '_' + this.imageSourceAdapter.fileName(uri); // timestamp ensures uniqueness
@@ -156,7 +143,7 @@ var WallpaperController = new Lang.Class({
 				callback(name, output_file.get_path());
 			}
 		});
-	},
+	}
 
 	/**
 	 * Sets the wallpaper and the lockscreen when enabled to the given path. Executes the callback on success.
@@ -164,7 +151,7 @@ var WallpaperController = new Lang.Class({
 	 * @param callback
 	 * @private
 	 */
-	_setBackground: function (path, callback) {
+	_setBackground(path, callback) {
 		let background_setting = new Gio.Settings({schema: "org.gnome.desktop.background"});
 		path = "file://" + path;
 
@@ -185,7 +172,7 @@ var WallpaperController = new Lang.Class({
 				}
 			}
 		});
-	},
+	}
 
 	/**
 	 * Set the picture-uri property of the given settings object to the path.
@@ -195,7 +182,7 @@ var WallpaperController = new Lang.Class({
 	 * @param callback
 	 * @private
 	 */
-	_setPictureUriOfSettingsObject: function (settings, path, callback) {
+	_setPictureUriOfSettingsObject(settings, path, callback) {
 		/*
 		 inspired from:
 		 https://bitbucket.org/LukasKnuth/backslide/src/7e36a49fc5e1439fa9ed21e39b09b61eca8df41a/backslide@codeisland.org/settings.js?at=master
@@ -217,14 +204,14 @@ var WallpaperController = new Lang.Class({
 		} else {
 			this._bailOutWithCallback("Could not set wallpaper.", callback);
 		}
-	},
+	}
 
-	_getCurrentWallpaper: function () {
+	_getCurrentWallpaper() {
 		let background_setting = new Gio.Settings({schema: "org.gnome.desktop.background"});
 		return background_setting.get_string("picture-uri").replace(/^(file:\/\/)/, "");
-	},
+	}
 
-	setWallpaper: function (historyId) {
+	setWallpaper(historyId) {
 		let historyElement = this._historyController.get(historyId);
 
 		if (this._historyController.promoteToActive(historyElement.id)) {
@@ -234,9 +221,9 @@ var WallpaperController = new Lang.Class({
 			this.logger.warn("The history id (" + historyElement.id + ") could not be found.")
 			// TODO: Error handling	history id not found.
 		}
-	},
+	}
 
-	fetchNewWallpaper: function (callback) {
+	fetchNewWallpaper(callback) {
 		this._startLoadingHooks.forEach((element) => {
 			element();
 		});
@@ -275,9 +262,9 @@ var WallpaperController = new Lang.Class({
 				});
 			});
 		});
-	},
+	}
 
-	_backgroundTimeout: function (delay) {
+	_backgroundTimeout(delay) {
 		if (this.timeout) {
 			return;
 		}
@@ -294,54 +281,55 @@ var WallpaperController = new Lang.Class({
 			}
 			return false;
 		});
-	},
+	}
 
-	previewWallpaper: function (historyid, delay) {
+	previewWallpaper(historyid, delay) {
 		if (!this._settings.get('disable-hover-preview', 'boolean')) {
 			this.previewId = historyid;
 			this._resetWallpaper = false;
 
 			this._backgroundTimeout(delay);
 		}
-	},
+	}
 
-	resetWallpaper: function () {
+	resetWallpaper() {
 		if (!this._settings.get('disable-hover-preview', 'boolean')) {
 			this._resetWallpaper = true;
 			this._backgroundTimeout();
 		}
-	},
+	}
 
-	getHistoryController: function () {
+	getHistoryController() {
 		return this._historyController;
-	},
+	}
 
-	deleteHistory: function () {
+	deleteHistory() {
 		this._historyController.clear();
-	},
+	}
 
-	update: function () {
+	update() {
 		this._updateHistory();
 		this.currentWallpaper = this._getCurrentWallpaper();
-	},
+	}
 
-	registerStartLoadingHook: function (fn) {
+	registerStartLoadingHook(fn) {
 		if (typeof fn === "function") {
 			this._startLoadingHooks.push(fn)
 		}
-	},
+	}
 
-	registerStopLoadingHook: function (fn) {
+	registerStopLoadingHook(fn) {
 		if (typeof fn === "function") {
 			this._stopLoadingHooks.push(fn)
 		}
-	},
+	}
 
-	_bailOutWithCallback: function (msg, callback) {
+	_bailOutWithCallback(msg, callback) {
 		this.logger.error(msg);
 
 		if (callback) {
 			callback();
 		}
 	}
-});
+
+};

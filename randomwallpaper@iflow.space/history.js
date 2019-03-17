@@ -1,6 +1,3 @@
-const Lang = imports.lang;
-const Mainloop = imports.gi.GLib;
-
 // Filesystem
 const Gio = imports.gi.Gio;
 
@@ -9,14 +6,12 @@ const Prefs = Self.imports.settings;
 
 const LoggerModule = Self.imports.logger;
 
-var HistoryEntry = new Lang.Class({
-	Name: "HistoryEntry",
-	timestamp: null,
-	id: null,
-	path: null,
-	source: null,
+var HistoryEntry = class {
 
-	_init: function (author, source, url) {
+	constructor(author, source, url) {
+		this.id = null;
+		this.path = null;
+		this.source = null;
 		this.timestamp = new Date().getTime();
 
 		this.source = {
@@ -27,39 +22,34 @@ var HistoryEntry = new Lang.Class({
 			imageDownloadUrl: url, // URL used for downloading the image
 			imageLinkUrl: url // URL used for linking back to the website of the image
 		};
-	},
-});
+	}
 
-var HistoryController = new Lang.Class({
-	Name: "HistoryController",
-	_settings: null,
-	_wallpaperlocation: null,
+};
 
-	logger: null,
-	size: 10,
-	history: [],
+var HistoryController = class {
 
-	_init: function (wallpaperlocation) {
+	constructor(wallpaperlocation) {
 		this.logger = new LoggerModule.Logger('RWG3', 'HistoryController');
-
+		this.size = 10;
+		this.history = [];
 		this._settings = new Prefs.Settings();
 		this._wallpaperlocation = wallpaperlocation;
 
 		this.load();
-	},
+	}
 
-	insert: function (historyElement) {
+	insert(historyElement) {
 		this.history.unshift(historyElement);
 		this._deleteOldPictures();
 		this.save();
-	},
+	}
 
 	/**
 	 * Set the given id to to the first history element (the current one)
 	 * @param id
 	 * @returns {boolean}
 	 */
-	promoteToActive: function (id) {
+	promoteToActive(id) {
 		let element = this.get(id);
 		if (element === null) {
 			return false;
@@ -72,14 +62,14 @@ var HistoryController = new Lang.Class({
 		this.save();
 
 		return true;
-	},
+	}
 
 	/**
 	 * Returns the corresponding HistoryEntry or null
 	 * @param id
 	 * @returns {*}
 	 */
-	get: function (id) {
+	get(id) {
 		for (let elem of this.history) {
 			if (elem.id == id) {
 				return elem;
@@ -87,35 +77,35 @@ var HistoryController = new Lang.Class({
 		}
 
 		return null;
-	},
+	}
 
 	/**
 	 * Load the history from the gschema
 	 */
-	load: function () {
+	load() {
 		this.size = this._settings.get('history-length', 'int');
 		let stringHistory = this._settings.get('history', 'strv');
 		this.history = stringHistory.map(elem => {
 			return JSON.parse(elem)
 		});
-	},
+	}
 
 	/**
 	 * Save the history to the gschema
 	 */
-	save: function () {
+	save() {
 		let stringHistory = this.history.map(elem => {
 			return JSON.stringify(elem)
 		});
 		this._settings.set('history', 'strv', stringHistory);
 		Gio.Settings.sync();
-	},
+	}
 
 	/**
 	 * Clear the history and delete all photos except the current one.
 	 * @returns {boolean}
 	 */
-	clear: function () {
+	clear() {
 		let firstHistoryElement = this.history[0];
 
 		if (firstHistoryElement)
@@ -147,19 +137,19 @@ var HistoryController = new Lang.Class({
 
 		this.save();
 		return true;
-	},
+	}
 
 	/**
 	 * Delete all pictures that have no slot in the history.
 	 * @private
 	 */
-	_deleteOldPictures: function () {
+	_deleteOldPictures() {
 		this.size = this._settings.get('history-length', 'int');
 		let deleteFile;
 		while (this.history.length > this.size) {
 			deleteFile = Gio.file_new_for_path(this.history.pop().path);
 			deleteFile.delete(null);
 		}
-	},
+	}
 
-});
+};

@@ -1,9 +1,7 @@
-const Lang = imports.lang;
 const Self = imports.misc.extensionUtils.getCurrentExtension();
 
 // network requests
 const Soup = imports.gi.Soup;
-const Json = imports.gi.Json;
 
 const RWG_SETTINGS_SCHEMA_DESKTOPPER = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.desktopper';
 const RWG_SETTINGS_SCHEMA_UNSPLASH = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.unsplash';
@@ -17,13 +15,11 @@ const HistoryModule = Self.imports.history;
 const LoggerModule = Self.imports.logger;
 const JSONPath = Self.imports.jsonpath.jsonpath;
 
-var BaseAdapter = new Lang.Class({
-	Name: "BaseAdapter",
-	logger: null,
+var BaseAdapter = class {
 
-	_init: function () {
+	constructor() {
 		this.logger = new LoggerModule.Logger('RWG3', 'BaseAdapter');
-	},
+	}
 
 	/**
 	 * Retrieves a new url for an image and calls the given callback with an HistoryEntry as parameter.
@@ -31,11 +27,11 @@ var BaseAdapter = new Lang.Class({
 	 *
 	 * @param callback(historyElement, error)
 	 */
-	requestRandomImage: function (callback) {
+	requestRandomImage(callback) {
 		this._error("requestRandomImage not implemented", callback);
-	},
+	}
 
-	fileName: function (uri) {
+	fileName(uri) {
 		while (this._isURIEncoded(uri)) {
 			uri = decodeURIComponent(uri);
 		}
@@ -45,9 +41,9 @@ var BaseAdapter = new Lang.Class({
 			base = base.substr(0, base.indexOf('?'));
 		}
 		return base;
-	},
+	}
 
-	_isURIEncoded: function (uri) {
+	_isURIEncoded(uri) {
 		uri = uri || '';
 
 		try {
@@ -56,9 +52,9 @@ var BaseAdapter = new Lang.Class({
 			this.logger.error(err);
 			return false;
 		}
-	},
+	}
 
-	_error: function (err, callback) {
+	_error(err, callback) {
 		let error = {"error": err};
 		this.logger.error(JSON.stringify(error));
 
@@ -67,21 +63,17 @@ var BaseAdapter = new Lang.Class({
 		}
 	}
 
-});
+};
 
-var DesktopperAdapter = new Lang.Class({
-	Name: "DesktopperAdapter",
-	Extends: BaseAdapter,
+var DesktopperAdapter = class extends BaseAdapter {
 
-	_settings: null,
-
-	_init: function () {
-		this.parent();
+	constructor() {
+		super();
 
 		this._settings = new SettingsModule.Settings(RWG_SETTINGS_SCHEMA_DESKTOPPER);
-	},
+	}
 
-	requestRandomImage: function (callback) {
+	requestRandomImage(callback) {
 		let session = new Soup.SessionAsync();
 
 		let url = 'https://api.desktoppr.co/1/wallpapers/random';
@@ -117,34 +109,31 @@ var DesktopperAdapter = new Lang.Class({
 			}
 		});
 	}
-});
 
-var UnsplashAdapter = new Lang.Class({
-	Name: "UnsplashAdapter",
-	Extends: BaseAdapter,
+};
 
-	sourceName: 'Unsplash',
-	sourceUrl: 'https://unsplash.com/',
+var UnsplashAdapter = class extends BaseAdapter {
 
-	_settings: null,
+	constructor() {
+		super();
 
-	// query options
-	options: {
-		'username': '',
-		'query': '',
-		'collections': [],
-		'w': 1920,
-		'h': 1080,
-		'featured': false
-	},
+		this.sourceName = 'Unsplash';
+		this.sourceUrl = 'https://unsplash.com/';
 
-	_init: function () {
-		this.parent();
+		// query options
+		this.options = {
+			'username': '',
+			'query': '',
+			'collections': [],
+			'w': 1920,
+			'h': 1080,
+			'featured': false
+		};
 
 		this._settings = new SettingsModule.Settings(RWG_SETTINGS_SCHEMA_UNSPLASH);
-	},
+	}
 
-	requestRandomImage: function (callback) {
+	requestRandomImage(callback) {
 		let session = new Soup.SessionAsync();
 
 		this._readOptionsFromSettings();
@@ -203,9 +192,9 @@ var UnsplashAdapter = new Lang.Class({
 				}
 			});
 		});
-	},
+	}
 
-	_generateOptionsString: function () {
+	_generateOptionsString() {
 		let options = this.options;
 		let optionsString = "";
 
@@ -218,9 +207,9 @@ var UnsplashAdapter = new Lang.Class({
 		}
 
 		return optionsString;
-	},
+	}
 
-	_readOptionsFromSettings: function () {
+	_readOptionsFromSettings() {
 		this.options.query = this._settings.get('unsplash-keyword', 'string');
 
 		this.options.username = this._settings.get('unsplash-username', 'string');
@@ -238,29 +227,25 @@ var UnsplashAdapter = new Lang.Class({
 
 		this.options.featured = this._settings.get('featured-only', 'boolean');
 	}
-});
+};
 
-var WallhavenAdapter = new Lang.Class({
-	Name: "WallhavenAdapter",
-	Extends: BaseAdapter,
-	_settings: null,
+var WallhavenAdapter = class extends BaseAdapter {
 
-	// query options
-	options: {
-		'q': '',
-		'purity': '110', // SFW, sketchy
-		'sorting': 'random',
-		'categories': '111', // General, Anime, People
-		'resolutions': ['1920x1200', '2560x1440']
-	},
+	constructor() {
+		super();
 
-	_init: function () {
-		this.parent();
+		this.options = {
+			'q': '',
+			'purity': '110', // SFW, sketchy
+			'sorting': 'random',
+			'categories': '111', // General, Anime, People
+			'resolutions': ['1920x1200', '2560x1440']
+		};
 
 		this._settings = new SettingsModule.Settings(RWG_SETTINGS_SCHEMA_WALLHAVEN);
-	},
+	}
 
-	requestRandomImage: function (callback) {
+	requestRandomImage(callback) {
 		let session = new Soup.SessionAsync();
 
 		this._readOptionsFromSettings();
@@ -273,6 +258,11 @@ var WallhavenAdapter = new Lang.Class({
 		session.queue_message(message, (session, message) => {
 			let body = message.response_body.data;
 			let urlArray = body.match(new RegExp(/http[s]*:\/\/alpha.wallhaven.cc\/wallpaper\/[0-9]+/g));
+
+			if (!urlArray || urlArray.length === 0) {
+				this._error("No image found.", callback);
+				return;
+			}
 
 			// remove dublicates from array
 			let uniqueUrlArray = urlArray.filter(function (item, pos) {
@@ -305,14 +295,13 @@ var WallhavenAdapter = new Lang.Class({
 					}
 				} catch (e) {
 					this._error("Unexpected response. (" + e + ")", callback);
-					return;
 				}
 			})
 
 		});
-	},
+	}
 
-	_generateOptionsString: function () {
+	_generateOptionsString() {
 		let options = this.options;
 		let optionsString = "";
 
@@ -329,9 +318,9 @@ var WallhavenAdapter = new Lang.Class({
 		}
 
 		return optionsString;
-	},
+	}
 
-	_readOptionsFromSettings: function () {
+	_readOptionsFromSettings() {
 		this.options.q = this._settings.get('wallhaven-keyword', 'string');
 
 		this.options.resolutions = this._settings.get('resolutions', 'string').split(',');
@@ -351,24 +340,21 @@ var WallhavenAdapter = new Lang.Class({
 		purity.push(0); // required by wallhaven
 		this.options.purity = purity.join('');
 	}
-});
+};
 
-var RedditAdapter = new Lang.Class({
-	Name: "RedditAdapter",
-	Extends: BaseAdapter,
+var RedditAdapter = class extends BaseAdapter {
 
-	_settings: null,
+	constructor() {
+		super();
 
-	_init: function () {
-		this.parent();
 		this._settings = new SettingsModule.Settings(RWG_SETTINGS_SCHEMA_REDDIT);
-	},
+	}
 
-	_ampDecode: function(string) {
-		return string.replace(/\&amp;/g,'&');
-	},
+	_ampDecode(string) {
+		return string.replace(/\&amp;/g, '&');
+	}
 
-	requestRandomImage: function (callback) {
+	requestRandomImage(callback) {
 		let session = new Soup.SessionAsync();
 
 		const subreddits = this._settings.get('subreddits', 'string').split(',').map(s => s.trim()).join('+');
@@ -385,11 +371,11 @@ var RedditAdapter = new Lang.Class({
 		session.queue_message(message, (session, message) => {
 			try {
 				const submissions = JSON.parse(message.response_body.data).data.children.filter(child => {
-					if(child.data.post_hint !== 'image') return false;
-					if(require_sfw) return child.data.over_18 === false;
+					if (child.data.post_hint !== 'image') return false;
+					if (require_sfw) return child.data.over_18 === false;
 					return true;
 				});
-				if(submissions.length === 0) {
+				if (submissions.length === 0) {
 					this._error("No suitable submissions found!", callback);
 					return;
 				}
@@ -405,26 +391,21 @@ var RedditAdapter = new Lang.Class({
 				}
 			} catch (e) {
 				this._error("Could not create request. (" + e + ")", callback);
-				return;
 			}
 		});
 	}
-});
 
-var GenericJsonAdapter = new Lang.Class({
-	Name: "GenericJsonAdapter",
-	Extends: BaseAdapter,
+};
 
-	_settings: null,
-	_jsonPathParser: null,
+var GenericJsonAdapter = class extends BaseAdapter {
 
-	_init: function () {
-		this.parent();
+	constructor() {
+		super();
 		this._jsonPathParser = new JSONPath.JSONPathParser();
 		this._settings = new SettingsModule.Settings(RWG_SETTINGS_SCHEMA_GENERIC_JSON);
-	},
+	}
 
-	requestRandomImage: function (callback) {
+	requestRandomImage(callback) {
 		let session = new Soup.SessionAsync();
 
 		let url = this._settings.get("generic-json-request-url", "string");
@@ -451,9 +432,9 @@ var GenericJsonAdapter = new Lang.Class({
 				}
 			} catch (e) {
 				this._error("Unexpected response. (" + e + ")", callback);
-				return;
 			}
 		});
 
 	}
-});
+
+};

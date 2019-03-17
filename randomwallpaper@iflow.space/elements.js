@@ -8,26 +8,19 @@ const Clutter = imports.gi.Clutter;
 const Cogl = imports.gi.Cogl;
 const Gtk = imports.gi.Gtk;
 
-// Filesystem
-const Gio = imports.gi.Gio;
-
 const Self = imports.misc.extensionUtils.getCurrentExtension();
 const LoggerModule = Self.imports.logger;
 const Timer = Self.imports.timer;
 
-var HistoryElement = new Lang.Class({
-	Name: 'HistoryElement',
-	Extends: PopupMenu.PopupSubMenuMenuItem,
-	logger: null,
-	historyEntry: null,
+var HistoryElement = class extends PopupMenu.PopupSubMenuMenuItem {
 
-	setAsWallpaperItem: null,
-	previewItem: null,
-	_previewActor: null,
-
-	_init: function (historyEntry, index) {
-		this.parent("", false);
+	constructor(historyEntry, index) {
+		super("", false);
 		this.logger = new LoggerModule.Logger('RWG3', 'HistoryElement');
+		this.historyEntry = null;
+		this.setAsWallpaperItem = null;
+		this.previewItem = null;
+		this._previewActor = null;
 
 		let timestamp = historyEntry.timestamp;
 		let date = new Date(timestamp);
@@ -149,26 +142,25 @@ var HistoryElement = new Lang.Class({
 				}
 			}
 		})
-	},
+	}
 
-	setIndex: function(index) {
+	setIndex(index) {
 		this.prefixLabel.set_text(String(index));
-	},
+	}
 
-});
+};
 
-var CurrentImageElement = new Lang.Class({
-	Name: 'CurrentImageElement',
-	Extends: HistoryElement,
+var CurrentImageElement = class extends HistoryElement {
 
-	_init: function (historyElement) {
-		this.parent(historyElement, 0);
+	constructor(historyElement) {
+		super(historyElement, 0);
 
 		if (this.setAsWallpaperItem !== null) {
 			this.setAsWallpaperItem.destroy();
 		}
 	}
-});
+
+};
 
 /**
  * Element for the New Wallpaper button and the remaining time for the auto fetch
@@ -177,12 +169,10 @@ var CurrentImageElement = new Lang.Class({
  *
  * @type {Lang.Class}
  */
-var NewWallpaperElement = new Lang.Class({
-	Name: 'NewWallpaperElement',
-	Extends: PopupMenu.PopupBaseMenuItem,
+var NewWallpaperElement = class extends PopupMenu.PopupBaseMenuItem {
 
-	_init: function (params) {
-		this.parent(params);
+	constructor(params) {
+		super(params);
 
 		this._timer = new Timer.AFTimer();
 
@@ -202,9 +192,9 @@ var NewWallpaperElement = new Lang.Class({
 		this._container.add_child(this._remainingLabel);
 
 		this.actor.add_child(this._container);
-	},
+	}
 
-	show: function () {
+	show() {
 		if (this._timer.isActive()) {
 			let remainingMinutes = this._timer.remainingMinutes();
 			let minutes = remainingMinutes % 60;
@@ -226,14 +216,12 @@ var NewWallpaperElement = new Lang.Class({
 			this._remainingLabel.hide();
 		}
 	}
-});
 
-var StatusElement = new Lang.Class({
-	Name: 'StatusElement',
+};
 
-	icon: null,
+var StatusElement = class {
 
-	_init: function () {
+	constructor() {
 		this.icon = new St.Icon({
 			icon_name: 'preferences-desktop-wallpaper-symbolic',
 			style_class: 'system-status-icon'
@@ -272,34 +260,32 @@ var StatusElement = new Lang.Class({
 			}
 		}
 
-	},
+	}
 
-	startLoading: function () {
+	startLoading() {
 		this.isLoading = true;
 		Tweener.addTween(this.icon, this.loadingTweenOut);
-	},
+	}
 
-	stopLoading: function () {
+	stopLoading() {
 		this.isLoading = false;
 		Tweener.removeTweens(this.icon);
 		this.icon.opacity = 255;
 	}
 
-});
+};
 
-var HistorySection = new Lang.Class({
-	Name: 'HistorySection',
-	Extends: PopupMenu.PopupMenuSection,
+var HistorySection = class extends PopupMenu.PopupMenuSection {
 
-	/**
-	 * Cache HistoryElements for performance of long histories.
-	 */
-	_historySectionCache: {},
+	constructor() {
+		super();
 
-	_historyCache: [],
+		/**
+		 * Cache HistoryElements for performance of long histories.
+		 */
+		this._historySectionCache = {};
 
-	_init: function () {
-		this.parent();
+		this._historyCache = [];
 
 		this.actor = new St.ScrollView({
 			hscrollbar_policy: Gtk.PolicyType.NEVER,
@@ -307,9 +293,9 @@ var HistorySection = new Lang.Class({
 		});
 
 		this.actor.add_actor(this.box);
-	},
+	}
 
-	updateList: function(history, onEnter, onLeave, onSelect) {
+	updateList(history, onEnter, onLeave, onSelect) {
 		if (this._historyCache.length <= 1) {
 			this.removeAll(); // remove empty history element
 		}
@@ -330,7 +316,7 @@ var HistorySection = new Lang.Class({
 				tmp.connect('activate', onSelect);
 				this._historySectionCache[historyID] = tmp;
 
-				this.addMenuItem(tmp, i-1);
+				this.addMenuItem(tmp, i - 1);
 			} else {
 				tmp = this._historySectionCache[historyID];
 				tmp.setIndex(i);
@@ -341,18 +327,18 @@ var HistorySection = new Lang.Class({
 
 		this._cleanupHistoryCache(existingHistoryElements);
 		this._historyCache = history;
-	},
+	}
 
-	_cleanupHistoryCache: function(existingIDs) {
+	_cleanupHistoryCache(existingIDs) {
 		let destroyIDs = Object.keys(this._historySectionCache).filter((i) => existingIDs.indexOf(i) === -1);
 
 		destroyIDs.map(id => {
 			this._historySectionCache[id].destroy();
 			delete this._historySectionCache[id];
 		});
-	},
+	}
 
-	clear: function() {
+	clear() {
 		this._cleanupHistoryCache([]);
 		this.removeAll();
 		this.addMenuItem(
@@ -365,7 +351,6 @@ var HistorySection = new Lang.Class({
 		);
 
 		this._historyCache = [];
-	},
+	}
 
-});
-
+};
