@@ -20,49 +20,47 @@ var AFTimer = function () {
  *
  * @type {Lang}
  */
-var _AFTimer = new Lang.Class({
-	Name: 'AFTimer',
-	logger: null,
+var _AFTimer = class {
 
-	_timeout: null,
-	_timoutEndCallback: null,
-	_minutes: 30,
-
-	_init: function () {
+	constructor() {
 		this.logger = new LoggerModule.Logger('RWG3', 'Timer');
 
+		this._timeout = null;
+		this._timoutEndCallback = null;
+		this._minutes = 30;
+
 		this._settings = new Prefs.Settings();
-	},
+	}
 
-	isActive: function () {
+	isActive() {
 		return this._settings.get('auto-fetch', 'boolean');
-	},
+	}
 
-	remainingMinutes: function () {
+	remainingMinutes() {
 		let minutesElapsed = this._minutesElapsed();
 		let remainder = minutesElapsed % this._minutes;
 		return Math.max(this._minutes - remainder, 0);
-	},
+	}
 
-	registerCallback: function (callback) {
+	registerCallback(callback) {
 		this._timoutEndCallback = callback;
-	},
+	}
 
 	/**
 	 * Sets the minutes of the timer.
 	 *
 	 * @param minutes
 	 */
-	setMinutes: function (minutes) {
+	setMinutes(minutes) {
 		this._minutes = minutes;
-	},
+	}
 
 	/**
 	 * Start the timer.
 	 *
 	 * @return void
 	 */
-	start: function () {
+	start() {
 		this.cleanup();
 
 		let last = this._settings.get('timer-last-trigger', 'int64');
@@ -90,41 +88,41 @@ var _AFTimer = new Lang.Class({
 			this.reset(); // reset timer
 			this.start(); // restart timer
 		});
-	},
+	}
 
 	/**
 	 * Stop the timer.
 	 *
 	 * @return void
 	 */
-	stop: function () {
+	stop() {
 		this._settings.set('timer-last-trigger', 'int64', 0);
 		this.cleanup();
-	},
+	}
 
 	/**
 	 * Cleanup the timeout callback if it exists.
 	 *
 	 * @return void
 	 */
-	cleanup: function () {
+	cleanup() {
 		if (this._timeout) { // only remove if a timeout is active
 			GLib.source_remove(this._timeout);
 			this._timeout = null;
 		}
-	},
+	}
 
 	/**
 	 * Reset the timer.
 	 *
 	 * @return void
 	 */
-	reset: function () {
+	reset() {
 		this._settings.set('timer-last-trigger', 'int64', new Date().getTime());
 		this.cleanup();
-	},
+	}
 
-	_minutesElapsed: function () {
+	_minutesElapsed() {
 		let now = Date.now();
 		let last = this._settings.get('timer-last-trigger', 'int64');
 
@@ -134,9 +132,9 @@ var _AFTimer = new Lang.Class({
 
 		let elapsed = Math.max(now - last, 0);
 		return Math.floor(elapsed / (60 * 1000));
-	},
+	}
 
-	_surpassedInterval: function () {
+	_surpassedInterval() {
 		let now = Date.now();
 		let last = this._settings.get('timer-last-trigger', 'int64');
 		let diff = now - last;
@@ -145,4 +143,4 @@ var _AFTimer = new Lang.Class({
 		return diff > intervalLength;
 	}
 
-});
+};

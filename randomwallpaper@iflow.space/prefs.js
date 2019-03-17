@@ -1,17 +1,12 @@
 const Gio = imports.gi.Gio;
 const GLib = imports.gi.GLib;
 const Gtk = imports.gi.Gtk;
-const Gdk = imports.gi.Gdk;
-const Lang = imports.lang;
 const ExtensionUtils = imports.misc.extensionUtils;
 
 const Self = ExtensionUtils.getCurrentExtension();
 const Convenience = Self.imports.convenience;
 
 const WallpaperController = Self.imports.wallpaperController;
-
-const Gettext = imports.gettext.domain('space.iflow.randomwallpaper');
-//const _ = Gettext.gettext;
 
 const RWG_SETTINGS_SCHEMA = 'org.gnome.shell.extensions.space.iflow.randomwallpaper';
 const RWG_SETTINGS_SCHEMA_DESKTOPPER = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.desktopper';
@@ -35,28 +30,20 @@ function buildPrefsWidget() {
 }
 
 /* UI Setup */
-var RandomWallpaperSettings = new Lang.Class({
-	Name: 'RandomWallpaper.Settings',
-	logger: null,
+var RandomWallpaperSettings = class {
 
-	currentSourceSettingsWidget: null,
+	constructor() {
+		this.logger = new LoggerModule.Logger('RWG3', 'RandomWallpaper.Settings');
 
-	noSettings: null,
-	desktopperSettings: null,
-	unsplashSettings: null,
-	wallhavenSettings: null,
-	redditSettings: null,
-	genericJsonSettings: null,
+		this.currentSourceSettingsWidget = null;
 
-	_wallpaperController: null,
+		this._wallpaperController = null;
 
-	_init: function () {
 		this._settings = Convenience.getSettings(RWG_SETTINGS_SCHEMA);
 		this._builder = new Gtk.Builder();
 		//this._builder.set_translation_domain(Self.metadata['gettext-domain']);
 		this._builder.add_from_file(Self.path + '/settings.ui');
 
-		this.logger = new LoggerModule.Logger('RWG3', 'RandomWallpaper.Settings');
 
 		this.noSettings = this._builder.get_object('no-settings');
 
@@ -158,9 +145,9 @@ var RandomWallpaperSettings = new Lang.Class({
 
 		this._wallpaperController = new WallpaperController.WallpaperController();
 		this._bindButtons();
-	},
+	}
 
-	_toggleAfSliders: function () {
+	_toggleAfSliders() {
 		if (this._builder.get_object('af-switch').active) {
 			this._builder.get_object('duration-slider-hours').set_sensitive(true);
 			this._builder.get_object('duration-slider-minutes').set_sensitive(true);
@@ -168,16 +155,16 @@ var RandomWallpaperSettings = new Lang.Class({
 			this._builder.get_object('duration-slider-hours').set_sensitive(false);
 			this._builder.get_object('duration-slider-minutes').set_sensitive(false);
 		}
-	},
+	}
 
-	bindDesktopper: function () {
+	bindDesktopper() {
 		this._desktopper_settings.bind('allow-unsafe',
 			this._builder.get_object('desktopper-allow-unsafe'),
 			'active',
 			Gio.SettingsBindFlags.DEFAULT);
-	},
+	}
 
-	bindUnsplash: function () {
+	bindUnsplash() {
 		this._unsplash_settings.bind('unsplash-keyword',
 			this._builder.get_object('unsplash-keyword'),
 			'text',
@@ -202,9 +189,9 @@ var RandomWallpaperSettings = new Lang.Class({
 			this._builder.get_object('unsplash-featured-only'),
 			'active',
 			Gio.SettingsBindFlags.DEFAULT);
-	},
+	}
 
-	bindWallhaven: function () {
+	bindWallhaven() {
 		this._wallhaven_settings.bind('wallhaven-keyword',
 			this._builder.get_object('wallhaven-keyword'),
 			'text',
@@ -235,9 +222,9 @@ var RandomWallpaperSettings = new Lang.Class({
 			this._builder.get_object('wallhaven-allow-sketchy'),
 			'active',
 			Gio.SettingsBindFlags.DEFAULT);
-	},
+	}
 
-  bindReddit: function () {
+	bindReddit() {
 		this._reddit_settings.bind('subreddits',
 			this._builder.get_object('reddit-subreddits'),
 			'text',
@@ -246,9 +233,9 @@ var RandomWallpaperSettings = new Lang.Class({
 			this._builder.get_object('reddit-allow-sfw'),
 			'active',
 			Gio.SettingsBindFlags.DEFAULT);
-  },
+	}
 
-	bindGenericJSON: function () {
+	bindGenericJSON() {
 		this._builder.get_object('generic-json-docs-link').set_label("More information here");
 		this._generic_json_settings.bind('generic-json-request-url',
 			this._builder.get_object('generic-json-request-url'),
@@ -262,9 +249,9 @@ var RandomWallpaperSettings = new Lang.Class({
 			this._builder.get_object('generic-json-url-prefix'),
 			'text',
 			Gio.SettingsBindFlags.DEFAULT);
-	},
+	}
 
-	_bindButtons: function () {
+	_bindButtons() {
 		let newWallpaperButton = this._builder.get_object('request-new-wallpaper');
 		let origNewWallpaperText = newWallpaperButton.get_label();
 		newWallpaperButton.connect('clicked', () => {
@@ -272,7 +259,7 @@ var RandomWallpaperSettings = new Lang.Class({
 			newWallpaperButton.set_sensitive(false);
 
 			this._wallpaperController.update();
-			this._wallpaperController.fetchNewWallpaper(()=>{
+			this._wallpaperController.fetchNewWallpaper(() => {
 				this._wallpaperController.update();
 				newWallpaperButton.set_label(origNewWallpaperText);
 				newWallpaperButton.set_sensitive(true);
@@ -290,4 +277,4 @@ var RandomWallpaperSettings = new Lang.Class({
 		});
 	}
 
-});
+};
