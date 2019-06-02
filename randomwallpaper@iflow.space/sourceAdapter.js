@@ -250,14 +250,13 @@ var WallhavenAdapter = class extends BaseAdapter {
 
 		this._readOptionsFromSettings();
 		let optionsString = this._generateOptionsString();
-		let url = 'http://alpha.wallhaven.cc/search?' + optionsString;
-		url = encodeURI(url);
+		let url = 'https://wallhaven.cc/search?' + encodeURI(optionsString);
 
 		let message = Soup.Message.new('GET', url);
 
 		session.queue_message(message, (session, message) => {
 			let body = message.response_body.data;
-			let urlArray = body.match(new RegExp(/http[s]*:\/\/alpha.wallhaven.cc\/wallpaper\/[0-9]+/g));
+			let urlArray = body.match(new RegExp(/https:\/\/wallhaven.cc\/w\/[0-9a-z]+/g));
 
 			if (!urlArray || urlArray.length === 0) {
 				this._error("No image found.", callback);
@@ -282,14 +281,11 @@ var WallhavenAdapter = class extends BaseAdapter {
 			session.queue_message(message, () => {
 				try {
 					let body = message.response_body.data;
-					let imageDownloadUrl = body.match(new RegExp(/\/\/wallpapers.wallhaven.cc\/wallpapers\/full\/.*?"/))[0];
-					imageDownloadUrl = imageDownloadUrl.slice(0, -1);
-					imageDownloadUrl = 'http:' + imageDownloadUrl;
-					imageDownloadUrl = encodeURI(imageDownloadUrl);
+					let imageDownloadUrl = body.match(new RegExp(/"(https:\/\/w.wallhaven.cc\/full\/.*?)"/))[1];
 
 					if (callback) {
 						let historyEntry = new HistoryModule.HistoryEntry(null, 'Wallhaven', imageDownloadUrl);
-						historyEntry.source.sourceUrl = 'https://alpha.wallhaven.cc/';
+						historyEntry.source.sourceUrl = 'https://wallhaven.cc/';
 						historyEntry.source.imageLinkUrl = url;
 						callback(historyEntry);
 					}
