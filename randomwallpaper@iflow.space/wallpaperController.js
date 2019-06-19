@@ -241,7 +241,7 @@ var WallpaperController = class {
 
 			this._fetchFile(historyElement.source.imageDownloadUrl, (historyId, path, error) => {
 				if (error) {
-					this._bailOutWithCallback("Could not load new wallpaper.", callback);
+					this._bailOutWithCallback("Could not load new wallpaper. (" + error + ")", callback);
 					this._stopLoadingHooks.map(element => element(null));
 					return;
 				}
