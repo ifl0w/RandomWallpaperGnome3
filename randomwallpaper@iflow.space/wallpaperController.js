@@ -127,7 +127,7 @@ var WallpaperController = class {
 		let request = Soup.Message.new('GET', uri);
 		request.connect('got_chunk', Lang.bind(this, function(message, chunk){
 			try {
-				fstream.write(chunk.get_data(), null, chunk.length);
+				fstream.write(chunk.get_data(), null);
 			} catch (e) {
 				if (callback) {
 					callback(null, null, e);
