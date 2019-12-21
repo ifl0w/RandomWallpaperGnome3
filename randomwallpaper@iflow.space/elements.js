@@ -7,15 +7,17 @@ const GdkPixbuf = imports.gi.GdkPixbuf;
 const Clutter = imports.gi.Clutter;
 const Cogl = imports.gi.Cogl;
 const Gtk = imports.gi.Gtk;
+const GObject = imports.gi.GObject;
 
 const Self = imports.misc.extensionUtils.getCurrentExtension();
 const LoggerModule = Self.imports.logger;
 const Timer = Self.imports.timer;
 
-var HistoryElement = class extends PopupMenu.PopupSubMenuMenuItem {
-
-	constructor(historyEntry, index) {
-		super("", false);
+var HistoryElement = GObject.registerClass({
+			 GTypeName: 'HistoryElement',
+	 }, class HistoryElement extends PopupMenu.PopupSubMenuMenuItem {
+				_init(historyEntry, index) {
+		super._init("", false);
 		this.logger = new LoggerModule.Logger('RWG3', 'HistoryElement');
 		this.historyEntry = null;
 		this.setAsWallpaperItem = null;
@@ -147,20 +149,22 @@ var HistoryElement = class extends PopupMenu.PopupSubMenuMenuItem {
 	setIndex(index) {
 		this.prefixLabel.set_text(String(index));
 	}
+	 }
+);
 
-};
+var CurrentImageElement = GObject.registerClass({
+			 GTypeName: 'CurrentImageElement',
+	 }, class CurrentImageElement extends HistoryElement {
 
-var CurrentImageElement = class extends HistoryElement {
-
-	constructor(historyElement) {
-		super(historyElement, 0);
+	_init(historyElement) {
+		super._init(historyElement, 0);
 
 		if (this.setAsWallpaperItem !== null) {
 			this.setAsWallpaperItem.destroy();
 		}
 	}
 
-};
+});
 
 /**
  * Element for the New Wallpaper button and the remaining time for the auto fetch
@@ -169,10 +173,12 @@ var CurrentImageElement = class extends HistoryElement {
  *
  * @type {Lang.Class}
  */
-var NewWallpaperElement = class extends PopupMenu.PopupBaseMenuItem {
+var NewWallpaperElement = GObject.registerClass({
+			 GTypeName: 'NewWallpaperElement',
+	 }, class NewWallpaperElement extends PopupMenu.PopupBaseMenuItem {
 
-	constructor(params) {
-		super(params);
+	_init(params) {
+		super._init(params);
 
 		this._timer = new Timer.AFTimer();
 
@@ -217,9 +223,9 @@ var NewWallpaperElement = class extends PopupMenu.PopupBaseMenuItem {
 		}
 	}
 
-};
+});
 
-var StatusElement = class {
+class StatusElement {
 
 	constructor() {
 		this.icon = new St.Icon({
@@ -275,7 +281,7 @@ var StatusElement = class {
 
 };
 
-var HistorySection = class extends PopupMenu.PopupMenuSection {
+class HistorySection extends PopupMenu.PopupMenuSection {
 
 	constructor() {
 		super();
