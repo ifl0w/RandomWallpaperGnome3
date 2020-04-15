@@ -85,8 +85,10 @@ var RandomWallpaperMenu = class {
 		});
 
 		this.openSettings.connect("activate", () => {
+			// Fixme: opens the settings overview in 3.36 where you have to select the correct extension yourself.
 			// call gnome settings tool for this extension
-			let app = Shell.AppSystem.get_default().lookup_app("gnome-shell-extension-prefs.desktop");
+			let app = Shell.AppSystem.get_default().lookup_app("org.gnome.Extensions.desktop");
+
 			if (app != null) {
 				// only works in Gnome >= 3.12
 				let info = app.get_app_info();

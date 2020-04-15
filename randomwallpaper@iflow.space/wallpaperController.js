@@ -3,6 +3,10 @@ const Mainloop = imports.gi.GLib;
 // Filesystem
 const Gio = imports.gi.Gio;
 
+// HTTP
+const Soup = imports.gi.Soup;
+const Lang = imports.lang;
+
 //self
 const Self = imports.misc.extensionUtils.getCurrentExtension();
 const SourceAdapter = Self.imports.sourceAdapter;
@@ -113,34 +117,31 @@ var WallpaperController = class {
 
 		let output_file, output_stream, input_file;
 
-		try {
-			output_file = Gio.file_new_for_path(this.wallpaperlocation + String(name));
-			output_stream = output_file.create(0, null);
+		let _httpSession = new Soup.SessionAsync();
+		Soup.Session.prototype.add_feature.call(_httpSession, new Soup.ProxyResolverDefault());
 
-			input_file = Gio.file_new_for_uri(uri);
-		} catch (e) {
-			if (callback) {
-				callback(null, null, e);
-			}
-			return;
-		}
+		let file = Gio.file_new_for_path(this.wallpaperlocation + String(name));
+		let fstream = file.replace(null, false, Gio.FileCreateFlags.NONE, null);
 
-		input_file.load_contents_async(null, (file, result) => {
-			let contents = null;
-
+		// start the download
+		let request = Soup.Message.new('GET', uri);
+		request.connect('got_chunk', Lang.bind(this, function(message, chunk){
 			try {
-				contents = file.load_contents_finish(result)[1];
-				output_stream.write(contents, null);
+				fstream.write(chunk.get_data(), null);
 			} catch (e) {
 				if (callback) {
 					callback(null, null, e);
 				}
 				return;
 			}
+		}));
 
+		_httpSession.queue_message(request, function(_httpSession, message) {
+			// close the file
+			fstream.close(null);
 			// call callback with the name and the full filepath of the written file as parameter
 			if (callback) {
-				callback(name, output_file.get_path());
+				callback(name, file.get_path());
 			}
 		});
 	}
