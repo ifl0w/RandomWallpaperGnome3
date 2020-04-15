@@ -103,7 +103,7 @@ var HistoryElement = GObject.registerClass({
 
 		this.setAsWallpaperItem = new PopupMenu.PopupMenuItem('Set As Wallpaper');
 		this.setAsWallpaperItem.connect('activate', () => {
-			this.emit('activate');
+			this.emit('activate', null); // Fixme: not sure what the second parameter should be. null seems to work fine for now.
 		});
 
 		this.previewItem = new PopupMenu.PopupBaseMenuItem({can_focus: false, reactive: false});
