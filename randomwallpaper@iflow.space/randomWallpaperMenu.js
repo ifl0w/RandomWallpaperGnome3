@@ -85,16 +85,16 @@ var RandomWallpaperMenu = class {
 		});
 
 		this.openSettings.connect("activate", () => {
-			// Fixme: opens the settings overview in 3.36 where you have to select the correct extension yourself.
-			// call gnome settings tool for this extension
-			let app = Shell.AppSystem.get_default().lookup_app("org.gnome.Extensions.desktop");
-
-			if (app != null) {
-				// only works in Gnome >= 3.12
-				let info = app.get_app_info();
-				let timestamp = global.display.get_current_time_roundtrip();
-				info.launch_uris([Self.uuid], global.create_app_launch_context(timestamp, -1));
-			}
+			Gio.DBus.session.call(
+				'org.gnome.Shell.Extensions',
+				'/org/gnome/Shell/Extensions',
+				'org.gnome.Shell.Extensions',
+				'OpenExtensionPrefs',
+				new GLib.Variant('(ssa{sv})', [Self.uuid, '', {}]),
+				null,
+				Gio.DBusCallFlags.NONE,
+				-1,
+				null);
 		});
 
 		this.panelMenu.menu.actor.connect('show', () => {
