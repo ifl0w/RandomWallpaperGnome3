@@ -236,7 +236,7 @@ class StatusElement {
 
 		this.loadingTweenIn = {
 			opacity: 20,
-			duration: 500,
+			duration: 1500,
 			mode: Clutter.AnimationMode.EASE_IN_OUT_SINE,
 			autoReverse: true,
 			repeatCount: -1
@@ -245,14 +245,11 @@ class StatusElement {
 	}
 
 	startLoading() {
-		this.isLoading = true
 		this.icon.ease(this.loadingTweenIn);
 	}
 
 	stopLoading() {
 		this.icon.remove_all_transitions();
-
-		this.isLoading = false;
 		this.icon.opacity = 255;
 	}
 
