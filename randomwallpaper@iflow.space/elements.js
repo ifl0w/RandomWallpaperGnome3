@@ -1,7 +1,6 @@
 const Lang = imports.lang;
 const PopupMenu = imports.ui.popupMenu;
 const St = imports.gi.St;
-const Tweener = imports.ui.tweener;
 const Util = imports.misc.util;
 const GdkPixbuf = imports.gi.GdkPixbuf;
 const Clutter = imports.gi.Clutter;
@@ -237,45 +236,20 @@ class StatusElement {
 
 		this.loadingTweenIn = {
 			opacity: 20,
-			time: 2,
-			transition: 'easeInOutSine',
-			onComplete: function () {
-				try {
-					Tweener.addTween(_this.icon, _this.loadingTweenOut);
-				} catch (e) {
-					// swollow (not really important)
-				}
-			}
+			duration: 1500,
+			mode: Clutter.AnimationMode.EASE_IN_OUT_SINE,
+			autoReverse: true,
+			repeatCount: -1
 		};
-
-		this.loadingTweenOut = {
-			opacity: 255,
-			time: 1,
-			transition: 'easeInOutSine',
-			onComplete: function () {
-				if (_this.isLoading) {
-					try {
-						Tweener.addTween(_this.icon, _this.loadingTweenIn);
-					} catch (e) {
-						// swollow (not really important)
-					}
-				} else {
-					return false;
-				}
-				return true;
-			}
-		}
 
 	}
 
 	startLoading() {
-		this.isLoading = true;
-		Tweener.addTween(this.icon, this.loadingTweenOut);
+		this.icon.ease(this.loadingTweenIn);
 	}
 
 	stopLoading() {
-		this.isLoading = false;
-		Tweener.removeTweens(this.icon);
+		this.icon.remove_all_transitions();
 		this.icon.opacity = 255;
 	}
 
