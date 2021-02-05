@@ -20,7 +20,14 @@ var WallpaperController = class {
 
 	constructor() {
 		this.logger = new LoggerModule.Logger('RWG3', 'WallpaperController');
-		this.wallpaperlocation = Self.path + '/wallpapers/';
+		let xdg_cache_home = Mainloop.getenv('XDG_CACHE_HOME')
+		if (!xdg_cache_home)
+		{
+			xdg_cache_home = Mainloop.getenv('HOME') + '/.cache'
+		}
+		this.wallpaperlocation = xdg_cache_home + '/RandomWallpaperGnome3/wallpapers/';
+		let mode = parseInt("0755", 8);
+		Mainloop.mkdir_with_parents(this.wallpaperlocation, mode)
 		this.imageSourceAdapter = null;
 
 		this._autoFetch = {
