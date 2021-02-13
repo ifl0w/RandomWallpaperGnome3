@@ -6,23 +6,23 @@ var Logger = class {
 	}
 
 	_log(level, message) {
-		global.log(this._prefix + " [" + level + "] >> " + this._callingClass + " :: " + message);
+		log(this._prefix + ' [' + level + '] >> ' + this._callingClass + ' :: ' + message);
 	}
 
 	debug(message) {
-		this._log("DEBUG", message);
+		this._log('DEBUG', message);
 	}
 
 	info(message) {
-		this._log("INFO", message);
+		this._log('INFO', message);
 	}
 
 	warn(message) {
-		this._log("WARNING", message);
+		this._log('WARNING', message);
 	}
 
 	error(message) {
-		this._log("ERROR", message);
+		this._log('ERROR', message);
 	}
 
 };
