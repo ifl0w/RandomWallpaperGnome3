@@ -9,7 +9,6 @@ const Convenience = Self.imports.convenience;
 const WallpaperController = Self.imports.wallpaperController;
 
 const RWG_SETTINGS_SCHEMA = 'org.gnome.shell.extensions.space.iflow.randomwallpaper';
-const RWG_SETTINGS_SCHEMA_DESKTOPPER = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.desktopper';
 const RWG_SETTINGS_SCHEMA_UNSPLASH = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.unsplash';
 const RWG_SETTINGS_SCHEMA_WALLHAVEN = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.wallhaven';
 const RWG_SETTINGS_SCHEMA_REDDIT = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.reddit';
@@ -44,13 +43,7 @@ var RandomWallpaperSettings = class {
 		//this._builder.set_translation_domain(Self.metadata['gettext-domain']);
 		this._builder.add_from_file(Self.path + '/settings.ui');
 
-
 		this.noSettings = this._builder.get_object('no-settings');
-
-		// Desktopper Settings
-		this._desktopper_settings = Convenience.getSettings(RWG_SETTINGS_SCHEMA_DESKTOPPER);
-		this.desktopperSettings = this._builder.get_object('desktopper-settings');
-		this.bindDesktopper();
 
 		// Unsplash Settings
 		this._unsplash_settings = Convenience.getSettings(RWG_SETTINGS_SCHEMA_UNSPLASH);
@@ -90,16 +83,13 @@ var RandomWallpaperSettings = class {
 				case 0: // unsplash
 					this.currentSourceSettingsWidget = this.unsplashSettings;
 					break;
-				case 1: // desktopper
-					this.currentSourceSettingsWidget = this.desktopperSettings;
-					break;
-				case 2: // wallhaven
+				case 1: // wallhaven
 					this.currentSourceSettingsWidget = this.wallhavenSettings;
 					break;
-				case 3: // reddit
+				case 2: // reddit
 					this.currentSourceSettingsWidget = this.redditSettings;
 					break;
-				case 4: // generic JSON
+				case 3: // generic JSON
 					this.currentSourceSettingsWidget = this.genericJsonSettings;
 					break;
 				default:
@@ -155,13 +145,6 @@ var RandomWallpaperSettings = class {
 			this._builder.get_object('duration-slider-hours').set_sensitive(false);
 			this._builder.get_object('duration-slider-minutes').set_sensitive(false);
 		}
-	}
-
-	bindDesktopper() {
-		this._desktopper_settings.bind('allow-unsafe',
-			this._builder.get_object('desktopper-allow-unsafe'),
-			'active',
-			Gio.SettingsBindFlags.DEFAULT);
 	}
 
 	bindUnsplash() {
@@ -236,7 +219,6 @@ var RandomWallpaperSettings = class {
 	}
 
 	bindGenericJSON() {
-		this._builder.get_object('generic-json-docs-link').set_label("More information here");
 		this._generic_json_settings.bind('generic-json-request-url',
 			this._builder.get_object('generic-json-request-url'),
 			'text',

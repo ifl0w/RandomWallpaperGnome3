@@ -3,7 +3,6 @@ const Self = imports.misc.extensionUtils.getCurrentExtension();
 // network requests
 const Soup = imports.gi.Soup;
 
-const RWG_SETTINGS_SCHEMA_DESKTOPPER = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.desktopper';
 const RWG_SETTINGS_SCHEMA_UNSPLASH = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.unsplash';
 const RWG_SETTINGS_SCHEMA_WALLHAVEN = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.wallhaven';
 const RWG_SETTINGS_SCHEMA_REDDIT = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.reddit';
@@ -61,53 +60,6 @@ var BaseAdapter = class {
 		if (callback) {
 			callback(null, error);
 		}
-	}
-
-};
-
-var DesktopperAdapter = class extends BaseAdapter {
-
-	constructor() {
-		super();
-
-		this._settings = new SettingsModule.Settings(RWG_SETTINGS_SCHEMA_DESKTOPPER);
-	}
-
-	requestRandomImage(callback) {
-		let session = new Soup.SessionAsync();
-
-		let url = 'https://api.desktoppr.co/1/wallpapers/random';
-		let allowUnsafe = this._settings.get('allow-unsafe', 'boolean');
-		if (allowUnsafe) {
-			url += '?safe_filter=all';
-		} else {
-			url += '?safe_filter=safe';
-		}
-		url = encodeURI(url);
-
-		let message = Soup.Message.new('GET', url);
-
-		if (message === null) {
-			this._error("Could not create request.", callback);
-			return;
-		}
-
-		session.queue_message(message, (session, message) => {
-			try {
-				let data = JSON.parse(message.response_body.data);
-				let response = data.response;
-				let imageDownloadUrl = encodeURI(response.image.url);
-
-				if (callback) {
-					let historyEntry = new HistoryModule.HistoryEntry(null, 'Desktopper', imageDownloadUrl);
-					historyEntry.source.sourceUrl = 'https://www.desktoppr.co/';
-					callback(historyEntry);
-				}
-			} catch (e) {
-				this._error("Could not create request. (" + e + ")", callback);
-				return;
-			}
-		});
 	}
 
 };

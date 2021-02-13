@@ -42,7 +42,6 @@ var WallpaperController = class {
 		this._settings.observe('minutes', this._updateAutoFetching.bind(this));
 		this._settings.observe('hours', this._updateAutoFetching.bind(this));
 
-		this._desktopperAdapter = new SourceAdapter.DesktopperAdapter();
 		this._unsplashAdapter = new SourceAdapter.UnsplashAdapter();
 		this._wallhavenAdapter = new SourceAdapter.WallhavenAdapter();
 		this._redditAdapter = new SourceAdapter.RedditAdapter();
@@ -78,25 +77,23 @@ var WallpaperController = class {
 	 forwards the request to the adapter
 	 */
 	_requestRandomImageFromAdapter(callback) {
-		this.imageSourceAdapter = this._desktopperAdapter;
+		this.imageSourceAdapter = this._unsplashAdapter;
+
 		switch (this._settings.get('source', 'enum')) {
 			case 0:
 				this.imageSourceAdapter = this._unsplashAdapter;
 				break;
 			case 1:
-				this.imageSourceAdapter = this._desktopperAdapter;
-				break;
-			case 2:
 				this.imageSourceAdapter = this._wallhavenAdapter;
 				break;
-			case 3:
+			case 2:
 				this.imageSourceAdapter = this._redditAdapter;
 				break;
-			case 4:
+			case 3:
 				this.imageSourceAdapter = this._genericJsonAdapter;
 				break;
 			default:
-				this.imageSourceAdapter = this._desktopperAdapter;
+				this.imageSourceAdapter = this._unsplashAdapter;
 				break;
 		}
 
