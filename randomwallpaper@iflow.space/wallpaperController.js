@@ -23,10 +23,10 @@ var WallpaperController = class {
 		let xdg_cache_home = Mainloop.getenv('XDG_CACHE_HOME')
 		if (!xdg_cache_home)
 		{
-			xdg_cache_home = Mainloop.getenv('HOME') + '/.cache'
+			xdg_cache_home = `${Mainloop.getenv('HOME')}/.cache`
 		}
-		this.wallpaperlocation = xdg_cache_home + '/RandomWallpaperGnome3/wallpapers/';
-		let mode = parseInt("0755", 8);
+		this.wallpaperlocation = `${xdg_cache_home}/${Self.metadata['uuid']}/wallpapers/`;
+		let mode = parseInt('0755', 8);
 		Mainloop.mkdir_with_parents(this.wallpaperlocation, mode)
 		this.imageSourceAdapter = null;
 
