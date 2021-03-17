@@ -231,21 +231,16 @@ class StatusElement {
 			icon_name: 'preferences-desktop-wallpaper-symbolic',
 			style_class: 'system-status-icon'
 		});
-
-		let _this = this;
-
-		this.loadingTweenIn = {
-			opacity: 20,
-			duration: 1500,
-			mode: Clutter.AnimationMode.EASE_IN_OUT_SINE,
-			autoReverse: true,
-			repeatCount: -1
-		};
-
 	}
 
 	startLoading() {
-		this.icon.ease(this.loadingTweenIn);
+		this.icon.ease({
+			opacity: 20,
+			duration: 1337,
+			mode: Clutter.AnimationMode.EASE_IN_OUT_SINE,
+			autoReverse: true,
+			repeatCount: -1
+		});
 	}
 
 	stopLoading() {
