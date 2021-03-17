@@ -23,7 +23,7 @@ function init(metaData) {
 function buildPrefsWidget() {
 	let settings = new RandomWallpaperSettings();
 	let widget = settings.widget;
-	widget.show_all();
+	widget.show();
 
 	return widget;
 }
@@ -33,8 +33,6 @@ var RandomWallpaperSettings = class {
 
 	constructor() {
 		this.logger = new LoggerModule.Logger('RWG3', 'RandomWallpaper.Settings');
-
-		this.currentSourceSettingsWidget = null;
 
 		this._wallpaperController = null;
 
@@ -75,29 +73,30 @@ var RandomWallpaperSettings = class {
 
 		this._builder.get_object('source-combo').connect('changed', (sourceCombo) => {
 			let container = this._builder.get_object('source-settings-container');
-			if (this.currentSourceSettingsWidget !== null) {
-				container.remove(this.currentSourceSettingsWidget);
-			}
 
+			let targetWidget = null;
 			switch (sourceCombo.active) {
 				case 0: // unsplash
-					this.currentSourceSettingsWidget = this.unsplashSettings;
+					targetWidget = this.unsplashSettings;
 					break;
 				case 1: // wallhaven
-					this.currentSourceSettingsWidget = this.wallhavenSettings;
+					targetWidget = this.wallhavenSettings;
 					break;
 				case 2: // reddit
-					this.currentSourceSettingsWidget = this.redditSettings;
+					targetWidget = this.redditSettings;
 					break;
 				case 3: // generic JSON
-					this.currentSourceSettingsWidget = this.genericJsonSettings;
+					targetWidget = this.genericJsonSettings;
 					break;
 				default:
-					this.currentSourceSettingsWidget = this.noSettings;
+					targetWidget = null;
+					this.logger.error("The selected source has no corresponding widget!")
 					break;
 			}
 
-			container.add(this.currentSourceSettingsWidget);
+			if (targetWidget !== null) {
+				container.set_child(targetWidget);
+			}
 		});
 
 		this._settings.bind('history-length',
