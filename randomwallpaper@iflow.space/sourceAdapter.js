@@ -115,7 +115,9 @@ var UnsplashAdapter = class extends BaseAdapter {
 				authorUrl = encodeURI(data.user.links.html);
 				imageLinkUrl = encodeURI(data.links.html);
 
-				let downloadLocation = data.links.download_location + '?' + clientParam;
+				// check whether the download link contains parameters already
+				let junctionSymbol = data.links.download_location.split('?').length > 1 ? '&' : '?';
+				let downloadLocation = data.links.download_location + junctionSymbol + clientParam;
 				downloadMessage = Soup.Message.new('GET', downloadLocation);
 			} catch (e) {
 				this._error("Unexpected response. (" + e + ")", callback);
