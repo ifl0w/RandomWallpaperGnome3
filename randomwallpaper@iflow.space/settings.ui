@@ -156,6 +156,7 @@ You can also define a prefix that will be added to the image URL.</property>
     </child>
     <child>
       <object class="GtkBox">
+        <property name="margin-top">10</property>
         <property name="visible">1</property>
         <child>
           <object class="GtkCheckButton" id="reddit-allow-sfw">
@@ -234,6 +235,7 @@ You can also define a prefix that will be added to the image URL.</property>
                           <object class="GtkBox">
                             <property name="visible">1</property>
                             <property name="orientation">vertical</property>
+                            <property name="spacing">5</property>
                             <child>
                               <object class="GtkLabel" id="change-lock-screen-label">
                                 <property name="visible">1</property>
@@ -291,6 +293,7 @@ You can also define a prefix that will be added to the image URL.</property>
                           <object class="GtkBox">
                             <property name="visible">1</property>
                             <property name="orientation">vertical</property>
+                            <property name="spacing">5</property>
                             <child>
                               <object class="GtkLabel" id="hide-panel-icon-label">
                                 <property name="visible">1</property>
@@ -367,6 +370,7 @@ You can also define a prefix that will be added to the image URL.</property>
                           <object class="GtkBox">
                             <property name="visible">1</property>
                             <property name="orientation">vertical</property>
+                            <property name="spacing">5</property>
                             <child>
                               <object class="GtkLabel" id="disable-hover-preview-label">
                                 <property name="visible">1</property>
@@ -473,6 +477,7 @@ You can also define a prefix that will be added to the image URL.</property>
                           <object class="GtkBox">
                             <property name="visible">1</property>
                             <property name="orientation">vertical</property>
+                            <property name="spacing">5</property>
                             <child>
                               <object class="GtkLabel" id="history-size-label">
                                 <property name="visible">1</property>
@@ -585,6 +590,7 @@ You can also define a prefix that will be added to the image URL.</property>
                               <object class="GtkBox">
                                 <property name="visible">1</property>
                                 <property name="orientation">vertical</property>
+                                <property name="spacing">5</property>
                                 <child>
                                   <object class="GtkLabel" id="af-label">
                                     <property name="visible">1</property>
@@ -731,8 +737,8 @@ You can also define a prefix that will be added to the image URL.</property>
                         <child>
                           <object class="GtkBox">
                             <property name="visible">1</property>
-                            <property name="spacing">10</property>
                             <property name="orientation">vertical</property>
+                            <property name="spacing">5</property>
                             <child>
                               <object class="GtkLabel" id="source-label">
                                 <property name="visible">1</property>
@@ -777,12 +783,6 @@ You can also define a prefix that will be added to the image URL.</property>
                           <object class="GtkFrame" id="source-settings-container">
                             <property name="visible">1</property>
                             <property name="hexpand">1</property>
-                            <child type="label">
-                              <object class="GtkLabel">
-                                <property name="visible">1</property>
-                                <property name="label" translatable="yes">Source Settings</property>
-                              </object>
-                            </child>
                           </object>
                         </child>
                       </object>
@@ -870,6 +870,7 @@ You can also define a prefix that will be added to the image URL.</property>
     <child>
       <object class="GtkBox">
         <property name="visible">1</property>
+        <property name="spacing">10</property>
         <child>
           <object class="GtkBox">
             <property name="visible">1</property>
@@ -918,11 +919,13 @@ You can also define a prefix that will be added to the image URL.</property>
     <child>
       <object class="GtkGrid">
         <property name="visible">1</property>
+        <property name="margin-top">10</property>
         <child>
           <object class="GtkBox">
             <property name="visible">1</property>
             <property name="hexpand">1</property>
             <property name="orientation">vertical</property>
+            <property name="spacing">5</property>
             <child>
               <object class="GtkLabel">
                 <property name="visible">1</property>
@@ -1007,6 +1010,7 @@ You can also define a prefix that will be added to the image URL.</property>
       <object class="GtkLabel">
         <property name="visible">1</property>
         <property name="halign">start</property>
+        <property name="margin-top">10</property>
         <property name="label" translatable="yes">Categories</property>
       </object>
     </child>
@@ -1039,6 +1043,7 @@ You can also define a prefix that will be added to the image URL.</property>
     <child>
       <object class="GtkLabel">
         <property name="visible">1</property>
+        <property name="margin-top">10</property>
         <property name="halign">start</property>
         <property name="label" translatable="yes">Resolutions</property>
       </object>
