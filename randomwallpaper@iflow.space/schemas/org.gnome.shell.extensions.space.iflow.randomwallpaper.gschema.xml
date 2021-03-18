@@ -3,10 +3,9 @@
 
     <enum id='org.gnome.shell.extensions.space.iflow.randomwallpaper.sources'>
         <value value='0' nick='unsplash'/>
-        <value value='1' nick='desktoppr'/>
-        <value value='2' nick='wallhaven'/>
-        <value value='3' nick='reddit'/>
-        <value value='4' nick='genericJSON'/>
+        <value value='1' nick='wallhaven'/>
+        <value value='2' nick='reddit'/>
+        <value value='3' nick='genericJSON'/>
     </enum>
 
     <schema path="/org/gnome/shell/extensions/space-iflow-randomwallpaper/"
@@ -76,15 +75,6 @@
             <description>Removes the panel icon from the gnome shell.</description>
         </key>
 
-    </schema>
-
-    <schema path="/org/gnome/shell/extensions/space-iflow-randomwallpaper/desktopper/"
-            id='org.gnome.shell.extensions.space.iflow.randomwallpaper.desktopper'>
-        <key type='b' name='allow-unsafe'>
-            <default>false</default>
-            <summary>Allow Unsafe</summary>
-            <description>Weather the extension should fetch images that are rated as unsafe.</description>
-        </key>
     </schema>
 
     <schema path="/org/gnome/shell/extensions/space-iflow-randomwallpaper/unsplash/"

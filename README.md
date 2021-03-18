@@ -11,7 +11,6 @@ Install and try the extension at [extensions.gnome.org](https://extensions.gnome
 
 * Many different online sources with filters
     * Unsplash (https://unsplash.com/)
-    * Desktoppr (https://desktoppr.co/)
     * Wallhaven (https://alpha.wallhaven.cc/)
     * Reddit (https://reddit.com)
     * Basically any JSON API/File ([Examples](https://github.com/ifl0w/RandomWallpaperGnome3/wiki/Generic-JSON-Source))

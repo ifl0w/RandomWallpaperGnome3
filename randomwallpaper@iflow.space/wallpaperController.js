@@ -20,7 +20,14 @@ var WallpaperController = class {
 
 	constructor() {
 		this.logger = new LoggerModule.Logger('RWG3', 'WallpaperController');
-		this.wallpaperlocation = Self.path + '/wallpapers/';
+		let xdg_cache_home = Mainloop.getenv('XDG_CACHE_HOME')
+		if (!xdg_cache_home)
+		{
+			xdg_cache_home = `${Mainloop.getenv('HOME')}/.cache`
+		}
+		this.wallpaperlocation = `${xdg_cache_home}/${Self.metadata['uuid']}/wallpapers/`;
+		let mode = parseInt('0755', 8);
+		Mainloop.mkdir_with_parents(this.wallpaperlocation, mode)
 		this.imageSourceAdapter = null;
 
 		this._autoFetch = {
@@ -42,7 +49,6 @@ var WallpaperController = class {
 		this._settings.observe('minutes', this._updateAutoFetching.bind(this));
 		this._settings.observe('hours', this._updateAutoFetching.bind(this));
 
-		this._desktopperAdapter = new SourceAdapter.DesktopperAdapter();
 		this._unsplashAdapter = new SourceAdapter.UnsplashAdapter();
 		this._wallhavenAdapter = new SourceAdapter.WallhavenAdapter();
 		this._redditAdapter = new SourceAdapter.RedditAdapter();
@@ -78,25 +84,23 @@ var WallpaperController = class {
 	 forwards the request to the adapter
 	 */
 	_requestRandomImageFromAdapter(callback) {
-		this.imageSourceAdapter = this._desktopperAdapter;
+		this.imageSourceAdapter = this._unsplashAdapter;
+
 		switch (this._settings.get('source', 'enum')) {
 			case 0:
 				this.imageSourceAdapter = this._unsplashAdapter;
 				break;
 			case 1:
-				this.imageSourceAdapter = this._desktopperAdapter;
-				break;
-			case 2:
 				this.imageSourceAdapter = this._wallhavenAdapter;
 				break;
-			case 3:
+			case 2:
 				this.imageSourceAdapter = this._redditAdapter;
 				break;
-			case 4:
+			case 3:
 				this.imageSourceAdapter = this._genericJsonAdapter;
 				break;
 			default:
-				this.imageSourceAdapter = this._desktopperAdapter;
+				this.imageSourceAdapter = this._unsplashAdapter;
 				break;
 		}
 

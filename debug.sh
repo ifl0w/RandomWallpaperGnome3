@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ "$1" = "prefs" ]; then
-  gnome-shell-extension-prefs randomwallpaper@iflow.space
+  journalctl -f /usr/bin/gjs
 else
   journalctl -f /usr/bin/gnome-shell
 fi
