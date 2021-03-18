@@ -409,6 +409,69 @@ You can also define a prefix that will be added to the image URL.</property>
                     <child type="label_item"/>
                   </object>
                 </child>
+                <child>
+                  <object class="GtkFrame">
+                    <property name="visible">1</property>
+                    <child>
+                      <object class="GtkBox">
+                        <property name="visible">1</property>
+                        <property name="margin-start">15</property>
+                        <property name="margin-end">15</property>
+                        <property name="margin-top">15</property>
+                        <property name="margin-bottom">15</property>
+                        <property name="orientation">vertical</property>
+                        <property name="spacing">10</property>
+                        <child>
+                          <object class="GtkBox">
+                            <property name="visible">1</property>
+                            <property name="orientation">vertical</property>
+                            <child>
+                              <object class="GtkLabel" id="image-settings-label">
+                                <property name="visible">1</property>
+                                <property name="halign">start</property>
+                                <property name="label" translatable="yes">Disable hover preview</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="image-settings-description">
+                                <property name="visible">1</property>
+                                <property name="hexpand">1</property>
+                                <property name="label" translatable="yes">Disable the desktop preview of the background while hovering the history items. Try enabling if you encounter crashes or lags of the gnome-shell while using the extension.</property>
+                                <property name="use-underline">1</property>
+                                <property name="wrap">1</property>
+                                <property name="max-width-chars">1</property>
+                                <property name="xalign">0</property>
+                                <style>
+                                  <class name="dim-label"/>
+                                </style>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkBox">
+                            <property name="visible">1</property>
+                            <property name="orientation">horizontal</property>
+                            <property name="spacing">10</property>
+                            <child>
+                              <object class="GtkColorButton" id="image-settings-color">
+                                <property name="visible">1</property>
+                                <property name="can-focus">1</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkComboBox" id="image-settings-placement">
+                                <property name="visible">1</property>
+                                <property name="can-focus">1</property>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child type="label_item"/>
+                  </object>
+                </child>
               </object>
             </child>
           </object>

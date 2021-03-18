@@ -2,6 +2,7 @@ const Gio = imports.gi.Gio;
 const GLib = imports.gi.GLib;
 const Gtk = imports.gi.Gtk;
 const ExtensionUtils = imports.misc.extensionUtils;
+const GObject = imports.gi.GObject;
 
 const Self = ExtensionUtils.getCurrentExtension();
 const Convenience = Self.imports.convenience;
@@ -35,6 +36,9 @@ var RandomWallpaperSettings = class {
 		this.logger = new LoggerModule.Logger('RWG3', 'RandomWallpaper.Settings');
 
 		this._wallpaperController = null;
+
+		this._background_settings = new Gio.Settings({schema: "org.gnome.desktop.background"});
+		this._screensaver_settings = new Gio.Settings({schema: "org.gnome.desktop.screensaver"});
 
 		this._settings = Convenience.getSettings(RWG_SETTINGS_SCHEMA);
 		this._builder = new Gtk.Builder();
@@ -131,6 +135,40 @@ var RandomWallpaperSettings = class {
 			this._builder.get_object('hide-panel-icon'),
 			'active',
 			Gio.SettingsBindFlags.DEFAULT);
+
+		// log(this._background_settings.get_range('picture-options').is_tuple());
+		log(this._background_settings.get_range('picture-options').get_child_value(0).get_string());
+
+		// get valid values for placement
+		let validValues = this._background_settings.get_range('picture-options').get_child_value(1).get_variant().get_strv();
+
+		// initialize image placement model
+		let model = new Gtk.ListStore();
+		model.set_column_types([GObject.TYPE_STRING]);
+		validValues.forEach((v) => model.set(model.append(), [0], [v]));
+
+		// initialize combobox
+		let cbox = this._builder.get_object('image-settings-placement');
+		cbox.set_model(model);
+		let renderer = new Gtk.CellRendererText();
+		cbox.pack_start(renderer, true);
+		cbox.add_attribute(renderer, 'text', 0);
+		cbox.set_id_column(0);
+
+		// bind image placement
+		this._background_settings.bind('picture-options',
+			this._builder.get_object('image-settings-placement'),
+			'active-id',
+			Gio.SettingsBindFlags.DEFAULT);
+
+		// change color selec
+		this._builder.get_object('image-settings-color').connect('color-set', (colorButton) => {
+			log("waasdfasdft")
+			let color_string = colorButton.get_rgba().to_string()
+
+			this._background_settings.set_string("primary-color", color_string);
+			Gio.Settings.sync();
+		})
 
 		this._wallpaperController = new WallpaperController.WallpaperController();
 		this._bindButtons();
