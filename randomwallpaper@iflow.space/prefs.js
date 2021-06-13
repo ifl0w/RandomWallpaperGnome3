@@ -126,7 +126,11 @@ var RandomWallpaperSettings = class {
 		this._settings.bind('disable-hover-preview',
 			this._builder.get_object('disable-hover-preview'),
 			'active',
-			Gio.SettingsBindFlags.DEFAULT)
+			Gio.SettingsBindFlags.DEFAULT);
+		this._settings.bind('fix-blur',
+			this._builder.get_object('fix-blur'),
+			'active',
+			Gio.SettingsBindFlags.DEFAULT);
 		this._settings.bind('hide-panel-icon',
 			this._builder.get_object('hide-panel-icon'),
 			'active',

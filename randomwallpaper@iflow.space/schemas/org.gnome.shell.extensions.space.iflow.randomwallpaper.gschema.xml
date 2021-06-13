@@ -69,6 +69,12 @@
             <description>Disables the preview of the background while hovering the history list</description>
         </key>
 
+		<key type='b' name='fix-blur'>
+            <default>false</default>
+            <summary>Fix for Blur My Shell</summary>
+            <description>Fixes wallpaper blur not updating with auto-fetching.</description>
+        </key>
+
         <key type='b' name='hide-panel-icon'>
             <default>false</default>
             <summary>Hide the panel icon</summary>
