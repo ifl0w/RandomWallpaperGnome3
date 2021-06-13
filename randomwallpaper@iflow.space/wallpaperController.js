@@ -195,8 +195,17 @@ var WallpaperController = class {
 		if (settings.is_writable("picture-uri")) {
 			// Set a new Background-Image (should show up immediately):
 			let rc = settings.set_string("picture-uri", path);
+			
 			if (rc) {
+				let fix_blur = this._settings.get('fix-blur', 'boolean');
+
+				if (fix_blur) settings.set_int("picture-opacity", 99);
 				Gio.Settings.sync(); // Necessary: http://stackoverflow.com/questions/9985140
+
+				if (fix_blur){ // force update blur my shell
+					settings.set_int("picture-opacity", 100);
+					Gio.Settings.sync(); // MAYBE FIX: not sure double time
+				} 
 
 				// call callback if given
 				if (callback) {

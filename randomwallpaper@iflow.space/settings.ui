@@ -413,6 +413,65 @@ You can also define a prefix that will be added to the image URL.</property>
                     <child type="label_item"/>
                   </object>
                 </child>
+				<child>
+                  <object class="GtkFrame">
+                    <property name="visible">1</property>
+                    <!-- n-columns=3 n-rows=3 -->
+                    <child>
+                      <object class="GtkBox">
+                        <property name="visible">1</property>
+                        <property name="margin-start">15</property>
+                        <property name="margin-end">15</property>
+                        <property name="margin-top">15</property>
+                        <property name="margin-bottom">15</property>
+                        <child>
+                          <object class="GtkBox">
+                            <property name="visible">1</property>
+                            <property name="orientation">vertical</property>
+                            <property name="spacing">5</property>
+                            <child>
+                              <object class="GtkLabel" id="fix-blur-label">
+                                <property name="visible">1</property>
+                                <property name="halign">start</property>
+                                <property name="label" translatable="yes">Fix for Blur My Shell</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="fix-blur-description">
+                                <property name="visible">1</property>
+                                <property name="hexpand">1</property>
+                                <property name="label" translatable="yes">Fixes wallpaper blur not updating with auto-fetching.</property>
+                                <property name="use-underline">1</property>
+                                <property name="wrap">1</property>
+                                <property name="max-width-chars">1</property>
+                                <property name="xalign">0</property>
+                                <style>
+                                  <class name="dim-label"/>
+                                </style>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+						
+                        <child>
+                          <object class="GtkBox">
+                            <property name="visible">1</property>
+                            <property name="orientation">vertical</property>
+                            <child>
+                              <object class="GtkSwitch" id="fix-blur">
+                                <property name="visible">1</property>
+                                <property name="can-focus">1</property>
+                                <property name="halign">end</property>
+                                <property name="valign">start</property>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child type="label_item"/>
+                  </object>
+                </child>
               </object>
             </child>
           </object>
