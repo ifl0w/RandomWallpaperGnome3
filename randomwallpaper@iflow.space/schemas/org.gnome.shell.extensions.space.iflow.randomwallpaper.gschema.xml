@@ -120,6 +120,11 @@
             <summary>Keyword</summary>
             <description>The keyword will be used to search images.</description>
         </key>
+        <key type='s' name='wallhaven-api-key'>
+            <default>""</default>
+            <summary>Api key</summary>
+            <description>The wallheven api key.</description>
+        </key>
         <key type='s' name='resolutions'>
             <default>"1920x1200, 1920x1080, 2560x1440, 2560x1600, 3840x1080"</default>
             <summary>Resolutions</summary>
@@ -134,6 +139,11 @@
             <default>false</default>
             <summary>Sketchy</summary>
             <description>Weather sketchy images are allowed.</description>
+        </key>
+        <key type='b' name='allow-nsfw'>
+            <default>false</default>
+            <summary>NSFW</summary>
+            <description>Weather not safe images are allowed.</description>
         </key>
 
         <key type='b' name='category-general'>

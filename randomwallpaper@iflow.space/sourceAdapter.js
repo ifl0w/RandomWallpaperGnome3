@@ -190,6 +190,7 @@ var WallhavenAdapter = class extends BaseAdapter {
 
 		this.options = {
 			'q': '',
+			'apikey': '',
 			'purity': '110', // SFW, sketchy
 			'sorting': 'random',
 			'categories': '111', // General, Anime, People
@@ -204,50 +205,32 @@ var WallhavenAdapter = class extends BaseAdapter {
 
 		this._readOptionsFromSettings();
 		let optionsString = this._generateOptionsString();
-		let url = 'https://wallhaven.cc/search?' + encodeURI(optionsString);
+		let url = 'https://wallhaven.cc/api/v1/search?' + encodeURI(optionsString);
 
 		let message = Soup.Message.new('GET', url);
 
 		session.queue_message(message, (session, message) => {
-			let body = message.response_body.data;
-			let urlArray = body.match(new RegExp(/https:\/\/wallhaven.cc\/w\/[0-9a-z]+/g));
+			let images = JSON.parse(message.response_body.data).data;
 
-			if (!urlArray || urlArray.length === 0) {
-				this._error("No image found.", callback);
+			if (!images || images.length === 0) {
+				this._error("No image found. body:"+images, callback);
 				return;
 			}
-
-			// remove dublicates from array
-			let uniqueUrlArray = urlArray.filter(function (item, pos) {
-				return urlArray.indexOf(item) == pos;
-			});
 
 			// get a random entry from the array
-			let url = uniqueUrlArray[Math.floor(Math.random() * uniqueUrlArray.length)];
+			let imageUrl = images[Math.floor(Math.random() * images.length)].path;
 
-			message = Soup.Message.new('GET', url);
+			let apiKey = this.options["apikey"];
+			if(apiKey){
+                imageUrl += "?apikey="+apiKey;
+            }
 
-			if (message === null) {
-				this._error("Could not create request.", callback);
-				return;
-			}
-
-			session.queue_message(message, () => {
-				try {
-					let body = message.response_body.data;
-					let imageDownloadUrl = body.match(new RegExp(/"(https:\/\/w.wallhaven.cc\/full\/.*?)"/))[1];
-
-					if (callback) {
-						let historyEntry = new HistoryModule.HistoryEntry(null, 'Wallhaven', imageDownloadUrl);
-						historyEntry.source.sourceUrl = 'https://wallhaven.cc/';
-						historyEntry.source.imageLinkUrl = url;
-						callback(historyEntry);
-					}
-				} catch (e) {
-					this._error("Unexpected response. (" + e + ")", callback);
-				}
-			})
-
+            if (callback) {
+                let historyEntry = new HistoryModule.HistoryEntry(null, 'Wallhaven', imageUrl);
+                historyEntry.source.sourceUrl = 'https://wallhaven.cc/';
+                historyEntry.source.imageLinkUrl = url;
+                callback(historyEntry);
+            }
 		});
 	}
 
@@ -272,6 +255,7 @@ var WallhavenAdapter = class extends BaseAdapter {
 
 	_readOptionsFromSettings() {
 		this.options.q = this._settings.get('wallhaven-keyword', 'string');
+		this.options.apikey = this._settings.get('wallhaven-api-key', 'string');
 
 		this.options.resolutions = this._settings.get('resolutions', 'string').split(',');
 		this.options.resolutions = this.options.resolutions.map((elem) => {
@@ -287,7 +271,7 @@ var WallhavenAdapter = class extends BaseAdapter {
 		let purity = [];
 		purity.push(+this._settings.get('allow-sfw', 'boolean'));
 		purity.push(+this._settings.get('allow-sketchy', 'boolean'));
-		purity.push(0); // required by wallhaven
+		purity.push(+this._settings.get('allow-nsfw', 'boolean'));
 		this.options.purity = purity.join('');
 	}
 };
