@@ -1021,7 +1021,7 @@ You can also define a prefix that will be added to the image URL.</property>
         </child>
         <child>
           <object class="GtkCheckButton" id="wallhaven-allow-nsfw">
-            <property name="label" translatable="yes">NSFW</property>
+            <property name="label" translatable="yes">NSFW (API key required)</property>
             <property name="visible">1</property>
             <property name="can-focus">1</property>
           </object>
