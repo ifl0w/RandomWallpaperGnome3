@@ -178,6 +178,10 @@ var RandomWallpaperSettings = class {
 			this._builder.get_object('wallhaven-keyword'),
 			'text',
 			Gio.SettingsBindFlags.DEFAULT);
+		this._wallhaven_settings.bind('wallhaven-api-key',
+			this._builder.get_object('wallhaven-api-key'),
+			'text',
+			Gio.SettingsBindFlags.DEFAULT);
 		this._wallhaven_settings.bind('resolutions',
 			this._builder.get_object('wallhaven-resolutions'),
 			'text',
@@ -202,6 +206,10 @@ var RandomWallpaperSettings = class {
 			Gio.SettingsBindFlags.DEFAULT);
 		this._wallhaven_settings.bind('allow-sketchy',
 			this._builder.get_object('wallhaven-allow-sketchy'),
+			'active',
+			Gio.SettingsBindFlags.DEFAULT);
+		this._wallhaven_settings.bind('allow-nsfw',
+			this._builder.get_object('wallhaven-allow-nsfw'),
 			'active',
 			Gio.SettingsBindFlags.DEFAULT);
 	}
