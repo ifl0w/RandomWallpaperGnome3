@@ -222,15 +222,15 @@ var WallhavenAdapter = class extends BaseAdapter {
 
 			let apiKey = this.options["apikey"];
 			if(apiKey){
-                imageUrl += "?apikey="+apiKey;
-            }
+				imageUrl += "?apikey="+apiKey;
+			}
 
-            if (callback) {
-                let historyEntry = new HistoryModule.HistoryEntry(null, 'Wallhaven', imageUrl);
-                historyEntry.source.sourceUrl = 'https://wallhaven.cc/';
-                historyEntry.source.imageLinkUrl = url;
-                callback(historyEntry);
-            }
+			if (callback) {
+				let historyEntry = new HistoryModule.HistoryEntry(null, 'Wallhaven', imageUrl);
+				historyEntry.source.sourceUrl = 'https://wallhaven.cc/';
+				historyEntry.source.imageLinkUrl = url;
+				callback(historyEntry);
+			}
 		});
 	}
 
