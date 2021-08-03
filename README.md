@@ -5,7 +5,7 @@ Random Wallpapers for Gnome 3 is a gnome-shell extension that fetches a random w
 
 Install and try the extension at [extensions.gnome.org](https://extensions.gnome.org/extension/1040/random-wallpaper/).
 
-![Screenshot](/assets/screenshot.png)
+![Screenshot](./assets/screenshot.png)
 
 ## Features
 

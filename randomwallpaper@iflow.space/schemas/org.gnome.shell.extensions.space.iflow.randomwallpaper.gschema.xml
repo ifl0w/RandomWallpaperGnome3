@@ -69,6 +69,12 @@
             <description>Disables the preview of the background while hovering the history list</description>
         </key>
 
+        <key type='b' name='enable-image-stretching'>
+            <default>false</default>
+            <summary>Enable image stretching</summary>
+            <description>Enables the image stretching of the background.</description>
+        </key>
+
         <key type='b' name='hide-panel-icon'>
             <default>false</default>
             <summary>Hide the panel icon</summary>
