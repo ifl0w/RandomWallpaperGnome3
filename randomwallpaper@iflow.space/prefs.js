@@ -23,7 +23,7 @@ function init(metaData) {
 function buildPrefsWidget() {
 	let settings = new RandomWallpaperSettings();
 	let widget = settings.widget;
-	widget.show_all();
+	widget.show();
 
 	return widget;
 }
@@ -33,8 +33,6 @@ var RandomWallpaperSettings = class {
 
 	constructor() {
 		this.logger = new LoggerModule.Logger('RWG3', 'RandomWallpaper.Settings');
-
-		this.currentSourceSettingsWidget = null;
 
 		this._wallpaperController = null;
 
@@ -75,29 +73,30 @@ var RandomWallpaperSettings = class {
 
 		this._builder.get_object('source-combo').connect('changed', (sourceCombo) => {
 			let container = this._builder.get_object('source-settings-container');
-			if (this.currentSourceSettingsWidget !== null) {
-				container.remove(this.currentSourceSettingsWidget);
-			}
 
+			let targetWidget = null;
 			switch (sourceCombo.active) {
 				case 0: // unsplash
-					this.currentSourceSettingsWidget = this.unsplashSettings;
+					targetWidget = this.unsplashSettings;
 					break;
 				case 1: // wallhaven
-					this.currentSourceSettingsWidget = this.wallhavenSettings;
+					targetWidget = this.wallhavenSettings;
 					break;
 				case 2: // reddit
-					this.currentSourceSettingsWidget = this.redditSettings;
+					targetWidget = this.redditSettings;
 					break;
 				case 3: // generic JSON
-					this.currentSourceSettingsWidget = this.genericJsonSettings;
+					targetWidget = this.genericJsonSettings;
 					break;
 				default:
-					this.currentSourceSettingsWidget = this.noSettings;
+					targetWidget = null;
+					this.logger.error("The selected source has no corresponding widget!")
 					break;
 			}
 
-			container.add(this.currentSourceSettingsWidget);
+			if (targetWidget !== null) {
+				container.set_child(targetWidget);
+			}
 		});
 
 		this._settings.bind('history-length',
@@ -152,31 +151,58 @@ var RandomWallpaperSettings = class {
 			this._builder.get_object('unsplash-keyword'),
 			'text',
 			Gio.SettingsBindFlags.DEFAULT);
-		this._unsplash_settings.bind('unsplash-username',
-			this._builder.get_object('unsplash-username'),
-			'text',
-			Gio.SettingsBindFlags.DEFAULT);
-		this._unsplash_settings.bind('unsplash-collections',
-			this._builder.get_object('unsplash-collections'),
-			'text',
-			Gio.SettingsBindFlags.DEFAULT);
-		this._unsplash_settings.bind('image-width',
+		this._unsplash_settings.bind('unsplash-image-width',
 			this._builder.get_object('unsplash-image-width'),
 			'value',
 			Gio.SettingsBindFlags.DEFAULT);
-		this._unsplash_settings.bind('image-height',
+		this._unsplash_settings.bind('unsplash-image-height',
 			this._builder.get_object('unsplash-image-height'),
 			'value',
 			Gio.SettingsBindFlags.DEFAULT);
-		this._unsplash_settings.bind('featured-only',
-			this._builder.get_object('unsplash-featured-only'),
+
+		const unsplash_featured_only = this._builder.get_object('unsplash-featured-only');
+		this._unsplash_settings.bind('unsplash-featured-only',
+			unsplash_featured_only,
 			'active',
 			Gio.SettingsBindFlags.DEFAULT);
+
+		const unsplash_constraint_type = this._builder.get_object('unsplash-constraint-type');
+		const unsplash_constraint_value = this._builder.get_object('unsplash-constraint-value');
+
+		this._unsplash_settings.bind('unsplash-constraint-type',
+			unsplash_constraint_type,
+			'active-id',
+			Gio.SettingsBindFlags.DEFAULT);
+		this._unsplash_settings.bind('unsplash-constraint-value',
+			unsplash_constraint_value,
+			'text',
+			Gio.SettingsBindFlags.DEFAULT);
+
+		this._unsplashUnconstrained(unsplash_constraint_type, true, unsplash_featured_only);
+		this._unsplashUnconstrained(unsplash_constraint_type, false, unsplash_constraint_value);
+		unsplash_constraint_type.connect('changed', (combo) => {
+			this._unsplashUnconstrained(combo, true, unsplash_featured_only);
+			this._unsplashUnconstrained(combo, false, unsplash_constraint_value);
+
+			unsplash_featured_only.set_active(false);
+		});
+	}
+
+	_unsplashUnconstrained(combobox, enable, targetElement) {
+		if(combobox.active_id === 'unconstrained') {
+			targetElement.set_sensitive(enable);
+		} else {
+			targetElement.set_sensitive(!enable);
+		}
 	}
 
 	bindWallhaven() {
 		this._wallhaven_settings.bind('wallhaven-keyword',
 			this._builder.get_object('wallhaven-keyword'),
+			'text',
+			Gio.SettingsBindFlags.DEFAULT);
+		this._wallhaven_settings.bind('wallhaven-api-key',
+			this._builder.get_object('wallhaven-api-key'),
 			'text',
 			Gio.SettingsBindFlags.DEFAULT);
 		this._wallhaven_settings.bind('resolutions',
@@ -203,6 +229,10 @@ var RandomWallpaperSettings = class {
 			Gio.SettingsBindFlags.DEFAULT);
 		this._wallhaven_settings.bind('allow-sketchy',
 			this._builder.get_object('wallhaven-allow-sketchy'),
+			'active',
+			Gio.SettingsBindFlags.DEFAULT);
+		this._wallhaven_settings.bind('allow-nsfw',
+			this._builder.get_object('wallhaven-allow-nsfw'),
 			'active',
 			Gio.SettingsBindFlags.DEFAULT);
 	}
