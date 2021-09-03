@@ -77,6 +77,13 @@
 
     </schema>
 
+    <enum id='org.gnome.shell.extensions.space.iflow.randomwallpaper.unsplash.constraints'>
+        <value value='0' nick='unconstrained'/>
+        <value value='1' nick='user'/>
+        <value value='2' nick='likes'/>
+        <value value='3' nick='collection'/>
+    </enum>
+
     <schema path="/org/gnome/shell/extensions/space-iflow-randomwallpaper/unsplash/"
             id='org.gnome.shell.extensions.space.iflow.randomwallpaper.unsplash'>
         <key type='s' name='unsplash-keyword'>
@@ -94,23 +101,36 @@
             <summary>Collections</summary>
             <description>Only fetch random images from a comma separated list of collections.</description>
         </key>
-        <key type='i' name='image-width'>
+        <key type='i' name='unsplash-image-width'>
             <default>1920</default>
             <summary>Image Width</summary>
             <description>The width of the image.</description>
         </key>
-        <key type='i' name='image-height'>
+        <key type='i' name='unsplash-image-height'>
             <default>1080</default>
             <summary>Image Width</summary>
             <description>The height of the image.</description>
         </key>
-        <key type='b' name='featured-only'>
+        <key type='b' name='unsplash-featured-only'>
             <default>false</default>
             <summary>Featured images only</summary>
             <description>This results in a smaller wallpaper pool but the images are considered to have higher
                 quality.
             </description>
         </key>
+
+        <key name='unsplash-constraint-type' enum='org.gnome.shell.extensions.space.iflow.randomwallpaper.unsplash.constraints'>
+            <default>'unconstrained'</default>
+            <summary>Constraint Type</summary>
+            <description>The constraint of the Unsplash Source API.</description>
+        </key>
+
+        <key type='s' name='unsplash-constraint-value'>
+            <default>""</default>
+            <summary>Constraint Value</summary>
+            <description>This value should match the constraint type for. Has no effect in the case of an unconstrained search.</description>
+        </key>
+
     </schema>
 
     <schema path="/org/gnome/shell/extensions/space-iflow-randomwallpaper/wallhaven/"

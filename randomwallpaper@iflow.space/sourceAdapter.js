@@ -70,16 +70,16 @@ var UnsplashAdapter = class extends BaseAdapter {
 		super();
 
 		this.sourceName = 'Unsplash';
-		this.sourceUrl = 'https://unsplash.com/';
+		this.sourceUrl = 'https://source.unsplash.com';
 
 		// query options
 		this.options = {
-			'username': '',
 			'query': '',
-			'collections': [],
 			'w': 1920,
 			'h': 1080,
-			'featured': false
+			'featured': false,
+			'constraintType': '',
+			'constraintValue': '',
 		};
 
 		this._settings = new SettingsModule.Settings(RWG_SETTINGS_SCHEMA_UNSPLASH);
@@ -90,61 +90,36 @@ var UnsplashAdapter = class extends BaseAdapter {
 
 		this._readOptionsFromSettings();
 		let optionsString = this._generateOptionsString();
-		let clientParam = 'client_id=64daf439e9b579dd566620c0b07022706522d87b255d06dd01d5470b7f193b8d';
 
-		let url = 'https://api.unsplash.com/photos/random?' + optionsString + clientParam;
+		let url = `https://source.unsplash.com${optionsString}`;
 		url = encodeURI(url);
 
 		let message = Soup.Message.new('GET', url);
+
+		this.logger.info(`Unsplash request to: ${url}`);
+
+		// unsplash redirects to actual file; we only want the file location
+		message.set_flags(Soup.MessageFlags.NO_REDIRECT);
 
 		if (message === null) {
 			this._error("Could not create request.", callback);
 			return;
 		}
 
-		let utmParameters = 'utm_source=RandomWallpaperGnome3&utm_medium=referral&utm_campaign=api-credit';
-
 		session.queue_message(message, (session, message) => {
-			let downloadMessage = null;
-			let authorName, authorUrl, imageLinkUrl;
+			let imageLinkUrl;
 
-			try {
-				let data = JSON.parse(message.response_body.data);
-
-				authorName = data.user.name;
-				authorUrl = encodeURI(data.user.links.html);
-				imageLinkUrl = encodeURI(data.links.html);
-
-				// check whether the download link contains parameters already
-				let junctionSymbol = data.links.download_location.split('?').length > 1 ? '&' : '?';
-				let downloadLocation = data.links.download_location + junctionSymbol + clientParam;
-				downloadMessage = Soup.Message.new('GET', downloadLocation);
-			} catch (e) {
-				this._error("Unexpected response. (" + e + ")", callback);
-				return;
+			// expecting redirect
+			if (message.status_code !== 302) {
+				this._error("Unexpected response status code (expected 302)", callback);
 			}
 
-			if (message === null) {
-				this._error("Could not create request.", callback);
-				return;
-			}
+			imageLinkUrl = message.response_headers.get_one('Location');
 
-			session.queue_message(downloadMessage, (session, message) => {
-				try {
-					let downloadData = JSON.parse(message.response_body.data);
-
-					if (callback) {
-						let historyEntry = new HistoryModule.HistoryEntry(authorName, this.sourceName, encodeURI(downloadData.url));
-						historyEntry.source.sourceUrl = encodeURI(this.sourceUrl + '?' + utmParameters);
-						historyEntry.source.authorUrl = encodeURI(authorUrl + '?' + utmParameters);
-						historyEntry.source.imageLinkUrl = imageLinkUrl + '?' + utmParameters;
-						callback(historyEntry);
-					}
-				} catch (e) {
-					this._error("Unexpected response. (" + e + ")", callback);
-					return;
-				}
-			});
+			let historyEntry = new HistoryModule.HistoryEntry(null, this.sourceName, imageLinkUrl);
+			historyEntry.source.sourceUrl = this.sourceUrl;
+			historyEntry.source.imageLinkUrl = imageLinkUrl;
+			callback(historyEntry);
 		});
 	}
 
@@ -152,34 +127,46 @@ var UnsplashAdapter = class extends BaseAdapter {
 		let options = this.options;
 		let optionsString = "";
 
-		for (let key in options) {
-			if (options.hasOwnProperty(key)) {
-				if (options[key]) {
-					optionsString += key + "=" + options[key] + "&";
+		switch (options.constraintType) {
+			case 'user':
+				optionsString = `/user/${options.constraintValue}/`;
+				break;
+			case 'likes':
+				optionsString = `/user/${options.constraintValue}/likes/`;
+				break;
+			case 'collection':
+				optionsString = `/collection/${options.constraintValue}/`;
+				break;
+			default:
+				if (options.featured) {
+					optionsString = `/featured/`;
+				} else {
+					optionsString = `/random/`;
 				}
-			}
+		}
+
+		if (options.w && options.h) {
+			optionsString += `${options.w}x${options.h}`;
+		}
+
+		if (options.query) {
+			let q = options.query.replace(/\W/, ',');
+			optionsString += `?${q}`;
 		}
 
 		return optionsString;
 	}
 
 	_readOptionsFromSettings() {
+		this.options.w = this._settings.get('unsplash-image-width', 'int');
+		this.options.h = this._settings.get('unsplash-image-height', 'int');
+
+		this.options.constraintType = this._settings.get('unsplash-constraint-type', 'string');
+		this.options.constraintValue = this._settings.get('unsplash-constraint-value', 'string');
+
 		this.options.query = this._settings.get('unsplash-keyword', 'string');
 
-		this.options.username = this._settings.get('unsplash-username', 'string');
-		if (this.options.username && this.options.username[0] === '@') {
-			this.options.username = this.options.username.substring(1); // remove @ prefix
-		}
-
-		this.options.collections = this._settings.get('unsplash-collections', 'string').split(',').map(
-			(elem) => {
-				return elem.trim();
-			});
-
-		this.options.w = this._settings.get('image-width', 'int');
-		this.options.h = this._settings.get('image-height', 'int');
-
-		this.options.featured = this._settings.get('featured-only', 'boolean');
+		this.options.featured = this._settings.get('unsplash-featured-only', 'boolean');
 	}
 };
 

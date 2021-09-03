@@ -130,6 +130,11 @@ var WallpaperController = class {
 		// start the download
 		let request = Soup.Message.new('GET', uri);
 		request.connect('got_chunk', Lang.bind(this, function(message, chunk){
+			// skip any non-content request (e.g. redirects)
+			if (message.status_code !== 200) {
+				return;
+			}
+
 			try {
 				fstream.write(chunk.get_data(), null);
 			} catch (e) {
