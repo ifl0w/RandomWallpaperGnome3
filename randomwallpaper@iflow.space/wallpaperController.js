@@ -193,6 +193,9 @@ var WallpaperController = class {
 		 https://bitbucket.org/LukasKnuth/backslide/src/7e36a49fc5e1439fa9ed21e39b09b61eca8df41a/backslide@codeisland.org/settings.js?at=master
 		 */
 		if (settings.is_writable("picture-uri")) {
+			// Set a picture options:
+			let stretching = this._settings.get('enable-image-stretching', 'boolean');
+			settings.set_string("picture-options", stretching ? 'spanned' : 'zoom');
 			// Set a new Background-Image (should show up immediately):
 			let rc = settings.set_string("picture-uri", path);
 			if (rc) {

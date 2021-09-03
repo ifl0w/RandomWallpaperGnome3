@@ -128,6 +128,10 @@ var RandomWallpaperSettings = class {
 			this._builder.get_object('disable-hover-preview'),
 			'active',
 			Gio.SettingsBindFlags.DEFAULT)
+		this._settings.bind('enable-image-stretching',
+			this._builder.get_object('enable-image-stretching'),
+			'active',
+			Gio.SettingsBindFlags.DEFAULT)
 		this._settings.bind('hide-panel-icon',
 			this._builder.get_object('hide-panel-icon'),
 			'active',
