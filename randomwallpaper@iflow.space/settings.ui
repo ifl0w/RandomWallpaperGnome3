@@ -822,36 +822,7 @@ You can also define a prefix that will be added to the image URL.</property>
     <property name="margin-top">10</property>
     <property name="margin-bottom">10</property>
     <property name="orientation">vertical</property>
-    <child>
-      <object class="GtkLabel">
-        <property name="visible">1</property>
-        <property name="halign">start</property>
-        <property name="label" translatable="yes">Username</property>
-      </object>
-    </child>
-    <child>
-      <object class="GtkEntry" id="unsplash-username">
-        <property name="visible">1</property>
-        <property name="can-focus">1</property>
-        <property name="margin-bottom">10</property>
-        <property name="placeholder-text" translatable="yes">@username</property>
-      </object>
-    </child>
-    <child>
-      <object class="GtkLabel">
-        <property name="visible">1</property>
-        <property name="halign">start</property>
-        <property name="label" translatable="yes">Collections</property>
-      </object>
-    </child>
-    <child>
-      <object class="GtkEntry" id="unsplash-collections">
-        <property name="visible">1</property>
-        <property name="can-focus">1</property>
-        <property name="margin-bottom">10</property>
-        <property name="placeholder-text" translatable="yes">ID1, ID2, ...</property>
-      </object>
-    </child>
+
     <child>
       <object class="GtkLabel">
         <property name="visible">1</property>
@@ -867,10 +838,54 @@ You can also define a prefix that will be added to the image URL.</property>
         <property name="placeholder-text" translatable="yes">Some keyword ...</property>
       </object>
     </child>
+
+    <child>
+      <object class="GtkGrid">
+        <property name="visible">1</property>
+        <property name="margin-bottom">10</property>
+        <child>
+          <object class="GtkBox">
+            <property name="visible">1</property>
+            <property name="hexpand">1</property>
+            <property name="orientation">vertical</property>
+            <property name="spacing">5</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">1</property>
+                <property name="halign">start</property>
+                <property name="label" translatable="yes">Only Featured Images</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">1</property>
+                <property name="label" translatable="yes">This option results in a smaller wallpaper pool, but the images are considered to be of higher quality.</property>
+                <property name="wrap">1</property>
+                <property name="max-width-chars">1</property>
+                <property name="xalign">0</property>
+                <style>
+                  <class name="dim-label"/>
+                </style>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkSwitch" id="unsplash-featured-only">
+            <property name="visible">1</property>
+            <property name="can-focus">1</property>
+            <property name="halign">end</property>
+            <property name="valign">start</property>
+          </object>
+        </child>
+      </object>
+    </child>
+
     <child>
       <object class="GtkBox">
         <property name="visible">1</property>
         <property name="spacing">10</property>
+        <property name="margin-bottom">10</property>
         <child>
           <object class="GtkBox">
             <property name="visible">1</property>
@@ -916,45 +931,38 @@ You can also define a prefix that will be added to the image URL.</property>
       </object>
     </child>
     <!-- n-columns=3 n-rows=3 -->
+
     <child>
-      <object class="GtkGrid">
+      <object class="GtkLabel">
+        <property name="halign">start</property>
+        <property name="label" translatable="yes">Constraint Type</property>
+      </object>
+    </child>
+    <child>
+        <object class="GtkComboBoxText" id="unsplash-constraint-type">
+            <property name="visible">1</property>
+            <property name="active-id">0</property>
+            <property name="margin-bottom">10</property>
+            <items>
+              <item id="unconstrained">Unconstrained</item>
+              <item id="user">User</item>
+              <item id="likes">User's Likes</item>
+              <item id="collection">Collection ID</item>
+            </items>
+        </object>
+    </child>
+
+    <child>
+      <object class="GtkLabel">
+        <property name="halign">start</property>
+        <property name="label" translatable="yes">Constraint Value</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkEntry" id="unsplash-constraint-value">
         <property name="visible">1</property>
-        <property name="margin-top">10</property>
-        <child>
-          <object class="GtkBox">
-            <property name="visible">1</property>
-            <property name="hexpand">1</property>
-            <property name="orientation">vertical</property>
-            <property name="spacing">5</property>
-            <child>
-              <object class="GtkLabel">
-                <property name="visible">1</property>
-                <property name="halign">start</property>
-                <property name="label" translatable="yes">Only Featured Images</property>
-              </object>
-            </child>
-            <child>
-              <object class="GtkLabel">
-                <property name="visible">1</property>
-                <property name="label" translatable="yes">This option results in a smaller wallpaper pool, but the images are considered to be of higher quality.</property>
-                <property name="wrap">1</property>
-                <property name="max-width-chars">1</property>
-                <property name="xalign">0</property>
-                <style>
-                  <class name="dim-label"/>
-                </style>
-              </object>
-            </child>
-          </object>
-        </child>
-        <child>
-          <object class="GtkSwitch" id="unsplash-featured-only">
-            <property name="visible">1</property>
-            <property name="can-focus">1</property>
-            <property name="halign">end</property>
-            <property name="valign">start</property>
-          </object>
-        </child>
+        <property name="can-focus">1</property>
+        <property name="placeholder-text" translatable="yes">Username or Collection ID</property>
       </object>
     </child>
   </object>
@@ -980,6 +988,21 @@ You can also define a prefix that will be added to the image URL.</property>
         <property name="placeholder-text" translatable="yes">Enter a keyword ...</property>
       </object>
     </child>
+        <child>
+          <object class="GtkLabel">
+            <property name="visible">1</property>
+            <property name="halign">start</property>
+            <property name="label" translatable="yes">Api Key</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkEntry" id="wallhaven-api-key">
+            <property name="visible">1</property>
+            <property name="can-focus">1</property>
+            <property name="margin-bottom">10</property>
+            <property name="placeholder-text" translatable="yes">The api key, can be empty...</property>
+          </object>
+        </child>
     <child>
       <object class="GtkLabel">
         <property name="visible">1</property>
@@ -1000,6 +1023,13 @@ You can also define a prefix that will be added to the image URL.</property>
         <child>
           <object class="GtkCheckButton" id="wallhaven-allow-sketchy">
             <property name="label" translatable="yes">Sketchy</property>
+            <property name="visible">1</property>
+            <property name="can-focus">1</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkCheckButton" id="wallhaven-allow-nsfw">
+            <property name="label" translatable="yes">NSFW (API key required)</property>
             <property name="visible">1</property>
             <property name="can-focus">1</property>
           </object>
