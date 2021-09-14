@@ -23,7 +23,7 @@ function init(metaData) {
 function buildPrefsWidget() {
 	let settings = new RandomWallpaperSettings();
 	let widget = settings.widget;
-	widget.show();
+	widget.show_all();
 
 	return widget;
 }
@@ -33,6 +33,8 @@ var RandomWallpaperSettings = class {
 
 	constructor() {
 		this.logger = new LoggerModule.Logger('RWG3', 'RandomWallpaper.Settings');
+
+		this.currentSourceSettingsWidget = null;
 
 		this._wallpaperController = null;
 
@@ -94,8 +96,13 @@ var RandomWallpaperSettings = class {
 					break;
 			}
 
+			if (this.currentSourceSettingsWidget !== null) {
+				container.remove(this.currentSourceSettingsWidget);
+			}
+
 			if (targetWidget !== null) {
-				container.set_child(targetWidget);
+				this.currentSourceSettingsWidget = targetWidget;
+				container.add(this.currentSourceSettingsWidget);
 			}
 		});
 
