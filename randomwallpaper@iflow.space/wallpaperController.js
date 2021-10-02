@@ -4,6 +4,7 @@ const Mainloop = imports.gi.GLib;
 const Gio = imports.gi.Gio;
 
 // HTTP
+imports.gi.versions.Soup = '2.4';
 const Soup = imports.gi.Soup;
 const Lang = imports.lang;
 

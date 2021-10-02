@@ -1,6 +1,7 @@
 const Self = imports.misc.extensionUtils.getCurrentExtension();
 
 // network requests
+imports.gi.versions.Soup = '2.4';
 const Soup = imports.gi.Soup;
 
 const RWG_SETTINGS_SCHEMA_UNSPLASH = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.unsplash';
