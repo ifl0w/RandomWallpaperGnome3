@@ -167,7 +167,7 @@ var UnsplashAdapter = class extends BaseAdapter {
 		const keywords = this._settings.get('unsplash-keyword', 'string').split(",");
 		if (keywords.length > 0) {
 			const randomKeyword = keywords[Math.floor(Math.random() * keywords.length)];
-			this.options.query = randomKeyword;
+			this.options.query = randomKeyword.trim();
 		}
 
 		this.options.featured = this._settings.get('unsplash-featured-only', 'boolean');
@@ -248,7 +248,7 @@ var WallhavenAdapter = class extends BaseAdapter {
 		const keywords = this._settings.get('wallhaven-keyword', 'string').split(",");
 		if (keywords.length > 0) {
 			const randomKeyword = keywords[Math.floor(Math.random() * keywords.length)];
-			this.options.q = randomKeyword;
+			this.options.q = randomKeyword.trim();
 		}
 		this.options.apikey = this._settings.get('wallhaven-api-key', 'string');
 
