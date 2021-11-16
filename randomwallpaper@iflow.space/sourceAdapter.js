@@ -164,7 +164,11 @@ var UnsplashAdapter = class extends BaseAdapter {
 		this.options.constraintType = this._settings.get('unsplash-constraint-type', 'string');
 		this.options.constraintValue = this._settings.get('unsplash-constraint-value', 'string');
 
-		this.options.query = this._settings.get('unsplash-keyword', 'string');
+		const keywords = this._settings.get('unsplash-keyword', 'string').split(",");
+		if (keywords.length > 0) {
+			const randomKeyword = keywords[Math.floor(Math.random() * keywords.length)];
+			this.options.query = randomKeyword.trim();
+		}
 
 		this.options.featured = this._settings.get('unsplash-featured-only', 'boolean');
 	}
@@ -241,7 +245,11 @@ var WallhavenAdapter = class extends BaseAdapter {
 	}
 
 	_readOptionsFromSettings() {
-		this.options.q = this._settings.get('wallhaven-keyword', 'string');
+		const keywords = this._settings.get('wallhaven-keyword', 'string').split(",");
+		if (keywords.length > 0) {
+			const randomKeyword = keywords[Math.floor(Math.random() * keywords.length)];
+			this.options.q = randomKeyword.trim();
+		}
 		this.options.apikey = this._settings.get('wallhaven-api-key', 'string');
 
 		this.options.resolutions = this._settings.get('resolutions', 'string').split(',');
