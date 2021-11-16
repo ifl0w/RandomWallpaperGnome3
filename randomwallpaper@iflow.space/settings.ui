@@ -144,7 +144,7 @@ You can also define a prefix that will be added to the image URL.</property>
       <object class="GtkLabel">
         <property name="visible">1</property>
         <property name="halign">start</property>
-        <property name="label" translatable="yes">Subreddits (separate with a comma)</property>
+        <property name="label" translatable="yes">Subreddits... (comma separated)</property>
       </object>
     </child>
     <child>
@@ -835,7 +835,7 @@ You can also define a prefix that will be added to the image URL.</property>
         <property name="visible">1</property>
         <property name="can-focus">1</property>
         <property name="margin-bottom">10</property>
-        <property name="placeholder-text" translatable="yes">Enter keywords... (comma separated)</property>
+        <property name="placeholder-text" translatable="yes">Keywords... (comma separated)</property>
       </object>
     </child>
 
@@ -985,7 +985,7 @@ You can also define a prefix that will be added to the image URL.</property>
         <property name="visible">1</property>
         <property name="can-focus">1</property>
         <property name="margin-bottom">10</property>
-        <property name="placeholder-text" translatable="yes">Enter keywords... (comma separated)</property>
+        <property name="placeholder-text" translatable="yes">Keywords... (comma separated)</property>
       </object>
     </child>
         <child>
