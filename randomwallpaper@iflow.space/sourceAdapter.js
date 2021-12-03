@@ -86,7 +86,7 @@ var UnsplashAdapter = class extends BaseAdapter {
 	}
 
 	requestRandomImage(callback) {
-		let session = new Soup.SessionAsync();
+		let session = new Soup.Session();
 
 		this._readOptionsFromSettings();
 		let optionsString = this._generateOptionsString();
@@ -192,7 +192,7 @@ var WallhavenAdapter = class extends BaseAdapter {
 	}
 
 	requestRandomImage(callback) {
-		let session = new Soup.SessionAsync();
+		let session = new Soup.Session();
 
 		this._readOptionsFromSettings();
 		let optionsString = this._generateOptionsString();
@@ -284,7 +284,7 @@ var RedditAdapter = class extends BaseAdapter {
 	}
 
 	requestRandomImage(callback) {
-		let session = new Soup.SessionAsync();
+		let session = new Soup.Session();
 
 		const subreddits = this._settings.get('subreddits', 'string').split(',').map(s => s.trim()).join('+');
 		const require_sfw = this._settings.get('allow-sfw', 'boolean');
@@ -335,7 +335,7 @@ var GenericJsonAdapter = class extends BaseAdapter {
 	}
 
 	requestRandomImage(callback) {
-		let session = new Soup.SessionAsync();
+		let session = new Soup.Session();
 
 		let url = this._settings.get("generic-json-request-url", "string");
 		url = encodeURI(url);

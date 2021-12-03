@@ -121,7 +121,7 @@ var WallpaperController = class {
 
 		let output_file, output_stream, input_file;
 
-		let _httpSession = new Soup.SessionAsync();
+		let _httpSession = new Soup.Session();
 		Soup.Session.prototype.add_feature.call(_httpSession, new Soup.ProxyResolverDefault());
 
 		let file = Gio.file_new_for_path(this.wallpaperlocation + String(name));
