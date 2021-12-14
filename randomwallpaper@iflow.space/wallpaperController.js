@@ -3,10 +3,6 @@ const Mainloop = imports.gi.GLib;
 // Filesystem
 const Gio = imports.gi.Gio;
 
-// HTTP
-const Soup = imports.gi.Soup;
-const Lang = imports.lang;
-
 //self
 const Self = imports.misc.extensionUtils.getCurrentExtension();
 const SourceAdapter = Self.imports.sourceAdapter;
@@ -15,6 +11,12 @@ const Timer = Self.imports.timer;
 const HistoryModule = Self.imports.history;
 
 const LoggerModule = Self.imports.logger;
+
+/*
+ libSoup is accessed through the SoupBowl wrapper to support libSoup3 and libSoup2.4 simultaneously in the extension
+ runtime and in the preferences window.
+ */
+const SoupBowl = Self.imports.soupBowl;
 
 var WallpaperController = class {
 
@@ -119,38 +121,33 @@ var WallpaperController = class {
 		let date = new Date();
 		let name = date.getTime() + '_' + this.imageSourceAdapter.fileName(uri); // timestamp ensures uniqueness
 
-		let output_file, output_stream, input_file;
-
-		let _httpSession = new Soup.SessionAsync();
-		Soup.Session.prototype.add_feature.call(_httpSession, new Soup.ProxyResolverDefault());
+		let bowl = new SoupBowl.SoupBowl();
 
 		let file = Gio.file_new_for_path(this.wallpaperlocation + String(name));
 		let fstream = file.replace(null, false, Gio.FileCreateFlags.NONE, null);
 
 		// start the download
-		let request = Soup.Message.new('GET', uri);
-		request.connect('got_chunk', Lang.bind(this, function(message, chunk){
-			// skip any non-content request (e.g. redirects)
-			if (message.status_code !== 200) {
-				return;
+		let request = bowl.Soup.Message.new('GET', uri);
+
+		bowl.send_and_receive(request, (response_data_bytes) => {
+			if (!response_data_bytes) {
+				this.logger.error(`Failed to retrieve wallpaper file from ${uri}`);
 			}
 
 			try {
-				fstream.write(chunk.get_data(), null);
+				fstream.write(response_data_bytes, null);
+
+				// close the file stream
+				fstream.close(null);
+
+				// call callback with the name and the full filepath of the written file as parameter
+				if (callback) {
+					callback(name, file.get_path());
+				}
 			} catch (e) {
 				if (callback) {
 					callback(null, null, e);
 				}
-				return;
-			}
-		}));
-
-		_httpSession.queue_message(request, function(_httpSession, message) {
-			// close the file
-			fstream.close(null);
-			// call callback with the name and the full filepath of the written file as parameter
-			if (callback) {
-				callback(name, file.get_path());
 			}
 		});
 	}
