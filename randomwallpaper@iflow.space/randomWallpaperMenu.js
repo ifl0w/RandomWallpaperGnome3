@@ -29,7 +29,7 @@ var RandomWallpaperMenu = class {
 
 		// Panelmenu Icon
 		this.statusIcon = new CustomElements.StatusElement();
-		this.panelMenu.actor.add_child(this.statusIcon.icon);
+		this.panelMenu.add_child(this.statusIcon.icon);
 
 		// new wallpaper button
 		this.newWallpaperItem = new CustomElements.NewWallpaperElement();
@@ -134,9 +134,9 @@ var RandomWallpaperMenu = class {
 
 	updatePanelMenuVisibility() {
 		if (this.settings.get('hide-panel-icon', 'boolean')) {
-			this.panelMenu.actor.hide();
+			this.panelMenu.hide();
 		} else {
-			this.panelMenu.actor.show();
+			this.panelMenu.show();
 		}
 	}
 
