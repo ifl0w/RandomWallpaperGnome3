@@ -136,13 +136,18 @@ var WallpaperController = class {
 
 		bowl.send_and_receive(request, (response_data_bytes) => {
 			if (!response_data_bytes) {
-				this.logger.error(`Failed to retrieve wallpaper file from ${uri}`);
+				fstream.close(null);
+
+				if (callback) {
+					callback(null, null, 'Not a valid response');
+				}
+
+				return;
 			}
 
 			try {
 				fstream.write(response_data_bytes, null);
 
-				// close the file stream
 				fstream.close(null);
 
 				// call callback with the name and the full filepath of the written file as parameter
@@ -253,8 +258,8 @@ var WallpaperController = class {
 
 			this._fetchFile(historyElement.source.imageDownloadUrl, (historyId, path, error) => {
 				if (error) {
-					this._bailOutWithCallback("Could not load new wallpaper. (" + error + ")", callback);
-					this._stopLoadingHooks.map(element => element(null));
+					this._bailOutWithCallback(`Could not load new wallpaper: ${error}`, callback);
+					this._stopLoadingHooks.forEach(element => element(null));
 					return;
 				}
 
