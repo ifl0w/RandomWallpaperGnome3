@@ -207,25 +207,27 @@ var WallhavenAdapter = class extends BaseAdapter {
 		this.bowl.send_and_receive(message, (response_body_bytes) => {
 			const response_body = ByteArray.toString(response_body_bytes);
 
-			let images = JSON.parse(response_body).data;
+			let response = JSON.parse(response_body).data;
 
-			if (!images || images.length === 0) {
-				this._error("No image found. body:"+images, callback);
+			if (!response || response.length === 0) {
+				this._error("Failed to request image.", callback);
 				return;
 			}
 
 			// get a random entry from the array
-			let imageUrl = images[Math.floor(Math.random() * images.length)].path;
+			let entry = response[Math.floor(Math.random() * response.length)];
+			let downloadURL = entry.path;
+			let siteURL = entry.url;
 
 			let apiKey = this.options["apikey"];
 			if(apiKey){
-				imageUrl += "?apikey="+apiKey;
+				downloadURL += "?apikey="+apiKey;
 			}
 
 			if (callback) {
-				let historyEntry = new HistoryModule.HistoryEntry(null, 'Wallhaven', imageUrl);
+				let historyEntry = new HistoryModule.HistoryEntry(null, 'Wallhaven', downloadURL);
 				historyEntry.source.sourceUrl = 'https://wallhaven.cc/';
-				historyEntry.source.imageLinkUrl = url;
+				historyEntry.source.imageLinkUrl = siteURL;
 				callback(historyEntry);
 			}
 		});
