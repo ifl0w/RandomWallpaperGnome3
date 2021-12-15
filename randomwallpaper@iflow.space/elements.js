@@ -224,7 +224,7 @@ var NewWallpaperElement = GObject.registerClass({
 
 });
 
-class StatusElement {
+var StatusElement = class {
 
 	constructor() {
 		this.icon = new St.Icon({
@@ -250,7 +250,7 @@ class StatusElement {
 
 };
 
-class HistorySection extends PopupMenu.PopupMenuSection {
+var HistorySection = class extends PopupMenu.PopupMenuSection {
 
 	constructor() {
 		super();

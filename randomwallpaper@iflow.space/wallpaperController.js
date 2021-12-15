@@ -3,10 +3,6 @@ const Mainloop = imports.gi.GLib;
 // Filesystem
 const Gio = imports.gi.Gio;
 
-// HTTP
-const Soup = imports.gi.Soup;
-const Lang = imports.lang;
-
 //self
 const Self = imports.misc.extensionUtils.getCurrentExtension();
 const SourceAdapter = Self.imports.sourceAdapter;
@@ -15,6 +11,12 @@ const Timer = Self.imports.timer;
 const HistoryModule = Self.imports.history;
 
 const LoggerModule = Self.imports.logger;
+
+/*
+ libSoup is accessed through the SoupBowl wrapper to support libSoup3 and libSoup2.4 simultaneously in the extension
+ runtime and in the preferences window.
+ */
+const SoupBowl = Self.imports.soupBowl;
 
 var WallpaperController = class {
 
@@ -78,6 +80,11 @@ var WallpaperController = class {
 		} else {
 			this._timer.stop();
 		}
+
+		// load a new wallpaper on startup
+		if (this._settings.get("fetch-on-startup", "boolean")) {
+			this.fetchNewWallpaper();
+		}
 	}
 
 	/*
@@ -119,38 +126,38 @@ var WallpaperController = class {
 		let date = new Date();
 		let name = date.getTime() + '_' + this.imageSourceAdapter.fileName(uri); // timestamp ensures uniqueness
 
-		let output_file, output_stream, input_file;
-
-		let _httpSession = new Soup.SessionAsync();
-		Soup.Session.prototype.add_feature.call(_httpSession, new Soup.ProxyResolverDefault());
+		let bowl = new SoupBowl.Bowl();
 
 		let file = Gio.file_new_for_path(this.wallpaperlocation + String(name));
 		let fstream = file.replace(null, false, Gio.FileCreateFlags.NONE, null);
 
 		// start the download
-		let request = Soup.Message.new('GET', uri);
-		request.connect('got_chunk', Lang.bind(this, function(message, chunk){
-			// skip any non-content request (e.g. redirects)
-			if (message.status_code !== 200) {
+		let request = bowl.Soup.Message.new('GET', uri);
+
+		bowl.send_and_receive(request, (response_data_bytes) => {
+			if (!response_data_bytes) {
+				fstream.close(null);
+
+				if (callback) {
+					callback(null, null, 'Not a valid response');
+				}
+
 				return;
 			}
 
 			try {
-				fstream.write(chunk.get_data(), null);
+				fstream.write(response_data_bytes, null);
+
+				fstream.close(null);
+
+				// call callback with the name and the full filepath of the written file as parameter
+				if (callback) {
+					callback(name, file.get_path());
+				}
 			} catch (e) {
 				if (callback) {
 					callback(null, null, e);
 				}
-				return;
-			}
-		}));
-
-		_httpSession.queue_message(request, function(_httpSession, message) {
-			// close the file
-			fstream.close(null);
-			// call callback with the name and the full filepath of the written file as parameter
-			if (callback) {
-				callback(name, file.get_path());
 			}
 		});
 	}
@@ -251,8 +258,8 @@ var WallpaperController = class {
 
 			this._fetchFile(historyElement.source.imageDownloadUrl, (historyId, path, error) => {
 				if (error) {
-					this._bailOutWithCallback("Could not load new wallpaper. (" + error + ")", callback);
-					this._stopLoadingHooks.map(element => element(null));
+					this._bailOutWithCallback(`Could not load new wallpaper: ${error}`, callback);
+					this._stopLoadingHooks.forEach(element => element(null));
 					return;
 				}
 
@@ -264,8 +271,9 @@ var WallpaperController = class {
 					this._historyController.insert(historyElement);
 					this.currentWallpaper = this._getCurrentWallpaper();
 
-					this._stopLoadingHooks.map(element => element(null));
+					this._stopLoadingHooks.forEach(element => element(null));
 
+					// call callback if given
 					if (callback) {
 						callback();
 					}

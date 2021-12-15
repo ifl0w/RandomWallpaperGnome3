@@ -1,8 +1,5 @@
 const Self = imports.misc.extensionUtils.getCurrentExtension();
 
-// network requests
-const Soup = imports.gi.Soup;
-
 const RWG_SETTINGS_SCHEMA_UNSPLASH = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.unsplash';
 const RWG_SETTINGS_SCHEMA_WALLHAVEN = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.wallhaven';
 const RWG_SETTINGS_SCHEMA_REDDIT = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.reddit';
@@ -13,6 +10,13 @@ const HistoryModule = Self.imports.history;
 
 const LoggerModule = Self.imports.logger;
 const JSONPath = Self.imports.jsonpath.jsonpath;
+
+/*
+ libSoup is accessed through the SoupBowl wrapper to support libSoup3 and libSoup2.4 simultaneously in the extension
+ runtime and in the preferences window.
+ */
+const SoupBowl = Self.imports.soupBowl;
+const ByteArray = imports.byteArray;
 
 var BaseAdapter = class {
 
@@ -83,30 +87,27 @@ var UnsplashAdapter = class extends BaseAdapter {
 		};
 
 		this._settings = new SettingsModule.Settings(RWG_SETTINGS_SCHEMA_UNSPLASH);
+		this.bowl = new SoupBowl.Bowl();
 	}
 
 	requestRandomImage(callback) {
-		let session = new Soup.SessionAsync();
-
 		this._readOptionsFromSettings();
 		let optionsString = this._generateOptionsString();
 
 		let url = `https://source.unsplash.com${optionsString}`;
 		url = encodeURI(url);
 
-		let message = Soup.Message.new('GET', url);
-
 		this.logger.info(`Unsplash request to: ${url}`);
-
-		// unsplash redirects to actual file; we only want the file location
-		message.set_flags(Soup.MessageFlags.NO_REDIRECT);
-
+		let message = this.bowl.Soup.Message.new('GET', url);
 		if (message === null) {
 			this._error("Could not create request.", callback);
 			return;
 		}
 
-		session.queue_message(message, (session, message) => {
+		// unsplash redirects to actual file; we only want the file location
+		message.set_flags(this.bowl.Soup.MessageFlags.NO_REDIRECT);
+
+		this.bowl.send_and_receive(message, (_null_expected) => {
 			let imageLinkUrl;
 
 			// expecting redirect
@@ -164,7 +165,11 @@ var UnsplashAdapter = class extends BaseAdapter {
 		this.options.constraintType = this._settings.get('unsplash-constraint-type', 'string');
 		this.options.constraintValue = this._settings.get('unsplash-constraint-value', 'string');
 
-		this.options.query = this._settings.get('unsplash-keyword', 'string');
+		const keywords = this._settings.get('unsplash-keyword', 'string').split(",");
+		if (keywords.length > 0) {
+			const randomKeyword = keywords[Math.floor(Math.random() * keywords.length)];
+			this.options.query = randomKeyword.trim();
+		}
 
 		this.options.featured = this._settings.get('unsplash-featured-only', 'boolean');
 	}
@@ -185,37 +190,44 @@ var WallhavenAdapter = class extends BaseAdapter {
 		};
 
 		this._settings = new SettingsModule.Settings(RWG_SETTINGS_SCHEMA_WALLHAVEN);
+		this.bowl = new SoupBowl.Bowl();
 	}
 
 	requestRandomImage(callback) {
-		let session = new Soup.SessionAsync();
-
 		this._readOptionsFromSettings();
 		let optionsString = this._generateOptionsString();
+
 		let url = 'https://wallhaven.cc/api/v1/search?' + encodeURI(optionsString);
+		let message = this.bowl.Soup.Message.new('GET', url);
+		if (message === null) {
+			this._error("Could not create request.", callback);
+			return;
+		}
 
-		let message = Soup.Message.new('GET', url);
+		this.bowl.send_and_receive(message, (response_body_bytes) => {
+			const response_body = ByteArray.toString(response_body_bytes);
 
-		session.queue_message(message, (session, message) => {
-			let images = JSON.parse(message.response_body.data).data;
+			let response = JSON.parse(response_body).data;
 
-			if (!images || images.length === 0) {
-				this._error("No image found. body:"+images, callback);
+			if (!response || response.length === 0) {
+				this._error("Failed to request image.", callback);
 				return;
 			}
 
 			// get a random entry from the array
-			let imageUrl = images[Math.floor(Math.random() * images.length)].path;
+			let entry = response[Math.floor(Math.random() * response.length)];
+			let downloadURL = entry.path;
+			let siteURL = entry.url;
 
 			let apiKey = this.options["apikey"];
 			if(apiKey){
-				imageUrl += "?apikey="+apiKey;
+				downloadURL += "?apikey="+apiKey;
 			}
 
 			if (callback) {
-				let historyEntry = new HistoryModule.HistoryEntry(null, 'Wallhaven', imageUrl);
+				let historyEntry = new HistoryModule.HistoryEntry(null, 'Wallhaven', downloadURL);
 				historyEntry.source.sourceUrl = 'https://wallhaven.cc/';
-				historyEntry.source.imageLinkUrl = url;
+				historyEntry.source.imageLinkUrl = siteURL;
 				callback(historyEntry);
 			}
 		});
@@ -241,7 +253,11 @@ var WallhavenAdapter = class extends BaseAdapter {
 	}
 
 	_readOptionsFromSettings() {
-		this.options.q = this._settings.get('wallhaven-keyword', 'string');
+		const keywords = this._settings.get('wallhaven-keyword', 'string').split(",");
+		if (keywords.length > 0) {
+			const randomKeyword = keywords[Math.floor(Math.random() * keywords.length)];
+			this.options.q = randomKeyword.trim();
+		}
 		this.options.apikey = this._settings.get('wallhaven-api-key', 'string');
 
 		this.options.resolutions = this._settings.get('resolutions', 'string').split(',');
@@ -269,6 +285,7 @@ var RedditAdapter = class extends BaseAdapter {
 		super();
 
 		this._settings = new SettingsModule.Settings(RWG_SETTINGS_SCHEMA_REDDIT);
+		this.bowl = new SoupBowl.Bowl();
 	}
 
 	_ampDecode(string) {
@@ -276,22 +293,21 @@ var RedditAdapter = class extends BaseAdapter {
 	}
 
 	requestRandomImage(callback) {
-		let session = new Soup.SessionAsync();
-
 		const subreddits = this._settings.get('subreddits', 'string').split(',').map(s => s.trim()).join('+');
 		const require_sfw = this._settings.get('allow-sfw', 'boolean');
+
 		const url = encodeURI('https://www.reddit.com/r/' + subreddits + '.json');
-
-		let message = Soup.Message.new('GET', url);
-
+		let message = this.bowl.Soup.Message.new('GET', url);
 		if (message === null) {
 			this._error("Could not create request.", callback);
 			return;
 		}
 
-		session.queue_message(message, (session, message) => {
+		this.bowl.send_and_receive(message, (response_body_bytes) => {
 			try {
-				const submissions = JSON.parse(message.response_body.data).data.children.filter(child => {
+				const response_body = JSON.parse(ByteArray.toString(response_body_bytes));
+
+				const submissions = response_body.data.children.filter(child => {
 					if (child.data.post_hint !== 'image') return false;
 					if (require_sfw) return child.data.over_18 === false;
 					return true;
@@ -324,26 +340,24 @@ var GenericJsonAdapter = class extends BaseAdapter {
 		super();
 		this._jsonPathParser = new JSONPath.JSONPathParser();
 		this._settings = new SettingsModule.Settings(RWG_SETTINGS_SCHEMA_GENERIC_JSON);
+		this.bowl = new SoupBowl.Bowl();
 	}
 
 	requestRandomImage(callback) {
-		let session = new Soup.SessionAsync();
-
 		let url = this._settings.get("generic-json-request-url", "string");
 		url = encodeURI(url);
-
-		let message = Soup.Message.new('GET', url);
-
+		let message = this.bowl.Soup.Message.new('GET', url);
 		if (message === null) {
 			this._error("Could not create request.", callback);
 			return;
 		}
 
-		session.queue_message(message, (session, message) => {
+		this.bowl.send_and_receive(message, (response_body_bytes) => {
 			try {
-				let response = JSON.parse(message.response_body.data);
+				const response_body = JSON.parse(ByteArray.toString(response_body_bytes));
+
 				let JSONPath = this._settings.get("generic-json-response-path", "string");
-				let imageDownloadUrl = this._jsonPathParser.access(response, JSONPath);
+				let imageDownloadUrl = this._jsonPathParser.access(response_body, JSONPath);
 				imageDownloadUrl = this._settings.get("generic-json-url-prefix", "string") + imageDownloadUrl;
 
 				if (callback) {
