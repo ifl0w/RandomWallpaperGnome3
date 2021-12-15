@@ -18,6 +18,12 @@
             <range min='2' max='100'/>
         </key>
 
+        <key type='b' name='fetch-on-startup'>
+            <default>false</default>
+            <summary>Fetch on startup</summary>
+            <description>Fetch a new wallpaper when the extension is enabled</description>
+        </key>
+
         <key type='b' name='auto-fetch'>
             <default>false</default>
             <summary>Auto-Fetch</summary>

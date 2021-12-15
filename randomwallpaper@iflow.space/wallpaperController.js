@@ -80,6 +80,11 @@ var WallpaperController = class {
 		} else {
 			this._timer.stop();
 		}
+
+		// load a new wallpaper on startup
+		if (this._settings.get("fetch-on-startup", "boolean")) {
+			this.fetchNewWallpaper();
+		}
 	}
 
 	/*
@@ -261,8 +266,9 @@ var WallpaperController = class {
 					this._historyController.insert(historyElement);
 					this.currentWallpaper = this._getCurrentWallpaper();
 
-					this._stopLoadingHooks.map(element => element(null));
+					this._stopLoadingHooks.forEach(element => element(null));
 
+					// call callback if given
 					if (callback) {
 						callback();
 					}
