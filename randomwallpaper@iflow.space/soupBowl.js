@@ -8,6 +8,9 @@ imports.gi.versions.Soup = '3.0';
 
 try {
     const _s = imports.gi.Soup;
+    // If Soup is already loaded, this check isn't enough and we need to verify the version
+    if (_s.get_major_version() === 2)
+        imports.gi.versions.Soup = '2.4';
 } catch (e) {
     imports.gi.versions.Soup = '2.4';
 }
