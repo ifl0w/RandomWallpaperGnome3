@@ -4,17 +4,6 @@
 const Self = imports.misc.extensionUtils.getCurrentExtension();
 const LoggerModule = Self.imports.logger;
 
-imports.gi.versions.Soup = '3.0';
-
-try {
-    const _s = imports.gi.Soup;
-    // If Soup is already loaded, this check isn't enough and we need to verify the version
-    if (_s.get_major_version() === 2)
-        imports.gi.versions.Soup = '2.4';
-} catch (e) {
-    imports.gi.versions.Soup = '2.4';
-}
-
 const _Soup = imports.gi.Soup;
 
 var Bowl = class {
@@ -26,10 +15,12 @@ var Bowl = class {
 
         this.session = new _Soup.Session();
 
-        if (imports.gi.versions.Soup === '2.4'){
+        if (_Soup.get_major_version() === 2) {
             this.send_and_receive = this._send_and_receive_soup24;
-        } else {
+        } else if (_Soup.get_major_version() === 3) {
             this.send_and_receive = this._send_and_receive_soup30;
+        } else {
+            this.logger.error("Unknown libsoup version");
         }
     }
 
