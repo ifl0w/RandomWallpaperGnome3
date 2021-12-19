@@ -42,4 +42,4 @@ You can keep the container running while making changes. Once you've made some c
 
 Inside the container you have to restart GNOME. Press CTRL + SHIFT to lock your mouse and keyboard in the X windows so you can use key modifiers. Then restart GNOME by pressing ALT + F2 and running the command `r`. You can use CTRL + SHIFT to release your keyboard and mouse again.
 
-For some reason filtering as usual in `debug.sh` doesn't work inside the container. You can just run `journalctl -f` inside the container and look for relevant output.
+Any debug messages will be displayed in your console, so there is no need to run `debug.sh`.
