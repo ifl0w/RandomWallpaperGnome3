@@ -17,5 +17,6 @@ $SCRIPT_DIR/x11docker/x11docker \
 	--desktop \
 	--init=systemd \
 	--user=RETAIN \
+	--runasuser="journalctl -f &" \
 	-- --mount type=bind,source=$SRC_DIR,target=$DST_DIR,readonly -- \
 	$1
