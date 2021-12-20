@@ -4,7 +4,7 @@
   "settings-schema": "org.gnome.shell.extensions.space.iflow.randomwallpaper",
   "name": "Random Wallpaper",
   "description": "Fetches a random wallpaper from an online source and sets it as desktop background. \nThe desktop background can be updated periodically or manually.",
-  "version": 27,
-  "semantic-version": "2.7.0",
+  "version": 28,
+  "semantic-version": "2.7.1",
   "url": "https://github.com/ifl0w/RandomWallpaperGnome3"
 }
