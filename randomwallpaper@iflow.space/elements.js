@@ -29,19 +29,18 @@ var HistoryElement = GObject.registerClass({
 		let timeString = date.toLocaleTimeString();
 		let dateString = date.toLocaleDateString();
 
-		let prefixText;
-		if (index === 0) {
-			prefixText = "Current Background";
-		} else {
-			prefixText = String(index) + '.';
-		}
+		let prefixText = String(index) + '.';
 		this.prefixLabel = new St.Label({
 			text: prefixText,
 			style_class: 'rwg-history-index'
 		});
 
-		this.actor.insert_child_above(this.prefixLabel, this.label);
-		this.label.destroy();
+		if (index === 0) {
+			this.label.text = 'Current Background';
+		} else {
+			this.actor.insert_child_above(this.prefixLabel, this.label);
+			this.label.destroy();
+		}
 
 		this._container = new St.BoxLayout({
 			vertical: true
@@ -66,10 +65,9 @@ var HistoryElement = GObject.registerClass({
 			this.actor.insert_child_above(this._container, this.prefixLabel);
 		}
 
-		this.menu.addMenuItem(new PopupMenu.PopupBaseMenuItem({can_focus: false, reactive: false})); // theme independent spacing
 		this.menu.actor.add_style_class_name("rwg-history-element-content");
 
-		if (this.historyEntry.source && this.historyEntry.source !== null) {
+		if (this.historyEntry.source !== null) {
 			if (this.historyEntry.source.author !== null
 				&& this.historyEntry.source.authorUrl !== null) {
 				this.authorItem = new PopupMenu.PopupMenuItem('Image By: ' + this.historyEntry.source.author);
@@ -105,11 +103,13 @@ var HistoryElement = GObject.registerClass({
 			this.emit('activate', null); // Fixme: not sure what the second parameter should be. null seems to work fine for now.
 		});
 
+		if (index !== 0) {
+			this.menu.addMenuItem(new PopupMenu.PopupBaseMenuItem({can_focus: false, reactive: false})); // theme independent spacing
+			this.menu.addMenuItem(this.setAsWallpaperItem);
+		}
+
 		this.previewItem = new PopupMenu.PopupBaseMenuItem({can_focus: false, reactive: false});
-		this.menu.addMenuItem(new PopupMenu.PopupBaseMenuItem({can_focus: false, reactive: false})); // theme independent spacing
-		this.menu.addMenuItem(this.setAsWallpaperItem);
 		this.menu.addMenuItem(this.previewItem);
-		this.menu.addMenuItem(new PopupMenu.PopupBaseMenuItem({can_focus: false, reactive: false})); // theme independent spacing
 
 		/*
 			Load the image on first opening of the sub menu instead of during creation of the history list.
@@ -206,9 +206,9 @@ var NewWallpaperElement = GObject.registerClass({
 			let hours = Math.floor(remainingMinutes / 60);
 
 			let hoursText = hours.toString();
-			hoursText += (hours == 1) ? ' hour' : ' hours';
+			hoursText += (hours === 1) ? ' hour' : ' hours';
 			let minText = minutes.toString();
-			minText += (minutes == 1) ? ' minute' : ' minutes';
+			minText += (minutes === 1) ? ' minute' : ' minutes';
 
 			if (hours >= 1) {
 				this._remainingLabel.text = '... ' + hoursText + ' and ' + minText + ' remaining.'
