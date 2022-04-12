@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Generated with glade 3.38.2 -->
 <interface>
-  <requires lib="gtk+" version="3.22"/>
   <object class="GtkImage" id="clear-icon">
     <property name="visible">1</property>
     <property name="icon-name">user-trash</property>
@@ -176,9 +175,7 @@ You can also define a prefix that will be added to the image URL.</property>
   <object class="GtkNotebook" id="main-widget">
     <property name="width-request">400</property>
     <property name="height-request">600</property>
-    <property name="visible">1</property>
-    <property name="can-focus">1</property>
-    <property name="show-border">0</property>
+    <property name="show-border">1</property>
     <child>
       <object class="GtkScrolledWindow" id="general-scroll-pane">
         <property name="visible">1</property>
