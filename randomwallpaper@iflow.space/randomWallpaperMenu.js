@@ -64,9 +64,9 @@ var RandomWallpaperMenu = class {
 		/*
 			add eventlistener
 		*/
-		this.wallpaperController.registerStartLoadingHook(this.statusIcon.startLoading.bind(this.statusIcon));
-		this.wallpaperController.registerStopLoadingHook(this.statusIcon.stopLoading.bind(this.statusIcon));
-		this.wallpaperController.registerStopLoadingHook(this.setHistoryList.bind(this));
+		this.wallpaperController.registerStartLoadingHook(() => this.statusIcon.startLoading());
+		this.wallpaperController.registerStopLoadingHook(() => this.statusIcon.stopLoading());
+		this.wallpaperController.registerStopLoadingHook(() => this.setHistoryList());
 
 		// new wallpaper event
 		this.newWallpaperItem.connect('activate', () => {

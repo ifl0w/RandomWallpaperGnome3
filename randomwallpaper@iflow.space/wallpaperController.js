@@ -20,7 +20,11 @@ const SoupBowl = Self.imports.soupBowl;
 
 var WallpaperController = class {
 
-	constructor() {
+	// Whether the controller instance was created in from the context of the preferences/settings window
+	preferencesContext = false;
+
+	constructor(prefsContext = false) {
+		this.preferencesContext = prefsContext;
 		this.logger = new LoggerModule.Logger('RWG3', 'WallpaperController');
 		let xdg_cache_home = Mainloop.getenv('XDG_CACHE_HOME')
 		if (!xdg_cache_home)
@@ -46,10 +50,10 @@ var WallpaperController = class {
 		this._historyController = new HistoryModule.HistoryController(this.wallpaperlocation);
 
 		this._settings = new Prefs.Settings();
-		this._settings.observe('history-length', this._updateHistory.bind(this));
-		this._settings.observe('auto-fetch', this._updateAutoFetching.bind(this));
-		this._settings.observe('minutes', this._updateAutoFetching.bind(this));
-		this._settings.observe('hours', this._updateAutoFetching.bind(this));
+		this._settings.observe('history-length', () => this._updateHistory());
+		this._settings.observe('auto-fetch', () => this._updateAutoFetching());
+		this._settings.observe('minutes', () => this._updateAutoFetching());
+		this._settings.observe('hours', () => this._updateAutoFetching());
 
 		this._unsplashAdapter = new SourceAdapter.UnsplashAdapter();
 		this._wallhavenAdapter = new SourceAdapter.WallhavenAdapter();
@@ -73,16 +77,17 @@ var WallpaperController = class {
 		this._autoFetch.duration = duration;
 		this._autoFetch.active = this._settings.get('auto-fetch', 'boolean');
 
-		if (this._autoFetch.active) {
-			this._timer.registerCallback(this.fetchNewWallpaper.bind(this));
+		// only start timer if not in context of preferences window
+		if (!this.preferencesContext && this._autoFetch.active) {
+			this._timer.registerCallback(() => this.fetchNewWallpaper());
 			this._timer.setMinutes(this._autoFetch.duration);
 			this._timer.start();
 		} else {
 			this._timer.stop();
 		}
 
-		// load a new wallpaper on startup
-		if (this._settings.get("fetch-on-startup", "boolean")) {
+		// load a new wallpaper on startup (only if not in preferences context)
+		if (!this.preferencesContext && this._settings.get("fetch-on-startup", "boolean")) {
 			this.fetchNewWallpaper();
 		}
 	}
