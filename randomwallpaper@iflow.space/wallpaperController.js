@@ -204,22 +204,34 @@ var WallpaperController = class {
 		 inspired from:
 		 https://bitbucket.org/LukasKnuth/backslide/src/7e36a49fc5e1439fa9ed21e39b09b61eca8df41a/backslide@codeisland.org/settings.js?at=master
 		 */
-		if (settings.is_writable("picture-uri")) {
-			// Set a new Background-Image (should show up immediately):
-			let rc = settings.set_string("picture-uri", path);
-			if (rc) {
-				Gio.Settings.sync(); // Necessary: http://stackoverflow.com/questions/9985140
-
-				// call callback if given
-				if (callback) {
-					callback();
+		let set_prop = (property) => {
+			if (settings.is_writable(property)) {
+				// Set a new Background-Image (should show up immediately):
+				if (!settings.set_string(property, path)) {
+					this._bailOutWithCallback(`Failed to write property: ${property}`, callback);
 				}
-
 			} else {
-				this._bailOutWithCallback("Could not set lock screen wallpaper.", callback);
+				this._bailOutWithCallback(`Property not writable: ${property}`, callback);
 			}
-		} else {
-			this._bailOutWithCallback("Could not set wallpaper.", callback);
+		}
+
+		const availableKeys = settings.list_keys();
+
+		let property = "picture-uri";
+		if (availableKeys.indexOf(property) !== -1) {
+			set_prop(property);
+		}
+
+		property = "picture-uri-dark";
+		if (availableKeys.indexOf(property) !== -1) {
+			set_prop(property);
+		}
+
+		Gio.Settings.sync(); // Necessary: http://stackoverflow.com/questions/9985140
+
+		// call callback if given
+		if (callback) {
+			callback();
 		}
 	}
 
