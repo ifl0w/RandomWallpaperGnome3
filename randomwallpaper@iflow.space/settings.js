@@ -1,7 +1,5 @@
 const Gio = imports.gi.Gio;
-
-const Self = imports.misc.extensionUtils.getCurrentExtension();
-const Convenience = Self.imports.convenience;
+const Utils = imports.misc.extensionUtils;
 
 var Settings = class {
 
@@ -12,7 +10,7 @@ var Settings = class {
 	 * @private
 	 */
 	constructor(schema) {
-		this._settings = Convenience.getSettings(schema);
+		this._settings = Utils.getSettings(schema);
 	}
 
 	observe(key, callback) {
