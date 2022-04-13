@@ -20,7 +20,11 @@ const SoupBowl = Self.imports.soupBowl;
 
 var WallpaperController = class {
 
-	constructor() {
+	// Whether the controller instance was created in from the context of the preferences/settings window
+	preferencesContext = false;
+
+	constructor(prefsContext = false) {
+		this.preferencesContext = prefsContext;
 		this.logger = new LoggerModule.Logger('RWG3', 'WallpaperController');
 		let xdg_cache_home = Mainloop.getenv('XDG_CACHE_HOME')
 		if (!xdg_cache_home)
@@ -46,10 +50,10 @@ var WallpaperController = class {
 		this._historyController = new HistoryModule.HistoryController(this.wallpaperlocation);
 
 		this._settings = new Prefs.Settings();
-		this._settings.observe('history-length', this._updateHistory.bind(this));
-		this._settings.observe('auto-fetch', this._updateAutoFetching.bind(this));
-		this._settings.observe('minutes', this._updateAutoFetching.bind(this));
-		this._settings.observe('hours', this._updateAutoFetching.bind(this));
+		this._settings.observe('history-length', () => this._updateHistory());
+		this._settings.observe('auto-fetch', () => this._updateAutoFetching());
+		this._settings.observe('minutes', () => this._updateAutoFetching());
+		this._settings.observe('hours', () => this._updateAutoFetching());
 
 		this._unsplashAdapter = new SourceAdapter.UnsplashAdapter();
 		this._wallhavenAdapter = new SourceAdapter.WallhavenAdapter();
@@ -73,16 +77,17 @@ var WallpaperController = class {
 		this._autoFetch.duration = duration;
 		this._autoFetch.active = this._settings.get('auto-fetch', 'boolean');
 
-		if (this._autoFetch.active) {
-			this._timer.registerCallback(this.fetchNewWallpaper.bind(this));
+		// only start timer if not in context of preferences window
+		if (!this.preferencesContext && this._autoFetch.active) {
+			this._timer.registerCallback(() => this.fetchNewWallpaper());
 			this._timer.setMinutes(this._autoFetch.duration);
 			this._timer.start();
 		} else {
 			this._timer.stop();
 		}
 
-		// load a new wallpaper on startup
-		if (this._settings.get("fetch-on-startup", "boolean")) {
+		// load a new wallpaper on startup (only if not in preferences context)
+		if (!this.preferencesContext && this._settings.get("fetch-on-startup", "boolean")) {
 			this.fetchNewWallpaper();
 		}
 	}
@@ -204,22 +209,34 @@ var WallpaperController = class {
 		 inspired from:
 		 https://bitbucket.org/LukasKnuth/backslide/src/7e36a49fc5e1439fa9ed21e39b09b61eca8df41a/backslide@codeisland.org/settings.js?at=master
 		 */
-		if (settings.is_writable("picture-uri")) {
-			// Set a new Background-Image (should show up immediately):
-			let rc = settings.set_string("picture-uri", path);
-			if (rc) {
-				Gio.Settings.sync(); // Necessary: http://stackoverflow.com/questions/9985140
-
-				// call callback if given
-				if (callback) {
-					callback();
+		let set_prop = (property) => {
+			if (settings.is_writable(property)) {
+				// Set a new Background-Image (should show up immediately):
+				if (!settings.set_string(property, path)) {
+					this._bailOutWithCallback(`Failed to write property: ${property}`, callback);
 				}
-
 			} else {
-				this._bailOutWithCallback("Could not set lock screen wallpaper.", callback);
+				this._bailOutWithCallback(`Property not writable: ${property}`, callback);
 			}
-		} else {
-			this._bailOutWithCallback("Could not set wallpaper.", callback);
+		}
+
+		const availableKeys = settings.list_keys();
+
+		let property = "picture-uri";
+		if (availableKeys.indexOf(property) !== -1) {
+			set_prop(property);
+		}
+
+		property = "picture-uri-dark";
+		if (availableKeys.indexOf(property) !== -1) {
+			set_prop(property);
+		}
+
+		Gio.Settings.sync(); // Necessary: http://stackoverflow.com/questions/9985140
+
+		// call callback if given
+		if (callback) {
+			callback();
 		}
 	}
 

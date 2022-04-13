@@ -136,7 +136,7 @@ var RandomWallpaperSettings = class {
 			'active',
 			Gio.SettingsBindFlags.DEFAULT);
 
-		this._wallpaperController = new WallpaperController.WallpaperController();
+		this._wallpaperController = new WallpaperController.WallpaperController(true);
 		this._bindButtons();
 	}
 
