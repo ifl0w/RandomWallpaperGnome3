@@ -1,20 +1,17 @@
 const Gio = imports.gi.Gio;
 const GLib = imports.gi.GLib;
 const Gtk = imports.gi.Gtk;
-const ExtensionUtils = imports.misc.extensionUtils;
+const Utils = imports.misc.extensionUtils;
 
-const Self = ExtensionUtils.getCurrentExtension();
-const Convenience = Self.imports.convenience;
-
+const Self = Utils.getCurrentExtension();
 const WallpaperController = Self.imports.wallpaperController;
+const LoggerModule = Self.imports.logger;
 
 const RWG_SETTINGS_SCHEMA = 'org.gnome.shell.extensions.space.iflow.randomwallpaper';
 const RWG_SETTINGS_SCHEMA_UNSPLASH = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.unsplash';
 const RWG_SETTINGS_SCHEMA_WALLHAVEN = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.wallhaven';
 const RWG_SETTINGS_SCHEMA_REDDIT = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.reddit';
 const RWG_SETTINGS_SCHEMA_GENERIC_JSON = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.genericJSON';
-
-const LoggerModule = Self.imports.logger;
 
 function init(metaData) {
 	//Convenience.initTranslations();
@@ -36,7 +33,7 @@ var RandomWallpaperSettings = class {
 
 		this._wallpaperController = null;
 
-		this._settings = Convenience.getSettings(RWG_SETTINGS_SCHEMA);
+		this._settings = Utils.getSettings(RWG_SETTINGS_SCHEMA);
 		this._builder = new Gtk.Builder();
 		//this._builder.set_translation_domain(Self.metadata['gettext-domain']);
 		this._builder.add_from_file(Self.path + '/settings.ui');
@@ -44,22 +41,22 @@ var RandomWallpaperSettings = class {
 		this.noSettings = this._builder.get_object('no-settings');
 
 		// Unsplash Settings
-		this._unsplash_settings = Convenience.getSettings(RWG_SETTINGS_SCHEMA_UNSPLASH);
+		this._unsplash_settings = Utils.getSettings(RWG_SETTINGS_SCHEMA_UNSPLASH);
 		this.unsplashSettings = this._builder.get_object('unsplash-settings');
 		this.bindUnsplash();
 
 		// Wallhaven Settings
-		this._wallhaven_settings = Convenience.getSettings(RWG_SETTINGS_SCHEMA_WALLHAVEN);
+		this._wallhaven_settings = Utils.getSettings(RWG_SETTINGS_SCHEMA_WALLHAVEN);
 		this.wallhavenSettings = this._builder.get_object('wallhaven-settings');
 		this.bindWallhaven();
 
 		// Reddit Settings
-		this._reddit_settings = Convenience.getSettings(RWG_SETTINGS_SCHEMA_REDDIT);
+		this._reddit_settings = Utils.getSettings(RWG_SETTINGS_SCHEMA_REDDIT);
 		this.redditSettings = this._builder.get_object('reddit-settings');
 		this.bindReddit();
 
 		// Generic JSON Settings
-		this._generic_json_settings = Convenience.getSettings(RWG_SETTINGS_SCHEMA_GENERIC_JSON);
+		this._generic_json_settings = Utils.getSettings(RWG_SETTINGS_SCHEMA_GENERIC_JSON);
 		this.genericJsonSettings = this._builder.get_object('generic-json-settings');
 		this.bindGenericJSON();
 
