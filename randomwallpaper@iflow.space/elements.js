@@ -1,4 +1,3 @@
-const Lang = imports.lang;
 const PopupMenu = imports.ui.popupMenu;
 const St = imports.gi.St;
 const Util = imports.misc.util;
@@ -169,8 +168,6 @@ var CurrentImageElement = GObject.registerClass({
  * Element for the New Wallpaper button and the remaining time for the auto fetch
  * feature.
  * The remaining time will only be displayed if the af-feature is activated.
- *
- * @type {Lang.Class}
  */
 var NewWallpaperElement = GObject.registerClass({
 			 GTypeName: 'NewWallpaperElement',
