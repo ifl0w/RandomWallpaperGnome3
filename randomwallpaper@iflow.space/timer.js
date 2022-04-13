@@ -1,4 +1,3 @@
-const Lang = imports.lang;
 const GLib = imports.gi.GLib;
 
 const Self = imports.misc.extensionUtils.getCurrentExtension();
@@ -17,8 +16,6 @@ var AFTimer = function () {
 
 /**
  * Timer for the auto fetch feature.
- *
- * @type {Lang}
  */
 var _AFTimer = class {
 
