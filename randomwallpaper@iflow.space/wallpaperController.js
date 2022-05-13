@@ -227,7 +227,7 @@ var WallpaperController = class {
 			set_prop(property);
 		}
 
-		property = "picture-uri-dark";
+		let property = "picture-uri-dark";
 		if (availableKeys.indexOf(property) !== -1) {
 			set_prop(property);
 		}
