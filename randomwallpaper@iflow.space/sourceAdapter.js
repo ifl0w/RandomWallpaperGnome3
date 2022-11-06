@@ -356,13 +356,36 @@ var GenericJsonAdapter = class extends BaseAdapter {
 			try {
 				const response_body = JSON.parse(ByteArray.toString(response_body_bytes));
 
-				let JSONPath = this._settings.get("generic-json-response-path", "string");
-				let imageDownloadUrl = this._jsonPathParser.access(response_body, JSONPath);
+				let identifier = this._settings.get("generic-json-id", "string");
+				if (identifier === null || identifier === "") {
+					identifier = 'Generic JSON Source';
+				}
+				
+				let imageJSONPath = this._settings.get("generic-json-response-path", "string");
+				let imageDownloadUrl = this._jsonPathParser.access(response_body, imageJSONPath);
 				imageDownloadUrl = this._settings.get("generic-json-url-prefix", "string") + imageDownloadUrl;
+				
+				let linkUrl = null;
+				try {
+					let linkJSONPath = this._settings.get("generic-json-link-path", "string");
+					linkUrl = this._jsonPathParser.access(response_body, linkJSONPath);
+					linkUrl = this._settings.get("generic-json-link-prefix", "string") + linkUrl;
+				} catch (exception) { }
+				
+				let domainUrl = this._settings.get("generic-json-domain", "string");
 
 				if (callback) {
-					let historyEntry = new HistoryModule.HistoryEntry(null, 'Generic JSON Source', imageDownloadUrl);
+					let historyEntry = new HistoryModule.HistoryEntry(null, identifier, imageDownloadUrl);
 					historyEntry.source.sourceUrl = imageDownloadUrl;
+
+					if (linkUrl !== null && linkUrl !== "") {
+						historyEntry.source.imageLinkUrl = linkUrl;
+					}
+
+					if (domainUrl !== null && domainUrl !== "") {
+						historyEntry.source.sourceUrl = domainUrl;
+					}
+
 					callback(historyEntry);
 				}
 			} catch (e) {
