@@ -6,15 +6,25 @@ var JSONPathParser = function () {
 	 *
 	 * @param inputObject the object to access
 	 * @param inputString the json path expression
+	 * @param randomElements the predefined random Elements
+	 * @param newRandomness whether to ignore previously defined random Elements
 	 * @returns {*}
 	 */
-	this.access = function (inputObject, inputString) {
+	this.access = function (inputObject, inputString, randomElements = null, newRandomness = true) {
 		if (inputObject === null || inputObject === undefined) {
 			return null;
 		}
 
 		if (inputString.length === 0) {
-			return inputObject;
+			return {
+				Object: inputObject,
+				RandomElements: randomElements,
+			};
+		}
+
+		if (randomElements === null) {
+			randomElements = [];
+			newRandomness = true;
 		}
 
 		let startDot = inputString.indexOf('.');
@@ -34,7 +44,7 @@ var JSONPathParser = function () {
 				return null;
 			}
 
-			return this.access(targetObject, inputStringTail)
+			return this.access(targetObject, inputStringTail, randomElements, newRandomness);
 
 		} else {
 
@@ -48,11 +58,22 @@ var JSONPathParser = function () {
 
 			switch (indexString) {
 				case "@random":
-					return this.access(this.randomElement(targetObject), inputStringTail);
+					let randomNumber = null;
+					if (!newRandomness && randomElements.length >= 1) {
+						// Take and remove first element
+						randomNumber = randomElements.shift();
+					} else if (!newRandomness && randomElements.length < 1) {
+						randomNumber = this.randomElement(targetObject);
+					} else {
+						randomNumber = this.randomElement(targetObject);
+						randomElements.push(randomNumber);
+					}
+
+					return this.access(randomNumber, inputStringTail, randomElements, newRandomness);
 				// add special keywords here
 				default:
 					// expecting integer
-					return this.access(targetObject[parseInt(indexString)], inputStringTail);
+					return this.access(targetObject[parseInt(indexString)], inputStringTail, randomElements, newRandomness);
 			}
 
 		}
