@@ -359,25 +359,30 @@ var GenericJsonAdapter = class extends BaseAdapter {
 				const response_body = JSON.parse(ByteArray.toString(response_body_bytes));
 
 				let identifier = this._settings.get("generic-json-id", "string");
+				let imageJSONPath = this._settings.get("generic-json-response-path", "string");
+				let linkJSONPath = this._settings.get("generic-json-link-path", "string");
+				let domainUrl = this._settings.get("generic-json-domain", "string");
+
 				if (identifier === null || identifier === "") {
 					identifier = 'Generic JSON Source';
 				}
+
+				let rObject = this._jsonPathParser.access(response_body, imageJSONPath);
+				let imageDownloadUrl = this._settings.get("generic-json-url-prefix", "string") + rObject.Object;
 				
-				let imageJSONPath = this._settings.get("generic-json-response-path", "string");
-				let imageDownloadUrl = this._jsonPathParser.access(response_body, imageJSONPath);
-				imageDownloadUrl = this._settings.get("generic-json-url-prefix", "string") + imageDownloadUrl;
-				
-				let linkUrl = null;
-				try {
-					let linkJSONPath = this._settings.get("generic-json-link-path", "string");
-					linkUrl = this._jsonPathParser.access(response_body, linkJSONPath);
-					linkUrl = this._settings.get("generic-json-link-prefix", "string") + linkUrl;
-				} catch (exception) { }
-				
-				let domainUrl = this._settings.get("generic-json-domain", "string");
+				// '@random' would yield different results so lets make sure the values stay
+				// the same as long as the path is identical
+				let samePath = imageJSONPath.substring(0, this.findFirstDifference(imageJSONPath, linkJSONPath));
+
+				// count occurrences of '@random' to slice the array later
+				// https://stackoverflow.com/a/4009768
+				let occurrences = (samePath.match(/@random/g) || []).length;
+
+				let linkUrl = this._jsonPathParser.access(response_body, linkJSONPath, rObject.RandomElements.slice(0, occurrences), false).Object;
+				linkUrl = this._settings.get("generic-json-link-prefix", "string") + linkUrl;
 
 				if (callback) {
-					let historyEntry = new HistoryModule.HistoryEntry(null, identifier, imageDownloadUrl);
+					let historyEntry = new HistoryModule.HistoryEntry(null, identifier, rObject.Object);
 					historyEntry.source.sourceUrl = imageDownloadUrl;
 
 					if (linkUrl !== null && linkUrl !== "") {
@@ -395,6 +400,14 @@ var GenericJsonAdapter = class extends BaseAdapter {
 			}
 		});
 
+	}
+
+	// https://stackoverflow.com/a/32859917
+	findFirstDifference (jsonPath1, jsonPath2) {
+		let i = 0;
+		if (jsonPath1 === jsonPath2) return -1;
+		while (jsonPath1[i] === jsonPath2[i]) i++;
+		return i;
 	}
 
 };
