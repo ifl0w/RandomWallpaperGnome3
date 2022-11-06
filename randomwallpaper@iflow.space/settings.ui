@@ -56,6 +56,26 @@ You can also define a prefix that will be added to the image URL.</property>
           <object class="GtkLabel">
             <property name="visible">1</property>
             <property name="halign">start</property>
+            <property name="label" translatable="yes">Identifier</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkEntry" id="generic-json-id">
+            <property name="visible">1</property>
+            <property name="can-focus">1</property>
+            <property name="placeholder-text" translatable="yes">Identifier</property>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child>
+      <object class="GtkBox">
+        <property name="visible">1</property>
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkLabel">
+            <property name="visible">1</property>
+            <property name="halign">start</property>
             <property name="label" translatable="yes">Request URL</property>
           </object>
         </child>
@@ -77,14 +97,14 @@ You can also define a prefix that will be added to the image URL.</property>
           <object class="GtkLabel">
             <property name="visible">1</property>
             <property name="halign">start</property>
-            <property name="label" translatable="yes">JSON Path</property>
+            <property name="label" translatable="yes">Image JSON Path</property>
           </object>
         </child>
         <child>
           <object class="GtkEntry" id="generic-json-response-path">
             <property name="visible">1</property>
             <property name="can-focus">1</property>
-            <property name="placeholder-text" translatable="yes">JSON Path</property>
+            <property name="placeholder-text" translatable="yes">Image JSON Path</property>
           </object>
         </child>
       </object>
@@ -105,6 +125,66 @@ You can also define a prefix that will be added to the image URL.</property>
             <property name="visible">1</property>
             <property name="can-focus">1</property>
             <property name="placeholder-text" translatable="yes">Image URL prefix</property>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child>
+      <object class="GtkBox">
+        <property name="visible">1</property>
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkLabel">
+            <property name="visible">1</property>
+            <property name="halign">start</property>
+            <property name="label" translatable="yes">Link JSON Path - optional</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkEntry" id="generic-json-link-path">
+            <property name="visible">1</property>
+            <property name="can-focus">1</property>
+            <property name="placeholder-text" translatable="yes">Link JSON Path - optional</property>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child>
+      <object class="GtkBox">
+        <property name="visible">1</property>
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkLabel">
+            <property name="visible">1</property>
+            <property name="halign">start</property>
+            <property name="label" translatable="yes">Link prefix - optional</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkEntry" id="generic-json-link-prefix">
+            <property name="visible">1</property>
+            <property name="can-focus">1</property>
+            <property name="placeholder-text" translatable="yes">Link prefix - optional</property>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child>
+      <object class="GtkBox">
+        <property name="visible">1</property>
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkLabel">
+            <property name="visible">1</property>
+            <property name="halign">start</property>
+            <property name="label" translatable="yes">Website URL - optional</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkEntry" id="generic-json-domain">
+            <property name="visible">1</property>
+            <property name="can-focus">1</property>
+            <property name="placeholder-text" translatable="yes">Website URL - optional</property>
           </object>
         </child>
       </object>

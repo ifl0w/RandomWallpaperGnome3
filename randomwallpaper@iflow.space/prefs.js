@@ -250,6 +250,10 @@ var RandomWallpaperSettings = class {
 	}
 
 	bindGenericJSON() {
+		this._generic_json_settings.bind('generic-json-id',
+			this._builder.get_object('generic-json-id'),
+			'text',
+			Gio.SettingsBindFlags.DEFAULT);
 		this._generic_json_settings.bind('generic-json-request-url',
 			this._builder.get_object('generic-json-request-url'),
 			'text',
@@ -260,6 +264,18 @@ var RandomWallpaperSettings = class {
 			Gio.SettingsBindFlags.DEFAULT);
 		this._generic_json_settings.bind('generic-json-url-prefix',
 			this._builder.get_object('generic-json-url-prefix'),
+			'text',
+			Gio.SettingsBindFlags.DEFAULT);
+		this._generic_json_settings.bind('generic-json-link-path',
+			this._builder.get_object('generic-json-link-path'),
+			'text',
+			Gio.SettingsBindFlags.DEFAULT);
+		this._generic_json_settings.bind('generic-json-link-prefix',
+			this._builder.get_object('generic-json-link-prefix'),
+			'text',
+			Gio.SettingsBindFlags.DEFAULT);
+		this._generic_json_settings.bind('generic-json-domain',
+			this._builder.get_object('generic-json-domain'),
 			'text',
 			Gio.SettingsBindFlags.DEFAULT);
 	}
