@@ -205,6 +205,11 @@
 
     <schema path="/org/gnome/shell/extensions/space-iflow-randomwallpaper/genericJSON/"
             id='org.gnome.shell.extensions.space.iflow.randomwallpaper.genericJSON'>
+        <key type='s' name='generic-json-id'>
+            <default>""</default>
+            <summary>Identifier</summary>
+            <description>Identifier for this source.</description>
+        </key>
         <key type='s' name='generic-json-request-url'>
             <default>""</default>
             <summary>The request URL</summary>
@@ -219,6 +224,21 @@
             <default>""</default>
             <summary>Image URL prefix</summary>
             <description>This prefix is added to the final image URL.</description>
+        </key>
+        <key type='s' name='generic-json-link-path'>
+            <default>""</default>
+            <summary>Link JSON Path</summary>
+            <description>The JSON path that describes the picture link.</description>
+        </key>
+        <key type='s' name='generic-json-link-prefix'>
+            <default>""</default>
+            <summary>Link prefix</summary>
+            <description>This prefix is added to the final image link.</description>
+        </key>
+        <key type='s' name='generic-json-domain'>
+            <default>""</default>
+            <summary>Website URL</summary>
+            <description>Main domain for this source.</description>
         </key>
     </schema>
 
