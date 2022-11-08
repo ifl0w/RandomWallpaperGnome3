@@ -1,7 +1,7 @@
 using Gtk 4.0;
 using Adw 1;
 
-template GenericJsonRow : Adw.PreferencesGroup {
+template GenericJsonSettingsGroup : Adw.PreferencesGroup {
   // title: _("Source Settings");
   description: _("This feature requires some know how. However, many different wallpaper providers can be used with this generic JSON source.\nYou have to specify an URL to a JSON response and a path to the target image URL within the JSON response.\nYou can also define a prefix that will be added to the image URL.");
 
@@ -21,13 +21,13 @@ template GenericJsonRow : Adw.PreferencesGroup {
   Adw.PreferencesGroup {
     title: _("General");
 
-    Adw.EntryRow generic_json_domain {
+    Adw.EntryRow domain {
       title: _("Domain");
       input-purpose: url;
 
       LinkButton {
         valign: center;
-        // uri: bind text;
+        uri: bind domain.text;
 
         Adw.ButtonContent {
           icon-name: "globe-symbolic";
@@ -39,13 +39,13 @@ template GenericJsonRow : Adw.PreferencesGroup {
       }
     }
 
-    Adw.EntryRow generic_json_request_url {
+    Adw.EntryRow request_url {
       title: _("Request URL");
       input-purpose: url;
 
       LinkButton {
         valign: center;
-        // uri: bind text;
+        uri: bind request_url.text;
 
         Adw.ButtonContent {
           icon-name: "globe-symbolic";
@@ -61,12 +61,12 @@ template GenericJsonRow : Adw.PreferencesGroup {
   Adw.PreferencesGroup {
     title: _("Image");
 
-    Adw.EntryRow generic_json_image_path {
+    Adw.EntryRow image_path {
       title: _("JSON Path");
       input-purpose: free_form;
     }
 
-    Adw.EntryRow generic_json_image_prefix {
+    Adw.EntryRow image_prefix {
       title: _("URL prefix");
       input-purpose: free_form;
     }
@@ -75,12 +75,12 @@ template GenericJsonRow : Adw.PreferencesGroup {
   Adw.PreferencesGroup {
     title: _("Post");
 
-    Adw.EntryRow generic_json_post_path {
+    Adw.EntryRow post_path {
       title: _("JSON Path");
       input-purpose: free_form;
     }
 
-    Adw.EntryRow generic_json_post_prefix {
+    Adw.EntryRow post_prefix {
       title: _("URL Prefix");
       input-purpose: free_form;
     }
@@ -89,17 +89,17 @@ template GenericJsonRow : Adw.PreferencesGroup {
   Adw.PreferencesGroup {
     title: _("Author");
 
-    Adw.EntryRow generic_json_author_name_path {
+    Adw.EntryRow author_name_path {
       title: _("Name JSON Path");
       input-purpose: free_form;
     }
 
-    Adw.EntryRow generic_json_author_url_path {
+    Adw.EntryRow author_url_path {
       title: _("URL JSON Path");
       input-purpose: free_form;
     }
 
-    Adw.EntryRow generic_json_author_url_prefix {
+    Adw.EntryRow author_url_prefix {
       title: _("URL URL prefix");
       input-purpose: free_form;
     }

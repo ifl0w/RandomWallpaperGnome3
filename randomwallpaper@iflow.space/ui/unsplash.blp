@@ -1,10 +1,10 @@
 using Gtk 4.0;
 using Adw 1;
 
-template UnsplashRow : Adw.PreferencesGroup {
-  // title: _("Source Settings");
+template UnsplashSettingsGroup : Adw.PreferencesGroup {
+  title: _("General");
 
-  Adw.EntryRow unsplash_keyword {
+  Adw.EntryRow keyword {
     title: _("Keywords - Comma seperated");
     input-purpose: free_form;
   }
@@ -13,7 +13,7 @@ template UnsplashRow : Adw.PreferencesGroup {
     title: _("Only Featured Images");
     subtitle: _("This option results in a smaller image pool, but the images are considered to be of higher quality.");
 
-    Switch unsplash_featured_only {
+    Switch featured_only {
       valign: center;
     }
   }
@@ -25,7 +25,7 @@ template UnsplashRow : Adw.PreferencesGroup {
       valign: center;
       numeric: true;
 
-      adjustment: Adjustment unsplash_image_width {
+      adjustment: Adjustment image_width {
         step-increment: 1;
         page-increment: 10;
         lower: 1;
@@ -41,7 +41,7 @@ template UnsplashRow : Adw.PreferencesGroup {
       valign: center;
       numeric: true;
 
-      adjustment: Adjustment unsplash_image_height {
+      adjustment: Adjustment image_height {
         step-increment: 1;
         page-increment: 10;
         lower: 1;
@@ -53,36 +53,21 @@ template UnsplashRow : Adw.PreferencesGroup {
   Adw.PreferencesGroup {
     title: _("Contraint");
 
-    Adw.ActionRow {
+    // TODO: ExpanderRow with switch?
+    // Nested ExpanderRows behave strangely
+    Adw.ComboRow constraint_type {
       title: _("Type");
-
-      ComboBoxText unsplash_constraint_type {
-        valign: center;
-        active: 0;
-
-        items [
+      model: StringList {
+        strings [
           _("Unconstraint"),
           _("User"),
           _("User's Likes"),
           _("Collection ID"),
         ]
-      }
+      };
     }
 
-    // Don't know how I can connect a change signal to a Adw.ComboRow - nothing works
-    // Adw.ComboRow unsplash_constraint_type {
-    //   title: _("Type");
-    //   model: StringList {
-    //     strings [
-    //       _("Unconstraint"),
-    //       _("User"),
-    //       _("User's Likes"),
-    //       _("Collection ID"),
-    //     ]
-    //   };
-    // }
-
-    Adw.EntryRow unsplash_constraint_value {
+    Adw.EntryRow constraint_value {
       title: _("Value");
     }
   }

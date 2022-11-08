@@ -1,18 +1,18 @@
 using Gtk 4.0;
 using Adw 1;
 
-template WallhavenRow : Adw.PreferencesGroup {
+template WallhavenSettingsGroup : Adw.PreferencesGroup {
   // title: _("Source Settings");
 
   Adw.PreferencesGroup {
     title: _("General");
 
-    Adw.EntryRow wallhaven_keyword {
+    Adw.EntryRow keyword {
       title: _("Keywords - Comma seperated");
       input-purpose: free_form;
     }
 
-    Adw.PasswordEntryRow wallhaven_api_key {
+    Adw.PasswordEntryRow api_key {
       title: _("API key");
       input-purpose: password;
 
@@ -30,7 +30,7 @@ template WallhavenRow : Adw.PreferencesGroup {
       }
     }
 
-    Adw.EntryRow wallhaven_resolutions {
+    Adw.EntryRow resolutions {
       title: _("Resolutions: 1920x1080, 2560x1440");
       input-purpose: free_form;
       text: "";
@@ -44,7 +44,7 @@ template WallhavenRow : Adw.PreferencesGroup {
       title: "SFW";
       subtitle: _("Safe for work");
 
-      Switch wallhaven_allow_sfw {
+      Switch allow_sfw {
         valign: center;
       }
     }
@@ -52,7 +52,7 @@ template WallhavenRow : Adw.PreferencesGroup {
     Adw.ActionRow {
       title: "Sketchy";
 
-      Switch wallhaven_allow_sketchy {
+      Switch allow_sketchy {
         valign: center;
       }
     }
@@ -61,7 +61,7 @@ template WallhavenRow : Adw.PreferencesGroup {
       title: "NSFW";
       subtitle: _("Not safe for work");
 
-      Switch wallhaven_allow_nsfw {
+      Switch allow_nsfw {
         valign: center;
       }
     }
@@ -73,7 +73,7 @@ template WallhavenRow : Adw.PreferencesGroup {
     Adw.ActionRow {
       title: "General";
 
-      Switch wallhaven_category_general {
+      Switch category_general {
         valign: center;
       }
     }
@@ -81,7 +81,7 @@ template WallhavenRow : Adw.PreferencesGroup {
     Adw.ActionRow {
       title: "Anime";
 
-      Switch wallhaven_category_anime {
+      Switch category_anime {
         valign: center;
       }
     }
@@ -89,7 +89,7 @@ template WallhavenRow : Adw.PreferencesGroup {
     Adw.ActionRow {
       title: "People";
 
-      Switch wallhaven_category_people {
+      Switch category_people {
         valign: center;
       }
     }
