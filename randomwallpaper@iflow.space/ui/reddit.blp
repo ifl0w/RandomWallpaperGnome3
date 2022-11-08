@@ -1,10 +1,10 @@
 using Gtk 4.0;
 using Adw 1;
 
-template RedditRow : Adw.PreferencesGroup {
-  // title: _("Source Settings");
+template RedditSettingsGroup : Adw.PreferencesGroup {
+  title: _("General");
 
-  Adw.EntryRow reddit_subreddits {
+  Adw.EntryRow subreddits {
     title: _("Subreddits - e.g.: wallpaper, wallpapers, minimalwallpaper");
   }
 
@@ -12,7 +12,7 @@ template RedditRow : Adw.PreferencesGroup {
     title: "SFW";
     subtitle: _("Safe for work");
 
-    Switch reddit_allow_sfw {
+    Switch allow_sfw {
       valign: center;
     }
   }

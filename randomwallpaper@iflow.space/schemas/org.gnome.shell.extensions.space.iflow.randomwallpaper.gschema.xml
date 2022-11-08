@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist gettext-domain='gnome-shell-extensions'>
 
-    <enum id='org.gnome.shell.extensions.space.iflow.randomwallpaper.sources'>
-        <value value='0' nick='unsplash' />
-        <value value='1' nick='wallhaven' />
-        <value value='2' nick='reddit' />
-        <value value='3' nick='genericJSON' />
-    </enum>
+    <!-- <enum id='org.gnome.shell.extensions.space.iflow.randomwallpaper.sources'>
+        <value value='0' nick='unsplash'/>
+        <value value='1' nick='wallhaven'/>
+        <value value='2' nick='reddit'/>
+        <value value='3' nick='genericJSON'/>
+    </enum> -->
 
     <schema path="/org/gnome/shell/extensions/space-iflow-randomwallpaper/"
         id='org.gnome.shell.extensions.space.iflow.randomwallpaper'>
@@ -44,12 +44,6 @@
             <range min='0' max='23' />
         </key>
 
-        <key type='i' name='source'>
-            <default>0</default>
-            <summary>Wallpaper Source</summary>
-            <description>Describes the adapter that will be used.</description>
-        </key>
-
         <key type='as' name='history'>
             <default>[]</default>
             <summary>History</summary>
@@ -59,8 +53,7 @@
         <key type='x' name='timer-last-trigger'>
             <default>0</default>
             <summary>Timestamp of the last timer trigger.</summary>
-            <description>A JS timestamp of the last timer callback trigger. Zero if no last change registered.
-</description>
+            <description>A JS timestamp of the last timer callback trigger. Zero if no last change registered.</description>
         </key>
 
         <key type='b' name='change-lock-screen'>
@@ -81,88 +74,117 @@
             <description>Removes the panel icon from the gnome shell.</description>
         </key>
 
+        <key type='as' name='sources'>
+            <default>[]</default>
+            <summary>Configured Wallpaper Sources</summary>
+            <description>A mapping with available configured wallpaper sources as stringified JSON.</description>
+        </key>
+
     </schema>
 
-    <enum id='org.gnome.shell.extensions.space.iflow.randomwallpaper.unsplash.constraints'>
-        <value value='0' nick='unconstrained' />
-        <value value='1' nick='user' />
-        <value value='2' nick='likes' />
-        <value value='3' nick='collection' />
-    </enum>
+    <!-- <enum id='org.gnome.shell.extensions.space.iflow.randomwallpaper.unsplash.constraints'>
+        <value value='0' nick='unconstrained'/>
+        <value value='1' nick='user'/>
+        <value value='2' nick='likes'/>
+        <value value='3' nick='collection'/>
+    </enum> -->
 
-    <schema path="/org/gnome/shell/extensions/space-iflow-randomwallpaper/unsplash/"
-        id='org.gnome.shell.extensions.space.iflow.randomwallpaper.unsplash'>
-        <key type='s' name='unsplash-keyword'>
+    <schema id='org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.unsplash'>
+
+        <key type='s' name='name'>
+            <default>"Unsplash"</default>
+            <summary>Name</summary>
+            <description>Name for this source.</description>
+        </key>
+
+        <key type='s' name='keyword'>
             <default>""</default>
             <summary>Keyword</summary>
             <description>The keyword will be used to search images.</description>
         </key>
-        <key type='s' name='unsplash-username'>
+
+        <key type='s' name='username'>
             <default>""</default>
             <summary>Username</summary>
             <description>Only fetch random images of a given user.</description>
         </key>
-        <key type='s' name='unsplash-collections'>
+
+        <key type='s' name='collections'>
             <default>""</default>
             <summary>Collections</summary>
             <description>Only fetch random images from a comma separated list of collections.</description>
         </key>
-        <key type='i' name='unsplash-image-width'>
+
+        <key type='i' name='image-width'>
             <default>1920</default>
             <summary>Image Width</summary>
             <description>The width of the image.</description>
         </key>
-        <key type='i' name='unsplash-image-height'>
+
+        <key type='i' name='image-height'>
             <default>1080</default>
             <summary>Image Width</summary>
             <description>The height of the image.</description>
         </key>
-        <key type='b' name='unsplash-featured-only'>
+
+        <key type='b' name='featured-only'>
             <default>false</default>
             <summary>Featured images only</summary>
-            <description>This results in a smaller wallpaper pool but the images are considered to have higher
-                quality.
-</description>
+            <description>This results in a smaller wallpaper pool but the images are considered to have higher quality.</description>
         </key>
-        <key type='i' name='unsplash-constraint-type'>
+
+        <key type='i' name='constraint-type'>
             <default>0</default>
             <summary>Constraint Type</summary>
             <description>The constraint of the Unsplash Source API.</description>
         </key>
-        <key type='s' name='unsplash-constraint-value'>
+
+        <key type='s' name='constraint-value'>
             <default>""</default>
             <summary>Constraint Value</summary>
             <description>This value should match the constraint type for. Has no effect in the case of an unconstrained search.</description>
         </key>
+
     </schema>
 
-    <schema path="/org/gnome/shell/extensions/space-iflow-randomwallpaper/wallhaven/"
-        id='org.gnome.shell.extensions.space.iflow.randomwallpaper.wallhaven'>
-        <key type='s' name='wallhaven-keyword'>
+    <schema id='org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.wallhaven'>
+
+        <key type='s' name='name'>
+            <default>"Wallhaven"</default>
+            <summary>Name</summary>
+            <description>Name for this source.</description>
+        </key>
+
+        <key type='s' name='keyword'>
             <default>""</default>
             <summary>Keyword</summary>
             <description>The keyword will be used to search images.</description>
         </key>
-        <key type='s' name='wallhaven-api-key'>
+
+        <key type='s' name='api-key'>
             <default>""</default>
             <summary>Api key</summary>
             <description>The wallheven api key.</description>
         </key>
+
         <key type='s' name='resolutions'>
             <default>"1920x1200, 1920x1080, 2560x1440, 2560x1600, 3840x1080"</default>
             <summary>Resolutions</summary>
             <description>The acceptable resolutions.</description>
         </key>
+
         <key type='b' name='allow-sfw'>
             <default>true</default>
             <summary>SFW</summary>
             <description>Whether safe images are allowed.</description>
         </key>
+
         <key type='b' name='allow-sketchy'>
             <default>false</default>
             <summary>Sketchy</summary>
             <description>Whether sketchy images are allowed.</description>
         </key>
+
         <key type='b' name='allow-nsfw'>
             <default>false</default>
             <summary>NSFW</summary>
@@ -174,84 +196,104 @@
             <summary>Category General</summary>
             <description>Whether the general category should be searched.</description>
         </key>
+
         <key type='b' name='category-anime'>
             <default>true</default>
             <summary>Category Anime</summary>
             <description>Whether the anime category should be searched.</description>
         </key>
+
         <key type='b' name='category-people'>
             <default>true</default>
             <summary>Category People</summary>
             <description>Whether the people category should be searched.</description>
         </key>
+
     </schema>
 
-    <schema path="/org/gnome/shell/extensions/space-iflow-randomwallpaper/reddit/"
-        id='org.gnome.shell.extensions.space.iflow.randomwallpaper.reddit'>
+    <schema id='org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.reddit'>
+        <key type='s' name='name'>
+            <default>"Reddit"</default>
+            <summary>Name</summary>
+            <description>Name for this source.</description>
+        </key>
+
         <key type='s' name='subreddits'>
             <default>""</default>
             <summary>Subreddits</summary>
             <description>These subreddits will be searched.</description>
         </key>
+
         <key type='b' name='allow-sfw'>
             <default>false</default>
             <summary>SFW</summary>
             <description>Whether safe images are allowed.</description>
         </key>
+
     </schema>
 
-    <schema path="/org/gnome/shell/extensions/space-iflow-randomwallpaper/genericJSON/"
-        id='org.gnome.shell.extensions.space.iflow.randomwallpaper.genericJSON'>
-        <key type='s' name='generic-json-id'>
-            <default>""</default>
-            <summary>Identifier</summary>
-            <description>Identifier for this source.</description>
+    <schema id='org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.genericJSON'>
+
+        <key type='s' name='name'>
+            <default>"genericJSON"</default>
+            <summary>Name</summary>
+            <description>Name for this source.</description>
         </key>
-        <key type='s' name='generic-json-domain'>
+
+        <key type='s' name='domain'>
             <default>""</default>
             <summary>Website URL</summary>
             <description>Main domain for this source.</description>
         </key>
-        <key type='s' name='generic-json-request-url'>
+
+        <key type='s' name='request-url'>
             <default>""</default>
             <summary>The request URL</summary>
             <description>The URL where the JSON will be requested.</description>
         </key>
-        <key type='s' name='generic-json-image-path'>
+
+        <key type='s' name='image-path'>
             <default>""</default>
             <summary>Image JSON Path</summary>
             <description>The JSON path that describes the picture URL.</description>
         </key>
-        <key type='s' name='generic-json-image-prefix'>
+
+        <key type='s' name='image-prefix'>
             <default>""</default>
             <summary>Image URL prefix</summary>
             <description>This prefix is added to the final image URL.</description>
         </key>
-        <key type='s' name='generic-json-post-path'>
+
+        <key type='s' name='post-path'>
             <default>""</default>
             <summary>Post JSON Path</summary>
             <description>The JSON path that describes the post link.</description>
         </key>
-        <key type='s' name='generic-json-post-prefix'>
+
+        <key type='s' name='post-prefix'>
             <default>""</default>
             <summary>Post URL prefix</summary>
             <description>This prefix is added to the post link.</description>
         </key>
-        <key type='s' name='generic-json-author-name-path'>
+
+        <key type='s' name='author-name-path'>
             <default>""</default>
             <summary>Author name JSON Path</summary>
             <description>The JSON path that describes the author name path.</description>
         </key>
-        <key type='s' name='generic-json-author-url-path'>
+
+        <key type='s' name='author-url-path'>
             <default>""</default>
             <summary>Author link JSON Path</summary>
             <description>The JSON path that describes the author link path.</description>
         </key>
-        <key type='s' name='generic-json-author-url-prefix'>
+
+        <key type='s' name='author-url-prefix'>
             <default>""</default>
             <summary>Author link URL prefix</summary>
             <description>This prefix is added to the final author link.</description>
         </key>
+
     </schema>
 
 </schemalist>

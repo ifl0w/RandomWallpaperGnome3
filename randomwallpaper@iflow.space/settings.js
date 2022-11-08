@@ -9,8 +9,8 @@ var Settings = class {
 	 * @param [schema]
 	 * @private
 	 */
-	constructor(schema) {
-		this._settings = Utils.getSettings(schema);
+	constructor(schema, path = null) {
+		this._settings = Utils.getSettings(schema, path);
 	}
 
 	observe(key, callback) {
