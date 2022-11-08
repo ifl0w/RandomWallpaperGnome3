@@ -27,8 +27,7 @@ var WallpaperController = class {
 		this.preferencesContext = prefsContext;
 		this.logger = new LoggerModule.Logger('RWG3', 'WallpaperController');
 		let xdg_cache_home = Mainloop.getenv('XDG_CACHE_HOME')
-		if (!xdg_cache_home)
-		{
+		if (!xdg_cache_home) {
 			xdg_cache_home = `${Mainloop.getenv('HOME')}/.cache`
 		}
 		this.wallpaperlocation = `${xdg_cache_home}/${Self.metadata['uuid']}/wallpapers/`;
@@ -54,11 +53,6 @@ var WallpaperController = class {
 		this._settings.observe('auto-fetch', () => this._updateAutoFetching());
 		this._settings.observe('minutes', () => this._updateAutoFetching());
 		this._settings.observe('hours', () => this._updateAutoFetching());
-
-		this._unsplashAdapter = new SourceAdapter.UnsplashAdapter();
-		this._wallhavenAdapter = new SourceAdapter.WallhavenAdapter();
-		this._redditAdapter = new SourceAdapter.RedditAdapter();
-		this._genericJsonAdapter = new SourceAdapter.GenericJsonAdapter();
 
 		this._updateHistory();
 		this._updateAutoFetching();
@@ -96,28 +90,50 @@ var WallpaperController = class {
 	 forwards the request to the adapter
 	 */
 	_requestRandomImageFromAdapter(callback) {
-		this.imageSourceAdapter = this._unsplashAdapter;
+		this.imageSourceAdapter = null;
 
-		// FIXME: gsettings schema changed from enum to int
-		switch (this._settings.get('source', 'int')) {
+		let source = this._getRandomSource();
+
+		switch (source.type) {
 			case 0:
-				this.imageSourceAdapter = this._unsplashAdapter;
+				this.imageSourceAdapter = new SourceAdapter.UnsplashAdapter(source.id);
 				break;
 			case 1:
-				this.imageSourceAdapter = this._wallhavenAdapter;
+				this.imageSourceAdapter = new SourceAdapter.WallhavenAdapter(source.id);
 				break;
 			case 2:
-				this.imageSourceAdapter = this._redditAdapter;
+				this.imageSourceAdapter = new SourceAdapter.RedditAdapter(source.id);
 				break;
 			case 3:
-				this.imageSourceAdapter = this._genericJsonAdapter;
+				this.imageSourceAdapter = new SourceAdapter.GenericJsonAdapter(source.id);
 				break;
 			default:
-				this.imageSourceAdapter = this._unsplashAdapter;
+				this.imageSourceAdapter = new SourceAdapter.UnsplashAdapter(null);
+				// TODO: log error and abort, raise exception?
 				break;
 		}
 
 		this.imageSourceAdapter.requestRandomImage(callback);
+	}
+
+	_getRandomSource() {
+		let stringSources = this._settings.get('sources', 'strv');
+		let sources = stringSources.map(elem => {
+			return JSON.parse(elem)
+		});
+
+		if (sources === null || sources.length < 1) {
+			return { type: -1 };
+		}
+
+		let enabled_sources = sources.filter(element => { return element.enabled; })
+
+		if (enabled_sources === null || enabled_sources.length < 1) {
+			return { type: -1 };
+		}
+
+		// https://stackoverflow.com/a/5915122
+		return enabled_sources[Math.floor(Math.random() * enabled_sources.length)];
 	}
 
 	/**
@@ -175,12 +191,12 @@ var WallpaperController = class {
 	 * @private
 	 */
 	_setBackground(path, callback) {
-		let background_setting = new Gio.Settings({schema: "org.gnome.desktop.background"});
+		let background_setting = new Gio.Settings({ schema: "org.gnome.desktop.background" });
 		path = "file://" + path;
 
 		this._setPictureUriOfSettingsObject(background_setting, path, () => {
 			if (this._settings.get('change-lock-screen', 'boolean')) {
-				let screensaver_setting = new Gio.Settings({schema: "org.gnome.desktop.screensaver"});
+				let screensaver_setting = new Gio.Settings({ schema: "org.gnome.desktop.screensaver" });
 
 				this._setPictureUriOfSettingsObject(screensaver_setting, path, () => {
 					// call callback if given
@@ -242,7 +258,7 @@ var WallpaperController = class {
 	}
 
 	_getCurrentWallpaper() {
-		let background_setting = new Gio.Settings({schema: "org.gnome.desktop.background"});
+		let background_setting = new Gio.Settings({ schema: "org.gnome.desktop.background" });
 		return background_setting.get_string("picture-uri").replace(/^(file:\/\/)/, "");
 	}
 

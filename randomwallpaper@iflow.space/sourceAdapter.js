@@ -1,9 +1,9 @@
 const Self = imports.misc.extensionUtils.getCurrentExtension();
 
-const RWG_SETTINGS_SCHEMA_UNSPLASH = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.unsplash';
-const RWG_SETTINGS_SCHEMA_WALLHAVEN = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.wallhaven';
-const RWG_SETTINGS_SCHEMA_REDDIT = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.reddit';
-const RWG_SETTINGS_SCHEMA_GENERIC_JSON = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.genericJSON';
+const RWG_SETTINGS_SCHEMA_UNSPLASH = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.unsplash';
+const RWG_SETTINGS_SCHEMA_WALLHAVEN = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.wallhaven';
+const RWG_SETTINGS_SCHEMA_REDDIT = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.reddit';
+const RWG_SETTINGS_SCHEMA_GENERIC_JSON = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.genericJSON';
 
 const SettingsModule = Self.imports.settings;
 const HistoryModule = Self.imports.history;
@@ -69,8 +69,7 @@ var BaseAdapter = class {
 };
 
 var UnsplashAdapter = class extends BaseAdapter {
-
-	constructor() {
+	constructor(id) {
 		super();
 
 		this.sourceName = 'Unsplash';
@@ -86,13 +85,23 @@ var UnsplashAdapter = class extends BaseAdapter {
 			'constraintValue': '',
 		};
 
-		this._settings = new SettingsModule.Settings(RWG_SETTINGS_SCHEMA_UNSPLASH);
+		if (id === null) {
+			id = -1;
+		}
+
+		let path = `/org/gnome/shell/extensions/space-iflow-randomwallpaper/sources/unsplash/${id}/`;
+		this._settings = new SettingsModule.Settings(RWG_SETTINGS_SCHEMA_UNSPLASH, path);
 		this.bowl = new SoupBowl.Bowl();
 	}
 
 	requestRandomImage(callback) {
 		this._readOptionsFromSettings();
 		let optionsString = this._generateOptionsString();
+
+		let identifier = this._settings.get("name", "string");
+		if (identifier === null || identifier === "") {
+			identifier = this.sourceName;
+		}
 
 		let url = `https://source.unsplash.com${optionsString}`;
 		url = encodeURI(url);
@@ -117,7 +126,7 @@ var UnsplashAdapter = class extends BaseAdapter {
 
 			imageLinkUrl = message.response_headers.get_one('Location');
 
-			let historyEntry = new HistoryModule.HistoryEntry(null, this.sourceName, imageLinkUrl);
+			let historyEntry = new HistoryModule.HistoryEntry(null, identifier, imageLinkUrl);
 			historyEntry.source.sourceUrl = this.sourceUrl;
 			historyEntry.source.imageLinkUrl = imageLinkUrl;
 			callback(historyEntry);
@@ -159,25 +168,24 @@ var UnsplashAdapter = class extends BaseAdapter {
 	}
 
 	_readOptionsFromSettings() {
-		this.options.w = this._settings.get('unsplash-image-width', 'int');
-		this.options.h = this._settings.get('unsplash-image-height', 'int');
+		this.options.w = this._settings.get('image-width', 'int');
+		this.options.h = this._settings.get('image-height', 'int');
 
-		this.options.constraintType = this._settings.get('unsplash-constraint-type', 'string');
-		this.options.constraintValue = this._settings.get('unsplash-constraint-value', 'string');
+		this.options.constraintType = this._settings.get('constraint-type', 'string');
+		this.options.constraintValue = this._settings.get('constraint-value', 'string');
 
-		const keywords = this._settings.get('unsplash-keyword', 'string').split(",");
+		const keywords = this._settings.get('keyword', 'string').split(",");
 		if (keywords.length > 0) {
 			const randomKeyword = keywords[Math.floor(Math.random() * keywords.length)];
 			this.options.query = randomKeyword.trim();
 		}
 
-		this.options.featured = this._settings.get('unsplash-featured-only', 'boolean');
+		this.options.featured = this._settings.get('featured-only', 'boolean');
 	}
 };
 
 var WallhavenAdapter = class extends BaseAdapter {
-
-	constructor() {
+	constructor(id) {
 		super();
 
 		this.options = {
@@ -189,13 +197,19 @@ var WallhavenAdapter = class extends BaseAdapter {
 			'resolutions': ['1920x1200', '2560x1440']
 		};
 
-		this._settings = new SettingsModule.Settings(RWG_SETTINGS_SCHEMA_WALLHAVEN);
+		let path = `/org/gnome/shell/extensions/space-iflow-randomwallpaper/sources/wallhaven/${id}/`;
+		this._settings = new SettingsModule.Settings(RWG_SETTINGS_SCHEMA_WALLHAVEN, path);
 		this.bowl = new SoupBowl.Bowl();
 	}
 
 	requestRandomImage(callback) {
 		this._readOptionsFromSettings();
 		let optionsString = this._generateOptionsString();
+
+		let identifier = this._settings.get("name", "string");
+		if (identifier === null || identifier === "") {
+			identifier = 'Wallhaven';
+		}
 
 		let url = 'https://wallhaven.cc/api/v1/search?' + encodeURI(optionsString);
 		let message = this.bowl.Soup.Message.new('GET', url);
@@ -225,7 +239,7 @@ var WallhavenAdapter = class extends BaseAdapter {
 			}
 
 			if (callback) {
-				let historyEntry = new HistoryModule.HistoryEntry(null, 'Wallhaven', downloadURL);
+				let historyEntry = new HistoryModule.HistoryEntry(null, identifier, downloadURL);
 				historyEntry.source.sourceUrl = 'https://wallhaven.cc/';
 				historyEntry.source.imageLinkUrl = siteURL;
 				callback(historyEntry);
@@ -253,12 +267,12 @@ var WallhavenAdapter = class extends BaseAdapter {
 	}
 
 	_readOptionsFromSettings() {
-		const keywords = this._settings.get('wallhaven-keyword', 'string').split(",");
+		const keywords = this._settings.get('keyword', 'string').split(",");
 		if (keywords.length > 0) {
 			const randomKeyword = keywords[Math.floor(Math.random() * keywords.length)];
 			this.options.q = randomKeyword.trim();
 		}
-		this.options.apikey = this._settings.get('wallhaven-api-key', 'string');
+		this.options.apikey = this._settings.get('api-key', 'string');
 
 		this.options.resolutions = this._settings.get('resolutions', 'string').split(',');
 		this.options.resolutions = this.options.resolutions.map((elem) => {
@@ -280,11 +294,11 @@ var WallhavenAdapter = class extends BaseAdapter {
 };
 
 var RedditAdapter = class extends BaseAdapter {
-
-	constructor() {
+	constructor(id) {
 		super();
 
-		this._settings = new SettingsModule.Settings(RWG_SETTINGS_SCHEMA_REDDIT);
+		let path = `/org/gnome/shell/extensions/space-iflow-randomwallpaper/sources/reddit/${id}/`;
+		this._settings = new SettingsModule.Settings(RWG_SETTINGS_SCHEMA_REDDIT, path);
 		this.bowl = new SoupBowl.Bowl();
 	}
 
@@ -295,6 +309,10 @@ var RedditAdapter = class extends BaseAdapter {
 	requestRandomImage(callback) {
 		const subreddits = this._settings.get('subreddits', 'string').split(',').map(s => s.trim()).join('+');
 		const require_sfw = this._settings.get('allow-sfw', 'boolean');
+		let identifier = this._settings.get("name", "string");
+		if (identifier === null || identifier === "") {
+			identifier = 'Reddit';
+		}
 
 		const url = encodeURI('https://www.reddit.com/r/' + subreddits + '.json');
 		let message = this.bowl.Soup.Message.new('GET', url);
@@ -321,7 +339,7 @@ var RedditAdapter = class extends BaseAdapter {
 				const imageDownloadUrl = this._ampDecode(submission.preview.images[0].source.url);
 
 				if (callback) {
-					let historyEntry = new HistoryModule.HistoryEntry(null, 'Reddit', imageDownloadUrl);
+					let historyEntry = new HistoryModule.HistoryEntry(null, identifier, imageDownloadUrl);
 					historyEntry.source.sourceUrl = 'https://www.reddit.com/' + submission.subreddit_name_prefixed;
 					historyEntry.source.imageLinkUrl = 'https://www.reddit.com/' + submission.permalink;
 					callback(historyEntry);
@@ -335,16 +353,16 @@ var RedditAdapter = class extends BaseAdapter {
 };
 
 var GenericJsonAdapter = class extends BaseAdapter {
-
-	constructor() {
+	constructor(id) {
 		super();
 		this._jsonPathParser = new JSONPath.JSONPathParser();
-		this._settings = new SettingsModule.Settings(RWG_SETTINGS_SCHEMA_GENERIC_JSON);
+		let path = `/org/gnome/shell/extensions/space-iflow-randomwallpaper/sources/genericJSON/${id}/`;
+		this._settings = new SettingsModule.Settings(RWG_SETTINGS_SCHEMA_GENERIC_JSON, path);
 		this.bowl = new SoupBowl.Bowl();
 	}
 
 	requestRandomImage(callback) {
-		let url = this._settings.get("generic-json-request-url", "string");
+		let url = this._settings.get("request-url", "string");
 		url = encodeURI(url);
 		let message = this.bowl.Soup.Message.new('GET', url);
 		if (message === null) {
@@ -356,19 +374,19 @@ var GenericJsonAdapter = class extends BaseAdapter {
 			try {
 				const response_body = JSON.parse(ByteArray.toString(response_body_bytes));
 
-				let identifier = this._settings.get("generic-json-id", "string");
-				let imageJSONPath = this._settings.get("generic-json-image-path", "string");
-				let postJSONPath = this._settings.get("generic-json-post-path", "string");
-				let domainUrl = this._settings.get("generic-json-domain", "string");
-				let authorNameJSONPath = this._settings.get("generic-json-author-name-path", "string");
-				let authorUrlJSONPath = this._settings.get("generic-json-author-url-path", "string");
+				let imageJSONPath = this._settings.get("image-path", "string");
+				let postJSONPath = this._settings.get("post-path", "string");
+				let domainUrl = this._settings.get("domain", "string");
+				let authorNameJSONPath = this._settings.get("author-name-path", "string");
+				let authorUrlJSONPath = this._settings.get("author-url-path", "string");
 
+				let identifier = this._settings.get("name", "string");
 				if (identifier === null || identifier === "") {
 					identifier = 'Generic JSON Source';
 				}
 
 				let rObject = this._jsonPathParser.access(response_body, imageJSONPath);
-				let imageDownloadUrl = this._settings.get("generic-json-image-prefix", "string") + rObject.Object;
+				let imageDownloadUrl = this._settings.get("image-prefix", "string") + rObject.Object;
 
 				// '@random' would yield different results so lets make sure the values stay
 				// the same as long as the path is identical
@@ -380,7 +398,7 @@ var GenericJsonAdapter = class extends BaseAdapter {
 				let slicedRandomElements = rObject.RandomElements.slice(0, occurrences);
 
 				let postUrl = this._jsonPathParser.access(response_body, postJSONPath, slicedRandomElements, false).Object;
-				postUrl = this._settings.get("generic-json-post-prefix", "string") + postUrl;
+				postUrl = this._settings.get("post-prefix", "string") + postUrl;
 				if (typeof postUrl !== 'string' || !postUrl instanceof String) {
 					postUrl = null;
 				}
@@ -391,7 +409,7 @@ var GenericJsonAdapter = class extends BaseAdapter {
 				}
 
 				let authorUrl = this._jsonPathParser.access(response_body, authorUrlJSONPath, slicedRandomElements, false).Object;
-				authorUrl = this._settings.get("generic-json-author-url-prefix", "string") + authorUrl;
+				authorUrl = this._settings.get("author-url-prefix", "string") + authorUrl;
 				if (typeof authorUrl !== 'string' || !authorUrl instanceof String) {
 					authorUrl = null;
 				}
