@@ -37,12 +37,6 @@ var RandomWallpaperSettings = class {
 
 		this._loadSources();
 
-		this._toggleAfSliders();
-
-		this._builder.get_object('af_switch').connect('notify::active', function (toggleSwitch) {
-			this._toggleAfSliders();
-		}.bind(this));
-
 		this._settings.bind('history-length',
 			this._builder.get_object('history_length'),
 			'value',
@@ -93,16 +87,6 @@ var RandomWallpaperSettings = class {
 
 			this._bind_source_row(new_row);
 		});
-	}
-
-	_toggleAfSliders() {
-		if (this._builder.get_object('af_switch').get_enable_expansion()) {
-			this._builder.get_object('duration_slider_hours').set_sensitive(true);
-			this._builder.get_object('duration_slider_minutes').set_sensitive(true);
-		} else {
-			this._builder.get_object('duration_slider_hours').set_sensitive(false);
-			this._builder.get_object('duration_slider_minutes').set_sensitive(false);
-		}
 	}
 
 	_bindButtons() {
