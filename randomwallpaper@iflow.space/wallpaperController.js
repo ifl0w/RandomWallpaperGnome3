@@ -47,6 +47,14 @@ var WallpaperController = class {
 		this._stopLoadingHooks = [];
 
 		this._backendConnection = new Prefs.Settings(RWG_SETTINGS_SCHEMA_BACKEND_CONNECTION);
+
+		// Bring values to defined stage
+		this._backendConnection.set('clear-history', 'boolean', false);
+		this._backendConnection.set('open-folder', 'boolean', false);
+		this._backendConnection.set('pause-timer', 'boolean', false);
+		this._backendConnection.set('request-new-wallpaper', 'boolean', false);
+
+		// Track value changes
 		this._backendConnection.observe('clear-history', () => this._clearHistory());
 		this._backendConnection.observe('open-folder', () => this._openFolder());
 		this._backendConnection.observe('pause-timer', () => this._pauseTimer());
@@ -103,8 +111,8 @@ var WallpaperController = class {
 			this.update();
 			this.fetchNewWallpaper(() => {
 				this.update();
+				this._backendConnection.set('request-new-wallpaper', 'boolean', false);
 			});
-			this._backendConnection.set('request-new-wallpaper', 'boolean', false);
 		}
 	}
 
