@@ -5,31 +5,44 @@ const ExtensionUtils = imports.misc.extensionUtils;
 
 const Self = ExtensionUtils.getCurrentExtension();
 const SourceRow = Self.imports.ui.source_row;
-
+const Settings = Self.imports.settings;
 const WallpaperController = Self.imports.wallpaperController;
 const LoggerModule = Self.imports.logger;
 
 const RWG_SETTINGS_SCHEMA = 'org.gnome.shell.extensions.space.iflow.randomwallpaper';
+const RWG_SETTINGS_SCHEMA_BACKEND_CONNECTION = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.backend-connection';
+
+const LoggerModule = Self.imports.logger;
 
 function init(metaData) {
 	//Convenience.initTranslations();
 }
 
+// https://gjs.guide/extensions/overview/anatomy.html#prefs-js
+// The code in prefs.js will be executed in a separate Gtk process
+// Here you will not have access to code running in GNOME Shell, but fatal errors or mistakes will be contained within that process.
+// In this process you will be using the Gtk toolkit, not Clutter.
+
 // https://gjs.guide/extensions/development/preferences.html#preferences-window
+// Gnome 42+
 function fillPreferencesWindow(window) {
 	new RandomWallpaperSettings(window);
 }
 
 /* UI Setup */
 var RandomWallpaperSettings = class {
+	_backendConnection = null;
+
 	constructor(window) {
 		this.logger = new LoggerModule.Logger('RWG3', 'RandomWallpaper.Settings');
 
-		this._wallpaperController = null;
 		this._sources = [];
 		this.available_rows = {};
 
 		this._settings = ExtensionUtils.getSettings(RWG_SETTINGS_SCHEMA);
+		this._backendConnection = new Settings.Settings(RWG_SETTINGS_SCHEMA_BACKEND_CONNECTION);
+		this._backendConnection.set('pause-timer', 'boolean', true);
+
 		this._builder = new Gtk.Builder();
 		//this._builder.set_translation_domain(Self.metadata['gettext-domain']);
 		this._builder.add_from_file(Self.path + '/ui/page_general.ui');
@@ -70,11 +83,11 @@ var RandomWallpaperSettings = class {
 			'active',
 			Gio.SettingsBindFlags.DEFAULT);
 
-		this._wallpaperController = new WallpaperController.WallpaperController(true);
 		this._bindButtons();
 
 		window.connect('close-request', () => {
 			this._saveSources();
+			this._backendConnection.set('pause-timer', 'boolean', false);
 		});
 
 		window.add(this._builder.get_object('page_general'));
@@ -96,25 +109,27 @@ var RandomWallpaperSettings = class {
 			newWallpaperButton.get_child().set_label("Loading ...");
 			newWallpaperButton.set_sensitive(false);
 
-			this._wallpaperController.update();
-			this._wallpaperController.fetchNewWallpaper(() => {
-				this._wallpaperController.update();
-				newWallpaperButton.get_child().set_label(origNewWallpaperText);
-				newWallpaperButton.set_sensitive(true);
+			// The backend sets this back to false after fetching the image - listen for that event.
+			let handler = this._backendConnection.observe('request-new-wallpaper', () => {
+				if (!this._backendConnection.get('request-new-wallpaper', 'boolean')) {
+					newWallpaperButton.get_child().set_label(origNewWallpaperText);
+					newWallpaperButton.set_sensitive(true);
+					this._backendConnection.disconnect(handler);
+				}
 			});
+
+			this._backendConnection.set('request-new-wallpaper', 'boolean', true);
 		});
 
 		this._builder.get_object('clear_history').connect('clicked', () => {
-			this._wallpaperController.update();
-			this._wallpaperController.deleteHistory();
+			this._backendConnection.set('clear-history', 'boolean', true);
 		});
 
 		this._builder.get_object('open_wallpaper_folder').connect('clicked', () => {
-			let uri = GLib.filename_to_uri(this._wallpaperController.wallpaperlocation, "");
-			Gio.AppInfo.launch_default_for_uri(uri, Gio.AppLaunchContext.new());
+			this._backendConnection.set('open-folder', 'boolean', true);
 		});
 
-		this._builder.get_object('button_new_source').connect('clicked', button => {
+		this._builder.get_object('button_new_source').connect('clicked', () => {
 			let source_row = new SourceRow.SourceRow();
 			this.available_rows[source_row.id] = source_row;
 			this._builder.get_object('sources_list').add(source_row);
@@ -130,17 +145,17 @@ var RandomWallpaperSettings = class {
 			}
 		});
 
-		source_row.connect('notify::enable-expansion', (row) => {
+		source_row.connect('notify::enable-expansion', () => {
 			this._saveSources();
 		});
 
-		source_row.button_delete.connect('clicked', button => {
+		source_row.button_delete.connect('clicked', () => {
 			this._builder.get_object('sources_list').remove(source_row);
 			delete this.available_rows[source_row.id];
 			this._saveSources();
 		});
 
-		source_row.combo.connect('notify::selected', comboRow => {
+		source_row.combo.connect('notify::selected', () => {
 			this._saveSources();
 		});
 	}
