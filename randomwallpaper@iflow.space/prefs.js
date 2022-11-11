@@ -29,6 +29,13 @@ function fillPreferencesWindow(window) {
 	new RandomWallpaperSettings(window);
 }
 
+// 40 < Gnome < 42
+// function buildPrefsWidget() {
+// 	let window = new Adw.PreferencesWindow();
+// 	new RandomWallpaperSettings(window);
+// 	return window;
+// }
+
 /* UI Setup */
 var RandomWallpaperSettings = class {
 	_backendConnection = null;
