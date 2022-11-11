@@ -2,6 +2,7 @@ const Mainloop = imports.gi.GLib;
 
 // Filesystem
 const Gio = imports.gi.Gio;
+const GLib = imports.gi.GLib;
 
 //self
 const Self = imports.misc.extensionUtils.getCurrentExtension();
@@ -12,6 +13,8 @@ const HistoryModule = Self.imports.history;
 
 const LoggerModule = Self.imports.logger;
 
+const RWG_SETTINGS_SCHEMA_BACKEND_CONNECTION = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.backend-connection';
+
 /*
  libSoup is accessed through the SoupBowl wrapper to support libSoup3 and libSoup2.4 simultaneously in the extension
  runtime and in the preferences window.
@@ -19,12 +22,10 @@ const LoggerModule = Self.imports.logger;
 const SoupBowl = Self.imports.soupBowl;
 
 var WallpaperController = class {
+	_backendConnection = null;
+	_prohibitTimer = false;
 
-	// Whether the controller instance was created in from the context of the preferences/settings window
-	preferencesContext = false;
-
-	constructor(prefsContext = false) {
-		this.preferencesContext = prefsContext;
+	constructor() {
 		this.logger = new LoggerModule.Logger('RWG3', 'WallpaperController');
 		let xdg_cache_home = Mainloop.getenv('XDG_CACHE_HOME')
 		if (!xdg_cache_home) {
@@ -40,10 +41,16 @@ var WallpaperController = class {
 			duration: 30,
 		};
 
-		// functions will be called uppon loading a new wallpaper
+		// functions will be called upon loading a new wallpaper
 		this._startLoadingHooks = [];
-		// functions will be called when loading a new wallpaper stopped. If an error occured then the error will be passed as parameter.
+		// functions will be called when loading a new wallpaper stopped. If an error occurred then the error will be passed as parameter.
 		this._stopLoadingHooks = [];
+
+		this._backendConnection = new Prefs.Settings(RWG_SETTINGS_SCHEMA_BACKEND_CONNECTION);
+		this._backendConnection.observe('clear-history', () => this._clearHistory());
+		this._backendConnection.observe('open-folder', () => this._openFolder());
+		this._backendConnection.observe('pause-timer', () => this._pauseTimer());
+		this._backendConnection.observe('request-new-wallpaper', () => this._requestNewWallpaper());
 
 		this._timer = new Timer.AFTimer();
 		this._historyController = new HistoryModule.HistoryController(this.wallpaperlocation);
@@ -57,7 +64,48 @@ var WallpaperController = class {
 		this._updateHistory();
 		this._updateAutoFetching();
 
+		// load a new wallpaper on startup
+		if (this._settings.get("fetch-on-startup", "boolean")) {
+			this.fetchNewWallpaper();
+		}
+
 		this.currentWallpaper = this._getCurrentWallpaper();
+	}
+
+	_clearHistory() {
+		if (this._backendConnection.get('clear-history', 'boolean')) {
+			this.update();
+			this.deleteHistory();
+			this._backendConnection.set('clear-history', 'boolean', false);
+		}
+	}
+
+	_openFolder() {
+		if (this._backendConnection.get('open-folder', 'boolean')) {
+			let uri = GLib.filename_to_uri(this.wallpaperlocation, "");
+			Gio.AppInfo.launch_default_for_uri(uri, Gio.AppLaunchContext.new());
+			this._backendConnection.set('open-folder', 'boolean', false);
+		}
+	}
+
+	_pauseTimer() {
+		if (this._backendConnection.get('pause-timer', 'boolean')) {
+			this._prohibitTimer = true;
+			this._updateAutoFetching();
+		} else {
+			this._prohibitTimer = false;
+			this._updateAutoFetching();
+		}
+	}
+
+	_requestNewWallpaper() {
+		if (this._backendConnection.get('request-new-wallpaper', 'boolean')) {
+			this.update();
+			this.fetchNewWallpaper(() => {
+				this.update();
+			});
+			this._backendConnection.set('request-new-wallpaper', 'boolean', false);
+		}
 	}
 
 	_updateHistory() {
@@ -72,17 +120,12 @@ var WallpaperController = class {
 		this._autoFetch.active = this._settings.get('auto-fetch', 'boolean');
 
 		// only start timer if not in context of preferences window
-		if (!this.preferencesContext && this._autoFetch.active) {
+		if (!this._prohibitTimer && this._autoFetch.active) {
 			this._timer.registerCallback(() => this.fetchNewWallpaper());
 			this._timer.setMinutes(this._autoFetch.duration);
 			this._timer.start();
 		} else {
 			this._timer.stop();
-		}
-
-		// load a new wallpaper on startup (only if not in preferences context)
-		if (!this.preferencesContext && this._settings.get("fetch-on-startup", "boolean")) {
-			this.fetchNewWallpaper();
 		}
 	}
 
@@ -279,7 +322,9 @@ var WallpaperController = class {
 			element();
 		});
 
-		this._timer.reset(); // reset timer
+		if (!this._prohibitTimer) {
+			this._timer.reset(); // reset timer
+		}
 
 		this._requestRandomImageFromAdapter((historyElement, error) => {
 			if (historyElement == null || error) {
