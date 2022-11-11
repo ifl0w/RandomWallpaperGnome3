@@ -82,6 +82,35 @@
 
     </schema>
 
+    <schema path="/org/gnome/shell/extensions/space-iflow-randomwallpaper/backend-connection/"
+        id='org.gnome.shell.extensions.space.iflow.randomwallpaper.backend-connection'>
+
+        <key type='b' name='clear-history'>
+            <default>false</default>
+            <summary>Clear history request</summary>
+            <description>Request clearing the history.</description>
+        </key>
+
+        <key type='b' name='open-folder'>
+            <default>false</default>
+            <summary>Open folder request</summary>
+            <description>Request opening the folder.</description>
+        </key>
+
+        <key type='b' name='pause-timer'>
+            <default>false</default>
+            <summary>Pause the timer</summary>
+            <description>Pause the background timer if running.</description>
+        </key>
+
+        <key type='b' name='request-new-wallpaper'>
+            <default>false</default>
+            <summary>Request a new wallpaper</summary>
+            <description>Manually request a new wallpaper.</description>
+        </key>
+
+    </schema>
+
     <!-- <enum id='org.gnome.shell.extensions.space.iflow.randomwallpaper.unsplash.constraints'>
         <value value='0' nick='unconstrained'/>
         <value value='1' nick='user'/>
