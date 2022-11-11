@@ -1,3 +1,5 @@
+const Gio = imports.gi.Gio;
+
 const Self = imports.misc.extensionUtils.getCurrentExtension();
 
 const RWG_SETTINGS_SCHEMA_UNSPLASH = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.unsplash';
@@ -44,6 +46,53 @@ var BaseAdapter = class {
 			base = base.substr(0, base.indexOf('?'));
 		}
 		return base;
+	}
+
+	/**
+	 * copy file from uri to local wallpaper directory and calls the given callback with the name and the full filepath
+	 * of the written file as parameter.
+	 * @param uri
+	 * @param callback(name, path, error)
+	 */
+	fetchFile(uri, callback) {
+		//extract the name from the url and
+		let date = new Date();
+		let name = date.getTime() + '_' + this.fileName(uri); // timestamp ensures uniqueness
+
+		let bowl = new SoupBowl.Bowl();
+
+		let file = Gio.file_new_for_path(this.wallpaperlocation + String(name));
+		let fstream = file.replace(null, false, Gio.FileCreateFlags.NONE, null);
+
+		// start the download
+		let request = bowl.Soup.Message.new('GET', uri);
+
+		bowl.send_and_receive(request, (response_data_bytes) => {
+			if (!response_data_bytes) {
+				fstream.close(null);
+
+				if (callback) {
+					callback(null, null, 'Not a valid response');
+				}
+
+				return;
+			}
+
+			try {
+				fstream.write(response_data_bytes, null);
+
+				fstream.close(null);
+
+				// call callback with the name and the full filepath of the written file as parameter
+				if (callback) {
+					callback(name, file.get_path());
+				}
+			} catch (e) {
+				if (callback) {
+					callback(null, null, e);
+				}
+			}
+		});
 	}
 
 	_isURIEncoded(uri) {
