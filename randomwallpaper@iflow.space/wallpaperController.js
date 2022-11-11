@@ -15,12 +15,6 @@ const LoggerModule = Self.imports.logger;
 
 const RWG_SETTINGS_SCHEMA_BACKEND_CONNECTION = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.backend-connection';
 
-/*
- libSoup is accessed through the SoupBowl wrapper to support libSoup3 and libSoup2.4 simultaneously in the extension
- runtime and in the preferences window.
- */
-const SoupBowl = Self.imports.soupBowl;
-
 var WallpaperController = class {
 	_backendConnection = null;
 	_prohibitTimer = false;
@@ -34,7 +28,6 @@ var WallpaperController = class {
 		this.wallpaperlocation = `${xdg_cache_home}/${Self.metadata['uuid']}/wallpapers/`;
 		let mode = parseInt('0755', 8);
 		Mainloop.mkdir_with_parents(this.wallpaperlocation, mode)
-		this.imageSourceAdapter = null;
 
 		this._autoFetch = {
 			active: false,
@@ -138,33 +131,34 @@ var WallpaperController = class {
 	}
 
 	/*
-	 forwards the request to the adapter
+	 randomly returns an enabled and configured SourceAdapter
+	 returns a default UnsplashAdapter in case of failure
 	 */
-	_requestRandomImageFromAdapter(callback) {
-		this.imageSourceAdapter = null;
+	_getRandomAdapter() {
+		let imageSourceAdapter = null;
 
 		let source = this._getRandomSource();
 
 		switch (source.type) {
 			case 0:
-				this.imageSourceAdapter = new SourceAdapter.UnsplashAdapter(source.id);
+				imageSourceAdapter = new SourceAdapter.UnsplashAdapter(source.id);
 				break;
 			case 1:
-				this.imageSourceAdapter = new SourceAdapter.WallhavenAdapter(source.id);
+				imageSourceAdapter = new SourceAdapter.WallhavenAdapter(source.id);
 				break;
 			case 2:
-				this.imageSourceAdapter = new SourceAdapter.RedditAdapter(source.id);
+				imageSourceAdapter = new SourceAdapter.RedditAdapter(source.id);
 				break;
 			case 3:
-				this.imageSourceAdapter = new SourceAdapter.GenericJsonAdapter(source.id);
+				imageSourceAdapter = new SourceAdapter.GenericJsonAdapter(source.id);
 				break;
 			default:
-				this.imageSourceAdapter = new SourceAdapter.UnsplashAdapter(null);
+				imageSourceAdapter = new SourceAdapter.UnsplashAdapter(null);
 				// TODO: log error and abort, raise exception?
 				break;
 		}
 
-		this.imageSourceAdapter.requestRandomImage(callback);
+		return imageSourceAdapter;
 	}
 
 	_getRandomSource() {
@@ -185,54 +179,6 @@ var WallpaperController = class {
 
 		// https://stackoverflow.com/a/5915122
 		return enabled_sources[Math.floor(Math.random() * enabled_sources.length)];
-	}
-
-	/**
-	 * copy file from uri to local wallpaper directory and calls the given callback with the name and the full filepath
-	 * of the written file as parameter.
-	 * @param uri
-	 * @param callback(name, path, error)
-	 * @private
-	 */
-	_fetchFile(uri, callback) {
-		//extract the name from the url and
-		let date = new Date();
-		let name = date.getTime() + '_' + this.imageSourceAdapter.fileName(uri); // timestamp ensures uniqueness
-
-		let bowl = new SoupBowl.Bowl();
-
-		let file = Gio.file_new_for_path(this.wallpaperlocation + String(name));
-		let fstream = file.replace(null, false, Gio.FileCreateFlags.NONE, null);
-
-		// start the download
-		let request = bowl.Soup.Message.new('GET', uri);
-
-		bowl.send_and_receive(request, (response_data_bytes) => {
-			if (!response_data_bytes) {
-				fstream.close(null);
-
-				if (callback) {
-					callback(null, null, 'Not a valid response');
-				}
-
-				return;
-			}
-
-			try {
-				fstream.write(response_data_bytes, null);
-
-				fstream.close(null);
-
-				// call callback with the name and the full filepath of the written file as parameter
-				if (callback) {
-					callback(name, file.get_path());
-				}
-			} catch (e) {
-				if (callback) {
-					callback(null, null, e);
-				}
-			}
-		});
 	}
 
 	/**
@@ -334,7 +280,8 @@ var WallpaperController = class {
 			this._timer.reset(); // reset timer
 		}
 
-		this._requestRandomImageFromAdapter((historyElement, error) => {
+		let adapter = this._getRandomAdapter();
+		adapter.requestRandomImage((historyElement, error) => {
 			if (historyElement == null || error) {
 				this._bailOutWithCallback("Could not fetch wallpaper location.", callback);
 				this._stopLoadingHooks.map(element => element(null));
@@ -343,7 +290,7 @@ var WallpaperController = class {
 
 			this.logger.info("Requesting image: " + historyElement.source.imageDownloadUrl);
 
-			this._fetchFile(historyElement.source.imageDownloadUrl, (historyId, path, error) => {
+			adapter.fetchFile(historyElement.source.imageDownloadUrl, (historyId, path, error) => {
 				if (error) {
 					this._bailOutWithCallback(`Could not load new wallpaper: ${error}`, callback);
 					this._stopLoadingHooks.forEach(element => element(null));
