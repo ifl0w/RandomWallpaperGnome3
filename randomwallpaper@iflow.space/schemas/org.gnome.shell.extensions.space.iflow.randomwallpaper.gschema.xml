@@ -326,6 +326,7 @@
     </schema>
 
     <schema id='org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.localFolder'>
+
         <key type='s' name='name'>
             <default>"Local Folder"</default>
             <summary>Name</summary>
@@ -336,6 +337,46 @@
             <default>""</default>
             <summary>Folder</summary>
             <description>The folder will be searched.</description>
+        </key>
+
+    </schema>
+
+    <schema id='org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.urlSource'>
+
+        <key type='s' name='name'>
+            <default>"Static URL"</default>
+            <summary>Name</summary>
+            <description>Name for this source.</description>
+        </key>
+
+        <key type='s' name='image-url'>
+            <default>""</default>
+            <summary>Image URL</summary>
+            <description>The URL to fetch.</description>
+        </key>
+
+        <key type='s' name='domain'>
+            <default>""</default>
+            <summary>Domain</summary>
+            <description>The domain used for linking the main page.</description>
+        </key>
+
+        <key type='s' name='author-name'>
+            <default>""</default>
+            <summary>Author name</summary>
+            <description>The name of the image author.</description>
+        </key>
+
+        <key type='s' name='author-url'>
+            <default>""</default>
+            <summary>Author URL</summary>
+            <description>The URL to link to the author.</description>
+        </key>
+
+        <key type='s' name='post-url'>
+            <default>""</default>
+            <summary>Post URL</summary>
+            <description>The URL to link to the image page.</description>
         </key>
 
     </schema>
