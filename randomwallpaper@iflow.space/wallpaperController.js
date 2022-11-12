@@ -16,6 +16,7 @@ const GenericJsonAdapter = Self.imports.adapter.genericJson;
 const LocalFolderAdapter = Self.imports.adapter.localFolder;
 const RedditAdapter = Self.imports.adapter.reddit;
 const UnsplashAdapter = Self.imports.adapter.unsplash;
+const UrlSourceAdapter = Self.imports.adapter.urlSource;
 const WallhavenAdapter = Self.imports.adapter.wallhaven;
 
 const RWG_SETTINGS_SCHEMA_BACKEND_CONNECTION = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.backend-connection';
@@ -159,6 +160,9 @@ var WallpaperController = class {
 					break;
 				case 4:
 					imageSourceAdapter = new LocalFolderAdapter.LocalFolderAdapter(source.id, this.wallpaperlocation);
+					break;
+				case 5:
+					imageSourceAdapter = new UrlSourceAdapter.UrlSourceAdapter(source.id, this.wallpaperlocation);
 					break;
 				default:
 					imageSourceAdapter = new UnsplashAdapter.UnsplashAdapter(null, this.wallpaperlocation);
