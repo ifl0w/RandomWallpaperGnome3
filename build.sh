@@ -17,6 +17,7 @@ blueprint-compiler batch-compile "$BASEDIR/ui" "$BASEDIR/ui" \
     "$BASEDIR/ui/reddit.blp" \
     "$BASEDIR/ui/sourceRow.blp" \
     "$BASEDIR/ui/unsplash.blp" \
+    "$BASEDIR/ui/urlSource.blp" \
     "$BASEDIR/ui/wallhaven.blp"
 
 cd "$BASEDIR" || exit 1
