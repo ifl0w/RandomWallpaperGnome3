@@ -1,0 +1,75 @@
+using Gtk 4.0;
+using Adw 1;
+
+template UrlSourceSettingsGroup : Adw.PreferencesGroup {
+  Adw.PreferencesGroup {
+    title: _("General");
+
+    Adw.EntryRow domain {
+      title: _("Domain");
+      input-purpose: url;
+
+      LinkButton {
+        valign: center;
+        uri: bind domain.text;
+
+        Adw.ButtonContent {
+          icon-name: "globe-symbolic";
+        }
+
+        styles [
+          "flat",
+        ]
+      }
+    }
+
+    Adw.EntryRow image_url {
+      title: _("Image URL");
+
+      LinkButton {
+        valign: center;
+        uri: bind image_url.text;
+
+        Adw.ButtonContent {
+          icon-name: "globe-symbolic";
+        }
+
+        styles [
+          "flat",
+        ]
+      }
+    }
+
+    Adw.EntryRow post_url {
+      title: _("Post URL");
+      input-purpose: free_form;
+
+      LinkButton {
+        valign: center;
+        uri: bind post_url.text;
+
+        Adw.ButtonContent {
+          icon-name: "globe-symbolic";
+        }
+
+        styles [
+          "flat",
+        ]
+      }
+    }
+  }
+
+  Adw.PreferencesGroup {
+    title: _("Author");
+
+    Adw.EntryRow author_name {
+      title: _("Name");
+      input-purpose: free_form;
+    }
+
+    Adw.EntryRow author_url {
+      title: _("URL");
+      input-purpose: free_form;
+    }
+  }
+}

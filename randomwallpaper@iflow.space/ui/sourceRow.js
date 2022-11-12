@@ -12,6 +12,7 @@ const Wallhaven = Self.imports.ui.wallhaven;
 const Reddit = Self.imports.ui.reddit;
 const GenericJson = Self.imports.ui.genericJson;
 const LocalFolder = Self.imports.ui.localFolder;
+const UrlSource = Self.imports.ui.urlSource;
 
 // https://gitlab.gnome.org/GNOME/gjs/-/blob/master/examples/gtk4-template.js
 var SourceRow = GObject.registerClass({
@@ -73,6 +74,9 @@ var SourceRow = GObject.registerClass({
 				break;
 			case 4: // Local Folder
 				targetWidget = new LocalFolder.LocalFolderSettingsGroup(this);
+				break;
+			case 5: // Static URL
+				targetWidget = new UrlSource.UrlSourceSettingsGroup(this);
 				break;
 			default:
 				targetWidget = null;

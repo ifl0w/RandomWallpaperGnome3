@@ -5,6 +5,21 @@ template SourceRow : Adw.ExpanderRow {
   title: bind source_name.text;
   show-enable-switch: true;
 
+  // Doesn't look good and prone to missclicks
+  // [action]
+  // Button button_delete {
+  //   valign: center;
+
+  //   styles [
+  //     "destructive-action",
+  //   ]
+
+  //   Adw.ButtonContent {
+  //     icon-name: "user-trash-symbolic";
+  //     valign: center;
+  //   }
+  // }
+
   Box {
     orientation: vertical;
     spacing: 14;
@@ -30,6 +45,7 @@ template SourceRow : Adw.ExpanderRow {
               "Reddit",
               _("Generic JSON"),
               _("Local Folder"),
+              _("Static URL"),
             ]
           };
         }
