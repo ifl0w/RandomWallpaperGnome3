@@ -7,7 +7,7 @@ const GObject = imports.gi.GObject;
 const Self = ExtensionUtils.getCurrentExtension();
 const Convenience = Self.imports.convenience;
 
-const RWG_SETTINGS_SCHEMA_WALLHAVEN = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.wallhaven';
+const RWG_SETTINGS_SCHEMA_SOURCES_WALLHAVEN = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.wallhaven';
 
 var WallhavenSettingsGroup = GObject.registerClass({
 	GTypeName: 'WallhavenSettingsGroup',
@@ -24,16 +24,12 @@ var WallhavenSettingsGroup = GObject.registerClass({
 		'resolutions'
 	]
 }, class WallhavenSettingsGroup extends Adw.PreferencesGroup {
-	constructor(parent_row, params = {}) {
+	constructor(id, params = {}) {
 		super(params);
 
-		const path = `/org/gnome/shell/extensions/space-iflow-randomwallpaper/sources/wallhaven/${parent_row.id}/`;
-		this._settings = Convenience.getSettings(RWG_SETTINGS_SCHEMA_WALLHAVEN, path);
+		const path = `/org/gnome/shell/extensions/space-iflow-randomwallpaper/sources/wallhaven/${id}/`;
+		this._settings = Convenience.getSettings(RWG_SETTINGS_SCHEMA_SOURCES_WALLHAVEN, path);
 
-		this._settings.bind('name',
-			parent_row.source_name,
-			'text',
-			Gio.SettingsBindFlags.DEFAULT);
 		this._settings.bind('keyword',
 			this._keyword,
 			'text',

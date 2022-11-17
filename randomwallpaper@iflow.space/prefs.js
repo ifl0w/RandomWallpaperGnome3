@@ -1,5 +1,6 @@
 const Gio = imports.gi.Gio;
 const GLib = imports.gi.GLib;
+const GObject = imports.gi.GObject;
 const Gtk = imports.gi.Gtk;
 const ExtensionUtils = imports.misc.extensionUtils;
 
@@ -11,6 +12,7 @@ const LoggerModule = Self.imports.logger;
 
 const RWG_SETTINGS_SCHEMA = 'org.gnome.shell.extensions.space.iflow.randomwallpaper';
 const RWG_SETTINGS_SCHEMA_BACKEND_CONNECTION = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.backend-connection';
+const RWG_SETTINGS_SCHEMA_SOURCES_GENERAL = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.general';
 
 const LoggerModule = Self.imports.logger;
 
@@ -38,8 +40,6 @@ function fillPreferencesWindow(window) {
 
 /* UI Setup */
 var RandomWallpaperSettings = class {
-	_backendConnection = null;
-
 	constructor(window) {
 		this.logger = new LoggerModule.Logger('RWG3', 'RandomWallpaper.Settings');
 
@@ -50,12 +50,13 @@ var RandomWallpaperSettings = class {
 		this._backendConnection = new Settings.Settings(RWG_SETTINGS_SCHEMA_BACKEND_CONNECTION);
 		this._backendConnection.set('pause-timer', 'boolean', true);
 
+		this._sources = [];
+		this._loadSources();
+
 		this._builder = new Gtk.Builder();
 		//this._builder.set_translation_domain(Self.metadata['gettext-domain']);
 		this._builder.add_from_file(Self.path + '/ui/pageGeneral.ui');
 		this._builder.add_from_file(Self.path + '/ui/pageSources.ui');
-
-		this._loadSources();
 
 		this._settings.bind('minutes',
 			this._builder.get_object('duration_minutes'),
@@ -85,25 +86,40 @@ var RandomWallpaperSettings = class {
 			this._builder.get_object('fetch_on_startup'),
 			'active',
 			Gio.SettingsBindFlags.DEFAULT);
+		this._settings.bind('general-post-command',
+			this._builder.get_object('general_post_command'),
+			'text',
+			Gio.SettingsBindFlags.DEFAULT);
 
 		this._bindButtons();
 		this._bindHistorySection(window);
 
 		window.connect('close-request', () => {
-			this._saveSources();
 			this._backendConnection.set('pause-timer', 'boolean', false);
 		});
 
 		window.add(this._builder.get_object('page_general'));
 		window.add(this._builder.get_object('page_sources'));
 
-		this._sources.forEach(source => {
-			let new_row = new SourceRow.SourceRow(source);
-			this._builder.get_object('sources_list').add(new_row);
-			this.available_rows[new_row.id] = new_row;
+		this._sources.forEach(id => {
+			let sourceRow = new SourceRow.SourceRow(id);
+			this._builder.get_object('sources_list').add(sourceRow);
 
-			this._bindSourceRow(new_row);
+			sourceRow.button_delete.connect('clicked', () => {
+				this._builder.get_object('sources_list').remove(sourceRow);
+				this._removeItemOnce(this._sources, id);
+				this._saveSources();
+			});
 		});
+	}
+
+	// https://stackoverflow.com/a/5767357
+	_removeItemOnce(arr, value) {
+		var index = arr.indexOf(value);
+		if (index > -1) {
+			arr.splice(index, 1);
+		}
+		return arr;
 	}
 
 	_bindButtons() {
@@ -125,12 +141,18 @@ var RandomWallpaperSettings = class {
 			this._backendConnection.set('request-new-wallpaper', 'boolean', true);
 		});
 
+		let sourceRowList = this._builder.get_object('sources_list');
 		this._builder.get_object('button_new_source').connect('clicked', () => {
-			let source_row = new SourceRow.SourceRow();
-			this.available_rows[source_row.id] = source_row;
-			this._builder.get_object('sources_list').add(source_row);
+			let sourceRow = new SourceRow.SourceRow();
+			sourceRowList.add(sourceRow);
+			this._sources.push(String(sourceRow.id));
+			this._saveSources();
 
-			this._bindSourceRow(source_row);
+			sourceRow.button_delete.connect('clicked', () => {
+				sourceRowList.remove(sourceRow);
+				this._removeItemOnce(this._sources, sourceRow.id);
+				this._saveSources();
+			});
 		});
 	}
 
@@ -180,63 +202,34 @@ var RandomWallpaperSettings = class {
 		});
 	}
 
-	_bindSourceRow(source_row) {
-		source_row.connect('notify::expanded', (row) => {
-			if (!row.expanded) {
-				this._saveSources();
-			}
-		});
-
-		source_row.connect('notify::enable-expansion', () => {
-			this._saveSources();
-		});
-
-		source_row.button_delete.connect('clicked', () => {
-			this._builder.get_object('sources_list').remove(source_row);
-			delete this.available_rows[source_row.id];
-			this._saveSources();
-		});
-
-		source_row.combo.connect('notify::selected', () => {
-			this._saveSources();
-		});
-	}
-
 	/**
 	 * Load the config from the gschema
 	 */
 	_loadSources() {
-		let stringSources = this._settings.get_strv('sources');
-		this._sources = stringSources.map(elem => {
-			return JSON.parse(elem)
+		this._sources = this._settings.get_strv('sources');
+
+		this._sources.sort((a, b) => {
+			let path1 = `/org/gnome/shell/extensions/space-iflow-randomwallpaper/sources/general/${a}/`;
+			let settingsGeneral1 = new Settings.Settings(RWG_SETTINGS_SCHEMA_SOURCES_GENERAL, path1);
+			let path2 = `/org/gnome/shell/extensions/space-iflow-randomwallpaper/sources/general/${b}/`;
+			let settingsGeneral2 = new Settings.Settings(RWG_SETTINGS_SCHEMA_SOURCES_GENERAL, path2);
+
+			const nameA = settingsGeneral1.get('name', 'string').toUpperCase();
+			const nameB = settingsGeneral2.get('name', 'string').toUpperCase();
+
+			return nameA.localeCompare(nameB);
 		});
 
 		this._sources.sort((a, b) => {
-			return a.type - b.type;
+			let path1 = `/org/gnome/shell/extensions/space-iflow-randomwallpaper/sources/general/${a}/`;
+			let settingsGeneral1 = new Settings.Settings(RWG_SETTINGS_SCHEMA_SOURCES_GENERAL, path1);
+			let path2 = `/org/gnome/shell/extensions/space-iflow-randomwallpaper/sources/general/${b}/`;
+			let settingsGeneral2 = new Settings.Settings(RWG_SETTINGS_SCHEMA_SOURCES_GENERAL, path2);
+			return settingsGeneral1.get('type', 'int') - settingsGeneral2.get('type', 'int');
 		});
 	}
 
-	/**
-	 * Save the config to the gschema
-	 */
 	_saveSources() {
-		this._sources = [];
-
-		for (const row in this.available_rows) {
-			if (Object.hasOwnProperty.call(this.available_rows, row)) {
-				const element = this.available_rows[row];
-				this._sources.push({
-					id: element.id,
-					type: element.combo.get_selected(),
-					enabled: element.get_enable_expansion()
-				});
-			}
-		}
-
-		let stringSources = this._sources.map(elem => {
-			return JSON.stringify(elem)
-		});
-		this._settings.set_strv('sources', stringSources);
-		Gio.Settings.sync();
+		this._settings.set_strv('sources', this._sources);
 	}
 };

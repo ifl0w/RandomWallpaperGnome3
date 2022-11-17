@@ -6,18 +6,23 @@ const HistoryModule = Self.imports.history;
 
 const BaseAdapter = Self.imports.adapter.baseAdapter;
 
-const RWG_SETTINGS_SCHEMA_LOCAL_FOLDER = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.localFolder';
+const RWG_SETTINGS_SCHEMA_SOURCES_LOCAL_FOLDER = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.localFolder';
 
 var LocalFolderAdapter = class extends BaseAdapter.BaseAdapter {
-	constructor(id, wallpaperLocation) {
+	constructor(id, name, wallpaperLocation) {
 		super(wallpaperLocation);
 
+		this._sourceName = name;
+		if (this._sourceName === null || this._sourceName === "") {
+			this._sourceName = 'Local Folder';
+		}
+
 		let path = `/org/gnome/shell/extensions/space-iflow-randomwallpaper/sources/localFolder/${id}/`;
-		this._settings = new SettingsModule.Settings(RWG_SETTINGS_SCHEMA_LOCAL_FOLDER, path);
+		this._settings = new SettingsModule.Settings(RWG_SETTINGS_SCHEMA_SOURCES_LOCAL_FOLDER, path);
 	}
 
 	requestRandomImage(callback) {
-		const folder = Gio.file_new_for_path(this._settings.get('folder', 'string'));
+		const folder = Gio.File.new_for_path(this._settings.get('folder', 'string'));
 		let files = this._listDirectory(folder);
 
 		if (files === null || files.length < 1) {
@@ -26,22 +31,17 @@ var LocalFolderAdapter = class extends BaseAdapter.BaseAdapter {
 
 		let randomFile = files[Math.floor(Math.random() * files.length)].get_path();
 
-		let identifier = this._settings.get("name", "string");
-		if (identifier === null || identifier === "") {
-			identifier = 'Local Folder';
-		}
-
 		if (callback) {
-			let historyEntry = new HistoryModule.HistoryEntry(null, identifier, randomFile);
+			let historyEntry = new HistoryModule.HistoryEntry(null, this._sourceName, randomFile);
 			historyEntry.source.sourceUrl = this._wallpaperLocation;
 			callback(historyEntry);
 		}
 	}
 
 	fetchFile(path, callback) {
-		let sourceFile = Gio.file_new_for_path(path);
+		let sourceFile = Gio.File.new_for_path(path);
 		let name = sourceFile.get_basename()
-		let targetFile = Gio.file_new_for_path(this._wallpaperLocation + String(name));
+		let targetFile = Gio.File.new_for_path(this._wallpaperLocation + String(name));
 
 		// https://gjs.guide/guides/gio/file-operations.html#copying-and-moving-files
 		sourceFile.copy(targetFile, Gio.FileCopyFlags.NONE, null, null);
