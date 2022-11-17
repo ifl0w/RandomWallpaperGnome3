@@ -5,14 +5,18 @@ const SoupBowl = Self.imports.soupBowl;
 
 const BaseAdapter = Self.imports.adapter.baseAdapter;
 
-const RWG_SETTINGS_SCHEMA_UNSPLASH = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.unsplash';
+const RWG_SETTINGS_SCHEMA_SOURCES_UNSPLASH = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.unsplash';
 
 var UnsplashAdapter = class extends BaseAdapter.BaseAdapter {
-	constructor(id, wallpaperLocation) {
+	constructor(id, name, wallpaperLocation) {
 		super(wallpaperLocation);
 
-		this.sourceName = 'Unsplash';
-		this.sourceUrl = 'https://source.unsplash.com';
+		this._sourceName = name;
+		if (this._sourceName === null || this._sourceName === "") {
+			this._sourceName = 'Unsplash';
+		}
+
+		this._sourceUrl = 'https://source.unsplash.com';
 
 		// query options
 		this.options = {
@@ -29,18 +33,13 @@ var UnsplashAdapter = class extends BaseAdapter.BaseAdapter {
 		}
 
 		let path = `/org/gnome/shell/extensions/space-iflow-randomwallpaper/sources/unsplash/${id}/`;
-		this._settings = new SettingsModule.Settings(RWG_SETTINGS_SCHEMA_UNSPLASH, path);
+		this._settings = new SettingsModule.Settings(RWG_SETTINGS_SCHEMA_SOURCES_UNSPLASH, path);
 		this.bowl = new SoupBowl.Bowl();
 	}
 
 	requestRandomImage(callback) {
 		this._readOptionsFromSettings();
 		let optionsString = this._generateOptionsString();
-
-		let identifier = this._settings.get("name", "string");
-		if (identifier === null || identifier === "") {
-			identifier = this.sourceName;
-		}
 
 		let url = `https://source.unsplash.com${optionsString}`;
 		url = encodeURI(url);
@@ -65,8 +64,8 @@ var UnsplashAdapter = class extends BaseAdapter.BaseAdapter {
 
 			imageLinkUrl = message.response_headers.get_one('Location');
 
-			let historyEntry = new HistoryModule.HistoryEntry(null, identifier, imageLinkUrl);
-			historyEntry.source.sourceUrl = this.sourceUrl;
+			let historyEntry = new HistoryModule.HistoryEntry(null, this._sourceName, imageLinkUrl);
+			historyEntry.source.sourceUrl = this._sourceUrl;
 			historyEntry.source.imageLinkUrl = imageLinkUrl;
 			callback(historyEntry);
 		});

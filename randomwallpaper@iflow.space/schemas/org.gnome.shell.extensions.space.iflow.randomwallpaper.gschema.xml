@@ -77,13 +77,19 @@
         <key type='as' name='sources'>
             <default>[]</default>
             <summary>Configured Wallpaper Sources</summary>
-            <description>A mapping with available configured wallpaper sources as stringified JSON.</description>
+            <description>All available source IDs as string array.</description>
         </key>
 
         <key type='s' name='favorites-folder'>
             <default>""</default>
             <summary>Favorites Folder</summary>
             <description>Saved images will land in this folder.</description>
+        </key>
+
+        <key type='s' name='general-post-command'>
+            <default>""</default>
+            <summary>General post command</summary>
+            <description>Run a command after setting a wallpaper.</description>
         </key>
 
     </schema>
@@ -124,13 +130,29 @@
         <value value='3' nick='collection'/>
     </enum> -->
 
-    <schema id='org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.unsplash'>
+    <schema id='org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.general'>
 
         <key type='s' name='name'>
-            <default>"Unsplash"</default>
+            <default>"MySource"</default>
             <summary>Name</summary>
             <description>Name for this source.</description>
         </key>
+
+        <key type='b' name='enabled'>
+            <default>true</default>
+            <summary>Enabled</summary>
+            <description>Whether this source is enabled.</description>
+        </key>
+
+        <key type='i' name='type'>
+            <default>0</default>
+            <summary>Type</summary>
+            <description>The type of this source.</description>
+        </key>
+
+    </schema>
+
+    <schema id='org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.unsplash'>
 
         <key type='s' name='keyword'>
             <default>""</default>
@@ -183,12 +205,6 @@
     </schema>
 
     <schema id='org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.wallhaven'>
-
-        <key type='s' name='name'>
-            <default>"Wallhaven"</default>
-            <summary>Name</summary>
-            <description>Name for this source.</description>
-        </key>
 
         <key type='s' name='keyword'>
             <default>""</default>
@@ -247,11 +263,6 @@
     </schema>
 
     <schema id='org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.reddit'>
-        <key type='s' name='name'>
-            <default>"Reddit"</default>
-            <summary>Name</summary>
-            <description>Name for this source.</description>
-        </key>
 
         <key type='s' name='subreddits'>
             <default>""</default>
@@ -268,12 +279,6 @@
     </schema>
 
     <schema id='org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.genericJSON'>
-
-        <key type='s' name='name'>
-            <default>"genericJSON"</default>
-            <summary>Name</summary>
-            <description>Name for this source.</description>
-        </key>
 
         <key type='s' name='domain'>
             <default>""</default>
@@ -333,12 +338,6 @@
 
     <schema id='org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.localFolder'>
 
-        <key type='s' name='name'>
-            <default>"Local Folder"</default>
-            <summary>Name</summary>
-            <description>Name for this source.</description>
-        </key>
-
         <key type='s' name='folder'>
             <default>""</default>
             <summary>Folder</summary>
@@ -348,12 +347,6 @@
     </schema>
 
     <schema id='org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.urlSource'>
-
-        <key type='s' name='name'>
-            <default>"Static URL"</default>
-            <summary>Name</summary>
-            <description>Name for this source.</description>
-        </key>
 
         <key type='s' name='image-url'>
             <default>""</default>

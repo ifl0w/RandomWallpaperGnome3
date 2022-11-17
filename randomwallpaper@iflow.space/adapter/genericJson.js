@@ -8,14 +8,20 @@ const SoupBowl = Self.imports.soupBowl;
 
 const BaseAdapter = Self.imports.adapter.baseAdapter;
 
-const RWG_SETTINGS_SCHEMA_GENERIC_JSON = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.genericJSON';
+const RWG_SETTINGS_SCHEMA_SOURCES_GENERIC_JSON = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.genericJSON';
 
 var GenericJsonAdapter = class extends BaseAdapter.BaseAdapter {
-	constructor(id, wallpaperLocation) {
+	constructor(id, name, wallpaperLocation) {
 		super(wallpaperLocation);
+
+		this._sourceName = name;
+		if (this._sourceName === null || this._sourceName === "") {
+			this._sourceName = 'Generic JSON Source';
+		}
+
 		this._jsonPathParser = new JSONPath.JSONPathParser();
 		let path = `/org/gnome/shell/extensions/space-iflow-randomwallpaper/sources/genericJSON/${id}/`;
-		this._settings = new SettingsModule.Settings(RWG_SETTINGS_SCHEMA_GENERIC_JSON, path);
+		this._settings = new SettingsModule.Settings(RWG_SETTINGS_SCHEMA_SOURCES_GENERIC_JSON, path);
 		this.bowl = new SoupBowl.Bowl();
 	}
 
@@ -37,11 +43,6 @@ var GenericJsonAdapter = class extends BaseAdapter.BaseAdapter {
 				let domainUrl = this._settings.get("domain", "string");
 				let authorNameJSONPath = this._settings.get("author-name-path", "string");
 				let authorUrlJSONPath = this._settings.get("author-url-path", "string");
-
-				let identifier = this._settings.get("name", "string");
-				if (identifier === null || identifier === "") {
-					identifier = 'Generic JSON Source';
-				}
 
 				let rObject = this._jsonPathParser.access(response_body, imageJSONPath);
 				let imageDownloadUrl = this._settings.get("image-prefix", "string") + rObject.Object;
@@ -73,7 +74,7 @@ var GenericJsonAdapter = class extends BaseAdapter.BaseAdapter {
 				}
 
 				if (callback) {
-					let historyEntry = new HistoryModule.HistoryEntry(authorName, identifier, imageDownloadUrl);
+					let historyEntry = new HistoryModule.HistoryEntry(authorName, this._sourceName, imageDownloadUrl);
 
 					if (authorUrl !== null && authorUrl !== "") {
 						historyEntry.source.authorUrl = authorUrl;
