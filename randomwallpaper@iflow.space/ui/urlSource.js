@@ -7,7 +7,7 @@ const GObject = imports.gi.GObject;
 const Self = ExtensionUtils.getCurrentExtension();
 const Convenience = Self.imports.convenience;
 
-const RWG_SETTINGS_SCHEMA_LOCAL_FOLDER = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.urlSource';
+const RWG_SETTINGS_SCHEMA_SOURCES_URL_SOURCE = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.urlSource';
 
 var UrlSourceSettingsGroup = GObject.registerClass({
     GTypeName: 'UrlSourceSettingsGroup',
@@ -20,16 +20,11 @@ var UrlSourceSettingsGroup = GObject.registerClass({
         'post_url',
     ]
 }, class UrlSourceSettingsGroup extends Adw.PreferencesGroup {
-    constructor(parent_row, params = {}) {
+    constructor(id, params = {}) {
         super(params);
 
-        const path = `/org/gnome/shell/extensions/space-iflow-randomwallpaper/sources/urlSource/${parent_row.id}/`;
-        this._settings = Convenience.getSettings(RWG_SETTINGS_SCHEMA_LOCAL_FOLDER, path);
-
-        this._settings.bind('name',
-            parent_row.source_name,
-            'text',
-            Gio.SettingsBindFlags.DEFAULT);
+        const path = `/org/gnome/shell/extensions/space-iflow-randomwallpaper/sources/urlSource/${id}/`;
+        this._settings = Convenience.getSettings(RWG_SETTINGS_SCHEMA_SOURCES_URL_SOURCE, path);
 
         this._settings.bind('author-name',
             this._author_name,

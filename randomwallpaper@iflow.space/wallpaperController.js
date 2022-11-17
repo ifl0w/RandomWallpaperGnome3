@@ -20,6 +20,7 @@ const UrlSourceAdapter = Self.imports.adapter.urlSource;
 const WallhavenAdapter = Self.imports.adapter.wallhaven;
 
 const RWG_SETTINGS_SCHEMA_BACKEND_CONNECTION = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.backend-connection';
+const RWG_SETTINGS_SCHEMA_SOURCES_GENERAL = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.general';
 
 var WallpaperController = class {
 	_backendConnection = null;
@@ -167,52 +168,59 @@ var WallpaperController = class {
 	 */
 	_getRandomAdapter() {
 		let imageSourceAdapter = null;
-		let source = this._getRandomSource();
+		let sourceID = this._getRandomSource();
+
+		let path = `/org/gnome/shell/extensions/space-iflow-randomwallpaper/sources/general/${sourceID}/`;
+		let settingsGeneral = new Prefs.Settings(RWG_SETTINGS_SCHEMA_SOURCES_GENERAL, path);
+
+		let sourceName = settingsGeneral.get('name', 'string');
+		let sourceType = settingsGeneral.get('type', 'int');
 
 		try {
-			switch (source.type) {
+			switch (sourceType) {
 				case 0:
-					imageSourceAdapter = new UnsplashAdapter.UnsplashAdapter(source.id, this.wallpaperlocation);
+					imageSourceAdapter = new UnsplashAdapter.UnsplashAdapter(sourceID, sourceName, this.wallpaperlocation);
 					break;
 				case 1:
-					imageSourceAdapter = new WallhavenAdapter.WallhavenAdapter(source.id, this.wallpaperlocation);
+					imageSourceAdapter = new WallhavenAdapter.WallhavenAdapter(sourceID, sourceName, this.wallpaperlocation);
 					break;
 				case 2:
-					imageSourceAdapter = new RedditAdapter.RedditAdapter(source.id, this.wallpaperlocation);
+					imageSourceAdapter = new RedditAdapter.RedditAdapter(sourceID, sourceName, this.wallpaperlocation);
 					break;
 				case 3:
-					imageSourceAdapter = new GenericJsonAdapter.GenericJsonAdapter(source.id, this.wallpaperlocation);
+					imageSourceAdapter = new GenericJsonAdapter.GenericJsonAdapter(sourceID, sourceName, this.wallpaperlocation);
 					break;
 				case 4:
-					imageSourceAdapter = new LocalFolderAdapter.LocalFolderAdapter(source.id, this.wallpaperlocation);
+					imageSourceAdapter = new LocalFolderAdapter.LocalFolderAdapter(sourceID, sourceName, this.wallpaperlocation);
 					break;
 				case 5:
-					imageSourceAdapter = new UrlSourceAdapter.UrlSourceAdapter(source.id, this.wallpaperlocation);
+					imageSourceAdapter = new UrlSourceAdapter.UrlSourceAdapter(sourceID, sourceName, this.wallpaperlocation);
 					break;
 				default:
-					imageSourceAdapter = new UnsplashAdapter.UnsplashAdapter(null, this.wallpaperlocation);
+					imageSourceAdapter = new UnsplashAdapter.UnsplashAdapter(null, null, this.wallpaperlocation);
 					// TODO: log error and abort, raise exception?
 					break;
 			}
 		} catch (error) {
 			this.logger.warn("Had errors, fetching with default settings.");
-			imageSourceAdapter = new UnsplashAdapter.UnsplashAdapter(null, this.wallpaperlocation);
+			imageSourceAdapter = new UnsplashAdapter.UnsplashAdapter(null, null, this.wallpaperlocation);
 		}
 
 		return imageSourceAdapter;
 	}
 
 	_getRandomSource() {
-		let stringSources = this._settings.get('sources', 'strv');
-		let sources = stringSources.map(elem => {
-			return JSON.parse(elem)
-		});
+		let sources = this._settings.get('sources', 'strv');
 
 		if (sources === null || sources.length < 1) {
 			return { type: -1 };
 		}
 
-		let enabled_sources = sources.filter(element => { return element.enabled; })
+		let enabled_sources = sources.filter(element => {
+			let path = `/org/gnome/shell/extensions/space-iflow-randomwallpaper/sources/general/${element}/`;
+			let settingsGeneral = new Prefs.Settings(RWG_SETTINGS_SCHEMA_SOURCES_GENERAL, path);
+			return settingsGeneral.get('enabled', 'boolean');
+		});
 
 		if (enabled_sources === null || enabled_sources.length < 1) {
 			return { type: -1 };
@@ -365,6 +373,25 @@ var WallpaperController = class {
 					this._historyController.insert(historyElement);
 					this.currentWallpaper = this._getCurrentWallpaper();
 
+					// Run general post command
+					let generalPostCommandArray = this._getGeneralPostCommand(historyElement);
+					if (generalPostCommandArray !== null) {
+						// https://gjs.guide/guides/gio/subprocesses.html#waiting-for-processes
+						try {
+							let proc = Gio.Subprocess.new(generalPostCommandArray, Gio.SubprocessFlags.NONE);
+
+							proc.wait_async(null, (proc, result) => {
+								try {
+									proc.wait_finish(result);
+								} catch (error) {
+									this.logger.warning(error);
+								}
+							});
+						} catch (error) {
+							this.logger.warning(error);
+						}
+					}
+
 					this._stopLoadingHooks.forEach(element => element(null));
 
 					// call callback if given
@@ -374,6 +401,24 @@ var WallpaperController = class {
 				});
 			});
 		});
+	}
+
+	_getGeneralPostCommand(historyElement) {
+		let commandString = this._settings.get('general-post-command', 'string');
+
+		if (commandString === "") {
+			return null;
+		}
+
+		let commandArray = commandString.split(' ');
+
+		commandArray.forEach((value, index, array) => {
+			if (value === "%wallpaper_path%") {
+				array[index] = historyElement.path;
+			}
+		});
+
+		return commandArray;
 	}
 
 	_backgroundTimeout(delay) {

@@ -14,69 +14,74 @@ const GenericJson = Self.imports.ui.genericJson;
 const LocalFolder = Self.imports.ui.localFolder;
 const UrlSource = Self.imports.ui.urlSource;
 
+const RWG_SETTINGS_SCHEMA_SOURCES_GENERAL = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.general';
+
 // https://gitlab.gnome.org/GNOME/gjs/-/blob/master/examples/gtk4-template.js
 var SourceRow = GObject.registerClass({
 	GTypeName: 'SourceRow',
 	Template: GLib.filename_to_uri(Self.path + '/ui/sourceRow.ui', null),
 	Children: [
-		'button_delete',
-		'combo',
-		'source_name'
+		'button_delete'
 	],
 	InternalChildren: [
-		'settings_container'
+		'combo',
+		'settings_container',
+		'source_name'
 	]
 }, class SourceRow extends Adw.ExpanderRow {
-	constructor(configObject = null, params = {}) {
+	constructor(id = null, params = {}) {
 		super(params);
 
-		if (configObject === null) {
+		if (id === null) {
 			// New row
 			this.id = Date.now();
-			this.combo.set_selected(0);
-			this.set_enable_expansion(true);
-			this._settings_container.set_child(new Unsplash.UnsplashSettingsGroup(this));
 		} else {
-			// Row from config
-			this.id = configObject.id;
-			this.combo.set_selected(configObject.type);
-			this.set_enable_expansion(configObject.enabled);
-
-			this._fillRow(this.combo.selected);
+			this.id = id;
 		}
 
-		this.combo.connect('notify::selected', comboRow => {
-			this._clearConfig()
+		const path = `/org/gnome/shell/extensions/space-iflow-randomwallpaper/sources/general/${this.id}/`;
+		this._settings = Convenience.getSettings(RWG_SETTINGS_SCHEMA_SOURCES_GENERAL, path);
+
+		this._settings.bind('name',
+			this._source_name,
+			'text',
+			Gio.SettingsBindFlags.DEFAULT);
+		this._settings.bind('enabled',
+			this,
+			'enable-expansion',
+			Gio.SettingsBindFlags.DEFAULT);
+		this._settings.bind('type',
+			this._combo,
+			'selected',
+			Gio.SettingsBindFlags.DEFAULT);
+
+		this._combo.connect('notify::selected', comboRow => {
 			this._fillRow(comboRow.selected);
 		});
-	}
 
-	_clearConfig() {
-		// TODO: clear remainder?
-		// this._settings_container.get_child().unbind(this);
-		Gio.Settings.unbind(this.source_name, 'text');
+		this._fillRow(this._combo.selected);
 	}
 
 	_fillRow(type) {
 		let targetWidget = null;
 		switch (type) {
 			case 0: // unsplash
-				targetWidget = new Unsplash.UnsplashSettingsGroup(this);
+				targetWidget = new Unsplash.UnsplashSettingsGroup(this.id);
 				break;
 			case 1: // wallhaven
-				targetWidget = new Wallhaven.WallhavenSettingsGroup(this);
+				targetWidget = new Wallhaven.WallhavenSettingsGroup(this.id);
 				break;
 			case 2: // reddit
-				targetWidget = new Reddit.RedditSettingsGroup(this);
+				targetWidget = new Reddit.RedditSettingsGroup(this.id);
 				break;
 			case 3: // generic JSON
-				targetWidget = new GenericJson.GenericJsonSettingsGroup(this);
+				targetWidget = new GenericJson.GenericJsonSettingsGroup(this.id);
 				break;
 			case 4: // Local Folder
-				targetWidget = new LocalFolder.LocalFolderSettingsGroup(this);
+				targetWidget = new LocalFolder.LocalFolderSettingsGroup(this.id);
 				break;
 			case 5: // Static URL
-				targetWidget = new UrlSource.UrlSourceSettingsGroup(this);
+				targetWidget = new UrlSource.UrlSourceSettingsGroup(this.id);
 				break;
 			default:
 				targetWidget = null;

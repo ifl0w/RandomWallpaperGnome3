@@ -7,7 +7,7 @@ const GObject = imports.gi.GObject;
 const Self = ExtensionUtils.getCurrentExtension();
 const Convenience = Self.imports.convenience;
 
-const RWG_SETTINGS_SCHEMA_UNSPLASH = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.unsplash';
+const RWG_SETTINGS_SCHEMA_SOURCES_UNSPLASH = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.unsplash';
 
 var UnsplashSettingsGroup = GObject.registerClass({
 	GTypeName: 'UnsplashSettingsGroup',
@@ -21,16 +21,12 @@ var UnsplashSettingsGroup = GObject.registerClass({
 		'keyword'
 	]
 }, class UnsplashSettingsGroup extends Adw.PreferencesGroup {
-	constructor(parent_row, params = {}) {
+	constructor(id, params = {}) {
 		super(params);
 
-		const path = `/org/gnome/shell/extensions/space-iflow-randomwallpaper/sources/unsplash/${parent_row.id}/`;
-		this._settings = Convenience.getSettings(RWG_SETTINGS_SCHEMA_UNSPLASH, path);
+		const path = `/org/gnome/shell/extensions/space-iflow-randomwallpaper/sources/unsplash/${id}/`;
+		this._settings = Convenience.getSettings(RWG_SETTINGS_SCHEMA_SOURCES_UNSPLASH, path);
 
-		this._settings.bind('name',
-			parent_row.source_name,
-			'text',
-			Gio.SettingsBindFlags.DEFAULT);
 		this._settings.bind('keyword',
 			this._keyword,
 			'text',

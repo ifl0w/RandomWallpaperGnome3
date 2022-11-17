@@ -7,11 +7,16 @@ const SoupBowl = Self.imports.soupBowl;
 
 const BaseAdapter = Self.imports.adapter.baseAdapter;
 
-const RWG_SETTINGS_SCHEMA_WALLHAVEN = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.wallhaven';
+const RWG_SETTINGS_SCHEMA_SOURCES_WALLHAVEN = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.wallhaven';
 
 var WallhavenAdapter = class extends BaseAdapter.BaseAdapter {
-	constructor(id, wallpaperLocation) {
+	constructor(id, name, wallpaperLocation) {
 		super(wallpaperLocation);
+
+		this._sourceName = name;
+		if (this._sourceName === null || this._sourceName === "") {
+			this._sourceName = 'Wallhaven';
+		}
 
 		this.options = {
 			'q': '',
@@ -23,18 +28,13 @@ var WallhavenAdapter = class extends BaseAdapter.BaseAdapter {
 		};
 
 		let path = `/org/gnome/shell/extensions/space-iflow-randomwallpaper/sources/wallhaven/${id}/`;
-		this._settings = new SettingsModule.Settings(RWG_SETTINGS_SCHEMA_WALLHAVEN, path);
+		this._settings = new SettingsModule.Settings(RWG_SETTINGS_SCHEMA_SOURCES_WALLHAVEN, path);
 		this.bowl = new SoupBowl.Bowl();
 	}
 
 	requestRandomImage(callback) {
 		this._readOptionsFromSettings();
 		let optionsString = this._generateOptionsString();
-
-		let identifier = this._settings.get("name", "string");
-		if (identifier === null || identifier === "") {
-			identifier = 'Wallhaven';
-		}
 
 		let url = 'https://wallhaven.cc/api/v1/search?' + encodeURI(optionsString);
 		let message = this.bowl.Soup.Message.new('GET', url);
@@ -64,7 +64,7 @@ var WallhavenAdapter = class extends BaseAdapter.BaseAdapter {
 			}
 
 			if (callback) {
-				let historyEntry = new HistoryModule.HistoryEntry(null, identifier, downloadURL);
+				let historyEntry = new HistoryModule.HistoryEntry(null, this._sourceName, downloadURL);
 				historyEntry.source.sourceUrl = 'https://wallhaven.cc/';
 				historyEntry.source.imageLinkUrl = siteURL;
 				callback(historyEntry);

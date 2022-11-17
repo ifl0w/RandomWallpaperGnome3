@@ -7,7 +7,7 @@ const GObject = imports.gi.GObject;
 const Self = ExtensionUtils.getCurrentExtension();
 const Convenience = Self.imports.convenience;
 
-const RWG_SETTINGS_SCHEMA_GENERIC_JSON = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.genericJSON';
+const RWG_SETTINGS_SCHEMA_SOURCES_GENERIC_JSON = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.genericJSON';
 
 var GenericJsonSettingsGroup = GObject.registerClass({
 	GTypeName: 'GenericJsonSettingsGroup',
@@ -24,16 +24,12 @@ var GenericJsonSettingsGroup = GObject.registerClass({
 		'request_url'
 	]
 }, class GenericJsonSettingsGroup extends Adw.PreferencesGroup {
-	constructor(parent_row, params = {}) {
+	constructor(id, params = {}) {
 		super(params);
 
-		const path = `/org/gnome/shell/extensions/space-iflow-randomwallpaper/sources/genericJSON/${parent_row.id}/`;
-		this._settings = Convenience.getSettings(RWG_SETTINGS_SCHEMA_GENERIC_JSON, path);
+		const path = `/org/gnome/shell/extensions/space-iflow-randomwallpaper/sources/genericJSON/${id}/`;
+		this._settings = Convenience.getSettings(RWG_SETTINGS_SCHEMA_SOURCES_GENERIC_JSON, path);
 
-		this._settings.bind('name',
-			parent_row.source_name,
-			'text',
-			Gio.SettingsBindFlags.DEFAULT);
 		this._settings.bind('domain',
 			this._domain,
 			'text',
