@@ -5,13 +5,19 @@ const SettingsModule = Self.imports.settings;
 
 const BaseAdapter = Self.imports.adapter.baseAdapter;
 
-const RWG_SETTINGS_SCHEMA_URL_SOURCE = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.urlSource';
+const RWG_SETTINGS_SCHEMA_SOURCES_URL_SOURCE = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.urlSource';
 
 var UrlSourceAdapter = class extends BaseAdapter.BaseAdapter {
-    constructor(id, wallpaperLocation) {
+    constructor(id, name, wallpaperLocation) {
         super(wallpaperLocation);
+
+        this._sourceName = name;
+        if (this._sourceName === null || this._sourceName === "") {
+            this._sourceName = 'Static URL';
+        }
+
         let path = `/org/gnome/shell/extensions/space-iflow-randomwallpaper/sources/urlSource/${id}/`;
-        this._settings = new SettingsModule.Settings(RWG_SETTINGS_SCHEMA_URL_SOURCE, path);
+        this._settings = new SettingsModule.Settings(RWG_SETTINGS_SCHEMA_SOURCES_URL_SOURCE, path);
     }
 
     requestRandomImage(callback) {
@@ -20,11 +26,6 @@ var UrlSourceAdapter = class extends BaseAdapter.BaseAdapter {
         let authorUrl = this._settings.get("author-url", "string");
         let domainUrl = this._settings.get("domain", "string");
         let postUrl = this._settings.get("domain", "string");
-
-        let identifier = this._settings.get("name", "string");
-        if (identifier === null || identifier === "") {
-            identifier = 'Static URL';
-        }
 
         if (typeof postUrl !== 'string' || !postUrl instanceof String) {
             postUrl = null;
@@ -39,7 +40,7 @@ var UrlSourceAdapter = class extends BaseAdapter.BaseAdapter {
         }
 
         if (callback) {
-            let historyEntry = new HistoryModule.HistoryEntry(authorName, identifier, imageDownloadUrl);
+            let historyEntry = new HistoryModule.HistoryEntry(authorName, this._sourceName, imageDownloadUrl);
 
             if (authorUrl !== null && authorUrl !== "") {
                 historyEntry.source.authorUrl = authorUrl;

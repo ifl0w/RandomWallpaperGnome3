@@ -7,14 +7,19 @@ const SoupBowl = Self.imports.soupBowl;
 
 const BaseAdapter = Self.imports.adapter.baseAdapter;
 
-const RWG_SETTINGS_SCHEMA_REDDIT = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.reddit';
+const RWG_SETTINGS_SCHEMA_SOURCES_REDDIT = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.reddit';
 
 var RedditAdapter = class extends BaseAdapter.BaseAdapter {
-	constructor(id, wallpaperLocation) {
+	constructor(id, name, wallpaperLocation) {
 		super(wallpaperLocation);
 
+		this._sourceName = name;
+		if (this._sourceName === null || this._sourceName === "") {
+			this._sourceName = 'Reddit';
+		}
+
 		let path = `/org/gnome/shell/extensions/space-iflow-randomwallpaper/sources/reddit/${id}/`;
-		this._settings = new SettingsModule.Settings(RWG_SETTINGS_SCHEMA_REDDIT, path);
+		this._settings = new SettingsModule.Settings(RWG_SETTINGS_SCHEMA_SOURCES_REDDIT, path);
 		this.bowl = new SoupBowl.Bowl();
 	}
 
@@ -25,10 +30,6 @@ var RedditAdapter = class extends BaseAdapter.BaseAdapter {
 	requestRandomImage(callback) {
 		const subreddits = this._settings.get('subreddits', 'string').split(',').map(s => s.trim()).join('+');
 		const require_sfw = this._settings.get('allow-sfw', 'boolean');
-		let identifier = this._settings.get("name", "string");
-		if (identifier === null || identifier === "") {
-			identifier = 'Reddit';
-		}
 
 		const url = encodeURI('https://www.reddit.com/r/' + subreddits + '.json');
 		let message = this.bowl.Soup.Message.new('GET', url);
@@ -55,7 +56,7 @@ var RedditAdapter = class extends BaseAdapter.BaseAdapter {
 				const imageDownloadUrl = this._ampDecode(submission.preview.images[0].source.url);
 
 				if (callback) {
-					let historyEntry = new HistoryModule.HistoryEntry(null, identifier, imageDownloadUrl);
+					let historyEntry = new HistoryModule.HistoryEntry(null, this._sourceName, imageDownloadUrl);
 					historyEntry.source.sourceUrl = 'https://www.reddit.com/' + submission.subreddit_name_prefixed;
 					historyEntry.source.imageLinkUrl = 'https://www.reddit.com/' + submission.permalink;
 					callback(historyEntry);

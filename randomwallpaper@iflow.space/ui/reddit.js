@@ -7,7 +7,7 @@ const GObject = imports.gi.GObject;
 const Self = ExtensionUtils.getCurrentExtension();
 const Convenience = Self.imports.convenience;
 
-const RWG_SETTINGS_SCHEMA_REDDIT = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.reddit';
+const RWG_SETTINGS_SCHEMA_SOURCES_REDDIT = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.reddit';
 
 var RedditSettingsGroup = GObject.registerClass({
 	GTypeName: 'RedditSettingsGroup',
@@ -17,16 +17,12 @@ var RedditSettingsGroup = GObject.registerClass({
 		'subreddits'
 	]
 }, class RedditSettingsGroup extends Adw.PreferencesGroup {
-	constructor(parent_row, params = {}) {
+	constructor(id, params = {}) {
 		super(params);
 
-		const path = `/org/gnome/shell/extensions/space-iflow-randomwallpaper/sources/reddit/${parent_row.id}/`;
-		this._settings = Convenience.getSettings(RWG_SETTINGS_SCHEMA_REDDIT, path);
+		const path = `/org/gnome/shell/extensions/space-iflow-randomwallpaper/sources/reddit/${id}/`;
+		this._settings = Convenience.getSettings(RWG_SETTINGS_SCHEMA_SOURCES_REDDIT, path);
 
-		this._settings.bind('name',
-			parent_row.source_name,
-			'text',
-			Gio.SettingsBindFlags.DEFAULT);
 		this._settings.bind('allow-sfw',
 			this._allow_sfw,
 			'active',
