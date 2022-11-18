@@ -106,6 +106,7 @@ var RandomWallpaperSettings = class {
 			this._builder.get_object('sources_list').add(sourceRow);
 
 			sourceRow.button_delete.connect('clicked', () => {
+				sourceRow.clearConfig();
 				this._builder.get_object('sources_list').remove(sourceRow);
 				this._removeItemOnce(this._sources, id);
 				this._saveSources();
@@ -149,6 +150,7 @@ var RandomWallpaperSettings = class {
 			this._saveSources();
 
 			sourceRow.button_delete.connect('clicked', () => {
+				sourceRow.clearConfig();
 				sourceRowList.remove(sourceRow);
 				this._removeItemOnce(this._sources, sourceRow.id);
 				this._saveSources();
