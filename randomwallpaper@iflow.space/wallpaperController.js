@@ -356,12 +356,12 @@ var WallpaperController = class {
 
 				try {
 					if (!sourceFile.move(targetFile, Gio.FileCopyFlags.NONE, null, null)) {
-						this.logger.warning('Failed copying unique image.');
+						this.logger.warn('Failed copying unique image.');
 						return;
 					}
 				} catch (error) {
 					if (error === Gio.IOErrorEnum.EXISTS) {
-						this.logger.warning('Image already exists in location.');
+						this.logger.warn('Image already exists in location.');
 						return;
 					}
 				}
@@ -374,7 +374,8 @@ var WallpaperController = class {
 					this.currentWallpaper = this._getCurrentWallpaper();
 
 					// Run general post command
-					let generalPostCommandArray = this._getGeneralPostCommand(historyElement);
+					let commandString = this._settings.get('general-post-command', 'string');
+					let generalPostCommandArray = this._getCommandArray(commandString, historyElement);
 					if (generalPostCommandArray !== null) {
 						// https://gjs.guide/guides/gio/subprocesses.html#waiting-for-processes
 						try {
@@ -384,11 +385,11 @@ var WallpaperController = class {
 								try {
 									proc.wait_finish(result);
 								} catch (error) {
-									this.logger.warning(error);
+									this.logger.warn(error);
 								}
 							});
 						} catch (error) {
-							this.logger.warning(error);
+							this.logger.warn(error);
 						}
 					}
 
@@ -403,20 +404,23 @@ var WallpaperController = class {
 		});
 	}
 
-	_getGeneralPostCommand(historyElement) {
-		let commandString = this._settings.get('general-post-command', 'string');
-
-		if (commandString === "") {
+	_getCommandArray(commandString, historyElement) {
+		let string = commandString;
+		if (string === "") {
 			return null;
 		}
 
-		let commandArray = commandString.split(' ');
+		// Replace variables
+		let variables = new Map();
+		variables.set('%wallpaper_path%', historyElement.path);
 
-		commandArray.forEach((value, index, array) => {
-			if (value === "%wallpaper_path%") {
-				array[index] = historyElement.path;
-			}
+		variables.forEach((value, key) => {
+			string = string.replaceAll(key, value);
 		});
+
+		// https://stackoverflow.com/a/43766456
+		const regex = /("[^"\\]*(?:\\[\S\s][^"\\]*)*"|'[^'\\]*(?:\\[\S\s][^'\\]*)*'|\/[^\/\\]*(?:\\[\S\s][^\/\\]*)*\/[gimy]*(?=\s|$)|(?:\\\s|\S)+)/g;
+		let commandArray = string.match(regex);
 
 		return commandArray;
 	}
