@@ -32,4 +32,9 @@ var RedditSettingsGroup = GObject.registerClass({
 			'text',
 			Gio.SettingsBindFlags.DEFAULT);
 	}
+
+	clearConfig() {
+		this._settings.reset('allow-sfw');
+		this._settings.reset('subreddits');
+	}
 });
