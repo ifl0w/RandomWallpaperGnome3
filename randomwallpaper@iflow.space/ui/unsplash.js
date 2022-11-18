@@ -69,4 +69,13 @@ var UnsplashSettingsGroup = GObject.registerClass({
 			targetElement.set_sensitive(!enable);
 		}
 	}
+
+	clearConfig() {
+		this._settings.reset('keyword');
+		this._settings.reset('image-width');
+		this._settings.reset('image-height');
+		this._settings.reset('featured-only');
+		this._settings.reset('constraint-type');
+		this._settings.reset('constraint-value');
+	}
 });

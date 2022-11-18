@@ -55,4 +55,8 @@ var LocalFolderSettingsGroup = GObject.registerClass({
 			this._saveDialog.show();
 		});
 	}
+
+	clearConfig() {
+		this._settings.reset('folder');
+	}
 });

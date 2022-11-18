@@ -63,7 +63,14 @@ var SourceRow = GObject.registerClass({
 	}
 
 	_fillRow(type) {
-		let targetWidget = null;
+		let targetWidget = this._getSettingsGroup(type);
+		if (targetWidget !== null) {
+			this._settings_container.set_child(targetWidget);
+		}
+	}
+
+	_getSettingsGroup(type = 0) {
+		let targetWidget;
 		switch (type) {
 			case 0: // unsplash
 				targetWidget = new Unsplash.UnsplashSettingsGroup(this.id);
@@ -88,9 +95,17 @@ var SourceRow = GObject.registerClass({
 				this.logger.error("The selected source has no corresponding widget!")
 				break;
 		}
+		return targetWidget;
+	}
 
-		if (targetWidget !== null) {
-			this._settings_container.set_child(targetWidget);
+	clearConfig() {
+		for (const i of Array(6).keys()) {
+			let widget = this._getSettingsGroup(i);
+			widget.clearConfig();
 		}
+
+		this._settings.reset('name');
+		this._settings.reset('enabled');
+		this._settings.reset('type');
 	}
 });
