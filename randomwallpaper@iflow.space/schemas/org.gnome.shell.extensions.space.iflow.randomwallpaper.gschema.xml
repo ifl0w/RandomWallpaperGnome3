@@ -212,22 +212,10 @@
 
     <schema id='org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.wallhaven'>
 
-        <key type='s' name='keyword'>
-            <default>""</default>
-            <summary>Keyword</summary>
-            <description>The keyword will be used to search images.</description>
-        </key>
-
-        <key type='s' name='api-key'>
-            <default>""</default>
-            <summary>Api key</summary>
-            <description>The wallheven api key.</description>
-        </key>
-
-        <key type='s' name='resolutions'>
-            <default>"1920x1200, 1920x1080, 2560x1440, 2560x1600, 3840x1080"</default>
-            <summary>Resolutions</summary>
-            <description>The acceptable resolutions.</description>
+        <key type='b' name='allow-nsfw'>
+            <default>false</default>
+            <summary>NSFW</summary>
+            <description>Weather not safe images are allowed.</description>
         </key>
 
         <key type='b' name='allow-sfw'>
@@ -242,16 +230,10 @@
             <description>Weather sketchy images are allowed.</description>
         </key>
 
-        <key type='b' name='allow-nsfw'>
-            <default>false</default>
-            <summary>NSFW</summary>
-            <description>Weather not safe images are allowed.</description>
-        </key>
-
-        <key type='b' name='category-general'>
-            <default>true</default>
-            <summary>Category General</summary>
-            <description>Weather the general category should be searched.</description>
+        <key type='s' name='api-key'>
+            <default>""</default>
+            <summary>Api key</summary>
+            <description>The wallheven api key.</description>
         </key>
 
         <key type='b' name='category-anime'>
@@ -260,10 +242,34 @@
             <description>Weather the anime category should be searched.</description>
         </key>
 
+        <key type='b' name='category-general'>
+            <default>true</default>
+            <summary>Category General</summary>
+            <description>Weather the general category should be searched.</description>
+        </key>
+
         <key type='b' name='category-people'>
             <default>true</default>
             <summary>Category People</summary>
             <description>Weather the people category should be searched.</description>
+        </key>
+
+        <key type='s' name='color'>
+            <default>""</default>
+            <summary>Color</summary>
+            <description>Hex color to search for.</description>
+        </key>
+
+        <key type='s' name='keyword'>
+            <default>""</default>
+            <summary>Keyword</summary>
+            <description>The keyword will be used to search images.</description>
+        </key>
+
+        <key type='s' name='resolutions'>
+            <default>"1920x1200, 1920x1080, 2560x1440, 2560x1600, 3840x1080"</default>
+            <summary>Resolutions</summary>
+            <description>The acceptable resolutions.</description>
         </key>
 
     </schema>
