@@ -35,6 +35,33 @@ template WallhavenSettingsGroup : Adw.PreferencesGroup {
       input-purpose: free_form;
       text: "";
     }
+
+    Adw.ActionRow row_color {
+      title: _("Search by color");
+      subtitle: "";
+
+      Box {
+        Button button_color_undo {
+          valign: center;
+
+          styles [
+            "flat",
+          ]
+
+          Adw.ButtonContent {
+            icon-name: "edit-undo-symbolic";
+          }
+        }
+
+        Button button_color {
+          valign: center;
+
+          Adw.ButtonContent {
+            icon-name: "color-select-symbolic";
+          }
+        }
+      }
+    }
   }
 
   Adw.PreferencesGroup {
