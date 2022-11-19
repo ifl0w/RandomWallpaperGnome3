@@ -2,6 +2,7 @@ const Gio = imports.gi.Gio;
 
 const Self = imports.misc.extensionUtils.getCurrentExtension();
 const LoggerModule = Self.imports.logger;
+const SettingsModule = Self.imports.settings;
 
 /*
  libSoup is accessed through the SoupBowl wrapper to support libSoup3 and libSoup2.4 simultaneously in the extension
@@ -9,13 +10,21 @@ const LoggerModule = Self.imports.logger;
  */
 const SoupBowl = Self.imports.soupBowl;
 
+const RWG_SETTINGS_SCHEMA_SOURCES_GENERAL = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.general';
+
 var BaseAdapter = class {
-	_wallpaperLocation = null;
-
-	constructor(wallpaperLocation) {
+	constructor(params = {}) {
 		this.logger = new LoggerModule.Logger('RWG3', 'BaseAdapter');
+		this._settings = new SettingsModule.Settings(params.schemaID, params.schemaPath);
+		this._wallpaperLocation = params.wallpaperLocation;
 
-		this._wallpaperLocation = wallpaperLocation;
+		this._sourceName = params.name;
+		if (this._sourceName === null || this._sourceName === "") {
+			this._sourceName = params.defaultName;
+		}
+
+		let path = `/org/gnome/shell/extensions/space-iflow-randomwallpaper/sources/general/${params.id}/`;
+		this._generalSettings = new SettingsModule.Settings(RWG_SETTINGS_SCHEMA_SOURCES_GENERAL, path);
 	}
 
 	/**
@@ -86,6 +95,17 @@ var BaseAdapter = class {
 		});
 	}
 
+	_isImageBlocked(filename) {
+		let blockedFilenames = this._generalSettings.get('blocked-images', 'strv');
+
+		if (blockedFilenames.includes(filename)) {
+			this.logger.warn(`Image is blocked: ${filename}`);
+			return true;
+		}
+
+		return false;
+	}
+
 	_isURIEncoded(uri) {
 		uri = uri || '';
 
@@ -105,5 +125,4 @@ var BaseAdapter = class {
 			callback(null, error);
 		}
 	}
-
 };
