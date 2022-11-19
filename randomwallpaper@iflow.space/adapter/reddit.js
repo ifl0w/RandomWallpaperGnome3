@@ -11,15 +11,15 @@ const RWG_SETTINGS_SCHEMA_SOURCES_REDDIT = 'org.gnome.shell.extensions.space.ifl
 
 var RedditAdapter = class extends BaseAdapter.BaseAdapter {
 	constructor(id, name, wallpaperLocation) {
-		super(wallpaperLocation);
+		super({
+			id: id,
+			schemaID: RWG_SETTINGS_SCHEMA_SOURCES_REDDIT,
+			schemaPath: `/org/gnome/shell/extensions/space-iflow-randomwallpaper/sources/reddit/${id}/`,
+			wallpaperLocation: wallpaperLocation,
+			name: name,
+			defaultName: 'Reddit'
+		});
 
-		this._sourceName = name;
-		if (this._sourceName === null || this._sourceName === "") {
-			this._sourceName = 'Reddit';
-		}
-
-		let path = `/org/gnome/shell/extensions/space-iflow-randomwallpaper/sources/reddit/${id}/`;
-		this._settings = new SettingsModule.Settings(RWG_SETTINGS_SCHEMA_SOURCES_REDDIT, path);
 		this.bowl = new SoupBowl.Bowl();
 	}
 
@@ -51,9 +51,25 @@ var RedditAdapter = class extends BaseAdapter.BaseAdapter {
 					this._error("No suitable submissions found!", callback);
 					return;
 				}
-				const random = Math.floor(Math.random() * submissions.length);
-				const submission = submissions[random].data;
-				const imageDownloadUrl = this._ampDecode(submission.preview.images[0].source.url);
+
+				let submission;
+				let imageDownloadUrl;
+				for (let i = 0; i < 5; i++) {
+					const random = Math.floor(Math.random() * submissions.length);
+					submission = submissions[random].data;
+					imageDownloadUrl = this._ampDecode(submission.preview.images[0].source.url);
+
+					if (!this._isImageBlocked(this.fileName(imageDownloadUrl))) {
+						break;
+					}
+
+					imageDownloadUrl = null;
+				}
+
+				if (imageDownloadUrl === null) {
+					this._error("Only blocked images found.", callback);
+					return;
+				}
 
 				if (callback) {
 					let historyEntry = new HistoryModule.HistoryEntry(null, this._sourceName, imageDownloadUrl);

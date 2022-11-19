@@ -198,7 +198,6 @@ var WallpaperController = class {
 					break;
 				default:
 					imageSourceAdapter = new UnsplashAdapter.UnsplashAdapter(null, null, this.wallpaperlocation);
-					// TODO: log error and abort, raise exception?
 					break;
 			}
 		} catch (error) {
@@ -206,7 +205,11 @@ var WallpaperController = class {
 			imageSourceAdapter = new UnsplashAdapter.UnsplashAdapter(null, null, this.wallpaperlocation);
 		}
 
-		return imageSourceAdapter;
+		return {
+			adapter: imageSourceAdapter,
+			adapterId: sourceID,
+			adapterType: sourceType
+		};
 	}
 
 	_getRandomSource() {
@@ -329,8 +332,8 @@ var WallpaperController = class {
 			this._timer.reset(); // reset timer
 		}
 
-		let adapter = this._getRandomAdapter();
-		adapter.requestRandomImage((historyElement, error) => {
+		let returnObject = this._getRandomAdapter();
+		returnObject.adapter.requestRandomImage((historyElement, error) => {
 			if (historyElement == null || error) {
 				this._bailOutWithCallback("Could not fetch wallpaper location.", callback);
 				this._stopLoadingHooks.map(element => element(null));
@@ -339,7 +342,7 @@ var WallpaperController = class {
 
 			this.logger.info("Requesting image: " + historyElement.source.imageDownloadUrl);
 
-			adapter.fetchFile(historyElement.source.imageDownloadUrl, (historyId, path, error) => {
+			returnObject.adapter.fetchFile(historyElement.source.imageDownloadUrl, (historyId, path, error) => {
 				if (error) {
 					this._bailOutWithCallback(`Could not load new wallpaper: ${error}`, callback);
 					this._stopLoadingHooks.forEach(element => element(null));
@@ -348,6 +351,8 @@ var WallpaperController = class {
 
 				historyElement.name = String(historyId);
 				historyElement.id = `${historyElement.timestamp}_${historyElement.name}`; // timestamp ensures uniqueness
+				historyElement.adapter.id = returnObject.adapterId;
+				historyElement.adapter.type = returnObject.adapterType;
 
 				// Move file to unique naming
 				let sourceFile = Gio.File.new_for_path(path);

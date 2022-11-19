@@ -28,6 +28,7 @@ function init(metaData) {
 // https://gjs.guide/extensions/development/preferences.html#preferences-window
 // Gnome 42+
 function fillPreferencesWindow(window) {
+	window.set_default_size(-1, 720);
 	new RandomWallpaperSettings(window);
 }
 
