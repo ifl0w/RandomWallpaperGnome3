@@ -10,15 +10,14 @@ const RWG_SETTINGS_SCHEMA_SOURCES_LOCAL_FOLDER = 'org.gnome.shell.extensions.spa
 
 var LocalFolderAdapter = class extends BaseAdapter.BaseAdapter {
 	constructor(id, name, wallpaperLocation) {
-		super(wallpaperLocation);
-
-		this._sourceName = name;
-		if (this._sourceName === null || this._sourceName === "") {
-			this._sourceName = 'Local Folder';
-		}
-
-		let path = `/org/gnome/shell/extensions/space-iflow-randomwallpaper/sources/localFolder/${id}/`;
-		this._settings = new SettingsModule.Settings(RWG_SETTINGS_SCHEMA_SOURCES_LOCAL_FOLDER, path);
+		super({
+			id: id,
+			schemaID: RWG_SETTINGS_SCHEMA_SOURCES_LOCAL_FOLDER,
+			schemaPath: `/org/gnome/shell/extensions/space-iflow-randomwallpaper/sources/localFolder/${id}/`,
+			wallpaperLocation: wallpaperLocation,
+			name: name,
+			defaultName: 'Local Folder'
+		});
 	}
 
 	requestRandomImage(callback) {
@@ -29,17 +28,32 @@ var LocalFolderAdapter = class extends BaseAdapter.BaseAdapter {
 			this._error("Empty array.", callback);
 		}
 
-		let randomFile = files[Math.floor(Math.random() * files.length)].get_path();
+		let randomFilePath;
+		for (let i = 0; i < 5; i++) {
+			let randomFile = files[Math.floor(Math.random() * files.length)];
+			randomFilePath = randomFile.get_uri();
+
+			if (!this._isImageBlocked(randomFile.get_basename())) {
+				break;
+			}
+
+			randomFilePath = null;
+		}
+
+		if (randomFilePath === null) {
+			this._error("Only blocked images found.", callback);
+			return;
+		}
 
 		if (callback) {
-			let historyEntry = new HistoryModule.HistoryEntry(null, this._sourceName, randomFile);
+			let historyEntry = new HistoryModule.HistoryEntry(null, this._sourceName, randomFilePath);
 			historyEntry.source.sourceUrl = this._wallpaperLocation;
 			callback(historyEntry);
 		}
 	}
 
 	fetchFile(path, callback) {
-		let sourceFile = Gio.File.new_for_path(path);
+		let sourceFile = Gio.File.new_for_uri(path);
 		let name = sourceFile.get_basename()
 		let targetFile = Gio.File.new_for_path(this._wallpaperLocation + String(name));
 

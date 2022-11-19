@@ -8,53 +8,52 @@ const BaseAdapter = Self.imports.adapter.baseAdapter;
 const RWG_SETTINGS_SCHEMA_SOURCES_URL_SOURCE = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.urlSource';
 
 var UrlSourceAdapter = class extends BaseAdapter.BaseAdapter {
-    constructor(id, name, wallpaperLocation) {
-        super(wallpaperLocation);
+	constructor(id, name, wallpaperLocation) {
+		super({
+			id: id,
+			schemaID: RWG_SETTINGS_SCHEMA_SOURCES_URL_SOURCE,
+			schemaPath: `/org/gnome/shell/extensions/space-iflow-randomwallpaper/sources/urlSource/${id}/`,
+			wallpaperLocation: wallpaperLocation,
+			name: name,
+			defaultName: 'Static URL'
+		});
+	}
 
-        this._sourceName = name;
-        if (this._sourceName === null || this._sourceName === "") {
-            this._sourceName = 'Static URL';
-        }
+	requestRandomImage(callback) {
+		let imageDownloadUrl = this._settings.get("image-url", "string");
+		let authorName = this._settings.get("author-name", "string");
+		let authorUrl = this._settings.get("author-url", "string");
+		let domainUrl = this._settings.get("domain", "string");
+		let postUrl = this._settings.get("domain", "string");
 
-        let path = `/org/gnome/shell/extensions/space-iflow-randomwallpaper/sources/urlSource/${id}/`;
-        this._settings = new SettingsModule.Settings(RWG_SETTINGS_SCHEMA_SOURCES_URL_SOURCE, path);
-    }
+		if (typeof postUrl !== 'string' || !postUrl instanceof String) {
+			postUrl = null;
+		}
 
-    requestRandomImage(callback) {
-        let imageDownloadUrl = this._settings.get("image-url", "string");
-        let authorName = this._settings.get("author-name", "string");
-        let authorUrl = this._settings.get("author-url", "string");
-        let domainUrl = this._settings.get("domain", "string");
-        let postUrl = this._settings.get("domain", "string");
+		if (typeof authorName !== 'string' || !authorName instanceof String) {
+			authorName = null;
+		}
 
-        if (typeof postUrl !== 'string' || !postUrl instanceof String) {
-            postUrl = null;
-        }
+		if (typeof authorUrl !== 'string' || !authorUrl instanceof String) {
+			authorUrl = null;
+		}
 
-        if (typeof authorName !== 'string' || !authorName instanceof String) {
-            authorName = null;
-        }
+		if (callback) {
+			let historyEntry = new HistoryModule.HistoryEntry(authorName, this._sourceName, imageDownloadUrl);
 
-        if (typeof authorUrl !== 'string' || !authorUrl instanceof String) {
-            authorUrl = null;
-        }
+			if (authorUrl !== null && authorUrl !== "") {
+				historyEntry.source.authorUrl = authorUrl;
+			}
 
-        if (callback) {
-            let historyEntry = new HistoryModule.HistoryEntry(authorName, this._sourceName, imageDownloadUrl);
+			if (postUrl !== null && postUrl !== "") {
+				historyEntry.source.imageLinkUrl = postUrl;
+			}
 
-            if (authorUrl !== null && authorUrl !== "") {
-                historyEntry.source.authorUrl = authorUrl;
-            }
+			if (domainUrl !== null && domainUrl !== "") {
+				historyEntry.source.sourceUrl = domainUrl;
+			}
 
-            if (postUrl !== null && postUrl !== "") {
-                historyEntry.source.imageLinkUrl = postUrl;
-            }
-
-            if (domainUrl !== null && domainUrl !== "") {
-                historyEntry.source.sourceUrl = domainUrl;
-            }
-
-            callback(historyEntry);
-        }
-    }
+			callback(historyEntry);
+		}
+	}
 };

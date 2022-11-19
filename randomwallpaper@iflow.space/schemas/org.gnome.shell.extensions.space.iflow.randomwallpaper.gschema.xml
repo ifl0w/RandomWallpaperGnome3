@@ -150,6 +150,12 @@
             <description>The type of this source.</description>
         </key>
 
+        <key type='as' name='blocked-images'>
+            <default>[]</default>
+            <summary>Blocked Images</summary>
+            <description>An array of strings containing the filenames of blocked images.</description>
+        </key>
+
     </schema>
 
     <schema id='org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.unsplash'>

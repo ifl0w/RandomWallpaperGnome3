@@ -12,68 +12,73 @@ const RWG_SETTINGS_SCHEMA_SOURCES_GENERIC_JSON = 'org.gnome.shell.extensions.spa
 
 var GenericJsonAdapter = class extends BaseAdapter.BaseAdapter {
 	constructor(id, name, wallpaperLocation) {
-		super(wallpaperLocation);
-
-		this._sourceName = name;
-		if (this._sourceName === null || this._sourceName === "") {
-			this._sourceName = 'Generic JSON Source';
-		}
+		super({
+			id: id,
+			schemaID: RWG_SETTINGS_SCHEMA_SOURCES_GENERIC_JSON,
+			schemaPath: `/org/gnome/shell/extensions/space-iflow-randomwallpaper/sources/genericJSON/${id}/`,
+			wallpaperLocation: wallpaperLocation,
+			name: name,
+			defaultName: 'Generic JSON Source'
+		});
 
 		this._jsonPathParser = new JSONPath.JSONPathParser();
-		let path = `/org/gnome/shell/extensions/space-iflow-randomwallpaper/sources/genericJSON/${id}/`;
-		this._settings = new SettingsModule.Settings(RWG_SETTINGS_SCHEMA_SOURCES_GENERIC_JSON, path);
 		this.bowl = new SoupBowl.Bowl();
 	}
 
-	requestRandomImage(callback) {
-		let url = this._settings.get("request-url", "string");
-		url = encodeURI(url);
-		let message = this.bowl.Soup.Message.new('GET', url);
-		if (message === null) {
-			this._error("Could not create request.", callback);
-			return;
-		}
+	_getHistoryEntry() {
+		return new Promise((resolve, reject) => {
+			let url = this._settings.get("request-url", "string");
+			url = encodeURI(url);
 
-		this.bowl.send_and_receive(message, (response_body_bytes) => {
-			try {
-				const response_body = JSON.parse(ByteArray.toString(response_body_bytes));
+			let message = this.bowl.Soup.Message.new('GET', url);
+			if (message === null) {
+				reject('Could not create request.');
+			}
 
-				let imageJSONPath = this._settings.get("image-path", "string");
-				let postJSONPath = this._settings.get("post-path", "string");
-				let domainUrl = this._settings.get("domain", "string");
-				let authorNameJSONPath = this._settings.get("author-name-path", "string");
-				let authorUrlJSONPath = this._settings.get("author-url-path", "string");
+			this.bowl.send_and_receive(message, (response_body_bytes) => {
+				try {
+					const response_body = JSON.parse(ByteArray.toString(response_body_bytes));
 
-				let rObject = this._jsonPathParser.access(response_body, imageJSONPath);
-				let imageDownloadUrl = this._settings.get("image-prefix", "string") + rObject.Object;
+					let imageJSONPath = this._settings.get("image-path", "string");
+					let postJSONPath = this._settings.get("post-path", "string");
+					let domainUrl = this._settings.get("domain", "string");
+					let authorNameJSONPath = this._settings.get("author-name-path", "string");
+					let authorUrlJSONPath = this._settings.get("author-url-path", "string");
 
-				// '@random' would yield different results so lets make sure the values stay
-				// the same as long as the path is identical
-				let samePath = imageJSONPath.substring(0, this.findFirstDifference(imageJSONPath, postJSONPath));
+					let rObject = this._jsonPathParser.access(response_body, imageJSONPath);
+					let imageDownloadUrl = this._settings.get("image-prefix", "string") + rObject.Object;
 
-				// count occurrences of '@random' to slice the array later
-				// https://stackoverflow.com/a/4009768
-				let occurrences = (samePath.match(/@random/g) || []).length;
-				let slicedRandomElements = rObject.RandomElements.slice(0, occurrences);
+					if (this._isImageBlocked(this.fileName(imageDownloadUrl))) {
+						// Abort and try again
+						resolve(null);
+					}
 
-				let postUrl = this._jsonPathParser.access(response_body, postJSONPath, slicedRandomElements, false).Object;
-				postUrl = this._settings.get("post-prefix", "string") + postUrl;
-				if (typeof postUrl !== 'string' || !postUrl instanceof String) {
-					postUrl = null;
-				}
+					// '@random' would yield different results so lets make sure the values stay
+					// the same as long as the path is identical
+					let samePath = imageJSONPath.substring(0, this.findFirstDifference(imageJSONPath, postJSONPath));
 
-				let authorName = this._jsonPathParser.access(response_body, authorNameJSONPath, slicedRandomElements, false).Object;
-				if (typeof authorName !== 'string' || !authorName instanceof String) {
-					authorName = null;
-				}
+					// count occurrences of '@random' to slice the array later
+					// https://stackoverflow.com/a/4009768
+					let occurrences = (samePath.match(/@random/g) || []).length;
+					let slicedRandomElements = rObject.RandomElements.slice(0, occurrences);
 
-				let authorUrl = this._jsonPathParser.access(response_body, authorUrlJSONPath, slicedRandomElements, false).Object;
-				authorUrl = this._settings.get("author-url-prefix", "string") + authorUrl;
-				if (typeof authorUrl !== 'string' || !authorUrl instanceof String) {
-					authorUrl = null;
-				}
+					let postUrl = this._jsonPathParser.access(response_body, postJSONPath, slicedRandomElements, false).Object;
+					postUrl = this._settings.get("post-prefix", "string") + postUrl;
+					if (typeof postUrl !== 'string' || !postUrl instanceof String) {
+						postUrl = null;
+					}
 
-				if (callback) {
+					let authorName = this._jsonPathParser.access(response_body, authorNameJSONPath, slicedRandomElements, false).Object;
+					if (typeof authorName !== 'string' || !authorName instanceof String) {
+						authorName = null;
+					}
+
+					let authorUrl = this._jsonPathParser.access(response_body, authorUrlJSONPath, slicedRandomElements, false).Object;
+					authorUrl = this._settings.get("author-url-prefix", "string") + authorUrl;
+					if (typeof authorUrl !== 'string' || !authorUrl instanceof String) {
+						authorUrl = null;
+					}
+
 					let historyEntry = new HistoryModule.HistoryEntry(authorName, this._sourceName, imageDownloadUrl);
 
 					if (authorUrl !== null && authorUrl !== "") {
@@ -88,12 +93,36 @@ var GenericJsonAdapter = class extends BaseAdapter.BaseAdapter {
 						historyEntry.source.sourceUrl = domainUrl;
 					}
 
+					resolve(historyEntry);
+				} catch (e) {
+					reject("Unexpected response. (" + e + ")");
+				}
+			});
+		});
+	}
+
+	async requestRandomImage(callback) {
+		for (let i = 0; i < 5; i++) {
+			try {
+				let historyEntry = await this._getHistoryEntry();
+
+				if (historyEntry === null) {
+					// Image blocked, try again
+					continue;
+				}
+
+				if (callback) {
 					callback(historyEntry);
 				}
-			} catch (e) {
-				this._error("Unexpected response. (" + e + ")", callback);
+
+				return;
+			} catch (error) {
+				this._error(error, callback);
+				return;
 			}
-		});
+		}
+
+		this._error("Only blocked images found.", callback);
 	}
 
 	// https://stackoverflow.com/a/32859917

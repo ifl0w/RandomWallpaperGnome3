@@ -9,12 +9,19 @@ const RWG_SETTINGS_SCHEMA_SOURCES_UNSPLASH = 'org.gnome.shell.extensions.space.i
 
 var UnsplashAdapter = class extends BaseAdapter.BaseAdapter {
 	constructor(id, name, wallpaperLocation) {
-		super(wallpaperLocation);
-
-		this._sourceName = name;
-		if (this._sourceName === null || this._sourceName === "") {
-			this._sourceName = 'Unsplash';
+		// Make sure we're not picking up a valid config
+		if (id === null) {
+			id = -1;
 		}
+
+		super({
+			id: id,
+			schemaID: RWG_SETTINGS_SCHEMA_SOURCES_UNSPLASH,
+			schemaPath: `/org/gnome/shell/extensions/space-iflow-randomwallpaper/sources/unsplash/${id}/`,
+			wallpaperLocation: wallpaperLocation,
+			name: name,
+			defaultName: 'Unsplash'
+		});
 
 		this._sourceUrl = 'https://source.unsplash.com';
 
@@ -28,47 +35,73 @@ var UnsplashAdapter = class extends BaseAdapter.BaseAdapter {
 			'constraintValue': '',
 		};
 
-		if (id === null) {
-			id = -1;
-		}
-
-		let path = `/org/gnome/shell/extensions/space-iflow-randomwallpaper/sources/unsplash/${id}/`;
-		this._settings = new SettingsModule.Settings(RWG_SETTINGS_SCHEMA_SOURCES_UNSPLASH, path);
 		this.bowl = new SoupBowl.Bowl();
 	}
 
-	requestRandomImage(callback) {
-		this._readOptionsFromSettings();
-		let optionsString = this._generateOptionsString();
+	_getHistoryEntry() {
+		return new Promise((resolve, reject) => {
+			this._readOptionsFromSettings();
+			let optionsString = this._generateOptionsString();
 
-		let url = `https://source.unsplash.com${optionsString}`;
-		url = encodeURI(url);
+			let url = `https://source.unsplash.com${optionsString}`;
+			url = encodeURI(url);
 
-		this.logger.info(`Unsplash request to: ${url}`);
-		let message = this.bowl.Soup.Message.new('GET', url);
-		if (message === null) {
-			this._error("Could not create request.", callback);
-			return;
-		}
+			this.logger.info(`Unsplash request to: ${url}`);
 
-		// unsplash redirects to actual file; we only want the file location
-		message.set_flags(this.bowl.Soup.MessageFlags.NO_REDIRECT);
-
-		this.bowl.send_and_receive(message, (_null_expected) => {
-			let imageLinkUrl;
-
-			// expecting redirect
-			if (message.status_code !== 302) {
-				this._error("Unexpected response status code (expected 302)", callback);
+			let message = this.bowl.Soup.Message.new('GET', url);
+			if (message === null) {
+				reject("Could not create request.");
 			}
 
-			imageLinkUrl = message.response_headers.get_one('Location');
+			// unsplash redirects to actual file; we only want the file location
+			message.set_flags(this.bowl.Soup.MessageFlags.NO_REDIRECT);
 
-			let historyEntry = new HistoryModule.HistoryEntry(null, this._sourceName, imageLinkUrl);
-			historyEntry.source.sourceUrl = this._sourceUrl;
-			historyEntry.source.imageLinkUrl = imageLinkUrl;
-			callback(historyEntry);
+			this.bowl.send_and_receive(message, (_null_expected) => {
+				let imageLinkUrl;
+
+				// expecting redirect
+				if (message.status_code !== 302) {
+					reject("Unexpected response status code (expected 302)");
+				}
+
+				imageLinkUrl = message.response_headers.get_one('Location');
+
+				if (this._isImageBlocked(this.fileName(imageLinkUrl))) {
+					// Abort and try again
+					resolve(null);
+				}
+
+				let historyEntry = new HistoryModule.HistoryEntry(null, this._sourceName, imageLinkUrl);
+				historyEntry.source.sourceUrl = this._sourceUrl;
+				historyEntry.source.imageLinkUrl = imageLinkUrl;
+
+				resolve(historyEntry);
+			});
 		});
+	}
+
+	async requestRandomImage(callback) {
+		for (let i = 0; i < 5; i++) {
+			try {
+				let historyEntry = await this._getHistoryEntry();
+
+				if (historyEntry === null) {
+					// Image blocked, try again
+					continue;
+				}
+
+				if (callback) {
+					callback(historyEntry);
+				}
+
+				return;
+			} catch (error) {
+				this._error(error, callback);
+				return;
+			}
+		}
+
+		this._error("Only blocked images found.", callback);
 	}
 
 	_generateOptionsString() {
