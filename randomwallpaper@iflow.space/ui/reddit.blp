@@ -9,6 +9,70 @@ template RedditSettingsGroup : Adw.PreferencesGroup {
   }
 
   Adw.ActionRow {
+    title: _("Minimal resolution");
+
+    SpinButton {
+      valign: center;
+      numeric: true;
+
+      adjustment: Adjustment min_width {
+        step-increment: 1;
+        page-increment: 10;
+        lower: 1;
+        upper: 1000000;
+      };
+    }
+
+    Label {
+      label: "x";
+    }
+
+    SpinButton {
+      valign: center;
+      numeric: true;
+
+      adjustment: Adjustment min_height {
+        step-increment: 1;
+        page-increment: 10;
+        lower: 1;
+        upper: 1000000;
+      };
+    }
+  }
+
+  Adw.ActionRow {
+    title: _("Minimal image ratio");
+
+    SpinButton {
+      valign: center;
+      numeric: true;
+
+      adjustment: Adjustment image_ratio1 {
+        step-increment: 1;
+        page-increment: 10;
+        lower: 1;
+        upper: 1000000;
+      };
+    }
+
+    Label {
+      label: ":";
+    }
+
+    SpinButton {
+      valign: center;
+      numeric: true;
+
+      adjustment: Adjustment image_ratio2 {
+        step-increment: 1;
+        page-increment: 10;
+        lower: 1;
+        upper: 1000000;
+      };
+    }
+  }
+
+  Adw.ActionRow {
     title: "SFW";
     subtitle: _("Safe for work");
 

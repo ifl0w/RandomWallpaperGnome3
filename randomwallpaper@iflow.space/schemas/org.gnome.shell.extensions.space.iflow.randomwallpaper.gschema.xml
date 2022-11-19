@@ -132,10 +132,10 @@
 
     <schema id='org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.general'>
 
-        <key type='s' name='name'>
-            <default>"MySource"</default>
-            <summary>Name</summary>
-            <description>Name for this source.</description>
+        <key type='as' name='blocked-images'>
+            <default>[]</default>
+            <summary>Blocked Images</summary>
+            <description>An array of strings containing the filenames of blocked images.</description>
         </key>
 
         <key type='b' name='enabled'>
@@ -144,16 +144,16 @@
             <description>Whether this source is enabled.</description>
         </key>
 
+        <key type='s' name='name'>
+            <default>"MySource"</default>
+            <summary>Name</summary>
+            <description>Name for this source.</description>
+        </key>
+
         <key type='i' name='type'>
             <default>0</default>
             <summary>Type</summary>
             <description>The type of this source.</description>
-        </key>
-
-        <key type='as' name='blocked-images'>
-            <default>[]</default>
-            <summary>Blocked Images</summary>
-            <description>An array of strings containing the filenames of blocked images.</description>
         </key>
 
     </schema>
@@ -270,16 +270,40 @@
 
     <schema id='org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.reddit'>
 
-        <key type='s' name='subreddits'>
-            <default>""</default>
-            <summary>Subreddits</summary>
-            <description>These subreddits will be searched.</description>
-        </key>
-
         <key type='b' name='allow-sfw'>
             <default>false</default>
             <summary>SFW</summary>
             <description>Whether safe images are allowed.</description>
+        </key>
+
+        <key type='i' name='image-ratio1'>
+            <default>16</default>
+            <summary>Image Ratio</summary>
+            <description>The minimal ratio 1.</description>
+        </key>
+
+        <key type='i' name='image-ratio2'>
+            <default>10</default>
+            <summary>Image Width</summary>
+            <description>The minimal ratio 2.</description>
+        </key>
+
+        <key type='i' name='min-height'>
+            <default>1080</default>
+            <summary>Image Height</summary>
+            <description>The minimal height of fetched image.</description>
+        </key>
+
+        <key type='i' name='min-width'>
+            <default>1920</default>
+            <summary>Image Width</summary>
+            <description>The minimal width of fetched image.</description>
+        </key>
+
+        <key type='s' name='subreddits'>
+            <default>""</default>
+            <summary>Subreddits</summary>
+            <description>These subreddits will be searched.</description>
         </key>
 
     </schema>
