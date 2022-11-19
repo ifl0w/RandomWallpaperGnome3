@@ -85,6 +85,7 @@ var RandomWallpaperMenu = class {
 		});
 
 		this.openSettings.connect("activate", () => {
+			// FIXME: Unhandled promise rejection. To suppress this warning, add an error handler to your promise chain with .catch() or a try-catch block around your await expression.
 			Gio.DBus.session.call(
 				'org.gnome.Shell.Extensions',
 				'/org/gnome/Shell/Extensions',
