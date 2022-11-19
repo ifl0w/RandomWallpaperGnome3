@@ -18,6 +18,8 @@ const Gio = imports.gi.Gio;
 // Settings
 const Prefs = Self.imports.settings;
 
+const RWG_SETTINGS_SCHEMA_BACKEND_CONNECTION = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.backend-connection';
+
 var RandomWallpaperMenu = class {
 
 	constructor(wallpaperController) {
@@ -26,6 +28,7 @@ var RandomWallpaperMenu = class {
 		this.wallpaperController = wallpaperController;
 		this.logger = new LoggerModule.Logger('RWG3', 'RandomWallpaperEntry');
 		this.hidePanelIconHandler = this.settings.observe('hide-panel-icon', this.updatePanelMenuVisibility.bind(this));
+		this._backendConnection = new Prefs.Settings(RWG_SETTINGS_SCHEMA_BACKEND_CONNECTION);
 
 		// Panelmenu Icon
 		this.statusIcon = new CustomElements.StatusElement();
@@ -48,6 +51,25 @@ var RandomWallpaperMenu = class {
 		this.panelMenu.menu.addMenuItem(this.historySection);
 
 		this.panelMenu.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+
+		// Temporarily pause timer
+		this._pauseTimerItem = new PopupMenu.PopupSwitchMenuItem('Pause timer', false, {});
+		this._pauseTimerItem.sensitive = this.settings.get('auto-fetch', 'boolean');
+		this._pauseTimerItem.setToggleState(this._backendConnection.get('pause-timer', 'boolean'));
+
+		this._pauseTimerItem.connect('toggled', (item, state) => {
+			this._backendConnection.set('pause-timer', 'boolean', state);
+		});
+
+		this.settings.observe('auto-fetch', () => {
+			this._pauseTimerItem.sensitive = this.settings.get('auto-fetch', 'boolean');
+		});
+
+		this._backendConnection.observe('pause-timer', () => {
+			this._pauseTimerItem.setToggleState(this._backendConnection.get('pause-timer', 'boolean'));
+		});
+
+		this.panelMenu.menu.addMenuItem(this._pauseTimerItem);
 
 		// clear history button
 		this.clearHistoryItem = new PopupMenu.PopupMenuItem('Clear History');
