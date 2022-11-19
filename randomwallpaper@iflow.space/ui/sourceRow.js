@@ -3,6 +3,7 @@ const ExtensionUtils = imports.misc.extensionUtils;
 const Gio = imports.gi.Gio;
 const GLib = imports.gi.GLib;
 const GObject = imports.gi.GObject;
+const Gtk = imports.gi.Gtk;
 
 const Self = ExtensionUtils.getCurrentExtension();
 const Convenience = Self.imports.convenience;
@@ -24,6 +25,7 @@ var SourceRow = GObject.registerClass({
 		'button_delete'
 	],
 	InternalChildren: [
+		'blocked_images_list',
 		'combo',
 		'settings_container',
 		'source_name'
@@ -60,6 +62,27 @@ var SourceRow = GObject.registerClass({
 		});
 
 		this._fillRow(this._combo.selected);
+
+		let blockedImages = this._settings.get_strv('blocked-images');
+		blockedImages.forEach(filename => {
+			let blockedImageRow = new Adw.ActionRow();
+			blockedImageRow.set_title(filename);
+
+			let button = new Gtk.Button();
+			button.set_valign(Gtk.Align.CENTER);
+			button.connect('clicked', () => {
+				this._removeBlockedImage(filename);
+				this._blocked_images_list.remove(blockedImageRow);
+			});
+
+			let buttonContent = new Adw.ButtonContent();
+			buttonContent.set_icon_name("user-trash-symbolic")
+
+			button.set_child(buttonContent);
+			blockedImageRow.add_suffix(button);
+			this._blocked_images_list.add_row(blockedImageRow);
+			this._blocked_images_list.set_sensitive(true);
+		});
 	}
 
 	_fillRow(type) {
@@ -96,6 +119,25 @@ var SourceRow = GObject.registerClass({
 				break;
 		}
 		return targetWidget;
+	}
+
+	_removeBlockedImage(filename) {
+		let blockedImages = this._settings.get_strv('blocked-images');
+		if (!blockedImages.includes(filename)) {
+			return;
+		}
+
+		blockedImages = this._removeItemOnce(blockedImages, filename);
+		this._settings.set_strv('blocked-images', blockedImages);
+	}
+
+	// https://stackoverflow.com/a/5767357
+	_removeItemOnce(arr, value) {
+		var index = arr.indexOf(value);
+		if (index > -1) {
+			arr.splice(index, 1);
+		}
+		return arr;
 	}
 
 	clearConfig() {
