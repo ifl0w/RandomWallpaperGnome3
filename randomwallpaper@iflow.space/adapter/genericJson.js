@@ -45,12 +45,29 @@ var GenericJsonAdapter = class extends BaseAdapter.BaseAdapter {
 					let authorNameJSONPath = this._settings.get("author-name-path", "string");
 					let authorUrlJSONPath = this._settings.get("author-url-path", "string");
 
-					let rObject = this._jsonPathParser.access(response_body, imageJSONPath);
-					let imageDownloadUrl = this._settings.get("image-prefix", "string") + rObject.Object;
+					let rObject;
+					let imageDownloadUrl;
+					for (let i = 0; i < 5; i++) {
+						rObject = this._jsonPathParser.access(response_body, imageJSONPath);
+						imageDownloadUrl = this._settings.get("image-prefix", "string") + rObject.Object;
 
-					if (this._isImageBlocked(this.fileName(imageDownloadUrl))) {
-						// Abort and try again
-						resolve(null);
+						let imageBlocked = this._isImageBlocked(this.fileName(imageDownloadUrl));
+
+						if (!imageBlocked) {
+							break;
+						}
+
+						// Only retry with @random present in JSONPath
+						if (imageBlocked && !imageJSONPath.includes("@random")) {
+							// Abort and try again
+							resolve(null);
+						}
+
+						imageDownloadUrl = null;
+					}
+
+					if (imageDownloadUrl === null) {
+						reject("Only blocked images found.");
 					}
 
 					// '@random' would yield different results so lets make sure the values stay
