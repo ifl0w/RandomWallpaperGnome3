@@ -130,5 +130,7 @@ var WallhavenAdapter = class extends BaseAdapter.BaseAdapter {
 		purity.push(+this._settings.get('allow-sketchy', 'boolean'));
 		purity.push(+this._settings.get('allow-nsfw', 'boolean'));
 		this.options.purity = purity.join('');
+
+		this.options.colors = this._settings.get('color', 'string');
 	}
 };
