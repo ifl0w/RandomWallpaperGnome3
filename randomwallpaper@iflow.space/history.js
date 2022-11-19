@@ -14,6 +14,10 @@ var HistoryEntry = class {
 		this.path = null;
 		this.source = null;
 		this.timestamp = new Date().getTime();
+		this.adapter = {
+			id: null,
+			type: null
+		};
 
 		this.source = {
 			author: author,

@@ -13,6 +13,8 @@ const Settings = Self.imports.settings;
 const LoggerModule = Self.imports.logger;
 const Timer = Self.imports.timer;
 
+const RWG_SETTINGS_SCHEMA_SOURCES_GENERAL = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.general';
+
 var HistoryElement = GObject.registerClass({
 	GTypeName: 'HistoryElement',
 }, class HistoryElement extends PopupMenu.PopupSubMenuMenuItem {
@@ -129,6 +131,15 @@ var HistoryElement = GObject.registerClass({
 		});
 		this.menu.addMenuItem(this.copyToFavorites);
 
+		// Static URLs can't block images
+		if (historyEntry.adapter.type !== 5) {
+			this.blockImage = new PopupMenu.PopupMenuItem('Block');
+			this.blockImage.connect('activate', () => {
+				this._addToBlocklist(historyEntry);
+			});
+			this.menu.addMenuItem(this.blockImage);
+		}
+
 		this.setAsWallpaperItem = new PopupMenu.PopupMenuItem('Set As Wallpaper');
 		this.setAsWallpaperItem.connect('activate', () => {
 			this.emit('activate', null); // Fixme: not sure what the second parameter should be. null seems to work fine for now.
@@ -174,6 +185,23 @@ var HistoryElement = GObject.registerClass({
 				}
 			}
 		})
+	}
+
+	_addToBlocklist(element) {
+		if (element.adapter.id === null) {
+			return;
+		}
+
+		let path = `/org/gnome/shell/extensions/space-iflow-randomwallpaper/sources/general/${element.adapter.id}/`;
+		let generalSettings = new Settings.Settings(RWG_SETTINGS_SCHEMA_SOURCES_GENERAL, path);
+		let blockedFilenames = generalSettings.get('blocked-images', 'strv');
+
+		if (blockedFilenames.includes(element.name)) {
+			return;
+		}
+
+		blockedFilenames.push(element.name);
+		generalSettings.set('blocked-images', 'strv', blockedFilenames);
 	}
 
 	setIndex(index) {

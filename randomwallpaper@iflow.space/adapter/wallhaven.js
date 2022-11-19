@@ -11,12 +11,14 @@ const RWG_SETTINGS_SCHEMA_SOURCES_WALLHAVEN = 'org.gnome.shell.extensions.space.
 
 var WallhavenAdapter = class extends BaseAdapter.BaseAdapter {
 	constructor(id, name, wallpaperLocation) {
-		super(wallpaperLocation);
-
-		this._sourceName = name;
-		if (this._sourceName === null || this._sourceName === "") {
-			this._sourceName = 'Wallhaven';
-		}
+		super({
+			id: id,
+			schemaID: RWG_SETTINGS_SCHEMA_SOURCES_WALLHAVEN,
+			schemaPath: `/org/gnome/shell/extensions/space-iflow-randomwallpaper/sources/wallhaven/${id}/`,
+			wallpaperLocation: wallpaperLocation,
+			name: name,
+			defaultName: 'Wallhaven'
+		});
 
 		this.options = {
 			'q': '',
@@ -27,8 +29,6 @@ var WallhavenAdapter = class extends BaseAdapter.BaseAdapter {
 			'resolutions': ['1920x1200', '2560x1440']
 		};
 
-		let path = `/org/gnome/shell/extensions/space-iflow-randomwallpaper/sources/wallhaven/${id}/`;
-		this._settings = new SettingsModule.Settings(RWG_SETTINGS_SCHEMA_SOURCES_WALLHAVEN, path);
 		this.bowl = new SoupBowl.Bowl();
 	}
 
@@ -53,10 +53,25 @@ var WallhavenAdapter = class extends BaseAdapter.BaseAdapter {
 				return;
 			}
 
-			// get a random entry from the array
-			let entry = response[Math.floor(Math.random() * response.length)];
-			let downloadURL = entry.path;
-			let siteURL = entry.url;
+			let downloadURL;
+			let siteURL;
+			for (let i = 0; i < 5; i++) {
+				// get a random entry from the array
+				let entry = response[Math.floor(Math.random() * response.length)];
+				downloadURL = entry.path;
+				siteURL = entry.url;
+
+				if (!this._isImageBlocked(this.fileName(downloadURL))) {
+					break;
+				}
+
+				downloadURL = null;
+			}
+
+			if (downloadURL === null) {
+				this._error("Only blocked images found.", callback);
+				return;
+			}
 
 			let apiKey = this.options["apikey"];
 			if (apiKey) {
