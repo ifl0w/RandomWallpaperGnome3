@@ -45,6 +45,15 @@ var RedditAdapter = class extends BaseAdapter.BaseAdapter {
 				const submissions = response_body.data.children.filter(child => {
 					if (child.data.post_hint !== 'image') return false;
 					if (require_sfw) return child.data.over_18 === false;
+
+					let minWidth = this._settings.get('min-width', 'int');
+					let minHeight = this._settings.get('min-height', 'int');
+					if (child.data.preview.images[0].source.width < minWidth) return false;
+					if (child.data.preview.images[0].source.height < minHeight) return false;
+
+					let imageRatio1 = this._settings.get('image-ratio1', 'int');
+					let imageRatio2 = this._settings.get('image-ratio2', 'int');
+					if (child.data.preview.images[0].source.width / imageRatio1 * imageRatio2 < child.data.preview.images[0].source.height) return false;
 					return true;
 				});
 				if (submissions.length === 0) {
