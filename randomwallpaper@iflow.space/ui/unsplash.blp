@@ -57,14 +57,6 @@ template UnsplashSettingsGroup : Adw.PreferencesGroup {
     // Nested ExpanderRows behave strangely
     Adw.ComboRow constraint_type {
       title: _("Type");
-      model: StringList {
-        strings [
-          _("Unconstraint"),
-          _("User"),
-          _("User's Likes"),
-          _("Collection ID"),
-        ]
-      };
     }
 
     Adw.EntryRow constraint_value {

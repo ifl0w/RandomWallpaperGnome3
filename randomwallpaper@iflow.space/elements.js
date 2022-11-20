@@ -13,8 +13,6 @@ const Settings = Self.imports.settings;
 const LoggerModule = Self.imports.logger;
 const Timer = Self.imports.timer;
 
-const RWG_SETTINGS_SCHEMA_SOURCES_GENERAL = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.general';
-
 var HistoryElement = GObject.registerClass({
 	GTypeName: 'HistoryElement',
 }, class HistoryElement extends PopupMenu.PopupSubMenuMenuItem {
@@ -188,12 +186,12 @@ var HistoryElement = GObject.registerClass({
 	}
 
 	_addToBlocklist(element) {
-		if (element.adapter.id === null) {
+		if (element.adapter.id === null || element.adapter.id === -1) {
 			return;
 		}
 
-		let path = `/org/gnome/shell/extensions/space-iflow-randomwallpaper/sources/general/${element.adapter.id}/`;
-		let generalSettings = new Settings.Settings(RWG_SETTINGS_SCHEMA_SOURCES_GENERAL, path);
+		let path = `${Settings.RWG_SETTINGS_SCHEMA_PATH}/sources/general/${element.adapter.id}/`;
+		let generalSettings = new Settings.Settings(Settings.RWG_SETTINGS_SCHEMA_SOURCES_GENERAL, path);
 		let blockedFilenames = generalSettings.get('blocked-images', 'strv');
 
 		if (blockedFilenames.includes(element.name)) {
