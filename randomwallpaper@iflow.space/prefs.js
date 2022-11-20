@@ -8,11 +8,6 @@ const Self = ExtensionUtils.getCurrentExtension();
 const SourceRow = Self.imports.ui.sourceRow;
 const Settings = Self.imports.settings;
 const WallpaperController = Self.imports.wallpaperController;
-const LoggerModule = Self.imports.logger;
-
-const RWG_SETTINGS_SCHEMA = 'org.gnome.shell.extensions.space.iflow.randomwallpaper';
-const RWG_SETTINGS_SCHEMA_BACKEND_CONNECTION = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.backend-connection';
-const RWG_SETTINGS_SCHEMA_SOURCES_GENERAL = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.general';
 
 const LoggerModule = Self.imports.logger;
 
@@ -44,11 +39,8 @@ var RandomWallpaperSettings = class {
 	constructor(window) {
 		this.logger = new LoggerModule.Logger('RWG3', 'RandomWallpaper.Settings');
 
-		this._sources = [];
-		this.available_rows = {};
-
-		this._settings = ExtensionUtils.getSettings(RWG_SETTINGS_SCHEMA);
-		this._backendConnection = new Settings.Settings(RWG_SETTINGS_SCHEMA_BACKEND_CONNECTION);
+		this._settings = new Settings.Settings(Settings.RWG_SETTINGS_SCHEMA);
+		this._backendConnection = new Settings.Settings(Settings.RWG_SETTINGS_SCHEMA_BACKEND_CONNECTION);
 		this._backendConnection.set('pause-timer', 'boolean', true);
 
 		this._sources = [];
@@ -161,7 +153,7 @@ var RandomWallpaperSettings = class {
 
 	_bindHistorySection(window) {
 		let entryRow = this._builder.get_object('row_favorites_folder');
-		entryRow.text = this._settings.get_string('favorites-folder');
+		entryRow.text = this._settings.get('favorites-folder', 'string');
 
 		this._settings.bind('history-length',
 			this._builder.get_object('history_length'),
@@ -209,30 +201,30 @@ var RandomWallpaperSettings = class {
 	 * Load the config from the gschema
 	 */
 	_loadSources() {
-		this._sources = this._settings.get_strv('sources');
+		this._sources = this._settings.get('sources', 'strv');
+
+		// this._sources.sort((a, b) => {
+		// 	let path1 = `${Settings.RWG_SETTINGS_SCHEMA_PATH}/sources/general/${a}/`;
+		// 	let settingsGeneral1 = new Settings.Settings(Settings.RWG_SETTINGS_SCHEMA_SOURCES_GENERAL, path1);
+		// 	let path2 = `${Settings.RWG_SETTINGS_SCHEMA_PATH}/sources/general/${b}/`;
+		// 	let settingsGeneral2 = new Settings.Settings(Settings.RWG_SETTINGS_SCHEMA_SOURCES_GENERAL, path2);
+
+		// 	const nameA = settingsGeneral1.get('name', 'string').toUpperCase();
+		// 	const nameB = settingsGeneral2.get('name', 'string').toUpperCase();
+
+		// 	return nameA.localeCompare(nameB);
+		// });
 
 		this._sources.sort((a, b) => {
-			let path1 = `/org/gnome/shell/extensions/space-iflow-randomwallpaper/sources/general/${a}/`;
-			let settingsGeneral1 = new Settings.Settings(RWG_SETTINGS_SCHEMA_SOURCES_GENERAL, path1);
-			let path2 = `/org/gnome/shell/extensions/space-iflow-randomwallpaper/sources/general/${b}/`;
-			let settingsGeneral2 = new Settings.Settings(RWG_SETTINGS_SCHEMA_SOURCES_GENERAL, path2);
-
-			const nameA = settingsGeneral1.get('name', 'string').toUpperCase();
-			const nameB = settingsGeneral2.get('name', 'string').toUpperCase();
-
-			return nameA.localeCompare(nameB);
-		});
-
-		this._sources.sort((a, b) => {
-			let path1 = `/org/gnome/shell/extensions/space-iflow-randomwallpaper/sources/general/${a}/`;
-			let settingsGeneral1 = new Settings.Settings(RWG_SETTINGS_SCHEMA_SOURCES_GENERAL, path1);
-			let path2 = `/org/gnome/shell/extensions/space-iflow-randomwallpaper/sources/general/${b}/`;
-			let settingsGeneral2 = new Settings.Settings(RWG_SETTINGS_SCHEMA_SOURCES_GENERAL, path2);
-			return settingsGeneral1.get('type', 'int') - settingsGeneral2.get('type', 'int');
+			let path1 = `${Settings.RWG_SETTINGS_SCHEMA_PATH}/sources/general/${a}/`;
+			let settingsGeneral1 = new Settings.Settings(Settings.RWG_SETTINGS_SCHEMA_SOURCES_GENERAL, path1);
+			let path2 = `${Settings.RWG_SETTINGS_SCHEMA_PATH}/sources/general/${b}/`;
+			let settingsGeneral2 = new Settings.Settings(Settings.RWG_SETTINGS_SCHEMA_SOURCES_GENERAL, path2);
+			return settingsGeneral1.get('type', 'enum') - settingsGeneral2.get('type', 'enum');
 		});
 	}
 
 	_saveSources() {
-		this._settings.set_strv('sources', this._sources);
+		this._settings.set('sources', 'strv', this._sources);
 	}
 };

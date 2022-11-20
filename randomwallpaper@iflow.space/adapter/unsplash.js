@@ -5,8 +5,6 @@ const SoupBowl = Self.imports.soupBowl;
 
 const BaseAdapter = Self.imports.adapter.baseAdapter;
 
-const RWG_SETTINGS_SCHEMA_SOURCES_UNSPLASH = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.unsplash';
-
 var UnsplashAdapter = class extends BaseAdapter.BaseAdapter {
 	constructor(id, name, wallpaperLocation) {
 		// Make sure we're not picking up a valid config
@@ -16,8 +14,8 @@ var UnsplashAdapter = class extends BaseAdapter.BaseAdapter {
 
 		super({
 			id: id,
-			schemaID: RWG_SETTINGS_SCHEMA_SOURCES_UNSPLASH,
-			schemaPath: `/org/gnome/shell/extensions/space-iflow-randomwallpaper/sources/unsplash/${id}/`,
+			schemaID: SettingsModule.RWG_SETTINGS_SCHEMA_SOURCES_UNSPLASH,
+			schemaPath: `${SettingsModule.RWG_SETTINGS_SCHEMA_PATH}/sources/unsplash/${id}/`,
 			wallpaperLocation: wallpaperLocation,
 			name: name,
 			defaultName: 'Unsplash'
@@ -31,7 +29,7 @@ var UnsplashAdapter = class extends BaseAdapter.BaseAdapter {
 			'w': 1920,
 			'h': 1080,
 			'featured': false,
-			'constraintType': '',
+			'constraintType': 0,
 			'constraintValue': '',
 		};
 
@@ -109,13 +107,13 @@ var UnsplashAdapter = class extends BaseAdapter.BaseAdapter {
 		let optionsString = "";
 
 		switch (options.constraintType) {
-			case 'user':
+			case 1:
 				optionsString = `/user/${options.constraintValue}/`;
 				break;
-			case 'likes':
+			case 2:
 				optionsString = `/user/${options.constraintValue}/likes/`;
 				break;
-			case 'collection':
+			case 3:
 				optionsString = `/collection/${options.constraintValue}/`;
 				break;
 			default:
@@ -142,7 +140,7 @@ var UnsplashAdapter = class extends BaseAdapter.BaseAdapter {
 		this.options.w = this._settings.get('image-width', 'int');
 		this.options.h = this._settings.get('image-height', 'int');
 
-		this.options.constraintType = this._settings.get('constraint-type', 'string');
+		this.options.constraintType = this._settings.get('constraint-type', 'enum');
 		this.options.constraintValue = this._settings.get('constraint-value', 'string');
 
 		const keywords = this._settings.get('keyword', 'string').split(",");

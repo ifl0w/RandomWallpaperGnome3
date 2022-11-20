@@ -7,9 +7,7 @@ const GObject = imports.gi.GObject;
 const Gtk = imports.gi.Gtk;
 
 const Self = ExtensionUtils.getCurrentExtension();
-const Convenience = Self.imports.convenience;
-
-const RWG_SETTINGS_SCHEMA_SOURCES_WALLHAVEN = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.wallhaven';
+const Settings = Self.imports.settings;
 
 var WallhavenSettingsGroup = GObject.registerClass({
 	GTypeName: 'WallhavenSettingsGroup',
@@ -32,8 +30,8 @@ var WallhavenSettingsGroup = GObject.registerClass({
 	constructor(id, params = {}) {
 		super(params);
 
-		const path = `/org/gnome/shell/extensions/space-iflow-randomwallpaper/sources/wallhaven/${id}/`;
-		this._settings = Convenience.getSettings(RWG_SETTINGS_SCHEMA_SOURCES_WALLHAVEN, path);
+		const path = `${Settings.RWG_SETTINGS_SCHEMA_PATH}/sources/wallhaven/${id}/`;
+		this._settings = new Settings.Settings(Settings.RWG_SETTINGS_SCHEMA_SOURCES_WALLHAVEN, path);
 
 		this._settings.bind('allow-nsfw',
 			this._allow_nsfw,

@@ -7,14 +7,12 @@ const SoupBowl = Self.imports.soupBowl;
 
 const BaseAdapter = Self.imports.adapter.baseAdapter;
 
-const RWG_SETTINGS_SCHEMA_SOURCES_REDDIT = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.reddit';
-
 var RedditAdapter = class extends BaseAdapter.BaseAdapter {
 	constructor(id, name, wallpaperLocation) {
 		super({
 			id: id,
-			schemaID: RWG_SETTINGS_SCHEMA_SOURCES_REDDIT,
-			schemaPath: `/org/gnome/shell/extensions/space-iflow-randomwallpaper/sources/reddit/${id}/`,
+			schemaID: SettingsModule.RWG_SETTINGS_SCHEMA_SOURCES_REDDIT,
+			schemaPath: `${SettingsModule.RWG_SETTINGS_SCHEMA_PATH}/sources/reddit/${id}/`,
 			wallpaperLocation: wallpaperLocation,
 			name: name,
 			defaultName: 'Reddit'

@@ -7,14 +7,12 @@ const SoupBowl = Self.imports.soupBowl;
 
 const BaseAdapter = Self.imports.adapter.baseAdapter;
 
-const RWG_SETTINGS_SCHEMA_SOURCES_WALLHAVEN = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.wallhaven';
-
 var WallhavenAdapter = class extends BaseAdapter.BaseAdapter {
 	constructor(id, name, wallpaperLocation) {
 		super({
 			id: id,
-			schemaID: RWG_SETTINGS_SCHEMA_SOURCES_WALLHAVEN,
-			schemaPath: `/org/gnome/shell/extensions/space-iflow-randomwallpaper/sources/wallhaven/${id}/`,
+			schemaID: SettingsModule.RWG_SETTINGS_SCHEMA_SOURCES_WALLHAVEN,
+			schemaPath: `${SettingsModule.RWG_SETTINGS_SCHEMA_PATH}/sources/wallhaven/${id}/`,
 			wallpaperLocation: wallpaperLocation,
 			name: name,
 			defaultName: 'Wallhaven'

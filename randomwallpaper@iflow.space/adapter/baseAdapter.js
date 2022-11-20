@@ -10,8 +10,6 @@ const SettingsModule = Self.imports.settings;
  */
 const SoupBowl = Self.imports.soupBowl;
 
-const RWG_SETTINGS_SCHEMA_SOURCES_GENERAL = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.general';
-
 var BaseAdapter = class {
 	constructor(params = {}) {
 		this.logger = new LoggerModule.Logger('RWG3', 'BaseAdapter');
@@ -23,8 +21,8 @@ var BaseAdapter = class {
 			this._sourceName = params.defaultName;
 		}
 
-		let path = `/org/gnome/shell/extensions/space-iflow-randomwallpaper/sources/general/${params.id}/`;
-		this._generalSettings = new SettingsModule.Settings(RWG_SETTINGS_SCHEMA_SOURCES_GENERAL, path);
+		let path = `${SettingsModule.RWG_SETTINGS_SCHEMA_PATH}/sources/general/${params.id}/`;
+		this._generalSettings = new SettingsModule.Settings(SettingsModule.RWG_SETTINGS_SCHEMA_SOURCES_GENERAL, path);
 	}
 
 	/**

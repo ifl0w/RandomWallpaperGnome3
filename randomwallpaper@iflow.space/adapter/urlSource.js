@@ -5,14 +5,12 @@ const SettingsModule = Self.imports.settings;
 
 const BaseAdapter = Self.imports.adapter.baseAdapter;
 
-const RWG_SETTINGS_SCHEMA_SOURCES_URL_SOURCE = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.urlSource';
-
 var UrlSourceAdapter = class extends BaseAdapter.BaseAdapter {
 	constructor(id, name, wallpaperLocation) {
 		super({
 			id: id,
-			schemaID: RWG_SETTINGS_SCHEMA_SOURCES_URL_SOURCE,
-			schemaPath: `/org/gnome/shell/extensions/space-iflow-randomwallpaper/sources/urlSource/${id}/`,
+			schemaID: SettingsModule.RWG_SETTINGS_SCHEMA_SOURCES_URL_SOURCE,
+			schemaPath: `${SettingsModule.RWG_SETTINGS_SCHEMA_PATH}/sources/urlSource/${id}/`,
 			wallpaperLocation: wallpaperLocation,
 			name: name,
 			defaultName: 'Static URL'
