@@ -6,16 +6,14 @@ const GObject = imports.gi.GObject;
 const Gtk = imports.gi.Gtk;
 
 const Self = ExtensionUtils.getCurrentExtension();
-const Convenience = Self.imports.convenience;
+const Settings = Self.imports.settings;
 
-const Unsplash = Self.imports.ui.unsplash;
-const Wallhaven = Self.imports.ui.wallhaven;
-const Reddit = Self.imports.ui.reddit;
 const GenericJson = Self.imports.ui.genericJson;
 const LocalFolder = Self.imports.ui.localFolder;
+const Reddit = Self.imports.ui.reddit;
+const Unsplash = Self.imports.ui.unsplash;
 const UrlSource = Self.imports.ui.urlSource;
-
-const RWG_SETTINGS_SCHEMA_SOURCES_GENERAL = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.general';
+const Wallhaven = Self.imports.ui.wallhaven;
 
 // https://gitlab.gnome.org/GNOME/gjs/-/blob/master/examples/gtk4-template.js
 var SourceRow = GObject.registerClass({
@@ -31,6 +29,9 @@ var SourceRow = GObject.registerClass({
 		'source_name'
 	]
 }, class SourceRow extends Adw.ExpanderRow {
+	// This list is the same across all rows
+	static _stringList = null;
+
 	constructor(id = null, params = {}) {
 		super(params);
 
@@ -41,8 +42,23 @@ var SourceRow = GObject.registerClass({
 			this.id = id;
 		}
 
-		const path = `/org/gnome/shell/extensions/space-iflow-randomwallpaper/sources/general/${this.id}/`;
-		this._settings = Convenience.getSettings(RWG_SETTINGS_SCHEMA_SOURCES_GENERAL, path);
+		const path = `${Settings.RWG_SETTINGS_SCHEMA_PATH}/sources/general/${this.id}/`;
+		this._settings = new Settings.Settings(Settings.RWG_SETTINGS_SCHEMA_SOURCES_GENERAL, path);
+
+		if (this._stringList === null || this._stringList === undefined) {
+			// Fill combo from settings enum
+
+			let availableTypes = this._settings.getSchema().get_key('type').get_range(); //GLib.Variant (sv)
+			// (sv) = Tuple(%G_VARIANT_TYPE_STRING, %G_VARIANT_TYPE_VARIANT)
+			// s should be 'enum'
+			// v should be an array enumerating the possible values. Each item in the array is a possible valid value and no other values are valid.
+			// v is 'as'
+			availableTypes = availableTypes.get_child_value(1).get_variant().get_strv();
+
+			this._stringList = Gtk.StringList.new(availableTypes);
+		}
+		this._combo.model = this._stringList;
+		this._combo.selected = this._settings.get('type', 'enum');
 
 		this._settings.bind('name',
 			this._source_name,
@@ -52,18 +68,21 @@ var SourceRow = GObject.registerClass({
 			this,
 			'enable-expansion',
 			Gio.SettingsBindFlags.DEFAULT);
-		this._settings.bind('type',
-			this._combo,
-			'selected',
-			Gio.SettingsBindFlags.DEFAULT);
+		// Binding an enum isn't possible straight away.
+		// This would need bind_with_mapping() which isn't available in gjs?
+		// this._settings.bind('type',
+		// 	this._combo,
+		// 	'selected',
+		// 	Gio.SettingsBindFlags.DEFAULT);
 
 		this._combo.connect('notify::selected', comboRow => {
+			this._settings.set('type', 'enum', comboRow.selected);
 			this._fillRow(comboRow.selected);
 		});
 
 		this._fillRow(this._combo.selected);
 
-		let blockedImages = this._settings.get_strv('blocked-images');
+		let blockedImages = this._settings.get('blocked-images', 'strv');
 		blockedImages.forEach(filename => {
 			let blockedImageRow = new Adw.ActionRow();
 			blockedImageRow.set_title(filename);
@@ -122,13 +141,13 @@ var SourceRow = GObject.registerClass({
 	}
 
 	_removeBlockedImage(filename) {
-		let blockedImages = this._settings.get_strv('blocked-images');
+		let blockedImages = this._settings.get('blocked-images', 'strv');
 		if (!blockedImages.includes(filename)) {
 			return;
 		}
 
 		blockedImages = this._removeItemOnce(blockedImages, filename);
-		this._settings.set_strv('blocked-images', blockedImages);
+		this._settings.set('blocked-images', 'strv', blockedImages);
 	}
 
 	// https://stackoverflow.com/a/5767357

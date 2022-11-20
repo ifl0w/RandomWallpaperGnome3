@@ -6,14 +6,12 @@ const HistoryModule = Self.imports.history;
 
 const BaseAdapter = Self.imports.adapter.baseAdapter;
 
-const RWG_SETTINGS_SCHEMA_SOURCES_LOCAL_FOLDER = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.localFolder';
-
 var LocalFolderAdapter = class extends BaseAdapter.BaseAdapter {
 	constructor(id, name, wallpaperLocation) {
 		super({
 			id: id,
-			schemaID: RWG_SETTINGS_SCHEMA_SOURCES_LOCAL_FOLDER,
-			schemaPath: `/org/gnome/shell/extensions/space-iflow-randomwallpaper/sources/localFolder/${id}/`,
+			schemaID: SettingsModule.RWG_SETTINGS_SCHEMA_SOURCES_LOCAL_FOLDER,
+			schemaPath: `${SettingsModule.RWG_SETTINGS_SCHEMA_PATH}/sources/localFolder/${id}/`,
 			wallpaperLocation: wallpaperLocation,
 			name: name,
 			defaultName: 'Local Folder'
