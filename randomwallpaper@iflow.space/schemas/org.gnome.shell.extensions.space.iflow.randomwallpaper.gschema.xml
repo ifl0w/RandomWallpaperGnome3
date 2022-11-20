@@ -1,13 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist gettext-domain='gnome-shell-extensions'>
 
-    <!-- <enum id='org.gnome.shell.extensions.space.iflow.randomwallpaper.sources'>
-        <value value='0' nick='unsplash'/>
-        <value value='1' nick='wallhaven'/>
-        <value value='2' nick='reddit'/>
-        <value value='3' nick='genericJSON'/>
-    </enum> -->
-
     <schema path="/org/gnome/shell/extensions/space-iflow-randomwallpaper/"
         id='org.gnome.shell.extensions.space.iflow.randomwallpaper'>
 
@@ -123,12 +116,14 @@
 
     </schema>
 
-    <!-- <enum id='org.gnome.shell.extensions.space.iflow.randomwallpaper.unsplash.constraints'>
-        <value value='0' nick='unconstrained'/>
-        <value value='1' nick='user'/>
-        <value value='2' nick='likes'/>
-        <value value='3' nick='collection'/>
-    </enum> -->
+    <enum id='org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.types'>
+        <value value='0' nick='Unsplash' />
+        <value value='1' nick='Wallhaven' />
+        <value value='2' nick='Reddit' />
+        <value value='3' nick='Generic JSON' />
+        <value value='4' nick='Local Folder' />
+        <value value='5' nick='Static URL' />
+    </enum>
 
     <schema id='org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.general'>
 
@@ -150,13 +145,20 @@
             <description>Name for this source.</description>
         </key>
 
-        <key type='i' name='type'>
-            <default>0</default>
+        <key name='type' enum='org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.types'>
+            <default>"Unsplash"</default>
             <summary>Type</summary>
             <description>The type of this source.</description>
         </key>
 
     </schema>
+
+    <enum id='org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.unsplash.constraints'>
+        <value value='0' nick='Unconstraint' />
+        <value value='1' nick='User' />
+        <value value='2' nick="User's Likes" />
+        <value value='3' nick='Collection ID' />
+    </enum>
 
     <schema id='org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.unsplash'>
 
@@ -196,8 +198,8 @@
             <description>This results in a smaller wallpaper pool but the images are considered to have higher quality.</description>
         </key>
 
-        <key type='i' name='constraint-type'>
-            <default>0</default>
+        <key name='constraint-type' enum='org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.unsplash.constraints'>
+            <default>'Unconstraint'</default>
             <summary>Constraint Type</summary>
             <description>The constraint of the Unsplash Source API.</description>
         </key>

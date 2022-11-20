@@ -18,8 +18,6 @@ const Gio = imports.gi.Gio;
 // Settings
 const Prefs = Self.imports.settings;
 
-const RWG_SETTINGS_SCHEMA_BACKEND_CONNECTION = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.backend-connection';
-
 var RandomWallpaperMenu = class {
 
 	constructor(wallpaperController) {
@@ -28,7 +26,7 @@ var RandomWallpaperMenu = class {
 		this.wallpaperController = wallpaperController;
 		this.logger = new LoggerModule.Logger('RWG3', 'RandomWallpaperEntry');
 		this.hidePanelIconHandler = this.settings.observe('hide-panel-icon', this.updatePanelMenuVisibility.bind(this));
-		this._backendConnection = new Prefs.Settings(RWG_SETTINGS_SCHEMA_BACKEND_CONNECTION);
+		this._backendConnection = new Prefs.Settings(Prefs.RWG_SETTINGS_SCHEMA_BACKEND_CONNECTION);
 
 		// Panelmenu Icon
 		this.statusIcon = new CustomElements.StatusElement();

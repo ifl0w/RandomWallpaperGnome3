@@ -36,18 +36,6 @@ template SourceRow : Adw.ExpanderRow {
 
         Adw.ComboRow combo {
           title: _("Type");
-
-          // Adw.EnumListModel ?
-          model: StringList {
-            strings [
-              "Unsplash",
-              "Wallhaven",
-              "Reddit",
-              _("Generic JSON"),
-              _("Local Folder"),
-              _("Static URL"),
-            ]
-          };
         }
 
         Adw.ActionRow {

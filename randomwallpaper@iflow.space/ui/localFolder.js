@@ -6,9 +6,7 @@ const GObject = imports.gi.GObject;
 const Gtk = imports.gi.Gtk;
 
 const Self = ExtensionUtils.getCurrentExtension();
-const Convenience = Self.imports.convenience;
-
-const RWG_SETTINGS_SCHEMA_SOURCES_LOCAL_FOLDER = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.localFolder';
+const Settings = Self.imports.settings;
 
 var LocalFolderSettingsGroup = GObject.registerClass({
 	GTypeName: 'LocalFolderSettingsGroup',
@@ -23,8 +21,8 @@ var LocalFolderSettingsGroup = GObject.registerClass({
 	constructor(id, params = {}) {
 		super(params);
 
-		const path = `/org/gnome/shell/extensions/space-iflow-randomwallpaper/sources/localFolder/${id}/`;
-		this._settings = Convenience.getSettings(RWG_SETTINGS_SCHEMA_SOURCES_LOCAL_FOLDER, path);
+		const path = `${Settings.RWG_SETTINGS_SCHEMA_PATH}/sources/localFolder/${id}/`;
+		this._settings = new Settings.Settings(Settings.RWG_SETTINGS_SCHEMA_SOURCES_LOCAL_FOLDER, path);
 
 		this._settings.bind('folder',
 			this._folder_row,

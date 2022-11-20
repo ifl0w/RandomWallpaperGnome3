@@ -19,9 +19,6 @@ const UnsplashAdapter = Self.imports.adapter.unsplash;
 const UrlSourceAdapter = Self.imports.adapter.urlSource;
 const WallhavenAdapter = Self.imports.adapter.wallhaven;
 
-const RWG_SETTINGS_SCHEMA_BACKEND_CONNECTION = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.backend-connection';
-const RWG_SETTINGS_SCHEMA_SOURCES_GENERAL = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.general';
-
 var WallpaperController = class {
 	_backendConnection = null;
 	_prohibitTimer = false;
@@ -46,7 +43,7 @@ var WallpaperController = class {
 		// functions will be called when loading a new wallpaper stopped. If an error occurred then the error will be passed as parameter.
 		this._stopLoadingHooks = [];
 
-		this._backendConnection = new Prefs.Settings(RWG_SETTINGS_SCHEMA_BACKEND_CONNECTION);
+		this._backendConnection = new Prefs.Settings(Prefs.RWG_SETTINGS_SCHEMA_BACKEND_CONNECTION);
 
 		// Bring values to defined stage
 		this._backendConnection.set('clear-history', 'boolean', false);
@@ -170,11 +167,15 @@ var WallpaperController = class {
 		let imageSourceAdapter = null;
 		let sourceID = this._getRandomSource();
 
-		let path = `/org/gnome/shell/extensions/space-iflow-randomwallpaper/sources/general/${sourceID}/`;
-		let settingsGeneral = new Prefs.Settings(RWG_SETTINGS_SCHEMA_SOURCES_GENERAL, path);
+		let path = `${Prefs.RWG_SETTINGS_SCHEMA_PATH}/sources/general/${sourceID}/`;
+		let settingsGeneral = new Prefs.Settings(Prefs.RWG_SETTINGS_SCHEMA_SOURCES_GENERAL, path);
 
 		let sourceName = settingsGeneral.get('name', 'string');
-		let sourceType = settingsGeneral.get('type', 'int');
+		let sourceType = settingsGeneral.get('type', 'enum');
+
+		if (sourceID === -1) {
+			sourceType = null;
+		}
 
 		try {
 			switch (sourceType) {
@@ -198,11 +199,13 @@ var WallpaperController = class {
 					break;
 				default:
 					imageSourceAdapter = new UnsplashAdapter.UnsplashAdapter(null, null, this.wallpaperlocation);
+					sourceType = 0;
 					break;
 			}
 		} catch (error) {
 			this.logger.warn("Had errors, fetching with default settings.");
 			imageSourceAdapter = new UnsplashAdapter.UnsplashAdapter(null, null, this.wallpaperlocation);
+			sourceType = 0;
 		}
 
 		return {
@@ -216,17 +219,17 @@ var WallpaperController = class {
 		let sources = this._settings.get('sources', 'strv');
 
 		if (sources === null || sources.length < 1) {
-			return { type: -1 };
+			return -1;
 		}
 
 		let enabled_sources = sources.filter(element => {
-			let path = `/org/gnome/shell/extensions/space-iflow-randomwallpaper/sources/general/${element}/`;
-			let settingsGeneral = new Prefs.Settings(RWG_SETTINGS_SCHEMA_SOURCES_GENERAL, path);
+			let path = `${Prefs.RWG_SETTINGS_SCHEMA_PATH}/sources/general/${element}/`;
+			let settingsGeneral = new Prefs.Settings(Prefs.RWG_SETTINGS_SCHEMA_SOURCES_GENERAL, path);
 			return settingsGeneral.get('enabled', 'boolean');
 		});
 
 		if (enabled_sources === null || enabled_sources.length < 1) {
-			return { type: -1 };
+			return -1;
 		}
 
 		// https://stackoverflow.com/a/5915122

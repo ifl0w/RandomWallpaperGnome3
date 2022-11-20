@@ -5,9 +5,7 @@ const GLib = imports.gi.GLib;
 const GObject = imports.gi.GObject;
 
 const Self = ExtensionUtils.getCurrentExtension();
-const Convenience = Self.imports.convenience;
-
-const RWG_SETTINGS_SCHEMA_SOURCES_URL_SOURCE = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.urlSource';
+const Settings = Self.imports.settings;
 
 var UrlSourceSettingsGroup = GObject.registerClass({
     GTypeName: 'UrlSourceSettingsGroup',
@@ -23,8 +21,8 @@ var UrlSourceSettingsGroup = GObject.registerClass({
     constructor(id, params = {}) {
         super(params);
 
-        const path = `/org/gnome/shell/extensions/space-iflow-randomwallpaper/sources/urlSource/${id}/`;
-        this._settings = Convenience.getSettings(RWG_SETTINGS_SCHEMA_SOURCES_URL_SOURCE, path);
+        const path = `${Settings.RWG_SETTINGS_SCHEMA_PATH}/sources/urlSource/${id}/`;
+        this._settings = new Settings.Settings(Settings.RWG_SETTINGS_SCHEMA_SOURCES_URL_SOURCE, path);
 
         this._settings.bind('author-name',
             this._author_name,
