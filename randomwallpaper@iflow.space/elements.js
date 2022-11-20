@@ -100,7 +100,20 @@ var HistoryElement = GObject.registerClass({
 			this.menu.addMenuItem(new PopupMenu.PopupMenuItem('Unknown source.'));
 		}
 
-		this.copyToFavorites = new PopupMenu.PopupMenuItem('Save for later');
+		this.previewItem = new PopupMenu.PopupBaseMenuItem({ can_focus: false, reactive: false });
+		this.menu.addMenuItem(this.previewItem);
+
+		this.setAsWallpaperItem = new PopupMenu.PopupMenuItem('Set As Wallpaper');
+		this.setAsWallpaperItem.connect('activate', () => {
+			this.emit('activate', null); // Fixme: not sure what the second parameter should be. null seems to work fine for now.
+		});
+
+		if (index !== 0) {
+			// this.menu.addMenuItem(new PopupMenu.PopupBaseMenuItem({ can_focus: false, reactive: false })); // theme independent spacing
+			this.menu.addMenuItem(this.setAsWallpaperItem);
+		}
+
+		this.copyToFavorites = new PopupMenu.PopupMenuItem('Save For Later');
 		this.copyToFavorites.connect('activate', () => {
 			let sourceFile = Gio.File.new_for_path(this.historyEntry.path);
 			let targetFolder = Gio.File.new_for_path(this._settings.get('favorites-folder', 'string'));
@@ -129,27 +142,14 @@ var HistoryElement = GObject.registerClass({
 		});
 		this.menu.addMenuItem(this.copyToFavorites);
 
-		// Static URLs can't block images
+		// Static URLs can't block images (yet?)
 		if (historyEntry.adapter.type !== 5) {
-			this.blockImage = new PopupMenu.PopupMenuItem('Block');
+			this.blockImage = new PopupMenu.PopupMenuItem('Add To Blocklist');
 			this.blockImage.connect('activate', () => {
 				this._addToBlocklist(historyEntry);
 			});
 			this.menu.addMenuItem(this.blockImage);
 		}
-
-		this.setAsWallpaperItem = new PopupMenu.PopupMenuItem('Set As Wallpaper');
-		this.setAsWallpaperItem.connect('activate', () => {
-			this.emit('activate', null); // Fixme: not sure what the second parameter should be. null seems to work fine for now.
-		});
-
-		if (index !== 0) {
-			this.menu.addMenuItem(new PopupMenu.PopupBaseMenuItem({ can_focus: false, reactive: false })); // theme independent spacing
-			this.menu.addMenuItem(this.setAsWallpaperItem);
-		}
-
-		this.previewItem = new PopupMenu.PopupBaseMenuItem({ can_focus: false, reactive: false });
-		this.menu.addMenuItem(this.previewItem);
 
 		/*
 			Load the image on first opening of the sub menu instead of during creation of the history list.
@@ -161,7 +161,8 @@ var HistoryElement = GObject.registerClass({
 				}
 
 				try {
-					let width = 250; // TODO: get width or add option in settings.
+					let width = 270; // 270 looks good for the now fixed 350px menu width
+					// let width = this.menu.actor.get_width(); // This should be correct but gives different results per element?
 					let pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(this.historyEntry.path, width, -1, true);
 					let height = pixbuf.get_height();
 

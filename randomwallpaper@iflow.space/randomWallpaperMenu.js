@@ -34,10 +34,12 @@ var RandomWallpaperMenu = class {
 
 		// new wallpaper button
 		this.newWallpaperItem = new CustomElements.NewWallpaperElement();
-
 		this.panelMenu.menu.addMenuItem(this.newWallpaperItem);
 
 		this.panelMenu.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+
+		// Set fixed width so the preview images don't widen the menu
+		this.panelMenu.menu.actor.set_width(350);
 
 		// current background section
 		this.currentBackgroundSection = new PopupMenu.PopupMenuSection();
