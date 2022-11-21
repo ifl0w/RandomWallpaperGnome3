@@ -69,8 +69,7 @@ Run `./build.sh` to compile ui files.
 1. Create a settings layout to the `…/schemas/….gschema.xml`
 1. Create your logic hooking the settings in a `…/ui/mySource.js`
 1. Add the new source to `…/ui/sourceRow.js`
-    * As string for the the ComboRow in `…/ui/sourceRow.blp`
-1. Create a adapter to read the settings and fetching the images and additional information in `…/adapter/myAdapter.js` by extending the `BaseAdapter`.
+1. Create a adapter to read the settings and fetching the images and additional information in `…/adapter/mySource.js` by extending the `BaseAdapter`.
     * Add your adapter to `…/wallpaperController.js`
 
 ## Support Me
