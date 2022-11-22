@@ -4,6 +4,7 @@ const Util = imports.misc.util;
 const GdkPixbuf = imports.gi.GdkPixbuf;
 const Clutter = imports.gi.Clutter;
 const Cogl = imports.gi.Cogl;
+const GLib = imports.gi.GLib;
 const Gio = imports.gi.Gio;
 const Gtk = imports.gi.Gtk;
 const GObject = imports.gi.GObject;
@@ -115,30 +116,7 @@ var HistoryElement = GObject.registerClass({
 
 		this.copyToFavorites = new PopupMenu.PopupMenuItem('Save For Later');
 		this.copyToFavorites.connect('activate', () => {
-			let sourceFile = Gio.File.new_for_path(this.historyEntry.path);
-			let targetFolder = Gio.File.new_for_path(this._settings.get('favorites-folder', 'string'));
-			let targetFile = targetFolder.get_child(historyEntry.name);
-
-			try {
-				if (!targetFolder.make_directory_with_parents(null)) {
-					this.logger.warn('Could not create directories.');
-					return;
-				}
-			} catch (error) {
-				if (error === Gio.IOErrorEnum.EXISTS) { }
-			}
-
-			try {
-				if (!sourceFile.copy(targetFile, Gio.FileCopyFlags.NONE, null, null)) {
-					this.logger.warn('Failed copying image.');
-					return;
-				}
-			} catch (error) {
-				if (error === Gio.IOErrorEnum.EXISTS) {
-					this.logger.warn('Image already exists in location.');
-					return;
-				}
-			}
+			this._saveImage();
 		});
 		this.menu.addMenuItem(this.copyToFavorites);
 
@@ -201,6 +179,81 @@ var HistoryElement = GObject.registerClass({
 
 		blockedFilenames.push(element.name);
 		generalSettings.set('blocked-images', 'strv', blockedFilenames);
+	}
+
+	async _saveImage() {
+		let sourceFile = Gio.File.new_for_path(this.historyEntry.path);
+		let targetFolder = Gio.File.new_for_path(this._settings.get('favorites-folder', 'string'));
+		let targetFile = targetFolder.get_child(this.historyEntry.name);
+		let targetInfoFile = targetFolder.get_child(`${this.historyEntry.name}.json`);
+
+		try {
+			if (!targetFolder.make_directory_with_parents(null)) {
+				this.logger.warn('Could not create directories.');
+				return;
+			}
+		} catch (error) {
+			if (error === Gio.IOErrorEnum.EXISTS) { }
+		}
+
+		try { // This try is for promise rejections. GJS mocks about missing this despite all examples omitting this try-catch-block
+			let copyResult = await new Promise((resolve, reject) => {
+				sourceFile.copy_async(targetFile, Gio.FileCopyFlags.NONE, GLib.PRIORITY_DEFAULT, null, null, (file, result) => {
+					try {
+						resolve(file.copy_finish(result));
+					} catch (e) {
+						reject(e);
+					}
+				});
+			});
+
+			if (copyResult === false) {
+				this.logger.warn('Failed copying image.');
+				return;
+			} else if (copyResult === Gio.IOErrorEnum.EXISTS) {
+				this.logger.warn('Image already exists in location.');
+				return;
+			}
+
+			let outputStream = await new Promise((resolve, reject) => {
+				targetInfoFile.create_async(Gio.FileCreateFlags.NONE, GLib.PRIORITY_DEFAULT, null, (file, result) => {
+					try {
+						resolve(file.create_finish(result));
+					} catch (error) {
+						reject(error);
+					}
+				});
+			});
+
+			if (outputStream === null) {
+				this.logger.warn('Failed creating info file.');
+				return;
+			}
+
+
+			const data = JSON.stringify(this.historyEntry.source, null, '\t');
+			let writeResult = await new Promise((resolve, reject) => {
+				outputStream.write_all_async(data, GLib.PRIORITY_DEFAULT, null, (stream, result) => {
+					try {
+						resolve(stream.write_all_finish(result));
+					} catch (error) {
+						reject(error);
+					}
+				});
+			});
+
+			if (writeResult === false) {
+				this.logger.warn('Failed writing info file.');
+				// return;
+			} else if (writeResult === true) {
+				// return;
+			}
+			// writeResult is a number with bytes already written - ignore for now
+
+			outputStream.close(); // Important! to flush the cache to the file
+		} catch (error) {
+			this.logger.warn(`Error saving image: ${error}`);
+		}
 	}
 
 	setIndex(index) {
