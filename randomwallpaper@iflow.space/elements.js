@@ -215,42 +215,24 @@ var HistoryElement = GObject.registerClass({
 				return;
 			}
 
-			let outputStream = await new Promise((resolve, reject) => {
-				targetInfoFile.create_async(Gio.FileCreateFlags.NONE, GLib.PRIORITY_DEFAULT, null, (file, result) => {
-					try {
-						resolve(file.create_finish(result));
-					} catch (error) {
-						reject(error);
+			// https://gjs.guide/guides/gio/file-operations.html#writing-file-contents
+			const [, etag] = await new Promise((resolve, reject) => {
+				let bytes = new GLib.Bytes(JSON.stringify(this.historyEntry.source, null, '\t'));
+				targetInfoFile.replace_contents_bytes_async(
+					bytes,
+					null,
+					false,
+					Gio.FileCreateFlags.NONE,
+					null,
+					(file, result) => {
+						try {
+							resolve(file.replace_contents_finish(result));
+						} catch (error) {
+							reject(error);
+						}
 					}
-				});
+				);
 			});
-
-			if (outputStream === null) {
-				this.logger.warn('Failed creating info file.');
-				return;
-			}
-
-
-			const data = JSON.stringify(this.historyEntry.source, null, '\t');
-			let writeResult = await new Promise((resolve, reject) => {
-				outputStream.write_all_async(data, GLib.PRIORITY_DEFAULT, null, (stream, result) => {
-					try {
-						resolve(stream.write_all_finish(result));
-					} catch (error) {
-						reject(error);
-					}
-				});
-			});
-
-			if (writeResult === false) {
-				this.logger.warn('Failed writing info file.');
-				// return;
-			} else if (writeResult === true) {
-				// return;
-			}
-			// writeResult is a number with bytes already written - ignore for now
-
-			outputStream.close(); // Important! to flush the cache to the file
 		} catch (error) {
 			this.logger.warn(`Error saving image: ${error}`);
 		}
