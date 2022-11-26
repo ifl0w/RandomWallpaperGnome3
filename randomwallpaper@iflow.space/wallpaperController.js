@@ -247,6 +247,26 @@ var WallpaperController = class {
 		path = "file://" + path;
 
 		this._setPictureUriOfSettingsObject(background_setting, path, () => {
+			// Run general post command
+			let commandString = this._settings.get('general-post-command', 'string');
+			let generalPostCommandArray = this._getCommandArray(commandString, path);
+			if (generalPostCommandArray !== null) {
+				// https://gjs.guide/guides/gio/subprocesses.html#waiting-for-processes
+				try {
+					let proc = Gio.Subprocess.new(generalPostCommandArray, Gio.SubprocessFlags.NONE);
+
+					proc.wait_async(null, (proc, result) => {
+						try {
+							proc.wait_finish(result);
+						} catch (error) {
+							this.logger.warn(error);
+						}
+					});
+				} catch (error) {
+					this.logger.warn(error);
+				}
+			}
+
 			if (this._settings.get('change-lock-screen', 'boolean')) {
 				let screensaver_setting = new Gio.Settings({ schema: "org.gnome.desktop.screensaver" });
 
@@ -381,26 +401,6 @@ var WallpaperController = class {
 					this._historyController.insert(historyElement);
 					this.currentWallpaper = this._getCurrentWallpaper();
 
-					// Run general post command
-					let commandString = this._settings.get('general-post-command', 'string');
-					let generalPostCommandArray = this._getCommandArray(commandString, historyElement);
-					if (generalPostCommandArray !== null) {
-						// https://gjs.guide/guides/gio/subprocesses.html#waiting-for-processes
-						try {
-							let proc = Gio.Subprocess.new(generalPostCommandArray, Gio.SubprocessFlags.NONE);
-
-							proc.wait_async(null, (proc, result) => {
-								try {
-									proc.wait_finish(result);
-								} catch (error) {
-									this.logger.warn(error);
-								}
-							});
-						} catch (error) {
-							this.logger.warn(error);
-						}
-					}
-
 					this._stopLoadingHooks.forEach(element => element(null));
 
 					// call callback if given
@@ -412,7 +412,8 @@ var WallpaperController = class {
 		});
 	}
 
-	_getCommandArray(commandString, historyElement) {
+	// TODO: Change to original historyElement if more variable get exposed
+	_getCommandArray(commandString, historyElementPath) {
 		let string = commandString;
 		if (string === "") {
 			return null;
@@ -420,7 +421,7 @@ var WallpaperController = class {
 
 		// Replace variables
 		let variables = new Map();
-		variables.set('%wallpaper_path%', historyElement.path);
+		variables.set('%wallpaper_path%', historyElementPath);
 
 		variables.forEach((value, key) => {
 			string = string.replaceAll(key, value);
