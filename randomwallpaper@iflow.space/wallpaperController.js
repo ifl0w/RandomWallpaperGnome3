@@ -427,11 +427,18 @@ var WallpaperController = class {
 			string = string.replaceAll(key, value);
 		});
 
-		// https://stackoverflow.com/a/43766456
-		const regex = /("[^"\\]*(?:\\[\S\s][^"\\]*)*"|'[^'\\]*(?:\\[\S\s][^'\\]*)*'|\/[^\/\\]*(?:\\[\S\s][^\/\\]*)*\/[gimy]*(?=\s|$)|(?:\\\s|\S)+)/g;
-		let commandArray = string.match(regex);
+		try {
+			// https://gjs-docs.gnome.org/glib20/glib.shell_parse_argv
+			// Parses a command line into an argument vector, in much the same way
+			// the shell would, but without many of the expansions the shell would
+			// perform (variable expansion, globs, operators, filename expansion,
+			// etc. are not supported).
+			return GLib.shell_parse_argv(string)[1];
+		} catch (e) {
+			this.logger.warn(e);
+		}
 
-		return commandArray;
+		return null;
 	}
 
 	_backgroundTimeout(delay) {
