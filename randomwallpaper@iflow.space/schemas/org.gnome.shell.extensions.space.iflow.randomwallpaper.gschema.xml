@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist gettext-domain='gnome-shell-extensions'>
 
+    <enum id='org.gnome.shell.extensions.space.iflow.randomwallpaper.change-types'>
+        <value value='0' nick='Background' />
+        <value value='1' nick='Lock Screen' />
+        <value value='2' nick='Background and Lock Screen' />
+        <!-- <value value='3' nick='Background and Lock Screen independently' /> -->
+    </enum>
+
     <schema path="/org/gnome/shell/extensions/space-iflow-randomwallpaper/"
         id='org.gnome.shell.extensions.space.iflow.randomwallpaper'>
 
@@ -49,10 +56,10 @@
             <description>A JS timestamp of the last timer callback trigger. Zero if no last change registered.</description>
         </key>
 
-        <key type='b' name='change-lock-screen'>
-            <default>false</default>
-            <summary>Change lock screen</summary>
-            <description>Weather the gnome lock screen should also be set to the new wallpaper.</description>
+        <key name='change-type' enum='org.gnome.shell.extensions.space.iflow.randomwallpaper.change-types'>
+            <default>"Background"</default>
+            <summary>Choose what should be changed</summary>
+            <description>Allows to choose what backgrounds will be changed.</description>
         </key>
 
         <key type='b' name='disable-hover-preview'>
