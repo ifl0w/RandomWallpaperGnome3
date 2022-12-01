@@ -5,6 +5,7 @@ const Gtk = imports.gi.Gtk;
 const ExtensionUtils = imports.misc.extensionUtils;
 
 const Self = ExtensionUtils.getCurrentExtension();
+const HydraPaper = Self.imports.hydraPaper;
 const SourceRow = Self.imports.ui.sourceRow;
 const Settings = Self.imports.settings;
 const Utils = Self.imports.utils;
@@ -52,6 +53,8 @@ var RandomWallpaperSettings = class {
 		this._builder.add_from_file(Self.path + '/ui/pageGeneral.ui');
 		this._builder.add_from_file(Self.path + '/ui/pageSources.ui');
 
+		this._fillTypeComboRow();
+
 		this._settings.bind('minutes',
 			this._builder.get_object('duration_minutes'),
 			'value',
@@ -63,10 +66,6 @@ var RandomWallpaperSettings = class {
 		this._settings.bind('auto-fetch',
 			this._builder.get_object('af_switch'),
 			'enable-expansion',
-			Gio.SettingsBindFlags.DEFAULT);
-		this._settings.bind('change-lock-screen',
-			this._builder.get_object('change_lock_screen'),
-			'active',
 			Gio.SettingsBindFlags.DEFAULT);
 		this._settings.bind('disable-hover-preview',
 			this._builder.get_object('disable_hover_preview'),
@@ -112,16 +111,34 @@ var RandomWallpaperSettings = class {
 		});
 
 		try {
-			Utils.Utils.getHydraPaperAvailable().then(result => {
+			new HydraPaper.HydraPaper().isAvailable().then(result => {
 				if (result === true) {
 					this._builder.get_object('multiple_displays_row').set_sensitive(true);
 				}
 			});
 		} catch (error) {
-			// Should already be handled at wallpaperController although in a different context
+			// Should already be handled although in a different context
 		}
 	}
 
+	_fillTypeComboRow() {
+		let comboRow = this._builder.get_object('combo_background_type');
+
+		// Fill combo from settings enum
+		let availableTypes = this._settings.getSchema().get_key('change-type').get_range(); //GLib.Variant (sv)
+		// (sv) = Tuple(%G_VARIANT_TYPE_STRING, %G_VARIANT_TYPE_VARIANT)
+		// s should be 'enum'
+		// v should be an array enumerating the possible values. Each item in the array is a possible valid value and no other values are valid.
+		// v is 'as'
+		availableTypes = availableTypes.get_child_value(1).get_variant().get_strv();
+
+		let stringList = Gtk.StringList.new(availableTypes);
+		comboRow.model = stringList;
+		comboRow.selected = this._settings.get('change-type', 'enum');
+
+		comboRow.connect('notify::selected', comboRow => {
+			this._settings.set('change-type', 'enum', comboRow.selected);
+		});
 	}
 
 	_bindButtons() {
