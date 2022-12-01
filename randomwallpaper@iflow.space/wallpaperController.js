@@ -75,8 +75,6 @@ var WallpaperController = class {
 			this.fetchNewWallpaper();
 		}
 
-		this._currentWallpaper = this._getCurrentWallpaper();
-
 		// Initialize favorites folder
 		// TODO: There's probably a better place for this
 		let favoritesFolder = this._settings.get('favorites-folder', 'string');
@@ -361,18 +359,11 @@ var WallpaperController = class {
 		}
 	}
 
-	_getCurrentWallpaper() {
-		let background_setting = new Gio.Settings({ schema: "org.gnome.desktop.background" });
-		return background_setting.get_string("picture-uri").replace(/^(file:\/\/)/, "");
-	}
-
 	setWallpaper(historyId) {
 		let historyElement = this._historyController.get(historyId);
 
 		if (this._historyController.promoteToActive(historyElement.id)) {
-			this._setBackground(historyElement.path).then(() => {
-				this._currentWallpaper = this._getCurrentWallpaper();
-			});
+			this._setBackground(historyElement.path);
 		} else {
 			this.logger.warn("The history id (" + historyElement.id + ") could not be found.")
 			// TODO: Error handling	history id not found.
@@ -432,7 +423,6 @@ var WallpaperController = class {
 				this._setBackground(historyElement.path, () => {
 					// insert file into history
 					this._historyController.insert(historyElement);
-					this._currentWallpaper = this._getCurrentWallpaper();
 
 					this._stopLoadingHooks.forEach(element => element(null));
 
@@ -484,7 +474,7 @@ var WallpaperController = class {
 		this.timeout = Mainloop.timeout_add(Mainloop.PRIORITY_DEFAULT, delay, () => {
 			this.timeout = null;
 			if (this._resetWallpaper) {
-				this._setBackground(this._currentWallpaper);
+				this._setBackground(this._historyController.getCurrentElement().path);
 				this._resetWallpaper = false;
 			} else {
 				this._setBackground(this.wallpaperLocation + this.previewId);
@@ -519,7 +509,6 @@ var WallpaperController = class {
 
 	update() {
 		this._updateHistory();
-		this._currentWallpaper = this._getCurrentWallpaper();
 	}
 
 	registerStartLoadingHook(fn) {
