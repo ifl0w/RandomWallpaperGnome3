@@ -85,6 +85,12 @@
             <description>Run a command after setting a wallpaper.</description>
         </key>
 
+        <key type='b' name='multiple-displays'>
+            <default>false</default>
+            <summary>Different wallpaper for multiple displays</summary>
+            <description>Display different wallpaper on different displays.</description>
+        </key>
+
     </schema>
 
     <schema path="/org/gnome/shell/extensions/space-iflow-randomwallpaper/backend-connection/"
