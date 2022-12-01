@@ -45,11 +45,14 @@ var WallhavenAdapter = class extends BaseAdapter.BaseAdapter {
 		this.bowl.send_and_receive(message, (response_body_bytes) => {
 			const response_body = ByteArray.toString(response_body_bytes);
 
-			let response = JSON.parse(response_body).data;
-
-			if (!response || response.length === 0) {
-				this._error("Failed to request image.", callback);
-				return;
+			let response = null;
+			try {
+				response = JSON.parse(response_body).data;
+			} finally {
+				if (!response || response.length === 0) {
+					this._error("Failed to request image.", callback);
+					return;
+				}
 			}
 
 			let downloadURL;
