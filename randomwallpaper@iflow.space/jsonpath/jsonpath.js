@@ -1,3 +1,6 @@
+const Self = imports.misc.extensionUtils.getCurrentExtension();
+const Utils = Self.imports.utils;
+
 var JSONPathParser = function () {
 
 	/**
@@ -103,7 +106,7 @@ var JSONPathParser = function () {
 	 */
 	this.randomElement = function (inputObject) {
 		let keys = Object.keys(inputObject);
-		let randomIndex = Math.floor(Math.random() * keys.length);
+		let randomIndex = Utils.Utils.getRandomNumber(keys.length);
 
 		return inputObject[keys[randomIndex]];
 	}
