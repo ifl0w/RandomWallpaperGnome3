@@ -1,7 +1,8 @@
 const Self = imports.misc.extensionUtils.getCurrentExtension();
-const SettingsModule = Self.imports.settings;
 const HistoryModule = Self.imports.history;
+const SettingsModule = Self.imports.settings;
 const SoupBowl = Self.imports.soupBowl;
+const Utils = Self.imports.utils;
 
 const BaseAdapter = Self.imports.adapter.baseAdapter;
 
@@ -145,7 +146,7 @@ var UnsplashAdapter = class extends BaseAdapter.BaseAdapter {
 
 		const keywords = this._settings.get('keyword', 'string').split(",");
 		if (keywords.length > 0) {
-			const randomKeyword = keywords[Math.floor(Math.random() * keywords.length)];
+			const randomKeyword = keywords[Utils.Utils.getRandomNumber(keywords.length)];
 			this.options.query = randomKeyword.trim();
 		}
 
