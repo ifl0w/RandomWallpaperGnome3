@@ -116,4 +116,13 @@ var Utils = class {
 			});
 		});
 	}
+
+	// https://stackoverflow.com/a/5767357
+	static removeItemOnce(arr, value) {
+		var index = arr.indexOf(value);
+		if (index > -1) {
+			arr.splice(index, 1);
+		}
+		return arr;
+	}
 }
