@@ -56,6 +56,16 @@ Adw.PreferencesPage page_general {
     Adw.EntryRow general_post_command {
       title: _("Run post-command - available variables: %wallpaper_path%");
     }
+
+    Adw.ActionRow multiple_displays_row {
+      title: _("Different wallpapers on multiple displays");
+      subtitle: _("Requires HydraPaper.\nFills from History.");
+      sensitive: false;
+
+      Switch enable_multiple_displays {
+        valign: center;
+      }
+    }
   }
 
   Adw.PreferencesGroup {

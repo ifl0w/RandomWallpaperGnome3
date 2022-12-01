@@ -3,6 +3,70 @@ const Gio = imports.gi.Gio;
 const GLib = imports.gi.GLib;
 
 var Utils = class {
+	static #hydraPaperCommand = null;
+
+	/**
+	 * Check whether HydraPaper is available on this system.
+	 * @returns {boolean} - Whether HydraPaper is available
+	 */
+	static async getHydraPaperAvailable() {
+		if (this.#hydraPaperCommand !== null) {
+			return true;
+		}
+
+		try {
+			// Normal installation:
+			await this.#execCheck(['hydrapaper', '--help']);
+
+			this.#hydraPaperCommand = ['hydrapaper'];
+			return true;
+		} catch (error) {
+			// logError(error);
+		}
+
+		try {
+			// FlatPak installation:
+			await this.#execCheck(['org.gabmus.hydrapaper', '--help']);
+
+			this.#hydraPaperCommand = ['org.gabmus.hydrapaper'];
+			return true;
+		} catch (error) {
+			// logError(error);
+		}
+
+		return this.#hydraPaperCommand !== null;
+	}
+
+	/**
+	 * Get the command found for HydraPaper.
+	 * Call getHydraPaperAvailable once to have this variable filled.
+	 *
+	 * @returns {Array<string>?} argv for HydraPaper
+	 */
+	static getHydraPaperCommand() {
+		return this.#hydraPaperCommand;
+	}
+
+	/**
+	 * Get the monitor count for the default "seat".
+	 * @returns Number
+	 */
+	static getMonitorCount() {
+		// Gdk 4.8+
+		// Gdk.DisplayManager.get()
+		// displayManager.get_default_display()
+		// display.get_monitors()
+		// monitors.get_n_items() <- Monitor count, number
+
+		// let defaultDisplay = Gdk.Display.get_default(); // default "seat" which can have multiple monitors
+		// let monitorList = defaultDisplay.get_monitors(); // Gio.ListModel containing all "Gdk.Monitor"
+		// return monitorList.get_n_items();
+
+		// Gdk < 4.8
+		let defaultDisplay = Gdk.Display.get_default(); // default "seat" which can have multiple monitors
+		return defaultDisplay.get_n_monitors();
+	}
+
 	static getRandomNumber(size) {
 		return Math.floor(Math.random() * size);
 	}
