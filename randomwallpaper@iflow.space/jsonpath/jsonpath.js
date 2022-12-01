@@ -1,7 +1,7 @@
 const Self = imports.misc.extensionUtils.getCurrentExtension();
 const Utils = Self.imports.utils;
 
-var JSONPathParser = function () {
+var JSONPathParser = class {
 
 	/**
 	 * Access a simple json path expression of an object.
@@ -13,7 +13,7 @@ var JSONPathParser = function () {
 	 * @param newRandomness whether to ignore previously defined random Elements
 	 * @returns {*}
 	 */
-	this.access = function (inputObject, inputString, randomElements = null, newRandomness = true) {
+	static access(inputObject, inputString, randomElements = null, newRandomness = true) {
 		if (inputObject === null || inputObject === undefined) {
 			return null;
 		}
@@ -90,7 +90,7 @@ var JSONPathParser = function () {
 	 * @returns {*}
 	 * @private
 	 */
-	this._getTargetObject = function (inputObject, keyString) {
+	static _getTargetObject(inputObject, keyString) {
 		if (!keyString.empty && keyString !== "$" && !inputObject.hasOwnProperty(keyString)) {
 			return null;
 		}
@@ -104,7 +104,7 @@ var JSONPathParser = function () {
 	 * @param inputObject
 	 * @returns {*}
 	 */
-	this.randomElement = function (inputObject) {
+	static randomElement(inputObject) {
 		let keys = Object.keys(inputObject);
 		let randomIndex = Utils.Utils.getRandomNumber(keys.length);
 
