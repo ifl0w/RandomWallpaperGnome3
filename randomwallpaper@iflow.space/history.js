@@ -86,6 +86,14 @@ var HistoryController = class {
 	}
 
 	/**
+	 * Get the current history element.
+	 * @returns {HistoryElement}
+	 */
+	getCurrentElement() {
+		return this.history[0];
+	}
+
+	/**
 	 * Get a random HistoryEntry.
 	 * @returns {HistoryEntry}
 	 */
