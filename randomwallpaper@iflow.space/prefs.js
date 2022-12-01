@@ -106,7 +106,7 @@ var RandomWallpaperSettings = class {
 			sourceRow.button_delete.connect('clicked', () => {
 				sourceRow.clearConfig();
 				this._builder.get_object('sources_list').remove(sourceRow);
-				this._removeItemOnce(this._sources, id);
+				Utils.Utils.removeItemOnce(this._sources, id);
 				this._saveSources();
 			});
 		});
@@ -122,13 +122,6 @@ var RandomWallpaperSettings = class {
 		}
 	}
 
-	// https://stackoverflow.com/a/5767357
-	_removeItemOnce(arr, value) {
-		var index = arr.indexOf(value);
-		if (index > -1) {
-			arr.splice(index, 1);
-		}
-		return arr;
 	}
 
 	_bindButtons() {
@@ -160,7 +153,7 @@ var RandomWallpaperSettings = class {
 			sourceRow.button_delete.connect('clicked', () => {
 				sourceRow.clearConfig();
 				sourceRowList.remove(sourceRow);
-				this._removeItemOnce(this._sources, sourceRow.id);
+				Utils.Utils.removeItemOnce(this._sources, sourceRow.id);
 				this._saveSources();
 			});
 		});
