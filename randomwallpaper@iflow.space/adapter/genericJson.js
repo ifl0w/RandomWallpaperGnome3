@@ -19,7 +19,6 @@ var GenericJsonAdapter = class extends BaseAdapter.BaseAdapter {
 			defaultName: 'Generic JSON Source'
 		});
 
-		this._jsonPathParser = new JSONPath.JSONPathParser();
 		this.bowl = new SoupBowl.Bowl();
 	}
 
@@ -46,7 +45,7 @@ var GenericJsonAdapter = class extends BaseAdapter.BaseAdapter {
 					let rObject;
 					let imageDownloadUrl;
 					for (let i = 0; i < 5; i++) {
-						rObject = this._jsonPathParser.access(response_body, imageJSONPath);
+						rObject = JSONPath.JSONPathParser.access(response_body, imageJSONPath);
 						imageDownloadUrl = this._settings.get("image-prefix", "string") + rObject.Object;
 
 						let imageBlocked = this._isImageBlocked(this.fileName(imageDownloadUrl));
@@ -77,18 +76,18 @@ var GenericJsonAdapter = class extends BaseAdapter.BaseAdapter {
 					let occurrences = (samePath.match(/@random/g) || []).length;
 					let slicedRandomElements = rObject.RandomElements.slice(0, occurrences);
 
-					let postUrl = this._jsonPathParser.access(response_body, postJSONPath, slicedRandomElements, false).Object;
+					let postUrl = JSONPath.JSONPathParser.access(response_body, postJSONPath, slicedRandomElements, false).Object;
 					postUrl = this._settings.get("post-prefix", "string") + postUrl;
 					if (typeof postUrl !== 'string' || !postUrl instanceof String) {
 						postUrl = null;
 					}
 
-					let authorName = this._jsonPathParser.access(response_body, authorNameJSONPath, slicedRandomElements, false).Object;
+					let authorName = JSONPath.JSONPathParser.access(response_body, authorNameJSONPath, slicedRandomElements, false).Object;
 					if (typeof authorName !== 'string' || !authorName instanceof String) {
 						authorName = null;
 					}
 
-					let authorUrl = this._jsonPathParser.access(response_body, authorUrlJSONPath, slicedRandomElements, false).Object;
+					let authorUrl = JSONPath.JSONPathParser.access(response_body, authorUrlJSONPath, slicedRandomElements, false).Object;
 					authorUrl = this._settings.get("author-url-prefix", "string") + authorUrl;
 					if (typeof authorUrl !== 'string' || !authorUrl instanceof String) {
 						authorUrl = null;
