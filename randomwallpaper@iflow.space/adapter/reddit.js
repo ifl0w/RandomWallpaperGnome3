@@ -1,9 +1,10 @@
 const ByteArray = imports.byteArray;
 
 const Self = imports.misc.extensionUtils.getCurrentExtension();
-const SettingsModule = Self.imports.settings;
 const HistoryModule = Self.imports.history;
+const SettingsModule = Self.imports.settings;
 const SoupBowl = Self.imports.soupBowl;
+const Utils = Self.imports.utils;
 
 const BaseAdapter = Self.imports.adapter.baseAdapter;
 
@@ -62,7 +63,7 @@ var RedditAdapter = class extends BaseAdapter.BaseAdapter {
 				let submission;
 				let imageDownloadUrl;
 				for (let i = 0; i < 5; i++) {
-					const random = Math.floor(Math.random() * submissions.length);
+					const random = Utils.Utils.getRandomNumber(submissions.length);
 					submission = submissions[random].data;
 					imageDownloadUrl = this._ampDecode(submission.preview.images[0].source.url);
 

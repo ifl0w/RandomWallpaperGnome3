@@ -102,7 +102,7 @@ var RandomWallpaperMenu = class {
 
 		// Open Wallpaper Folder
 		this.openFolder.connect('activate', (event) => {
-			let uri = GLib.filename_to_uri(this.wallpaperController.wallpaperlocation, "");
+			let uri = GLib.filename_to_uri(this.wallpaperController.wallpaperLocation, "");
 			Gio.AppInfo.launch_default_for_uri(uri, global.create_app_launch_context(0, -1))
 		});
 

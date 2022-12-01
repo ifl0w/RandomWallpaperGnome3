@@ -1,8 +1,9 @@
 const Gio = imports.gi.Gio;
 
 const Self = imports.misc.extensionUtils.getCurrentExtension();
-const SettingsModule = Self.imports.settings;
 const HistoryModule = Self.imports.history;
+const SettingsModule = Self.imports.settings;
+const Utils = Self.imports.utils;
 
 const BaseAdapter = Self.imports.adapter.baseAdapter;
 
@@ -28,7 +29,7 @@ var LocalFolderAdapter = class extends BaseAdapter.BaseAdapter {
 
 		let randomFilePath;
 		for (let i = 0; i < 5; i++) {
-			let randomFile = files[Math.floor(Math.random() * files.length)];
+			let randomFile = files[Utils.Utils.getRandomNumber(files.length)];
 			randomFilePath = randomFile.get_uri();
 
 			if (!this._isImageBlocked(randomFile.get_basename())) {
