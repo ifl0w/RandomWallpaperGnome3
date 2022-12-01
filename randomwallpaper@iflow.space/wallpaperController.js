@@ -257,7 +257,7 @@ var WallpaperController = class {
 		let wallpaperUri = "file://" + path;
 
 		try {
-			if (this._settings.get('multiple-displays', 'boolean') && monitorCount > 1 && await Utils.Utils.getHydraPaperAvailable()) {
+			if (this._settings.get('multiple-displays', 'boolean') && await Utils.Utils.getHydraPaperAvailable()) {
 				// Needs a copy here
 				let hydraPaperCommand = [...Utils.Utils.getHydraPaperCommand()];
 
