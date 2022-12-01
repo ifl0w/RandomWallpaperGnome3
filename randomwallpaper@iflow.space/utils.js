@@ -16,7 +16,7 @@ var Utils = class {
 
 		try {
 			// Normal installation:
-			await this.#execCheck(['hydrapaper', '--help']);
+			await this.execCheck(['hydrapaper', '--help']);
 
 			this.#hydraPaperCommand = ['hydrapaper'];
 			return true;
@@ -26,7 +26,7 @@ var Utils = class {
 
 		try {
 			// FlatPak installation:
-			await this.#execCheck(['org.gabmus.hydrapaper', '--help']);
+			await this.execCheck(['org.gabmus.hydrapaper', '--help']);
 
 			this.#hydraPaperCommand = ['org.gabmus.hydrapaper'];
 			return true;
@@ -71,25 +71,6 @@ var Utils = class {
 		return Math.floor(Math.random() * size);
 	}
 
-	// https://gjs.guide/guides/gio/subprocesses.html#waiting-for-processes
-	static runCommand(argv) {
-		return new Promise((resolve, reject) => {
-			try {
-				let proc = Gio.Subprocess.new(argv, Gio.SubprocessFlags.NONE);
-
-				proc.wait_async(null, (proc, result) => {
-					try {
-						resolve(proc.wait_finish(result));
-					} catch (error) {
-						reject(error);
-					}
-				});
-			} catch (error) {
-				reject(error);
-			}
-		});
-	}
-
 	// https://gjs.guide/guides/gio/subprocesses.html#complete-examples
 	/**
 	 * Execute a command asynchronously and check the exit status.
@@ -100,7 +81,7 @@ var Utils = class {
 	 * @param {Gio.Cancellable} [cancellable] - optional cancellable object
 	 * @returns {Promise<>} - The process success
 	 */
-	static async #execCheck(argv, cancellable = null) {
+	static async execCheck(argv, cancellable = null) {
 		let cancelId = 0;
 		let proc = new Gio.Subprocess({
 			argv: argv,
