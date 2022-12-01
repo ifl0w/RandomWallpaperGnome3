@@ -33,12 +33,12 @@ var HistoryEntry = class {
 
 var HistoryController = class {
 
-	constructor(wallpaperlocation) {
+	constructor(wallpaperLocation) {
 		this.logger = new LoggerModule.Logger('RWG3', 'HistoryController');
 		this.size = 10;
 		this.history = [];
 		this._settings = new Prefs.Settings();
-		this._wallpaperlocation = wallpaperlocation;
+		this._wallpaperLocation = wallpaperLocation;
 
 		this.load();
 	}
@@ -116,7 +116,7 @@ var HistoryController = class {
 		if (firstHistoryElement)
 			this.history = [firstHistoryElement];
 
-		let directory = Gio.file_new_for_path(this._wallpaperlocation);
+		let directory = Gio.file_new_for_path(this._wallpaperLocation);
 		let enumerator = directory.enumerate_children('', Gio.FileQueryInfoFlags.NONE, null);
 
 		let fileinfo;
@@ -134,7 +134,7 @@ var HistoryController = class {
 
 			// ignore hidden files and first element
 			if (id[0] != '.' && id != firstHistoryElement.id) {
-				deleteFile = Gio.file_new_for_path(this._wallpaperlocation + id);
+				deleteFile = Gio.file_new_for_path(this._wallpaperLocation + id);
 				deleteFile.delete(null);
 			}
 
