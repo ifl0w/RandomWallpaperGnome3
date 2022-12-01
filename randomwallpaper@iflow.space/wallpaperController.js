@@ -75,7 +75,7 @@ var WallpaperController = class {
 			this.fetchNewWallpaper();
 		}
 
-		this.currentWallpaper = this._getCurrentWallpaper();
+		this._currentWallpaper = this._getCurrentWallpaper();
 
 		// Initialize favorites folder
 		// TODO: There's probably a better place for this
@@ -371,7 +371,7 @@ var WallpaperController = class {
 
 		if (this._historyController.promoteToActive(historyElement.id)) {
 			this._setBackground(historyElement.path).then(() => {
-				this.currentWallpaper = this._getCurrentWallpaper();
+				this._currentWallpaper = this._getCurrentWallpaper();
 			});
 		} else {
 			this.logger.warn("The history id (" + historyElement.id + ") could not be found.")
@@ -432,7 +432,7 @@ var WallpaperController = class {
 				this._setBackground(historyElement.path, () => {
 					// insert file into history
 					this._historyController.insert(historyElement);
-					this.currentWallpaper = this._getCurrentWallpaper();
+					this._currentWallpaper = this._getCurrentWallpaper();
 
 					this._stopLoadingHooks.forEach(element => element(null));
 
@@ -484,7 +484,7 @@ var WallpaperController = class {
 		this.timeout = Mainloop.timeout_add(Mainloop.PRIORITY_DEFAULT, delay, () => {
 			this.timeout = null;
 			if (this._resetWallpaper) {
-				this._setBackground(this.currentWallpaper);
+				this._setBackground(this._currentWallpaper);
 				this._resetWallpaper = false;
 			} else {
 				this._setBackground(this.wallpaperLocation + this.previewId);
@@ -519,7 +519,7 @@ var WallpaperController = class {
 
 	update() {
 		this._updateHistory();
-		this.currentWallpaper = this._getCurrentWallpaper();
+		this._currentWallpaper = this._getCurrentWallpaper();
 	}
 
 	registerStartLoadingHook(fn) {
