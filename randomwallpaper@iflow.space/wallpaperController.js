@@ -7,6 +7,7 @@ const GLib = imports.gi.GLib;
 //self
 const Self = imports.misc.extensionUtils.getCurrentExtension();
 const HistoryModule = Self.imports.history;
+const HydraPaper = Self.imports.hydraPaper;
 const LoggerModule = Self.imports.logger;
 const Prefs = Self.imports.settings;
 const Utils = Self.imports.utils;
@@ -60,6 +61,7 @@ var WallpaperController = class {
 
 		this._timer = new Timer.AFTimer();
 		this._historyController = new HistoryModule.HistoryController(this.wallpaperLocation);
+		this._hydraPaper = new HydraPaper.HydraPaper();
 
 		this._settings = new Prefs.Settings();
 		this._settings.observe('history-length', () => this._updateHistory());
@@ -98,14 +100,6 @@ var WallpaperController = class {
 			favoritesFolder = favoritesFolder.get_child(Self.metadata['uuid']);
 
 			this._settings.set('favorites-folder', 'string', favoritesFolder.get_path());
-		}
-
-		try {
-			Utils.Utils.getHydraPaperAvailable().then(result => {
-				this.logger.debug(`HydraPaper available: ${result}`);
-			});
-		} catch (error) {
-			this.logger.warn(error);
 		}
 	}
 
@@ -252,54 +246,91 @@ var WallpaperController = class {
 	async _setBackground(path, callback) {
 		let monitorCount = Utils.Utils.getMonitorCount();
 		let background_setting = new Gio.Settings({ schema: "org.gnome.desktop.background" });
+		let screensaver_setting = new Gio.Settings({ schema: "org.gnome.desktop.screensaver" });
 		let wallpaperUri = "file://" + path;
 
-		try {
-			if (this._settings.get('multiple-displays', 'boolean') && await Utils.Utils.getHydraPaperAvailable()) {
-				// Needs a copy here
-				let hydraPaperCommand = [...Utils.Utils.getHydraPaperCommand()];
+		let changeType = this._settings.get('change-type', 'enum');
+		// <value value='0' nick='Background' />
+		// <value value='1' nick='Lock Screen' />
+		// <value value='2' nick='Background and Lock Screen' />
+		// TODO: <value value='3' nick='Background and Lock Screen independently' />
 
-				hydraPaperCommand.push('--cli');
-				hydraPaperCommand.push(path);
+		if (changeType === 0 || changeType === 2) {
+			try {
+				if (this._settings.get('multiple-displays', 'boolean') && this._hydraPaper !== null && await this._hydraPaper.isAvailable()) {
+					let wallpaperArray = [path];
 
-				// Abuse history to fill missing images
-				for (let index = 0; index < monitorCount - 1; index++) {
-					let historyElement;
-					do {
-						historyElement = this._historyController.getRandom();
-					} while (this._historyController.history.length > monitorCount && hydraPaperCommand.includes(historyElement.path, 1))
-					// ensure different wallpaper for all displays if possible
+					// Abuse history to fill missing images
+					for (let index = 0; index < monitorCount - 1; index++) {
+						let historyElement;
+						do {
+							historyElement = this._historyController.getRandom();
+						} while (this._historyController.history.length > monitorCount && wallpaperArray.includes(historyElement.path, 1))
+						// ensure different wallpaper for all displays if possible
 
-					hydraPaperCommand.push(historyElement.path);
+						wallpaperArray.push(historyElement.path);
+					}
+
+					await this._hydraPaper.run(wallpaperArray);
+
+					// Manually set key for darkmode because that's way faster
+					background_setting.set_string("picture-uri-dark", background_setting.get_string("picture-uri"));
+
+					Gio.Settings.sync();
+				} else {
+					// set "picture-options" to "zoom" for single wallpapers
+					// hydrapaper changes this to "spanned"
+					background_setting.set_string('picture-options', 'zoom');
+					this._setPictureUriOfSettingsObject(background_setting, wallpaperUri);
 				}
-
-				try {
-					this._hydraPaperCancellable = new Gio.Cancellable();
-
-					// hydrapaper [--darkmode] --cli PATH PATH PATH
-					await Utils.Utils.execCheck(hydraPaperCommand, this._hydraPaperCancellable);
-
-					this._hydraPaperCancellable = null;
-				} catch (error) {
-					this.logger.warn(error);
-				}
-
-				// Manually set key for darkmode because that's way faster
-				background_setting.set_string("picture-uri-dark", background_setting.get_string("picture-uri"));
-			} else {
-				// set "picture-options" to "zoom" for single wallpapers
-				// hydrapaper changes this to "spanned"
-				background_setting.set_string('picture-options', 'zoom');
-
-				this._setPictureUriOfSettingsObject(background_setting, wallpaperUri);
+			} catch (error) {
+				this.logger.warn(error);
 			}
-		} catch (error) {
-			this.logger.warn(error);
 		}
 
-		if (this._settings.get('change-lock-screen', 'boolean')) {
-			let screensaver_setting = new Gio.Settings({ schema: "org.gnome.desktop.screensaver" });
-			this._setPictureUriOfSettingsObject(screensaver_setting, wallpaperUri);
+		if (changeType === 1) {
+			try {
+				if (this._settings.get('multiple-displays', 'boolean') && this._hydraPaper !== null && await this._hydraPaper.isAvailable()) {
+					let wallpaperArray = [path];
+
+					// Abuse history to fill missing images
+					for (let index = 0; index < monitorCount - 1; index++) {
+						let historyElement;
+						do {
+							historyElement = this._historyController.getRandom();
+						} while (this._historyController.history.length > monitorCount && wallpaperArray.includes(historyElement.path, 1))
+						// ensure different wallpaper for all displays if possible
+
+						wallpaperArray.push(historyElement.path);
+					}
+
+					// Remember keys, HydraPaper will change these
+					let tmpBackground = background_setting.get_string("picture-uri-dark");
+					let tmpMode = background_setting.get_string("picture-options");
+
+					// Force HydraPaper to target a different resulting image by using darkmode
+					await this._hydraPaper.run(wallpaperArray, true);
+
+					screensaver_setting.set_string("picture-options", "spanned");
+					this._setPictureUriOfSettingsObject(screensaver_setting, background_setting.get_string("picture-uri-dark"))
+
+					// HydraPaper possibly changed these, change them back
+					background_setting.set_string("picture-uri-dark", tmpBackground);
+					background_setting.set_string("picture-options", tmpMode);
+
+					Gio.Settings.sync();
+				} else {
+					// set "picture-options" to "zoom" for single wallpapers
+					screensaver_setting.set_string('picture-options', 'zoom');
+					this._setPictureUriOfSettingsObject(screensaver_setting, wallpaperUri);
+				}
+			} catch (error) {
+				this.logger.warn(error);
+			}
+		}
+
+		if (changeType === 2) {
+			this._setPictureUriOfSettingsObject(screensaver_setting, background_setting.get_string('picture-uri'));
 		}
 
 		// Run general post command
@@ -476,11 +507,6 @@ var WallpaperController = class {
 		delay = delay || 200;
 
 		this.timeout = Mainloop.timeout_add(Mainloop.PRIORITY_DEFAULT, delay, () => {
-			if (this._hydraPaperCancellable instanceof Gio.Cancellable) {
-				this._hydraPaperCancellable.cancel();
-				this._hydraPaperCancellable = null;
-			}
-
 			this.timeout = null;
 			if (this._resetWallpaper) {
 				this._setBackground(this._historyController.getCurrentElement().path);
