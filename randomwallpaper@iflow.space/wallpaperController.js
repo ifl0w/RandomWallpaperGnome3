@@ -274,8 +274,12 @@ var WallpaperController = class {
 				}
 
 				try {
+					this._hydraPaperCancellable = new Gio.Cancellable();
+
 					// hydrapaper [--darkmode] --cli PATH PATH PATH
-					await Utils.Utils.runCommand(hydraPaperCommand);
+					await Utils.Utils.execCheck(hydraPaperCommand, this._hydraPaperCancellable);
+
+					this._hydraPaperCancellable = null;
 				} catch (error) {
 					this.logger.warn(error);
 				}
@@ -303,7 +307,7 @@ var WallpaperController = class {
 		let generalPostCommandArray = this._getCommandArray(commandString, path);
 		if (generalPostCommandArray !== null) {
 			try {
-				await Utils.Utils.runCommand(generalPostCommandArray);
+				await Utils.Utils.execCheck(generalPostCommandArray);
 			} catch (error) {
 				this.logger.warn(error);
 			}
@@ -472,6 +476,11 @@ var WallpaperController = class {
 		delay = delay || 200;
 
 		this.timeout = Mainloop.timeout_add(Mainloop.PRIORITY_DEFAULT, delay, () => {
+			if (this._hydraPaperCancellable instanceof Gio.Cancellable) {
+				this._hydraPaperCancellable.cancel();
+				this._hydraPaperCancellable = null;
+			}
+
 			this.timeout = null;
 			if (this._resetWallpaper) {
 				this._setBackground(this._historyController.getCurrentElement().path);
