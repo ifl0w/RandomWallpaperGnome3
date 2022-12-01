@@ -26,13 +26,9 @@ Adw.PreferencesPage page_general {
   Adw.PreferencesGroup {
     title: _("General Settings");
 
-    Adw.ActionRow {
-      title: _("Change lock screen");
-      subtitle: _("Change the gnome lock screen image to the new wallpaper.");
-
-      Switch change_lock_screen {
-        valign: center;
-      }
+    Adw.ComboRow combo_background_type {
+      title: _("Change type");
+      use-subtitle: true;
     }
 
     Adw.ActionRow {

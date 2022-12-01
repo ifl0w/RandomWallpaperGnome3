@@ -3,50 +3,6 @@ const Gio = imports.gi.Gio;
 const GLib = imports.gi.GLib;
 
 var Utils = class {
-	static #hydraPaperCommand = null;
-
-	/**
-	 * Check whether HydraPaper is available on this system.
-	 * @returns {boolean} - Whether HydraPaper is available
-	 */
-	static async getHydraPaperAvailable() {
-		if (this.#hydraPaperCommand !== null) {
-			return true;
-		}
-
-		try {
-			// Normal installation:
-			await this.execCheck(['hydrapaper', '--help']);
-
-			this.#hydraPaperCommand = ['hydrapaper'];
-			return true;
-		} catch (error) {
-			// logError(error);
-		}
-
-		try {
-			// FlatPak installation:
-			await this.execCheck(['org.gabmus.hydrapaper', '--help']);
-
-			this.#hydraPaperCommand = ['org.gabmus.hydrapaper'];
-			return true;
-		} catch (error) {
-			// logError(error);
-		}
-
-		return this.#hydraPaperCommand !== null;
-	}
-
-	/**
-	 * Get the command found for HydraPaper.
-	 * Call getHydraPaperAvailable once to have this variable filled.
-	 *
-	 * @returns {Array<string>?} argv for HydraPaper
-	 */
-	static getHydraPaperCommand() {
-		return this.#hydraPaperCommand;
-	}
-
 	/**
 	 * Get the monitor count for the default "seat".
 	 * @returns Number
