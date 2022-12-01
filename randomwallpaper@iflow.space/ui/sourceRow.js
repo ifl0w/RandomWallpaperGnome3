@@ -7,6 +7,7 @@ const Gtk = imports.gi.Gtk;
 
 const Self = ExtensionUtils.getCurrentExtension();
 const Settings = Self.imports.settings;
+const Utils = Self.imports.utils;
 
 const GenericJson = Self.imports.ui.genericJson;
 const LocalFolder = Self.imports.ui.localFolder;
@@ -146,17 +147,8 @@ var SourceRow = GObject.registerClass({
 			return;
 		}
 
-		blockedImages = this._removeItemOnce(blockedImages, filename);
+		blockedImages = Utils.Utils.removeItemOnce(blockedImages, filename);
 		this._settings.set('blocked-images', 'strv', blockedImages);
-	}
-
-	// https://stackoverflow.com/a/5767357
-	_removeItemOnce(arr, value) {
-		var index = arr.indexOf(value);
-		if (index > -1) {
-			arr.splice(index, 1);
-		}
-		return arr;
 	}
 
 	clearConfig() {
