@@ -7,6 +7,7 @@ const ExtensionUtils = imports.misc.extensionUtils;
 const Self = ExtensionUtils.getCurrentExtension();
 const SourceRow = Self.imports.ui.sourceRow;
 const Settings = Self.imports.settings;
+const Utils = Self.imports.utils;
 const WallpaperController = Self.imports.wallpaperController;
 
 const LoggerModule = Self.imports.logger;
@@ -83,6 +84,10 @@ var RandomWallpaperSettings = class {
 			this._builder.get_object('general_post_command'),
 			'text',
 			Gio.SettingsBindFlags.DEFAULT);
+		this._settings.bind('multiple-displays',
+			this._builder.get_object('enable_multiple_displays'),
+			'active',
+			Gio.SettingsBindFlags.DEFAULT);
 
 		this._bindButtons();
 		this._bindHistorySection(window);
@@ -105,6 +110,16 @@ var RandomWallpaperSettings = class {
 				this._saveSources();
 			});
 		});
+
+		try {
+			Utils.Utils.getHydraPaperAvailable().then(result => {
+				if (result === true) {
+					this._builder.get_object('multiple_displays_row').set_sensitive(true);
+				}
+			});
+		} catch (error) {
+			// Should already be handled at wallpaperController although in a different context
+		}
 	}
 
 	// https://stackoverflow.com/a/5767357

@@ -3,6 +3,7 @@ const Gio = imports.gi.Gio;
 
 const Self = imports.misc.extensionUtils.getCurrentExtension();
 const Prefs = Self.imports.settings;
+const Utils = Self.imports.utils;
 
 const LoggerModule = Self.imports.logger;
 
@@ -82,6 +83,14 @@ var HistoryController = class {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Get a random HistoryEntry.
+	 * @returns {HistoryEntry}
+	 */
+	getRandom() {
+		return this.history[Utils.Utils.getRandomNumber(this.history.length)];
 	}
 
 	/**

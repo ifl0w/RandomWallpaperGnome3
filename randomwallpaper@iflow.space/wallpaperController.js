@@ -9,6 +9,7 @@ const Self = imports.misc.extensionUtils.getCurrentExtension();
 const HistoryModule = Self.imports.history;
 const LoggerModule = Self.imports.logger;
 const Prefs = Self.imports.settings;
+const Utils = Self.imports.utils;
 const Timer = Self.imports.timer;
 
 // SourceAdapter
@@ -29,9 +30,9 @@ var WallpaperController = class {
 		if (!xdg_cache_home) {
 			xdg_cache_home = `${Mainloop.getenv('HOME')}/.cache`
 		}
-		this.wallpaperlocation = `${xdg_cache_home}/${Self.metadata['uuid']}/wallpapers/`;
+		this.wallpaperLocation = `${xdg_cache_home}/${Self.metadata['uuid']}/wallpapers/`;
 		let mode = parseInt('0755', 8);
-		Mainloop.mkdir_with_parents(this.wallpaperlocation, mode)
+		Mainloop.mkdir_with_parents(this.wallpaperLocation, mode)
 
 		this._autoFetch = {
 			active: false,
@@ -58,7 +59,7 @@ var WallpaperController = class {
 		this._backendConnection.observe('request-new-wallpaper', () => this._requestNewWallpaper());
 
 		this._timer = new Timer.AFTimer();
-		this._historyController = new HistoryModule.HistoryController(this.wallpaperlocation);
+		this._historyController = new HistoryModule.HistoryController(this.wallpaperLocation);
 
 		this._settings = new Prefs.Settings();
 		this._settings.observe('history-length', () => this._updateHistory());
@@ -100,6 +101,14 @@ var WallpaperController = class {
 
 			this._settings.set('favorites-folder', 'string', favoritesFolder.get_path());
 		}
+
+		try {
+			Utils.Utils.getHydraPaperAvailable().then(result => {
+				this.logger.debug(`HydraPaper available: ${result}`);
+			});
+		} catch (error) {
+			this.logger.warn(error);
+		}
 	}
 
 	_clearHistory() {
@@ -112,7 +121,7 @@ var WallpaperController = class {
 
 	_openFolder() {
 		if (this._backendConnection.get('open-folder', 'boolean')) {
-			let uri = GLib.filename_to_uri(this.wallpaperlocation, "");
+			let uri = GLib.filename_to_uri(this.wallpaperLocation, "");
 			Gio.AppInfo.launch_default_for_uri(uri, Gio.AppLaunchContext.new());
 			this._backendConnection.set('open-folder', 'boolean', false);
 		}
@@ -180,31 +189,31 @@ var WallpaperController = class {
 		try {
 			switch (sourceType) {
 				case 0:
-					imageSourceAdapter = new UnsplashAdapter.UnsplashAdapter(sourceID, sourceName, this.wallpaperlocation);
+					imageSourceAdapter = new UnsplashAdapter.UnsplashAdapter(sourceID, sourceName, this.wallpaperLocation);
 					break;
 				case 1:
-					imageSourceAdapter = new WallhavenAdapter.WallhavenAdapter(sourceID, sourceName, this.wallpaperlocation);
+					imageSourceAdapter = new WallhavenAdapter.WallhavenAdapter(sourceID, sourceName, this.wallpaperLocation);
 					break;
 				case 2:
-					imageSourceAdapter = new RedditAdapter.RedditAdapter(sourceID, sourceName, this.wallpaperlocation);
+					imageSourceAdapter = new RedditAdapter.RedditAdapter(sourceID, sourceName, this.wallpaperLocation);
 					break;
 				case 3:
-					imageSourceAdapter = new GenericJsonAdapter.GenericJsonAdapter(sourceID, sourceName, this.wallpaperlocation);
+					imageSourceAdapter = new GenericJsonAdapter.GenericJsonAdapter(sourceID, sourceName, this.wallpaperLocation);
 					break;
 				case 4:
-					imageSourceAdapter = new LocalFolderAdapter.LocalFolderAdapter(sourceID, sourceName, this.wallpaperlocation);
+					imageSourceAdapter = new LocalFolderAdapter.LocalFolderAdapter(sourceID, sourceName, this.wallpaperLocation);
 					break;
 				case 5:
-					imageSourceAdapter = new UrlSourceAdapter.UrlSourceAdapter(sourceID, sourceName, this.wallpaperlocation);
+					imageSourceAdapter = new UrlSourceAdapter.UrlSourceAdapter(sourceID, sourceName, this.wallpaperLocation);
 					break;
 				default:
-					imageSourceAdapter = new UnsplashAdapter.UnsplashAdapter(null, null, this.wallpaperlocation);
+					imageSourceAdapter = new UnsplashAdapter.UnsplashAdapter(null, null, this.wallpaperLocation);
 					sourceType = 0;
 					break;
 			}
 		} catch (error) {
 			this.logger.warn("Had errors, fetching with default settings.");
-			imageSourceAdapter = new UnsplashAdapter.UnsplashAdapter(null, null, this.wallpaperlocation);
+			imageSourceAdapter = new UnsplashAdapter.UnsplashAdapter(null, null, this.wallpaperLocation);
 			sourceType = 0;
 		}
 
@@ -233,7 +242,7 @@ var WallpaperController = class {
 		}
 
 		// https://stackoverflow.com/a/5915122
-		return enabled_sources[Math.floor(Math.random() * enabled_sources.length)];
+		return enabled_sources[Utils.Utils.getRandomNumber(enabled_sources.length)];
 	}
 
 	/**
@@ -242,47 +251,70 @@ var WallpaperController = class {
 	 * @param callback
 	 * @private
 	 */
-	_setBackground(path, callback) {
+	async _setBackground(path, callback) {
+		let monitorCount = Utils.Utils.getMonitorCount();
 		let background_setting = new Gio.Settings({ schema: "org.gnome.desktop.background" });
-		path = "file://" + path;
+		let wallpaperUri = "file://" + path;
 
-		this._setPictureUriOfSettingsObject(background_setting, path, () => {
-			// Run general post command
-			let commandString = this._settings.get('general-post-command', 'string');
-			let generalPostCommandArray = this._getCommandArray(commandString, path);
-			if (generalPostCommandArray !== null) {
-				// https://gjs.guide/guides/gio/subprocesses.html#waiting-for-processes
+		try {
+			if (this._settings.get('multiple-displays', 'boolean') && monitorCount > 1 && await Utils.Utils.getHydraPaperAvailable()) {
+				// Needs a copy here
+				let hydraPaperCommand = [...Utils.Utils.getHydraPaperCommand()];
+
+				hydraPaperCommand.push('--cli');
+				hydraPaperCommand.push(path);
+
+				// Abuse history to fill missing images
+				for (let index = 0; index < monitorCount - 1; index++) {
+					let historyElement;
+					do {
+						historyElement = this._historyController.getRandom();
+					} while (this._historyController.history.length > monitorCount && hydraPaperCommand.includes(historyElement.path, 1))
+					// ensure different wallpaper for all displays if possible
+
+					hydraPaperCommand.push(historyElement.path);
+				}
+
 				try {
-					let proc = Gio.Subprocess.new(generalPostCommandArray, Gio.SubprocessFlags.NONE);
-
-					proc.wait_async(null, (proc, result) => {
-						try {
-							proc.wait_finish(result);
-						} catch (error) {
-							this.logger.warn(error);
-						}
-					});
+					// hydrapaper [--darkmode] --cli PATH PATH PATH
+					await Utils.Utils.runCommand(hydraPaperCommand);
 				} catch (error) {
 					this.logger.warn(error);
 				}
-			}
 
-			if (this._settings.get('change-lock-screen', 'boolean')) {
-				let screensaver_setting = new Gio.Settings({ schema: "org.gnome.desktop.screensaver" });
-
-				this._setPictureUriOfSettingsObject(screensaver_setting, path, () => {
-					// call callback if given
-					if (callback) {
-						callback();
-					}
-				});
+				// Manually set key for darkmode because that's way faster
+				background_setting.set_string("picture-uri-dark", background_setting.get_string("picture-uri"));
 			} else {
-				// call callback if given
-				if (callback) {
-					callback();
-				}
+				// set "picture-options" to "zoom" for single wallpapers
+				// hydrapaper changes this to "spanned"
+				background_setting.set_string('picture-options', 'zoom');
+
+				this._setPictureUriOfSettingsObject(background_setting, wallpaperUri);
 			}
-		});
+		} catch (error) {
+			this.logger.warn(error);
+		}
+
+		if (this._settings.get('change-lock-screen', 'boolean')) {
+			let screensaver_setting = new Gio.Settings({ schema: "org.gnome.desktop.screensaver" });
+			this._setPictureUriOfSettingsObject(screensaver_setting, wallpaperUri);
+		}
+
+		// Run general post command
+		let commandString = this._settings.get('general-post-command', 'string');
+		let generalPostCommandArray = this._getCommandArray(commandString, path);
+		if (generalPostCommandArray !== null) {
+			try {
+				await Utils.Utils.runCommand(generalPostCommandArray);
+			} catch (error) {
+				this.logger.warn(error);
+			}
+		}
+
+		// call callback if given
+		if (callback) {
+			callback();
+		}
 	}
 
 	/**
@@ -338,8 +370,9 @@ var WallpaperController = class {
 		let historyElement = this._historyController.get(historyId);
 
 		if (this._historyController.promoteToActive(historyElement.id)) {
-			this._setBackground(historyElement.path);
-			this.currentWallpaper = this._getCurrentWallpaper();
+			this._setBackground(historyElement.path).then(() => {
+				this.currentWallpaper = this._getCurrentWallpaper();
+			});
 		} else {
 			this.logger.warn("The history id (" + historyElement.id + ") could not be found.")
 			// TODO: Error handling	history id not found.
@@ -454,7 +487,7 @@ var WallpaperController = class {
 				this._setBackground(this.currentWallpaper);
 				this._resetWallpaper = false;
 			} else {
-				this._setBackground(this.wallpaperlocation + this.previewId);
+				this._setBackground(this.wallpaperLocation + this.previewId);
 			}
 			return false;
 		});
