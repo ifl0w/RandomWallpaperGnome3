@@ -2,21 +2,21 @@ using Gtk 4.0;
 using Adw 1;
 
 Adw.PreferencesPage page_sources {
-  title: _("Wallpaper Sources");
-  icon-name: "download-symbolic";
+    title: _("Wallpaper Sources");
+    icon-name: "download-symbolic";
 
-  Adw.PreferencesGroup sources_list {
-    // title: _("Configured Wallpaper Sources");
+    Adw.PreferencesGroup sources_list {
+        // title: _("Configured Wallpaper Sources");
 
-    header-suffix: Button button_new_source {
-      styles [
-        "suggested-action",
-      ]
+        header-suffix: Button button_new_source {
+            styles [
+                "suggested-action",
+            ]
 
-      Adw.ButtonContent {
-        icon-name: "add-symbolic";
-        label: _("Add Source");
-      }
-    };
-  }
+            Adw.ButtonContent {
+                icon-name: "add-symbolic";
+                label: _("Add Source");
+            }
+        };
+    }
 }

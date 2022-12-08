@@ -2,69 +2,69 @@ using Gtk 4.0;
 using Adw 1;
 
 template SourceRow : Adw.ExpanderRow {
-  title: bind source_name.text;
-  show-enable-switch: true;
+    title: bind source_name.text;
+    show-enable-switch: true;
 
-  // Doesn't look good and prone to missclicks
-  // [action]
-  // Button button_delete {
-  //   valign: center;
+    // Doesn't look good and prone to missclicks
+    // [action]
+    // Button button_delete {
+    //   valign: center;
 
-  //   styles [
-  //     "destructive-action",
-  //   ]
+    //   styles [
+    //     "destructive-action",
+    //   ]
 
-  //   Adw.ButtonContent {
-  //     icon-name: "user-trash-symbolic";
-  //     valign: center;
-  //   }
-  // }
+    //   Adw.ButtonContent {
+    //     icon-name: "user-trash-symbolic";
+    //     valign: center;
+    //   }
+    // }
 
-  Box {
-    orientation: vertical;
-    spacing: 14;
+    Box {
+        orientation: vertical;
+        spacing: 14;
 
-    Adw.Clamp {
-      Adw.PreferencesGroup {
-        title: _("Meta");
+        Adw.Clamp {
+            Adw.PreferencesGroup {
+                title: _("Meta");
 
-        Adw.EntryRow source_name {
-          title: _("Name");
-          input-purpose: free_form;
-          text: _("My Source - (1080p)");
-        }
+                Adw.EntryRow source_name {
+                    title: _("Name");
+                    input-purpose: free_form;
+                    text: _("My Source - (1080p)");
+                }
 
-        Adw.ComboRow combo {
-          title: _("Type");
-        }
+                Adw.ComboRow combo {
+                    title: _("Type");
+                }
 
-        Adw.ActionRow {
-          title: _("Delete this source");
+                Adw.ActionRow {
+                    title: _("Delete this source");
 
-          Button button_delete {
-            valign: center;
+                    Button button_delete {
+                        valign: center;
 
-            styles [
-              "destructive-action",
-            ]
+                        styles [
+                            "destructive-action",
+                        ]
 
-            Adw.ButtonContent {
-              icon-name: "user-trash-symbolic";
-              valign: center;
+                        Adw.ButtonContent {
+                            icon-name: "user-trash-symbolic";
+                            valign: center;
+                        }
+                    }
+                }
+
+                Adw.ExpanderRow blocked_images_list {
+                    title: _("Blocked Images");
+                    sensitive: false;
+                }
             }
-          }
         }
 
-        Adw.ExpanderRow blocked_images_list {
-          title: _("Blocked Images");
-          sensitive: false;
-        }
-      }
+        Adw.Clamp settings_container { }
+
+        // FIXME: Additional PreferencesGroup solely for spacing to the next row when expanded
+        Adw.PreferencesGroup { }
     }
-
-    Adw.Clamp settings_container { }
-
-    // FIXME: Additional PreferencesGroup solely for spacing to the next row when expanded
-    Adw.PreferencesGroup { }
-  }
 }

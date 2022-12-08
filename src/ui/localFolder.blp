@@ -2,17 +2,17 @@ using Gtk 4.0;
 using Adw 1;
 
 template LocalFolderSettingsGroup : Adw.PreferencesGroup {
-  title: _("General");
+    title: _("General");
 
-  Adw.EntryRow folder_row {
-    title: _("Folder");
+    Adw.EntryRow folder_row {
+        title: _("Folder");
 
-    Button folder {
-      valign: center;
+        Button folder {
+            valign: center;
 
-      Adw.ButtonContent {
-        icon-name: "folder-open-symbolic";
-      }
+            Adw.ButtonContent {
+                icon-name: "folder-open-symbolic";
+            }
+        }
     }
-  }
 }

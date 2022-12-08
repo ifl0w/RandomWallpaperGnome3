@@ -2,65 +2,65 @@ using Gtk 4.0;
 using Adw 1;
 
 template UnsplashSettingsGroup : Adw.PreferencesGroup {
-  title: _("General");
+    title: _("General");
 
-  Adw.EntryRow keyword {
-    title: _("Keywords - Comma seperated");
-    input-purpose: free_form;
-  }
-
-  Adw.ActionRow {
-    title: _("Only Featured Images");
-    subtitle: _("This option results in a smaller image pool, but the images are considered to be of higher quality.");
-
-    Switch featured_only {
-      valign: center;
-    }
-  }
-
-  Adw.ActionRow {
-    title: _("Image Dimensions");
-
-    SpinButton {
-      valign: center;
-      numeric: true;
-
-      adjustment: Adjustment image_width {
-        step-increment: 1;
-        page-increment: 10;
-        lower: 1;
-        upper: 1000000;
-      };
+    Adw.EntryRow keyword {
+        title: _("Keywords - Comma seperated");
+        input-purpose: free_form;
     }
 
-    Label {
-      label: "x";
+    Adw.ActionRow {
+        title: _("Only Featured Images");
+        subtitle: _("This option results in a smaller image pool, but the images are considered to be of higher quality.");
+
+        Switch featured_only {
+            valign: center;
+        }
     }
 
-    SpinButton {
-      valign: center;
-      numeric: true;
+    Adw.ActionRow {
+        title: _("Image Dimensions");
 
-      adjustment: Adjustment image_height {
-        step-increment: 1;
-        page-increment: 10;
-        lower: 1;
-        upper: 1000000;
-      };
+        SpinButton {
+            valign: center;
+            numeric: true;
+
+            adjustment: Adjustment image_width {
+                step-increment: 1;
+                page-increment: 10;
+                lower: 1;
+                upper: 1000000;
+            };
+        }
+
+        Label {
+            label: "x";
+        }
+
+        SpinButton {
+            valign: center;
+            numeric: true;
+
+            adjustment: Adjustment image_height {
+                step-increment: 1;
+                page-increment: 10;
+                lower: 1;
+                upper: 1000000;
+            };
+        }
     }
-  }
 
-  Adw.PreferencesGroup {
-    title: _("Contraint");
+    Adw.PreferencesGroup {
+        title: _("Contraint");
 
-    // TODO: ExpanderRow with switch?
-    // Nested ExpanderRows behave strangely
-    Adw.ComboRow constraint_type {
-      title: _("Type");
+        // TODO: ExpanderRow with switch?
+        // Nested ExpanderRows behave strangely
+        Adw.ComboRow constraint_type {
+            title: _("Type");
+        }
+
+        Adw.EntryRow constraint_value {
+            title: _("Value");
+        }
     }
-
-    Adw.EntryRow constraint_value {
-      title: _("Value");
-    }
-  }
 }

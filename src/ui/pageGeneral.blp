@@ -2,182 +2,182 @@ using Gtk 4.0;
 using Adw 1;
 
 Adw.PreferencesPage page_general {
-  title: _("General");
-  icon-name: "preferences-system-symbolic";
+    title: _("General");
+    icon-name: "preferences-system-symbolic";
 
-  Adw.PreferencesGroup {
-    Adw.ActionRow request_new_wallpaper {
-      title: _("Request New Wallpaper");
-      activatable: true;
+    Adw.PreferencesGroup {
+        Adw.ActionRow request_new_wallpaper {
+            title: _("Request New Wallpaper");
+            activatable: true;
 
-      styles [
-        "suggested-action",
-        "title-3",
-      ]
+            styles [
+                "suggested-action",
+                "title-3",
+            ]
 
-      // I don't know how to center the title so just overwrite it with a label
-      child: Label {
-        label: _("Request New Wallpaper");
-        height-request: 50;
-      };
-    }
-  }
-
-  Adw.PreferencesGroup {
-    title: _("General Settings");
-
-    Adw.ComboRow combo_background_type {
-      title: _("Change type");
-      use-subtitle: true;
+            // I don't know how to center the title so just overwrite it with a label
+            child: Label {
+                label: _("Request New Wallpaper");
+                height-request: 50;
+            };
+        }
     }
 
-    Adw.ActionRow {
-      title: _("Hide the panel icon");
-      subtitle: _("You won't be able to access the history and the settings through the panel menu. Enabling this option currently is only reasonable in conjunction with the Auto-Fetching feature.\n<b>Only enable this option if you know how to open the settings without the panel icon!</b>");
+    Adw.PreferencesGroup {
+        title: _("General Settings");
 
-      Switch hide_panel_icon {
-        valign: center;
-      }
-    }
-
-    Adw.ActionRow {
-      title: _("Disable hover preview");
-      subtitle: _("Disable the desktop preview of the background while hovering the history items. Try enabling if you encounter crashes or lags of the gnome-shell while using the extension.");
-
-      Switch disable_hover_preview {
-        valign: center;
-      }
-    }
-
-    Adw.EntryRow general_post_command {
-      title: _("Run post-command - available variables: %wallpaper_path%");
-    }
-
-    Adw.ActionRow multiple_displays_row {
-      title: _("Different wallpapers on multiple displays");
-      subtitle: _("Requires HydraPaper.\nFills from History.");
-      sensitive: false;
-
-      Switch enable_multiple_displays {
-        valign: center;
-      }
-    }
-  }
-
-  Adw.PreferencesGroup {
-    title: _("History");
-
-    header-suffix: Box {
-      spacing: 14;
-
-      Button open_wallpaper_folder {
-        Adw.ButtonContent {
-          icon-name: "folder-open-symbolic";
-          label: _("Open");
+        Adw.ComboRow combo_background_type {
+            title: _("Change type");
+            use-subtitle: true;
         }
 
-        styles [
-          "flat",
-        ]
-      }
+        Adw.ActionRow {
+            title: _("Hide the panel icon");
+            subtitle: _("You won't be able to access the history and the settings through the panel menu. Enabling this option currently is only reasonable in conjunction with the Auto-Fetching feature.\n<b>Only enable this option if you know how to open the settings without the panel icon!</b>");
 
-      Button clear_history {
-        Adw.ButtonContent {
-          icon-name: "user-trash-symbolic";
-          label: _("Delete");
+            Switch hide_panel_icon {
+                valign: center;
+            }
         }
 
-        styles [
-          "destructive-action",
-        ]
-      }
-    };
+        Adw.ActionRow {
+            title: _("Disable hover preview");
+            subtitle: _("Disable the desktop preview of the background while hovering the history items. Try enabling if you encounter crashes or lags of the gnome-shell while using the extension.");
 
-    Adw.ActionRow {
-      title: _("History length");
-      subtitle: _("The number of wallpapers that will be shown in the history and stored in the wallpaper folder of this extension.");
+            Switch disable_hover_preview {
+                valign: center;
+            }
+        }
 
-      SpinButton {
-        valign: center;
-        numeric: true;
+        Adw.EntryRow general_post_command {
+            title: _("Run post-command - available variables: %wallpaper_path%");
+        }
 
-        adjustment: Adjustment history_length {
-          lower: 1;
-          upper: 100;
-          value: 10;
-          step-increment: 1;
-          page-increment: 10;
+        Adw.ActionRow multiple_displays_row {
+            title: _("Different wallpapers on multiple displays");
+            subtitle: _("Requires HydraPaper.\nFills from History.");
+            sensitive: false;
+
+            Switch enable_multiple_displays {
+                valign: center;
+            }
+        }
+    }
+
+    Adw.PreferencesGroup {
+        title: _("History");
+
+        header-suffix: Box {
+            spacing: 14;
+
+            Button open_wallpaper_folder {
+                Adw.ButtonContent {
+                    icon-name: "folder-open-symbolic";
+                    label: _("Open");
+                }
+
+                styles [
+                    "flat",
+                ]
+            }
+
+            Button clear_history {
+                Adw.ButtonContent {
+                    icon-name: "user-trash-symbolic";
+                    label: _("Delete");
+                }
+
+                styles [
+                    "destructive-action",
+                ]
+            }
         };
-      }
-    }
 
-    Adw.EntryRow row_favorites_folder{
-      title: _("Save for later folder");
+        Adw.ActionRow {
+            title: _("History length");
+            subtitle: _("The number of wallpapers that will be shown in the history and stored in the wallpaper folder of this extension.");
 
-      Button button_favorites_folder {
-        valign: center;
+            SpinButton {
+                valign: center;
+                numeric: true;
 
-        Adw.ButtonContent {
-          icon-name: "folder-open-symbolic";
+                adjustment: Adjustment history_length {
+                    lower: 1;
+                    upper: 100;
+                    value: 10;
+                    step-increment: 1;
+                    page-increment: 10;
+                };
+            }
         }
-      }
-    }
-  }
 
-  Adw.PreferencesGroup {
-    title: "Auto-Fetching";
+        Adw.EntryRow row_favorites_folder{
+            title: _("Save for later folder");
 
-    Adw.ExpanderRow af_switch {
-      title: _("Auto-Fetching");
-      subtitle: _("Automatically fetch new wallpapers based on an interval.");
-      show-enable-switch: true;
+            Button button_favorites_folder {
+                valign: center;
 
-      Adw.ActionRow {
-        title: _("Hours");
-
-        Scale duration_slider_hours {
-          draw-value: true;
-          orientation: horizontal;
-          hexpand: true;
-          digits: 0;
-
-          adjustment: Adjustment duration_hours {
-            value: 1;
-            step-increment: 1;
-            page-increment: 10;
-            lower: 0;
-            upper: 23;
-          };
+                Adw.ButtonContent {
+                    icon-name: "folder-open-symbolic";
+                }
+            }
         }
-      }
+    }
 
-      Adw.ActionRow {
-        title: _("Minutes");
+    Adw.PreferencesGroup {
+        title: "Auto-Fetching";
 
-        Scale duration_slider_minutes {
-          draw-value: true;
-          orientation: horizontal;
-          hexpand: true;
-          digits: 0;
+        Adw.ExpanderRow af_switch {
+            title: _("Auto-Fetching");
+            subtitle: _("Automatically fetch new wallpapers based on an interval.");
+            show-enable-switch: true;
 
-          adjustment: Adjustment duration_minutes {
-            value: 30;
-            step-increment: 1;
-            page-increment: 10;
-            lower: 1;
-            upper: 59;
-          };
+            Adw.ActionRow {
+                title: _("Hours");
+
+                Scale duration_slider_hours {
+                    draw-value: true;
+                    orientation: horizontal;
+                    hexpand: true;
+                    digits: 0;
+
+                    adjustment: Adjustment duration_hours {
+                        value: 1;
+                        step-increment: 1;
+                        page-increment: 10;
+                        lower: 0;
+                        upper: 23;
+                    };
+                }
+            }
+
+            Adw.ActionRow {
+                title: _("Minutes");
+
+                Scale duration_slider_minutes {
+                    draw-value: true;
+                    orientation: horizontal;
+                    hexpand: true;
+                    digits: 0;
+
+                    adjustment: Adjustment duration_minutes {
+                        value: 30;
+                        step-increment: 1;
+                        page-increment: 10;
+                        lower: 1;
+                        upper: 59;
+                    };
+                }
+            }
         }
-      }
-    }
 
-    Adw.ActionRow {
-      title: _("Fetch on startup (experimental)");
-      subtitle: _("Fetch a new wallpaper during the startup of the extension. Rebooting your system, and enabling the extension will trigger a new wallpaper request.\n<b>WARNING: Do not enable this feature if you observe crashes when requesting new wallpapers! This could render your system unstable as crashes could repeatedly happen on startup! In the case, you encounter such a problem, you will have to disable the extension or the feature manually from the commandline for your user.</b>");
+        Adw.ActionRow {
+            title: _("Fetch on startup (experimental)");
+            subtitle: _("Fetch a new wallpaper during the startup of the extension. Rebooting your system, and enabling the extension will trigger a new wallpaper request.\n<b>WARNING: Do not enable this feature if you observe crashes when requesting new wallpapers! This could render your system unstable as crashes could repeatedly happen on startup! In the case, you encounter such a problem, you will have to disable the extension or the feature manually from the commandline for your user.</b>");
 
-      Switch fetch_on_startup {
-        valign: center;
-      }
+            Switch fetch_on_startup {
+                valign: center;
+            }
+        }
     }
-  }
 }

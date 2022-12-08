@@ -1,0 +1,55 @@
+name: Build and create ZIP
+run-name: Generate javascript, ui and schema to publish
+on: [push, pull_request]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install dependencies
+        run: |
+          sudo apt -q update
+          sudo apt -q install --no-install-recommends npm
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Setup environment
+        run: |
+          ${{github.workspace}}/build.sh setup_env
+      - name: Check TypeScript
+        run: |
+          ${{github.workspace}}/build.sh check
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install dependencies
+        run: |
+          sudo apt -q update
+          sudo apt -q install --no-install-recommends npm blueprint-compiler libglib2.0-0 bash gnome-shell libgtk-4-bin libgtk-4-common libgtk-4-dev libadwaita-1-dev gir1.2-adw-1 gir1.2-gtk-4.0 zstd
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Ubuntu specific workarounds
+        run: |
+          cd ${{github.workspace}}/.github/workflows || exit 1
+          mkdir libadwaita
+          cd libadwaita || exit 1
+          wget https://archlinux.org/packages/extra/x86_64/libadwaita/download/ -O libadwaita.tar.zstd
+          tar -xf libadwaita.tar.zstd
+          sed -i -E 's#libdir=\$\{prefix\}/lib#libdir=${prefix}/lib/x86_64-linux-gnu#g' usr/lib/pkgconfig/libadwaita-1.pc
+          sed -i -E 's#Libs: -L\$\{prefix\}/lib -ladwaita-1#Libs: -L${prefix}/lib/x86_64-linux-gnu -ladwaita-1#g' usr/lib/pkgconfig/libadwaita-1.pc
+          sudo rm /usr/lib/x86_64-linux-gnu/girepository-1.0/Adw-1.typelib
+          sudo rm -r /usr/include/libadwaita-1
+          sudo rm /usr/lib/x86_64-linux-gnu/libadwaita-1.so
+          sudo rm /usr/share/gir-1.0/Adw-1.gir
+          sudo rm /usr/lib/x86_64-linux-gnu/pkgconfig/libadwaita-1.pc
+          sudo mv usr/lib/girepository-1.0/Adw-1.typelib /usr/lib/x86_64-linux-gnu/girepository-1.0/
+          sudo mv usr/include/libadwaita-1 /usr/include/
+          sudo mv usr/lib/libadwaita-1.so.0 /usr/lib/x86_64-linux-gnu/
+          sudo mv usr/lib/pkgconfig/libadwaita-1.pc /usr/lib/x86_64-linux-gnu/pkgconfig/
+          sudo mv usr/share/gir-1.0/Adw-1.gir /usr/share/gir-1.0/
+      - run: ${{github.workspace}}/build.sh setup_env
+      - run: ${{github.workspace}}/build.sh build
+      - run: ${{github.workspace}}/build.sh format
+      - run: ${{github.workspace}}/build.sh copy_static
+      - uses: actions/upload-artifact@v3
+        with:
+          name: randomwallpaper@iflow.space.shell-extension.zip
+          path: ${{github.workspace}}/randomwallpaper@iflow.space

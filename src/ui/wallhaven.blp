@@ -2,123 +2,123 @@ using Gtk 4.0;
 using Adw 1;
 
 template WallhavenSettingsGroup : Adw.PreferencesGroup {
-  // title: _("Source Settings");
+    // title: _("Source Settings");
 
-  Adw.PreferencesGroup {
-    title: _("General");
+    Adw.PreferencesGroup {
+        title: _("General");
 
-    Adw.EntryRow keyword {
-      title: _("Keywords - Comma seperated");
-      input-purpose: free_form;
-    }
-
-    Adw.PasswordEntryRow api_key {
-      title: _("API key");
-      input-purpose: password;
-
-      LinkButton {
-        valign: center;
-        uri: "https://wallhaven.cc/settings/account";
-
-        Adw.ButtonContent {
-          icon-name: "globe-symbolic";
+        Adw.EntryRow keyword {
+            title: _("Keywords - Comma seperated");
+            input-purpose: free_form;
         }
 
-        styles [
-          "flat",
-        ]
-      }
-    }
+        Adw.PasswordEntryRow api_key {
+            title: _("API key");
+            input-purpose: password;
 
-    Adw.EntryRow resolutions {
-      title: _("Resolutions: 1920x1080, 2560x1440");
-      input-purpose: free_form;
-      text: "";
-    }
+            LinkButton {
+                valign: center;
+                uri: "https://wallhaven.cc/settings/account";
 
-    Adw.ActionRow row_color {
-      title: _("Search by color");
-      subtitle: "";
+                Adw.ButtonContent {
+                    icon-name: "globe-symbolic";
+                }
 
-      Box {
-        Button button_color_undo {
-          valign: center;
-
-          styles [
-            "flat",
-          ]
-
-          Adw.ButtonContent {
-            icon-name: "edit-undo-symbolic";
-          }
+                styles [
+                    "flat",
+                ]
+            }
         }
 
-        Button button_color {
-          valign: center;
-
-          Adw.ButtonContent {
-            icon-name: "color-select-symbolic";
-          }
+        Adw.EntryRow resolutions {
+            title: _("Resolutions: 1920x1080, 2560x1440");
+            input-purpose: free_form;
+            text: "";
         }
-      }
-    }
-  }
 
-  Adw.PreferencesGroup {
-    title: _("Allowed content ratings");
+        Adw.ActionRow row_color {
+            title: _("Search by color");
+            subtitle: "";
 
-    Adw.ActionRow {
-      title: "SFW";
-      subtitle: _("Safe for work");
+            Box {
+                Button button_color_undo {
+                    valign: center;
 
-      Switch allow_sfw {
-        valign: center;
-      }
-    }
+                    styles [
+                        "flat",
+                    ]
 
-    Adw.ActionRow {
-      title: "Sketchy";
+                    Adw.ButtonContent {
+                        icon-name: "edit-undo-symbolic";
+                    }
+                }
 
-      Switch allow_sketchy {
-        valign: center;
-      }
-    }
+                Button button_color {
+                    valign: center;
 
-    Adw.ActionRow {
-      title: "NSFW";
-      subtitle: _("Not safe for work");
-
-      Switch allow_nsfw {
-        valign: center;
-      }
-    }
-  }
-
-  Adw.PreferencesGroup {
-    title: _("Categories");
-
-    Adw.ActionRow {
-      title: "General";
-
-      Switch category_general {
-        valign: center;
-      }
+                    Adw.ButtonContent {
+                        icon-name: "color-select-symbolic";
+                    }
+                }
+            }
+        }
     }
 
-    Adw.ActionRow {
-      title: "Anime";
+    Adw.PreferencesGroup {
+        title: _("Allowed content ratings");
 
-      Switch category_anime {
-        valign: center;
-      }
+        Adw.ActionRow {
+            title: "SFW";
+            subtitle: _("Safe for work");
+
+            Switch allow_sfw {
+                valign: center;
+            }
+        }
+
+        Adw.ActionRow {
+            title: "Sketchy";
+
+            Switch allow_sketchy {
+                valign: center;
+            }
+        }
+
+        Adw.ActionRow {
+            title: "NSFW";
+            subtitle: _("Not safe for work");
+
+            Switch allow_nsfw {
+                valign: center;
+            }
+        }
     }
 
-    Adw.ActionRow {
-      title: "People";
+    Adw.PreferencesGroup {
+        title: _("Categories");
 
-      Switch category_people {
-        valign: center;
-      }
+        Adw.ActionRow {
+            title: "General";
+
+            Switch category_general {
+                valign: center;
+            }
+        }
+
+        Adw.ActionRow {
+            title: "Anime";
+
+            Switch category_anime {
+                valign: center;
+            }
+        }
+
+        Adw.ActionRow {
+            title: "People";
+
+            Switch category_people {
+                valign: center;
+            }
+        }
     }
-  }
 }

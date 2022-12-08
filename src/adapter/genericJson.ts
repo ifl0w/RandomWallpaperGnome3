@@ -1,149 +1,136 @@
-const ByteArray = imports.byteArray;
+import * as ByteArray from '@gi-types/gjs-environment/legacyModules/byteArray';
 
-const Self = imports.misc.extensionUtils.getCurrentExtension();
-const HistoryModule = Self.imports.history;
-const JSONPath = Self.imports.jsonpath.jsonpath;
-const SettingsModule = Self.imports.settings;
-const SoupBowl = Self.imports.soupBowl;
+import * as JSONPath from './../jsonPath.js';
+import * as SettingsModule from './../settings.js';
+import * as Utils from './../utils.js';
 
-const BaseAdapter = Self.imports.adapter.baseAdapter;
+import {BaseAdapter} from './../adapter/baseAdapter.js';
+import {HistoryEntry} from './../history.js';
+import {SoupBowl} from './../soupBowl.js';
 
-var GenericJsonAdapter = class extends BaseAdapter.BaseAdapter {
-	constructor(id, name, wallpaperLocation) {
-		super({
-			id: id,
-			schemaID: SettingsModule.RWG_SETTINGS_SCHEMA_SOURCES_GENERIC_JSON,
-			schemaPath: `${SettingsModule.RWG_SETTINGS_SCHEMA_PATH}/sources/genericJSON/${id}/`,
-			wallpaperLocation: wallpaperLocation,
-			name: name,
-			defaultName: 'Generic JSON Source'
-		});
+class GenericJsonAdapter extends BaseAdapter {
+    private _bowl = new SoupBowl();
 
-		this.bowl = new SoupBowl.Bowl();
-	}
+    constructor(id: string, name: string, wallpaperLocation: string) {
+        super({
+            defaultName: 'Generic JSON Source',
+            id,
+            name,
+            schemaID: SettingsModule.RWG_SETTINGS_SCHEMA_SOURCES_GENERIC_JSON,
+            schemaPath: `${SettingsModule.RWG_SETTINGS_SCHEMA_PATH}/sources/genericJSON/${id}/`,
+            wallpaperLocation,
+        });
+    }
 
-	_getHistoryEntry() {
-		return new Promise((resolve, reject) => {
-			let url = this._settings.get("request-url", "string");
-			url = encodeURI(url);
+    private async _getHistoryEntry() {
+        let url = this._settings.getString('request-url');
+        url = encodeURI(url);
 
-			let message = this.bowl.Soup.Message.new('GET', url);
-			if (message === null) {
-				reject('Could not create request.');
-			}
+        const message = this._bowl.newGetMessage(url);
+        if (message === null)
+            throw new Error('Could not create request.');
 
-			this.bowl.send_and_receive(message, (response_body_bytes) => {
-				try {
-					const response_body = JSON.parse(ByteArray.toString(response_body_bytes));
+        const response_body_bytes = await this._bowl.send_and_receive(message);
+        if (!response_body_bytes)
+            throw new Error('Error fetching response.');
 
-					let imageJSONPath = this._settings.get("image-path", "string");
-					let postJSONPath = this._settings.get("post-path", "string");
-					let domainUrl = this._settings.get("domain", "string");
-					let authorNameJSONPath = this._settings.get("author-name-path", "string");
-					let authorUrlJSONPath = this._settings.get("author-url-path", "string");
+        const response_body = JSON.parse(ByteArray.toString(response_body_bytes));
+        const imageJSONPath = this._settings.getString('image-path');
+        const postJSONPath = this._settings.getString('post-path');
+        const domainUrl = this._settings.getString('domain');
+        const authorNameJSONPath = this._settings.getString('author-name-path');
+        const authorUrlJSONPath = this._settings.getString('author-url-path');
 
-					let rObject;
-					let imageDownloadUrl;
-					for (let i = 0; i < 5; i++) {
-						rObject = JSONPath.JSONPathParser.access(response_body, imageJSONPath);
-						imageDownloadUrl = this._settings.get("image-prefix", "string") + rObject.Object;
+        let returnObject;
+        let imageDownloadUrl;
+        for (let i = 0; i < 5; i++) {
+            returnObject = JSONPath.getTarget(response_body, imageJSONPath);
 
-						let imageBlocked = this._isImageBlocked(this.fileName(imageDownloadUrl));
+            if (returnObject && (typeof returnObject.Object === 'string' || typeof returnObject.Object === 'number') && returnObject.Object !== '') {
+                imageDownloadUrl = this._settings.getString('image-prefix') + String(returnObject.Object);
 
-						if (!imageBlocked) {
-							break;
-						}
+                const imageBlocked = this._isImageBlocked(Utils.fileName(imageDownloadUrl));
 
-						// Only retry with @random present in JSONPath
-						if (imageBlocked && !imageJSONPath.includes("@random")) {
-							// Abort and try again
-							resolve(null);
-						}
+                if (!imageBlocked)
+                    break;
 
-						imageDownloadUrl = null;
-					}
+                // Only retry with @random present in JSONPath
+                if (imageBlocked && !imageJSONPath.includes('@random')) {
+                    // Abort and try again
+                    return null;
+                }
+            }
 
-					if (imageDownloadUrl === null) {
-						reject("Only blocked images found.");
-					}
+            imageDownloadUrl = null;
+        }
 
-					// '@random' would yield different results so lets make sure the values stay
-					// the same as long as the path is identical
-					let samePath = imageJSONPath.substring(0, this.findFirstDifference(imageJSONPath, postJSONPath));
+        if (!imageDownloadUrl)
+            throw new Error('Only blocked images found.');
 
-					// count occurrences of '@random' to slice the array later
-					// https://stackoverflow.com/a/4009768
-					let occurrences = (samePath.match(/@random/g) || []).length;
-					let slicedRandomElements = rObject.RandomElements.slice(0, occurrences);
+        // '@random' would yield different results so lets make sure the values stay
+        // the same as long as the path is identical
+        const samePath = imageJSONPath.substring(0, Utils.findFirstDifference(imageJSONPath, postJSONPath));
 
-					let postUrl = JSONPath.JSONPathParser.access(response_body, postJSONPath, slicedRandomElements, false).Object;
-					postUrl = this._settings.get("post-prefix", "string") + postUrl;
-					if (typeof postUrl !== 'string' || !postUrl instanceof String) {
-						postUrl = null;
-					}
+        // count occurrences of '@random' to slice the array later
+        // https://stackoverflow.com/a/4009768
+        const occurrences = (samePath.match(/@random/g) || []).length;
+        const slicedRandomNumbers = returnObject?.RandomNumbers?.slice(0, occurrences);
 
-					let authorName = JSONPath.JSONPathParser.access(response_body, authorNameJSONPath, slicedRandomElements, false).Object;
-					if (typeof authorName !== 'string' || !authorName instanceof String) {
-						authorName = null;
-					}
+        // A bit cumbersome to handle "unknown" in the following parts:
+        // https://github.com/microsoft/TypeScript/issues/27706
 
-					let authorUrl = JSONPath.JSONPathParser.access(response_body, authorUrlJSONPath, slicedRandomElements, false).Object;
-					authorUrl = this._settings.get("author-url-prefix", "string") + authorUrl;
-					if (typeof authorUrl !== 'string' || !authorUrl instanceof String) {
-						authorUrl = null;
-					}
+        let postUrl: string;
+        const postUrlObject = JSONPath.getTarget(response_body, postJSONPath, slicedRandomNumbers ? [...slicedRandomNumbers] : undefined, false)?.Object;
+        if (typeof postUrlObject === 'string' || typeof postUrlObject === 'number')
+            postUrl = this._settings.getString('post-prefix') + String(postUrlObject);
+        else
+            postUrl = '';
 
-					let historyEntry = new HistoryModule.HistoryEntry(authorName, this._sourceName, imageDownloadUrl);
+        let authorName: string | null = null;
+        const authorNameObject = JSONPath.getTarget(response_body, authorNameJSONPath, slicedRandomNumbers ? [...slicedRandomNumbers] : undefined, false)?.Object;
+        if (typeof authorNameObject === 'string' && authorNameObject !== '')
+            authorName = authorNameObject;
 
-					if (authorUrl !== null && authorUrl !== "") {
-						historyEntry.source.authorUrl = authorUrl;
-					}
+        let authorUrl: string;
+        const authorUrlObject = JSONPath.getTarget(response_body, authorUrlJSONPath, slicedRandomNumbers ? [...slicedRandomNumbers] : undefined, false)?.Object;
+        if (typeof authorUrlObject === 'string' || typeof authorUrlObject === 'number')
+            authorUrl = this._settings.getString('author-url-prefix') + String(authorUrlObject);
+        else
+            authorUrl = '';
 
-					if (postUrl !== null && postUrl !== "") {
-						historyEntry.source.imageLinkUrl = postUrl;
-					}
+        const historyEntry = new HistoryEntry(authorName, this._sourceName, imageDownloadUrl);
 
-					if (domainUrl !== null && domainUrl !== "") {
-						historyEntry.source.sourceUrl = domainUrl;
-					}
+        if (authorUrl !== '')
+            historyEntry.source.authorUrl = authorUrl;
 
-					resolve(historyEntry);
-				} catch (e) {
-					reject("Unexpected response. (" + e + ")");
-				}
-			});
-		});
-	}
+        if (postUrl !== '')
+            historyEntry.source.imageLinkUrl = postUrl;
 
-	async requestRandomImage(callback) {
-		for (let i = 0; i < 5; i++) {
-			try {
-				let historyEntry = await this._getHistoryEntry();
+        if (domainUrl !== '')
+            historyEntry.source.sourceUrl = domainUrl;
 
-				if (historyEntry === null) {
-					// Image blocked, try again
-					continue;
-				}
+        return historyEntry;
+    }
 
-				if (callback) {
-					callback(historyEntry);
-				}
+    async requestRandomImage() {
+        for (let i = 0; i < 5; i++) {
+            try {
+                // This should run sequentially
+                // eslint-disable-next-line no-await-in-loop
+                const historyEntry = await this._getHistoryEntry();
 
-				return;
-			} catch (error) {
-				this._error(error, callback);
-				return;
-			}
-		}
+                if (historyEntry)
+                    return historyEntry;
+            } catch (error) {
+                this.logger.warn(`Failed getting image: ${error}`);
+                // Do not escalate yet, try again
+            }
 
-		this._error("Only blocked images found.", callback);
-	}
+            // Image blocked, try again
+        }
 
-	// https://stackoverflow.com/a/32859917
-	findFirstDifference(jsonPath1, jsonPath2) {
-		let i = 0;
-		if (jsonPath1 === jsonPath2) return -1;
-		while (jsonPath1[i] === jsonPath2[i]) i++;
-		return i;
-	}
-};
+        throw new Error('Only blocked images found.');
+    }
+}
+
+export {GenericJsonAdapter};
