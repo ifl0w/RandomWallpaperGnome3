@@ -1,138 +1,144 @@
-const ByteArray = imports.byteArray;
+import * as ByteArray from '@gi-types/gjs-environment/legacyModules/byteArray';
 
-const Self = imports.misc.extensionUtils.getCurrentExtension();
-const HistoryModule = Self.imports.history;
-const SettingsModule = Self.imports.settings;
-const SoupBowl = Self.imports.soupBowl;
-const Utils = Self.imports.utils;
+import * as SettingsModule from './../settings.js';
+import * as Utils from './../utils.js';
 
-const BaseAdapter = Self.imports.adapter.baseAdapter;
+import {BaseAdapter} from './../adapter/baseAdapter.js';
+import {HistoryEntry} from './../history.js';
+import {SoupBowl} from './../soupBowl.js';
 
-var WallhavenAdapter = class extends BaseAdapter.BaseAdapter {
-	constructor(id, name, wallpaperLocation) {
-		super({
-			id: id,
-			schemaID: SettingsModule.RWG_SETTINGS_SCHEMA_SOURCES_WALLHAVEN,
-			schemaPath: `${SettingsModule.RWG_SETTINGS_SCHEMA_PATH}/sources/wallhaven/${id}/`,
-			wallpaperLocation: wallpaperLocation,
-			name: name,
-			defaultName: 'Wallhaven'
-		});
+interface QueryOptions {
+    q: string,
+    apikey: string,
+    purity: string,
+    sorting: string,
+    categories: string,
+    resolutions: string[],
+    colors: string,
+    // atleast: string,
+    // ratios: string[],
+    // order: string,
+    // topRange: string,
+}
 
-		this.options = {
-			'q': '',
-			'apikey': '',
-			'purity': '110', // SFW, sketchy
-			'sorting': 'random',
-			'categories': '111', // General, Anime, People
-			'resolutions': ['1920x1200', '2560x1440']
-		};
+interface WallhavenSearchResponse {
+    data: {
+        path:  string,
+        url: string,
+    }[]
+}
 
-		this.bowl = new SoupBowl.Bowl();
-	}
+class WallhavenAdapter extends BaseAdapter {
+    private _bowl = new SoupBowl();
+    private _options: QueryOptions = {
+        q: '',
+        apikey: '',
+        purity: '110', // SFW, sketchy
+        sorting: 'random',
+        categories: '111', // General, Anime, People
+        resolutions: ['1920x1200', '2560x1440'],
+        colors: '',
+    };
 
-	requestRandomImage(callback) {
-		this._readOptionsFromSettings();
-		let optionsString = this._generateOptionsString();
+    constructor(id: string, name: string, wallpaperLocation: string) {
+        super({
+            id,
+            schemaID: SettingsModule.RWG_SETTINGS_SCHEMA_SOURCES_WALLHAVEN,
+            schemaPath: `${SettingsModule.RWG_SETTINGS_SCHEMA_PATH}/sources/wallhaven/${id}/`,
+            wallpaperLocation,
+            name,
+            defaultName: 'Wallhaven',
+        });
+    }
 
-		let url = 'https://wallhaven.cc/api/v1/search?' + encodeURI(optionsString);
-		let message = this.bowl.Soup.Message.new('GET', url);
-		if (message === null) {
-			this._error("Could not create request.", callback);
-			return;
-		}
+    async requestRandomImage() {
+        this._readOptionsFromSettings();
+        const optionsString = this._generateOptionsString(this._options);
 
-		this.bowl.send_and_receive(message, (response_body_bytes) => {
-			const response_body = ByteArray.toString(response_body_bytes);
+        const url = `https://wallhaven.cc/api/v1/search?${encodeURI(optionsString)}`;
+        const message = this._bowl.newGetMessage(url);
 
-			let response = null;
-			try {
-				response = JSON.parse(response_body).data;
-			} finally {
-				if (!response || response.length === 0) {
-					this._error("Failed to request image.", callback);
-					return;
-				}
-			}
+        const response_body_bytes = await this._bowl.send_and_receive(message);
 
-			let downloadURL;
-			let siteURL;
-			for (let i = 0; i < 5; i++) {
-				// get a random entry from the array
-				let entry = response[Utils.Utils.getRandomNumber(response.length)];
-				downloadURL = entry.path;
-				siteURL = entry.url;
+        let response: WallhavenSearchResponse['data'];
+        try {
+            response = JSON.parse(ByteArray.toString(response_body_bytes)).data;
+        } catch {
+            throw new Error('Error parsing API.');
+        }
+        if (!response || response.length === 0)
+            throw new Error('Empty response');
 
-				if (!this._isImageBlocked(this.fileName(downloadURL))) {
-					break;
-				}
+        let downloadURL: string | null = null;
+        let siteURL: string = '';
+        for (let i = 0; i < 5; i++) {
+            // get a random entry from the array
+            const entry = response[Utils.getRandomNumber(response.length)];
+            downloadURL = entry.path;
+            siteURL = entry.url;
 
-				downloadURL = null;
-			}
+            if (!this._isImageBlocked(Utils.fileName(downloadURL)))
+                break;
 
-			if (downloadURL === null) {
-				this._error("Only blocked images found.", callback);
-				return;
-			}
+            downloadURL = null;
+        }
 
-			let apiKey = this.options["apikey"];
-			if (apiKey) {
-				downloadURL += "?apikey=" + apiKey;
-			}
+        if (!downloadURL)
+            throw new Error('Only blocked images found.');
 
-			if (callback) {
-				let historyEntry = new HistoryModule.HistoryEntry(null, this._sourceName, downloadURL);
-				historyEntry.source.sourceUrl = 'https://wallhaven.cc/';
-				historyEntry.source.imageLinkUrl = siteURL;
-				callback(historyEntry);
-			}
-		});
-	}
+        const apiKey = this._options['apikey'];
+        if (apiKey !== '')
+            downloadURL += `?apikey=${apiKey}`;
 
-	_generateOptionsString() {
-		let options = this.options;
-		let optionsString = "";
+        const historyEntry = new HistoryEntry(null, this._sourceName, downloadURL);
+        historyEntry.source.sourceUrl = 'https://wallhaven.cc/';
+        historyEntry.source.imageLinkUrl = siteURL;
+        return historyEntry;
+    }
 
-		for (let key in options) {
-			if (options.hasOwnProperty(key)) {
-				if (Array.isArray(options[key])) {
-					optionsString += key + "=" + options[key].join() + "&";
-				} else {
-					if (options[key]) {
-						optionsString += key + "=" + options[key] + "&";
-					}
-				}
-			}
-		}
+    private _generateOptionsString<T extends QueryOptions>(options: T) {
+        let optionsString = '';
 
-		return optionsString;
-	}
+        for (const key in options) {
+            if (options.hasOwnProperty(key)) {
+                if (Array.isArray(options[key]))
+                    // eslint-disable-next-line no-extra-parens
+                    optionsString += `${key}=${(options[key] as Array<string>).join()}&`;
+                else if (options[key] !== '')
+                    optionsString += `${key}=${options[key]}&`;
+            }
+        }
 
-	_readOptionsFromSettings() {
-		const keywords = this._settings.get('keyword', 'string').split(",");
-		if (keywords.length > 0) {
-			const randomKeyword = keywords[Utils.Utils.getRandomNumber(keywords.length)];
-			this.options.q = randomKeyword.trim();
-		}
-		this.options.apikey = this._settings.get('api-key', 'string');
+        return optionsString;
+    }
 
-		this.options.resolutions = this._settings.get('resolutions', 'string').split(',');
-		this.options.resolutions = this.options.resolutions.map((elem) => {
-			return elem.trim();
-		});
+    private _readOptionsFromSettings() {
+        const keywords = this._settings.getString('keyword').split(',');
+        if (keywords.length > 0) {
+            const randomKeyword = keywords[Utils.getRandomNumber(keywords.length)];
+            this._options.q = randomKeyword.trim();
+        }
+        this._options.apikey = this._settings.getString('api-key');
 
-		let categories = [];
-		categories.push(+this._settings.get('category-general', 'boolean')); // + is implicit conversion to int
-		categories.push(+this._settings.get('category-anime', 'boolean'));
-		categories.push(+this._settings.get('category-people', 'boolean'));
-		this.options.categories = categories.join('');
+        this._options.resolutions = this._settings.getString('resolutions').split(',');
+        this._options.resolutions = this._options.resolutions.map(elem => {
+            return elem.trim();
+        });
 
-		let purity = [];
-		purity.push(+this._settings.get('allow-sfw', 'boolean'));
-		purity.push(+this._settings.get('allow-sketchy', 'boolean'));
-		purity.push(+this._settings.get('allow-nsfw', 'boolean'));
-		this.options.purity = purity.join('');
+        let categories = [];
+        categories.push(Number(this._settings.getBoolean('category-general'))); // + is implicit conversion to int
+        categories.push(Number(this._settings.getBoolean('category-anime')));
+        categories.push(Number(this._settings.getBoolean('category-people')));
+        this._options.categories = categories.join('');
 
-		this.options.colors = this._settings.get('color', 'string');
-	}
-};
+        let purity = [];
+        purity.push(Number(this._settings.getBoolean('allow-sfw')));
+        purity.push(Number(this._settings.getBoolean('allow-sketchy')));
+        purity.push(Number(this._settings.getBoolean('allow-nsfw')));
+        this._options.purity = purity.join('');
+
+        this._options.colors = this._settings.getString('color');
+    }
+}
+
+export {WallhavenAdapter};

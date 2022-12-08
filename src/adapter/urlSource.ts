@@ -1,57 +1,47 @@
-const Self = imports.misc.extensionUtils.getCurrentExtension();
-const HistoryModule = Self.imports.history;
-const JSONPath = Self.imports.jsonpath.jsonpath;
-const SettingsModule = Self.imports.settings;
+import * as SettingsModule from './../settings.js';
 
-const BaseAdapter = Self.imports.adapter.baseAdapter;
+import {BaseAdapter} from './../adapter/baseAdapter.js';
+import {HistoryEntry} from './../history.js';
 
-var UrlSourceAdapter = class extends BaseAdapter.BaseAdapter {
-	constructor(id, name, wallpaperLocation) {
-		super({
-			id: id,
-			schemaID: SettingsModule.RWG_SETTINGS_SCHEMA_SOURCES_URL_SOURCE,
-			schemaPath: `${SettingsModule.RWG_SETTINGS_SCHEMA_PATH}/sources/urlSource/${id}/`,
-			wallpaperLocation: wallpaperLocation,
-			name: name,
-			defaultName: 'Static URL'
-		});
-	}
+class UrlSourceAdapter extends BaseAdapter {
+    constructor(id: string, name: string, wallpaperLocation: string) {
+        super({
+            defaultName: 'Static URL',
+            id,
+            name,
+            schemaID: SettingsModule.RWG_SETTINGS_SCHEMA_SOURCES_URL_SOURCE,
+            schemaPath: `${SettingsModule.RWG_SETTINGS_SCHEMA_PATH}/sources/urlSource/${id}/`,
+            wallpaperLocation,
+        });
+    }
 
-	requestRandomImage(callback) {
-		let imageDownloadUrl = this._settings.get("image-url", "string");
-		let authorName = this._settings.get("author-name", "string");
-		let authorUrl = this._settings.get("author-url", "string");
-		let domainUrl = this._settings.get("domain", "string");
-		let postUrl = this._settings.get("domain", "string");
+    requestRandomImage() {
+        const imageDownloadUrl = this._settings.getString('image-url');
+        let authorName: string | null = this._settings.getString('author-name');
+        const authorUrl = this._settings.getString('author-url');
+        const domainUrl = this._settings.getString('domain');
+        const postUrl = this._settings.getString('domain');
 
-		if (typeof postUrl !== 'string' || !postUrl instanceof String) {
-			postUrl = null;
-		}
+        if (imageDownloadUrl === '')
+            throw new Error('Missing download url');
 
-		if (typeof authorName !== 'string' || !authorName instanceof String) {
-			authorName = null;
-		}
+        if (authorName === '')
+            authorName = null;
 
-		if (typeof authorUrl !== 'string' || !authorUrl instanceof String) {
-			authorUrl = null;
-		}
+        const historyEntry = new HistoryEntry(authorName, this._sourceName, imageDownloadUrl);
 
-		if (callback) {
-			let historyEntry = new HistoryModule.HistoryEntry(authorName, this._sourceName, imageDownloadUrl);
+        if (authorUrl !== '')
+            historyEntry.source.authorUrl = authorUrl;
 
-			if (authorUrl !== null && authorUrl !== "") {
-				historyEntry.source.authorUrl = authorUrl;
-			}
+        if (postUrl !== '')
+            historyEntry.source.imageLinkUrl = postUrl;
 
-			if (postUrl !== null && postUrl !== "") {
-				historyEntry.source.imageLinkUrl = postUrl;
-			}
 
-			if (domainUrl !== null && domainUrl !== "") {
-				historyEntry.source.sourceUrl = domainUrl;
-			}
+        if (domainUrl !== '')
+            historyEntry.source.sourceUrl = domainUrl;
 
-			callback(historyEntry);
-		}
-	}
-};
+        return Promise.resolve(historyEntry);
+    }
+}
+
+export {UrlSourceAdapter};

@@ -1,93 +1,113 @@
-const ByteArray = imports.byteArray;
+import * as ByteArray from '@gi-types/gjs-environment/legacyModules/byteArray';
 
-const Self = imports.misc.extensionUtils.getCurrentExtension();
-const HistoryModule = Self.imports.history;
-const SettingsModule = Self.imports.settings;
-const SoupBowl = Self.imports.soupBowl;
-const Utils = Self.imports.utils;
+import * as SettingsModule from './../settings.js';
+import * as Utils from './../utils.js';
 
-const BaseAdapter = Self.imports.adapter.baseAdapter;
+import {BaseAdapter} from './../adapter/baseAdapter.js';
+import {HistoryEntry} from './../history.js';
+import {SoupBowl} from './../soupBowl.js';
 
-var RedditAdapter = class extends BaseAdapter.BaseAdapter {
-	constructor(id, name, wallpaperLocation) {
-		super({
-			id: id,
-			schemaID: SettingsModule.RWG_SETTINGS_SCHEMA_SOURCES_REDDIT,
-			schemaPath: `${SettingsModule.RWG_SETTINGS_SCHEMA_PATH}/sources/reddit/${id}/`,
-			wallpaperLocation: wallpaperLocation,
-			name: name,
-			defaultName: 'Reddit'
-		});
+interface RedditResponse {
+    data: {
+        children: RedditSubmission[],
+    }
+}
 
-		this.bowl = new SoupBowl.Bowl();
-	}
+interface RedditSubmission {
+    data: {
+        post_hint: string,
+        over_18: boolean,
+        subreddit_name_prefixed: string,
+        permalink: string,
+        preview: {
+            images: {
+                source: {
+                    width: number,
+                    height: number,
+                    url: string,
+                }
+            }[]
+        }
+    }
+}
 
-	_ampDecode(string) {
-		return string.replace(/\&amp;/g, '&');
-	}
+class RedditAdapter extends BaseAdapter {
+    private _bowl = new SoupBowl();
 
-	requestRandomImage(callback) {
-		const subreddits = this._settings.get('subreddits', 'string').split(',').map(s => s.trim()).join('+');
-		const require_sfw = this._settings.get('allow-sfw', 'boolean');
+    constructor(id: string, name: string, wallpaperLocation: string) {
+        super({
+            defaultName: 'Reddit',
+            id,
+            name,
+            schemaID: SettingsModule.RWG_SETTINGS_SCHEMA_SOURCES_REDDIT,
+            schemaPath: `${SettingsModule.RWG_SETTINGS_SCHEMA_PATH}/sources/reddit/${id}/`,
+            wallpaperLocation,
+        });
+    }
 
-		const url = encodeURI('https://www.reddit.com/r/' + subreddits + '.json');
-		let message = this.bowl.Soup.Message.new('GET', url);
-		if (message === null) {
-			this._error("Could not create request.", callback);
-			return;
-		}
+    private _ampDecode(string: string) {
+        return string.replace(/&amp;/g, '&');
+    }
 
-		this.bowl.send_and_receive(message, (response_body_bytes) => {
-			try {
-				const response_body = JSON.parse(ByteArray.toString(response_body_bytes));
+    async requestRandomImage() {
+        const subreddits = this._settings.getString('subreddits').split(',').map(s => s.trim()).join('+');
+        const require_sfw = this._settings.getBoolean('allow-sfw');
 
-				const submissions = response_body.data.children.filter(child => {
-					if (child.data.post_hint !== 'image') return false;
-					if (require_sfw) return child.data.over_18 === false;
+        const url = encodeURI(`https://www.reddit.com/r/${subreddits}.json`);
+        const message = this._bowl.newGetMessage(url);
 
-					let minWidth = this._settings.get('min-width', 'int');
-					let minHeight = this._settings.get('min-height', 'int');
-					if (child.data.preview.images[0].source.width < minWidth) return false;
-					if (child.data.preview.images[0].source.height < minHeight) return false;
+        const response_body_bytes = await this._bowl.send_and_receive(message);
 
-					let imageRatio1 = this._settings.get('image-ratio1', 'int');
-					let imageRatio2 = this._settings.get('image-ratio2', 'int');
-					if (child.data.preview.images[0].source.width / imageRatio1 * imageRatio2 < child.data.preview.images[0].source.height) return false;
-					return true;
-				});
-				if (submissions.length === 0) {
-					this._error("No suitable submissions found!", callback);
-					return;
-				}
+        try {
+            const response_body: RedditResponse = JSON.parse(ByteArray.toString(response_body_bytes));
 
-				let submission;
-				let imageDownloadUrl;
-				for (let i = 0; i < 5; i++) {
-					const random = Utils.Utils.getRandomNumber(submissions.length);
-					submission = submissions[random].data;
-					imageDownloadUrl = this._ampDecode(submission.preview.images[0].source.url);
+            const submissions = response_body.data.children.filter(child => {
+                if (child.data.post_hint !== 'image')
+                    return false;
+                if (require_sfw)
+                    return child.data.over_18 === false;
 
-					if (!this._isImageBlocked(this.fileName(imageDownloadUrl))) {
-						break;
-					}
+                const minWidth = this._settings.getInt('min-width');
+                const minHeight = this._settings.getInt('min-height');
+                if (child.data.preview.images[0].source.width < minWidth)
+                    return false;
+                if (child.data.preview.images[0].source.height < minHeight)
+                    return false;
 
-					imageDownloadUrl = null;
-				}
+                const imageRatio1 = this._settings.getInt('image-ratio1');
+                const imageRatio2 = this._settings.getInt('image-ratio2');
+                if (child.data.preview.images[0].source.width / imageRatio1 * imageRatio2 < child.data.preview.images[0].source.height)
+                    return false;
+                return true;
+            });
 
-				if (imageDownloadUrl === null) {
-					this._error("Only blocked images found.", callback);
-					return;
-				}
+            if (submissions.length === 0)
+                throw new Error('No suitable submissions found!');
 
-				if (callback) {
-					let historyEntry = new HistoryModule.HistoryEntry(null, this._sourceName, imageDownloadUrl);
-					historyEntry.source.sourceUrl = 'https://www.reddit.com/' + submission.subreddit_name_prefixed;
-					historyEntry.source.imageLinkUrl = 'https://www.reddit.com/' + submission.permalink;
-					callback(historyEntry);
-				}
-			} catch (e) {
-				this._error("Could not create request. (" + e + ")", callback);
-			}
-		});
-	}
-};
+            let submission = null;
+            let imageDownloadUrl = null;
+            for (let i = 0; i < 5; i++) {
+                const random = Utils.getRandomNumber(submissions.length);
+                submission = submissions[random].data;
+                imageDownloadUrl = this._ampDecode(submission.preview.images[0].source.url);
+
+                if (!this._isImageBlocked(Utils.fileName(imageDownloadUrl)))
+                    break;
+
+                imageDownloadUrl = null;
+            }
+
+            if (!imageDownloadUrl || !submission)
+                throw new Error('Only blocked images found.');
+
+            const historyEntry = new HistoryEntry(null, this._sourceName, imageDownloadUrl);
+            historyEntry.source.sourceUrl = `https://www.reddit.com/${submission.subreddit_name_prefixed}`;
+            historyEntry.source.imageLinkUrl = `https://www.reddit.com/${submission.permalink}`;
+            return historyEntry;
+        } catch (e) {
+            throw new Error(`Could not create request. (${e})`);
+        }
+    }
+}
+
+export {RedditAdapter};

@@ -1,114 +1,109 @@
-const Self = imports.misc.extensionUtils.getCurrentExtension();
-const Utils = Self.imports.utils;
+import * as Utils from './utils.js';
 
-var JSONPathParser = class {
+/**
+ * Access a simple json path expression of an object.
+ * Returns the accessed value or null if the access was not possible.
+ * Accepts predefined number values to access the same elements as previously
+ * and allows to override the use of these values.
+ *
+ * @param {unknown} inputObject A JSON object
+ * @param {string} inputString JSONPath to follow, see wiki for syntax
+ * @param {number[]} randomNumbers Array of pre-generated numbers
+ * @param {boolean} newRandomness Whether to ignore a given randomNumbers array
+ */
+function getTarget(inputObject: unknown, inputString: string, randomNumbers?: number[], newRandomness?: boolean): { Object: unknown, RandomNumbers?: number[] } | null {
+    if (!inputObject)
+        return null;
 
-	/**
-	 * Access a simple json path expression of an object.
-	 * Returns the accessed value or null if the access was not possible.
-	 *
-	 * @param inputObject the object to access
-	 * @param inputString the json path expression
-	 * @param randomElements the predefined random Elements
-	 * @param newRandomness whether to ignore previously defined random Elements
-	 * @returns {*}
-	 */
-	static access(inputObject, inputString, randomElements = null, newRandomness = true) {
-		if (inputObject === null || inputObject === undefined) {
-			return null;
-		}
+    if (inputString.length === 0) {
+        return {
+            Object: inputObject,
+            RandomNumbers: randomNumbers,
+        };
+    }
 
-		if (inputString.length === 0) {
-			return {
-				Object: inputObject,
-				RandomElements: randomElements,
-			};
-		}
+    if (!randomNumbers) {
+        randomNumbers = [];
+        newRandomness = true;
+    }
 
-		if (randomElements === null) {
-			randomElements = [];
-			newRandomness = true;
-		}
+    let startDot = inputString.indexOf('.');
+    if (startDot === -1)
+        startDot = inputString.length;
 
-		let startDot = inputString.indexOf('.');
-		if (startDot === -1) {
-			startDot = inputString.length;
-		}
+    let keyString = inputString.slice(0, startDot);
+    const inputStringTail = inputString.slice(startDot + 1);
 
-		let keyString = inputString.slice(0, startDot);
-		let inputStringTail = inputString.slice(startDot + 1);
+    const startParentheses = keyString.indexOf('[');
 
-		let startParentheses = keyString.indexOf('[');
+    if (startParentheses === -1) {
+        // Expect Object here
+        const targetObject = _getObjectMember(inputObject, keyString);
+        if (!targetObject)
+            return null;
 
-		if (startParentheses === -1) {
+        return getTarget(targetObject, inputStringTail, randomNumbers, newRandomness);
+    } else {
+        const indexString = keyString.slice(startParentheses + 1, keyString.length - 1);
+        keyString = keyString.slice(0, startParentheses);
 
-			let targetObject = this._getTargetObject(inputObject, keyString);
-			if (targetObject == null) {
-				return null;
-			}
+        // Expect an Array at this point
+        const targetObject = _getObjectMember(inputObject, keyString);
+        if (!targetObject || !Array.isArray(targetObject))
+            return null;
 
-			return this.access(targetObject, inputStringTail, randomElements, newRandomness);
+        switch (indexString) {
+        case '@random': {
+            let randomNumber: number = -1;
+            let randomElement: unknown = null;
 
-		} else {
+            if (!newRandomness && randomNumbers.length > 0) {
+                // Take and remove first element
+                randomNumber = randomNumbers.shift() ?? -1;
+                randomElement = targetObject[randomNumber];
+            } else {
+                [randomElement, randomNumber] = _randomElement(targetObject);
 
-			let indexString = keyString.slice(startParentheses + 1, keyString.length - 1);
-			keyString = keyString.slice(0, startParentheses);
+                if (newRandomness)
+                    randomNumbers.push(randomNumber);
+            }
 
-			let targetObject = this._getTargetObject(inputObject, keyString);
-			if (targetObject == null) {
-				return null;
-			}
+            return getTarget(randomElement, inputStringTail, randomNumbers, newRandomness);
+        }
+        // add special keywords here
+        default:
+            // expecting integer
+            return getTarget(targetObject[parseInt(indexString)], inputStringTail, randomNumbers, newRandomness);
+        }
+    }
+}
 
-			switch (indexString) {
-				case "@random":
-					let randomNumber = null;
-					if (!newRandomness && randomElements.length >= 1) {
-						// Take and remove first element
-						randomNumber = randomElements.shift();
-					} else if (!newRandomness && randomElements.length < 1) {
-						randomNumber = this.randomElement(targetObject);
-					} else {
-						randomNumber = this.randomElement(targetObject);
-						randomElements.push(randomNumber);
-					}
+/**
+ * Check validity of the key string and return the target member or null.
+ *
+ * @param {object} inputObject JSON object
+ * @param {string} keyString Name of the key in the object
+ */
+function _getObjectMember(inputObject: object, keyString: string): unknown | null {
+    if (keyString === '$')
+        return inputObject;
 
-					return this.access(randomNumber, inputStringTail, randomElements, newRandomness);
-				// add special keywords here
-				default:
-					// expecting integer
-					return this.access(targetObject[parseInt(indexString)], inputStringTail, randomElements, newRandomness);
-			}
+    for (const [key, value] of Object.entries(inputObject)) {
+        if (key === keyString)
+            return value;
+    }
 
-		}
+    return null;
+}
 
-	};
+/**
+ * Returns the value of a random key of a given array.
+ *
+ * @param {Array<T>} array Array with values
+ */
+function _randomElement<T>(array: Array<T>): [T, number] {
+    const randomNumber = Utils.getRandomNumber(array.length);
+    return [array[randomNumber], randomNumber];
+}
 
-	/**
-	 * Check validity of the key string and return the target object or null.
-	 * @param inputObject
-	 * @param keyString
-	 * @returns {*}
-	 * @private
-	 */
-	static _getTargetObject(inputObject, keyString) {
-		if (!keyString.empty && keyString !== "$" && !inputObject.hasOwnProperty(keyString)) {
-			return null;
-		}
-
-		return (keyString === "$") ? inputObject : inputObject[keyString];
-	};
-
-	/**
-	 * Returns the value of a random key of a given object.
-	 *
-	 * @param inputObject
-	 * @returns {*}
-	 */
-	static randomElement(inputObject) {
-		let keys = Object.keys(inputObject);
-		let randomIndex = Utils.Utils.getRandomNumber(keys.length);
-
-		return inputObject[keys[randomIndex]];
-	}
-
-};
+export {getTarget};

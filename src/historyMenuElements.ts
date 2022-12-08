@@ -1,261 +1,256 @@
-const PopupMenu = imports.ui.popupMenu;
-const St = imports.gi.St;
-const Util = imports.misc.util;
-const GdkPixbuf = imports.gi.GdkPixbuf;
-const Clutter = imports.gi.Clutter;
-const Cogl = imports.gi.Cogl;
-const GLib = imports.gi.GLib;
-const Gio = imports.gi.Gio;
-const Gtk = imports.gi.Gtk;
-const GObject = imports.gi.GObject;
+import * as GdkPixbuf from 'gi://GdkPixbuf';
+import * as Gio from 'gi://Gio';
+import * as GLib from 'gi://GLib';
+import * as GObject from 'gi://GObject';
+import * as Gtk from 'gi://Gtk';
 
-const Self = imports.misc.extensionUtils.getCurrentExtension();
-const Settings = Self.imports.settings;
-const LoggerModule = Self.imports.logger;
-const Timer = Self.imports.timer;
+import * as Clutter from '@gi-types/clutter';
+import * as Cogl from '@gi-types/cogl';
+import * as St from '@gi-types/st';
 
-var HistoryElement = GObject.registerClass({
-	GTypeName: 'HistoryElement',
+import * as PopupMenu from '@gi/ui/popupMenu';
+
+import * as HistoryModule from './history.js';
+import * as Settings from './settings.js';
+import * as Utils from './utils.js';
+
+import {AFTimer as Timer} from './timer.js';
+import {Logger} from './logger.js';
+
+// https://gjs.guide/guides/gjs/asynchronous-programming.html#promisify-helper
+Gio._promisify(Gio.File.prototype, 'copy_async', 'copy_finish');
+Gio._promisify(Gio.File.prototype, 'replace_contents_bytes_async', 'replace_contents_finish');
+
+const HistoryElement = GObject.registerClass({
+    GTypeName: 'HistoryElement',
 }, class HistoryElement extends PopupMenu.PopupSubMenuMenuItem {
-	_init(historyEntry, index) {
-		super._init("", false);
-		this.logger = new LoggerModule.Logger('RWG3', 'HistoryElement');
-		this.historyEntry = null;
-		this.setAsWallpaperItem = null;
-		this.previewItem = null;
-		this._previewActor = null;
-		this._settings = new Settings.Settings();
+    private _logger = new Logger('RWG3', 'HistoryElement');
+    private _settings = new Settings.Settings();
 
-		let timestamp = historyEntry.timestamp;
-		let date = new Date(timestamp);
+    private _prefixLabel;
+    private _container;
+    private _dateLabel;
+    private _previewActor: Clutter.Actor | null = null;
 
-		let timeString = date.toLocaleTimeString();
-		let dateString = date.toLocaleDateString();
+    protected _setAsWallpaperItem;
 
-		let prefixText = String(index) + '.';
-		this.prefixLabel = new St.Label({
-			text: prefixText,
-			style_class: 'rwg-history-index'
-		});
+    historyId: string;
+    historyEntry: HistoryModule.HistoryEntry;
 
-		if (index === 0) {
-			this.label.text = 'Current Background';
-		} else {
-			this.actor.insert_child_above(this.prefixLabel, this.label);
-			this.label.destroy();
-		}
+    constructor(params: object | undefined, historyEntry: HistoryModule.HistoryEntry, index: number) {
+        super('', false);
 
-		this._container = new St.BoxLayout({
-			vertical: true
-		});
+        this.historyEntry = historyEntry;
+        this.historyId = this.historyEntry.id; // extend the actor with the historyId
 
-		this.dateLabel = new St.Label({
-			text: dateString,
-			style_class: 'rwg-history-date'
-		});
-		this._container.add_child(this.dateLabel);
+        const timestamp = this.historyEntry.timestamp;
+        const date = new Date(timestamp);
 
-		this.timeLabel = new St.Label({
-			text: timeString,
-			style_class: 'rwg-history-time'
-		});
-		this._container.add_child(this.timeLabel);
+        const timeString = date.toLocaleTimeString();
+        const dateString = date.toLocaleDateString();
 
-		this.historyEntry = historyEntry;
-		this.actor.historyId = historyEntry.id; // extend the actor with the historyId
+        const prefixText = `${String(index)}.`;
+        this._prefixLabel = new St.Label({
+            text: prefixText,
+            style_class: 'rwg-history-index',
+        });
 
-		if (index !== 0) {
-			this.actor.insert_child_above(this._container, this.prefixLabel);
-		}
+        if (index === 0) {
+            this.label.text = 'Current Background';
+        } else {
+            this.actor.insert_child_above(this._prefixLabel, this.label);
+            this.label.destroy();
+        }
 
-		this.menu.actor.add_style_class_name("rwg-history-element-content");
+        this._container = new St.BoxLayout({
+            vertical: true,
+        });
 
-		if (this.historyEntry.source !== null) {
-			if (this.historyEntry.source.author !== null
-				&& this.historyEntry.source.authorUrl !== null) {
-				this.authorItem = new PopupMenu.PopupMenuItem('Image By: ' + this.historyEntry.source.author);
-				this.authorItem.connect('activate', () => {
-					Util.spawn(['xdg-open', this.historyEntry.source.authorUrl]);
-				});
+        this._dateLabel = new St.Label({
+            text: dateString,
+            style_class: 'rwg-history-date',
+        });
+        this._container.add_child(this._dateLabel);
 
-				this.menu.addMenuItem(this.authorItem);
-			}
+        const timeLabel = new St.Label({
+            text: timeString,
+            style_class: 'rwg-history-time',
+        });
+        this._container.add_child(timeLabel);
 
-			if (this.historyEntry.source.source !== null
-				&& this.historyEntry.source.sourceUrl !== null) {
-				this.sourceItem = new PopupMenu.PopupMenuItem('Image From: ' + this.historyEntry.source.source);
-				this.sourceItem.connect('activate', () => {
-					Util.spawn(['xdg-open', this.historyEntry.source.sourceUrl]);
-				});
+        if (index !== 0)
+            this.actor.insert_child_above(this._container, this._prefixLabel);
 
-				this.menu.addMenuItem(this.sourceItem);
-			}
+        this.menu.actor.add_style_class_name('rwg-history-element-content');
 
-			this.imageUrlItem = new PopupMenu.PopupMenuItem('Open Image In Browser');
-			this.imageUrlItem.connect('activate', () => {
-				Util.spawn(['xdg-open', this.historyEntry.source.imageLinkUrl]);
-			});
+        if (this.historyEntry.source !== null) {
+            if (this.historyEntry.source.author !== null &&
+                this.historyEntry.source.authorUrl !== null) {
+                const authorItem = new PopupMenu.PopupMenuItem(`Image By: ${this.historyEntry.source.author}`);
+                authorItem.connect('activate', () => {
+                    if (this.historyEntry.source.authorUrl)
+                        Utils.execCheck(['xdg-open', this.historyEntry.source.authorUrl]).catch(logError);
+                });
 
-			this.menu.addMenuItem(this.imageUrlItem);
-		} else {
-			this.menu.addMenuItem(new PopupMenu.PopupMenuItem('Unknown source.'));
-		}
+                this.menu.addMenuItem(authorItem);
+            }
 
-		this.previewItem = new PopupMenu.PopupBaseMenuItem({ can_focus: false, reactive: false });
-		this.menu.addMenuItem(this.previewItem);
+            if (this.historyEntry.source.source !== null &&
+                this.historyEntry.source.sourceUrl !== null) {
+                const sourceItem = new PopupMenu.PopupMenuItem(`Image From: ${this.historyEntry.source.source}`);
+                sourceItem.connect('activate', () => {
+                    if (this.historyEntry.source.sourceUrl)
+                        Utils.execCheck(['xdg-open', this.historyEntry.source.sourceUrl]).catch(logError);
+                });
 
-		this.setAsWallpaperItem = new PopupMenu.PopupMenuItem('Set As Wallpaper');
-		this.setAsWallpaperItem.connect('activate', () => {
-			this.emit('activate', null); // Fixme: not sure what the second parameter should be. null seems to work fine for now.
-		});
+                this.menu.addMenuItem(sourceItem);
+            }
 
-		if (index !== 0) {
-			// this.menu.addMenuItem(new PopupMenu.PopupBaseMenuItem({ can_focus: false, reactive: false })); // theme independent spacing
-			this.menu.addMenuItem(this.setAsWallpaperItem);
-		}
+            const imageUrlItem = new PopupMenu.PopupMenuItem('Open Image In Browser');
+            imageUrlItem.connect('activate', () => {
+                if (this.historyEntry.source.imageLinkUrl)
+                    Utils.execCheck(['xdg-open', this.historyEntry.source.imageLinkUrl]).catch(logError);
+            });
 
-		this.copyToFavorites = new PopupMenu.PopupMenuItem('Save For Later');
-		this.copyToFavorites.connect('activate', () => {
-			this._saveImage();
-		});
-		this.menu.addMenuItem(this.copyToFavorites);
+            this.menu.addMenuItem(imageUrlItem);
+        } else {
+            this.menu.addMenuItem(new PopupMenu.PopupMenuItem('Unknown source.'));
+        }
 
-		// Static URLs can't block images (yet?)
-		if (historyEntry.adapter.type !== 5) {
-			this.blockImage = new PopupMenu.PopupMenuItem('Add To Blocklist');
-			this.blockImage.connect('activate', () => {
-				this._addToBlocklist(historyEntry);
-			});
-			this.menu.addMenuItem(this.blockImage);
-		}
+        const previewItem = new PopupMenu.PopupBaseMenuItem({can_focus: false, reactive: false});
+        this.menu.addMenuItem(previewItem);
 
-		/*
-			Load the image on first opening of the sub menu instead of during creation of the history list.
-		 */
-		this.menu.connect('open-state-changed', (self, open) => {
-			if (open) {
-				if (this._previewActor !== null) {
-					return;
-				}
+        this._setAsWallpaperItem = new PopupMenu.PopupMenuItem('Set As Wallpaper');
+        this._setAsWallpaperItem.connect('activate', () => {
+            this.emit('activate', null); // Fixme: not sure what the second parameter should be. null seems to work fine for now.
+        });
 
-				try {
-					let width = 270; // 270 looks good for the now fixed 350px menu width
-					// let width = this.menu.actor.get_width(); // This should be correct but gives different results per element?
-					let pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(this.historyEntry.path, width, -1, true);
-					let height = pixbuf.get_height();
+        if (index !== 0) {
+            // this.menu.addMenuItem(new PopupMenu.PopupBaseMenuItem({ can_focus: false, reactive: false })); // theme independent spacing
+            this.menu.addMenuItem(this._setAsWallpaperItem);
+        }
 
-					let image = new Clutter.Image();
-					let pixelFormat = pixbuf.get_has_alpha() ? Cogl.PixelFormat.RGBA_8888 : Cogl.PixelFormat.RGB_888;
-					image.set_data(
-						pixbuf.get_pixels(),
-						pixelFormat,
-						width,
-						height,
-						pixbuf.get_rowstride()
-					);
-					this._previewActor = new Clutter.Actor({ height: height, width: width });
-					this._previewActor.set_content(image);
+        const copyToFavorites = new PopupMenu.PopupMenuItem('Save For Later');
+        copyToFavorites.connect('activate', () => {
+            this._saveImage().catch(logError);
+        });
+        this.menu.addMenuItem(copyToFavorites);
 
-					this.previewItem.actor.add_actor(this._previewActor);
-				} catch (exeption) {
-					this.logger.error(exeption);
-				}
-			}
-		})
-	}
+        // Static URLs can't block images (yet?)
+        if (this.historyEntry.adapter.type !== 5) {
+            const blockImage = new PopupMenu.PopupMenuItem('Add To Blocklist');
+            blockImage.connect('activate', () => {
+                this._addToBlocklist(this.historyEntry);
+            });
+            this.menu.addMenuItem(blockImage);
+        }
 
-	_addToBlocklist(element) {
-		if (element.adapter.id === null || element.adapter.id === -1) {
-			return;
-		}
+        /*
+            Load the image on first opening of the sub menu instead of during creation of the history list.
+         */
+        this.menu.connect('open-state-changed', (_, open: boolean | unknown) => {
+            if (open) {
+                if (this._previewActor !== null)
+                    return;
 
-		let path = `${Settings.RWG_SETTINGS_SCHEMA_PATH}/sources/general/${element.adapter.id}/`;
-		let generalSettings = new Settings.Settings(Settings.RWG_SETTINGS_SCHEMA_SOURCES_GENERAL, path);
-		let blockedFilenames = generalSettings.get('blocked-images', 'strv');
+                if (!this.historyEntry.path) {
+                    this._logger.error('Image path in entry not found');
+                    return;
+                }
 
-		if (blockedFilenames.includes(element.name)) {
-			return;
-		}
+                try {
+                    const width = 270; // 270 looks good for the now fixed 350px menu width
+                    // const width = this.menu.actor.get_width(); // This should be correct but gives different results per element?
+                    const pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(this.historyEntry.path, width, -1, true);
+                    const height = pixbuf.get_height();
 
-		blockedFilenames.push(element.name);
-		generalSettings.set('blocked-images', 'strv', blockedFilenames);
-	}
+                    const image = new Clutter.Image();
+                    const pixelFormat = pixbuf.get_has_alpha() ? Cogl.PixelFormat.RGBA_8888 : Cogl.PixelFormat.RGB_888;
+                    image.set_data(
+                        pixbuf.get_pixels(),
+                        pixelFormat,
+                        width,
+                        height,
+                        pixbuf.get_rowstride()
+                    );
+                    this._previewActor = new Clutter.Actor({height, width});
+                    this._previewActor.set_content(image);
 
-	async _saveImage() {
-		let sourceFile = Gio.File.new_for_path(this.historyEntry.path);
-		let targetFolder = Gio.File.new_for_path(this._settings.get('favorites-folder', 'string'));
-		let targetFile = targetFolder.get_child(this.historyEntry.name);
-		let targetInfoFile = targetFolder.get_child(`${this.historyEntry.name}.json`);
+                    previewItem.actor.add_actor(this._previewActor);
+                } catch (exception) {
+                    this._logger.error(String(exception));
+                }
+            }
+        });
+    }
 
-		try {
-			if (!targetFolder.make_directory_with_parents(null)) {
-				this.logger.warn('Could not create directories.');
-				return;
-			}
-		} catch (error) {
-			if (error === Gio.IOErrorEnum.EXISTS) { }
-		}
+    private _addToBlocklist(entry: HistoryModule.HistoryEntry) {
+        if (!entry.adapter.id || entry.adapter.id === '-1' || !entry.name) {
+            this._logger.error('Image entry is missing information');
+            return;
+        }
 
-		try { // This try is for promise rejections. GJS mocks about missing this despite all examples omitting this try-catch-block
-			let copyResult = await new Promise((resolve, reject) => {
-				sourceFile.copy_async(targetFile, Gio.FileCopyFlags.NONE, GLib.PRIORITY_DEFAULT, null, null, (file, result) => {
-					try {
-						resolve(file.copy_finish(result));
-					} catch (e) {
-						reject(e);
-					}
-				});
-			});
+        const path = `${Settings.RWG_SETTINGS_SCHEMA_PATH}/sources/general/${entry.adapter.id}/`;
+        const generalSettings = new Settings.Settings(Settings.RWG_SETTINGS_SCHEMA_SOURCES_GENERAL, path);
+        const blockedFilenames = generalSettings.getStrv('blocked-images');
 
-			if (copyResult === false) {
-				this.logger.warn('Failed copying image.');
-				return;
-			} else if (copyResult === Gio.IOErrorEnum.EXISTS) {
-				this.logger.warn('Image already exists in location.');
-				return;
-			}
+        if (blockedFilenames.includes(entry.name))
+            return;
 
-			// https://gjs.guide/guides/gio/file-operations.html#writing-file-contents
-			const [, etag] = await new Promise((resolve, reject) => {
-				let bytes = new GLib.Bytes(JSON.stringify(this.historyEntry.source, null, '\t'));
-				targetInfoFile.replace_contents_bytes_async(
-					bytes,
-					null,
-					false,
-					Gio.FileCreateFlags.NONE,
-					null,
-					(file, result) => {
-						try {
-							resolve(file.replace_contents_finish(result));
-						} catch (error) {
-							reject(error);
-						}
-					}
-				);
-			});
-		} catch (error) {
-			this.logger.warn(`Error saving image: ${error}`);
-		}
-	}
+        blockedFilenames.push(entry.name);
+        generalSettings.setStrv('blocked-images', blockedFilenames);
+    }
 
-	setIndex(index) {
-		this.prefixLabel.set_text(String(index));
-	}
-}
-);
+    private async _saveImage() {
+        if (!this.historyEntry.path || !this.historyEntry.name)
+            throw new Error('Image entry is missing information');
 
-var CurrentImageElement = GObject.registerClass({
-	GTypeName: 'CurrentImageElement',
+        const sourceFile = Gio.File.new_for_path(this.historyEntry.path);
+        const targetFolder = Gio.File.new_for_path(this._settings.getString('favorites-folder'));
+        const targetFile = targetFolder.get_child(this.historyEntry.name);
+        const targetInfoFile = targetFolder.get_child(`${this.historyEntry.name}.json`);
+
+        try {
+            if (!targetFolder.make_directory_with_parents(null))
+                throw new Error('Could not create directories.');
+        } catch (error) {
+            if (error === Gio.IOErrorEnum.EXISTS) { /** noop */ }
+        }
+
+        // This function was rewritten by Gio._promisify
+        // @ts-expect-error
+        if (!await sourceFile.copy_async(targetFile, Gio.FileCopyFlags.NONE, GLib.PRIORITY_DEFAULT, null, null))
+            throw new Error('Failed copying image.');
+
+        // https://gjs.guide/guides/gio/file-operations.html#writing-file-contents
+        // This function was rewritten by Gio._promisify
+        // @ts-expect-error
+        const [success, message]: [boolean, string] = await targetInfoFile.replace_contents_bytes_async(
+            // @ts-expect-error Don't know from where to import
+            new TextEncoder().encode(JSON.stringify(this.historyEntry.source, null, '\t')),
+            null,
+            false,
+            Gio.FileCreateFlags.NONE,
+            null);
+
+        if (!success)
+            throw new Error(`Failed writing file contents: ${message}`);
+    }
+
+    setIndex(index: number) {
+        this._prefixLabel.set_text(`${String(index)}.`);
+    }
+});
+
+const CurrentImageElement = GObject.registerClass({
+    GTypeName: 'CurrentImageElement',
 }, class CurrentImageElement extends HistoryElement {
+    constructor(params: object | undefined, historyEntry: HistoryModule.HistoryEntry) {
+        super(params, historyEntry, 0);
 
-	_init(historyElement) {
-		super._init(historyElement, 0);
-
-		if (this.setAsWallpaperItem !== null) {
-			this.setAsWallpaperItem.destroy();
-		}
-	}
-
+        if (this._setAsWallpaperItem)
+            this._setAsWallpaperItem.destroy();
+    }
 });
 
 /**
@@ -263,160 +258,180 @@ var CurrentImageElement = GObject.registerClass({
  * feature.
  * The remaining time will only be displayed if the af-feature is activated.
  */
-var NewWallpaperElement = GObject.registerClass({
-	GTypeName: 'NewWallpaperElement',
-}, class NewWallpaperElement extends PopupMenu.PopupBaseMenuItem {
+const NewWallpaperElement = GObject.registerClass({
+    GTypeName: 'NewWallpaperElement',
+},
+class NewWallpaperElement extends PopupMenu.PopupBaseMenuItem {
+    private _timer = Timer.getTimer();
+    private _remainingLabel;
 
-	_init(params) {
-		super._init(params);
+    constructor(params: object | undefined) {
+        super(params);
 
-		this._timer = new Timer.AFTimer();
+        const container = new St.BoxLayout({
+            vertical: true,
+        });
 
-		this._container = new St.BoxLayout({
-			vertical: true
-		});
+        const newWPLabel = new St.Label({
+            text: 'New Wallpaper',
+            style_class: 'rwg-new-label',
+        });
+        container.add_child(newWPLabel);
 
-		this._newWPLabel = new St.Label({
-			text: 'New Wallpaper',
-			style_class: 'rwg-new-lable'
-		});
-		this._container.add_child(this._newWPLabel);
+        this._remainingLabel = new St.Label({
+            text: '1 minute remaining',
+        });
+        container.add_child(this._remainingLabel);
 
-		this._remainingLabel = new St.Label({
-			text: '1 minute remaining'
-		});
-		this._container.add_child(this._remainingLabel);
+        this.actor.add_child(container);
+    }
 
-		this.actor.add_child(this._container);
-	}
+    show() {
+        if (this._timer.isActive()) {
+            const remainingMinutes = this._timer.remainingMinutes();
+            const minutes = remainingMinutes % 60;
+            const hours = Math.floor(remainingMinutes / 60);
 
-	show() {
-		if (this._timer.isActive()) {
-			let remainingMinutes = this._timer.remainingMinutes();
-			let minutes = remainingMinutes % 60;
-			let hours = Math.floor(remainingMinutes / 60);
+            let hoursText = hours.toString();
+            hoursText += hours === 1 ? ' hour' : ' hours';
+            let minText = minutes.toString();
+            minText += minutes === 1 ? ' minute' : ' minutes';
 
-			let hoursText = hours.toString();
-			hoursText += (hours === 1) ? ' hour' : ' hours';
-			let minText = minutes.toString();
-			minText += (minutes === 1) ? ' minute' : ' minutes';
+            if (hours >= 1)
+                this._remainingLabel.text = `... ${hoursText} and ${minText} remaining.`;
+            else
+                this._remainingLabel.text = `... ${minText} remaining.`;
 
-			if (hours >= 1) {
-				this._remainingLabel.text = '... ' + hoursText + ' and ' + minText + ' remaining.'
-			} else {
-				this._remainingLabel.text = '... ' + minText + ' remaining.'
-			}
 
-			this._remainingLabel.show();
-		} else {
-			this._remainingLabel.hide();
-		}
-	}
-
+            this._remainingLabel.show();
+        } else {
+            this._remainingLabel.hide();
+        }
+    }
 });
 
-var StatusElement = class {
+class StatusElement {
+    icon;
 
-	constructor() {
-		this.icon = new St.Icon({
-			icon_name: 'preferences-desktop-wallpaper-symbolic',
-			style_class: 'system-status-icon'
-		});
-	}
+    constructor() {
+        this.icon = new St.Icon({
+            icon_name: 'preferences-desktop-wallpaper-symbolic',
+            style_class: 'system-status-icon',
+        });
+    }
 
-	startLoading() {
-		this.icon.ease({
-			opacity: 20,
-			duration: 1337,
-			mode: Clutter.AnimationMode.EASE_IN_OUT_SINE,
-			autoReverse: true,
-			repeatCount: -1
-		});
-	}
+    startLoading() {
+        // @ts-expect-error Don't know where this is defined
+        this.icon.ease({
+            opacity: 20,
+            duration: 1337,
+            mode: Clutter.AnimationMode.EASE_IN_OUT_SINE,
+            autoReverse: true,
+            repeatCount: -1,
+        });
+    }
 
-	stopLoading() {
-		this.icon.remove_all_transitions();
-		this.icon.opacity = 255;
-	}
+    stopLoading() {
+        this.icon.remove_all_transitions();
+        this.icon.opacity = 255;
+    }
+}
 
-};
+class HistorySection extends PopupMenu.PopupMenuSection {
+    /**
+     * Cache HistoryElements for performance of long histories.
+     */
+    private _historySectionCache = new Map<string, typeof HistoryElement>();
+    private _historyCache: HistoryModule.HistoryEntry[] = [];
 
-var HistorySection = class extends PopupMenu.PopupMenuSection {
+    constructor() {
+        super();
 
-	constructor() {
-		super();
+        this.actor = new St.ScrollView({
+            hscrollbar_policy: Gtk.PolicyType.NEVER,
+            vscrollbar_policy: Gtk.PolicyType.AUTOMATIC,
+        });
 
-		/**
-		 * Cache HistoryElements for performance of long histories.
-		 */
-		this._historySectionCache = {};
+        this.actor.add_actor(this.box);
+    }
 
-		this._historyCache = [];
+    // eslint-disable-next-line no-unused-vars
+    updateList(history: HistoryModule.HistoryEntry[], onEnter: (actor: typeof HistoryElement) => void, onLeave: (actor: typeof HistoryElement) => void, onSelect: (actor: typeof HistoryElement) => void) {
+        if (this._historyCache.length <= 1)
+            this.removeAll(); // remove empty history element
 
-		this.actor = new St.ScrollView({
-			hscrollbar_policy: Gtk.PolicyType.NEVER,
-			vscrollbar_policy: Gtk.PolicyType.AUTOMATIC
-		});
+        const existingHistoryElements = [];
 
-		this.actor.add_actor(this.box);
-	}
+        for (let i = 1; i < history.length; i++) {
+            const historyID = history[i].id;
 
-	updateList(history, onEnter, onLeave, onSelect) {
-		if (this._historyCache.length <= 1) {
-			this.removeAll(); // remove empty history element
-		}
+            if (!historyID)
+                continue;
 
-		let existingHistoryElements = [];
+            // Typing fails here for our own class derived from GObject.registerClass
+            // FIXME: Expect a whole lot of ignore comments here:
 
-		for (let i = 1; i < history.length; i++) {
-			let historyID = history[i].id;
-			let tmp;
+            let cachedHistoryElement = this._historySectionCache.get(historyID);
+            if (!cachedHistoryElement) {
+                // @ts-expect-error
+                cachedHistoryElement = new HistoryElement(undefined, history[i], i);
+                // @ts-expect-error
+                cachedHistoryElement.actor.connect('key-focus-in', onEnter);
+                // @ts-expect-error
+                cachedHistoryElement.actor.connect('key-focus-out', onLeave);
+                // @ts-expect-error
+                cachedHistoryElement.actor.connect('enter-event', onEnter);
 
-			if (!(historyID in this._historySectionCache)) {
-				tmp = new HistoryElement(history[i], i);
+                // @ts-expect-error
+                cachedHistoryElement.connect('activate', onSelect);
+                // @ts-expect-error
+                this._historySectionCache.set(historyID, cachedHistoryElement);
 
-				tmp.actor.connect('key-focus-in', onEnter);
-				tmp.actor.connect('key-focus-out', onLeave);
-				tmp.actor.connect('enter-event', onEnter);
+                // @ts-expect-error
+                this.addMenuItem(cachedHistoryElement, i - 1);
+            } else {
+                // @ts-expect-error
+                cachedHistoryElement.setIndex(i);
+            }
 
-				tmp.connect('activate', onSelect);
-				this._historySectionCache[historyID] = tmp;
+            existingHistoryElements.push(historyID);
+        }
 
-				this.addMenuItem(tmp, i - 1);
-			} else {
-				tmp = this._historySectionCache[historyID];
-				tmp.setIndex(i);
-			}
+        this._cleanupHistoryCache(existingHistoryElements);
+        this._historyCache = history;
+    }
 
-			existingHistoryElements.push(historyID);
-		}
+    private _cleanupHistoryCache(existingIDs: string[]) {
+        const destroyIDs = Array.from(this._historySectionCache.keys()).filter(i => existingIDs.indexOf(i) === -1);
 
-		this._cleanupHistoryCache(existingHistoryElements);
-		this._historyCache = history;
-	}
+        destroyIDs.forEach(id => {
+            // Same as the block above, typing from GObject.registerClass fails
+            // @ts-expect-error
+            this._historySectionCache.get(id)?.destroy();
+            this._historySectionCache.delete(id);
+        });
+    }
 
-	_cleanupHistoryCache(existingIDs) {
-		let destroyIDs = Object.keys(this._historySectionCache).filter((i) => existingIDs.indexOf(i) === -1);
+    clear() {
+        this._cleanupHistoryCache([]);
+        this.removeAll();
+        this.addMenuItem(
+            new PopupMenu.PopupMenuItem('No recent wallpaper ...', {
+                activate: false,
+                hover: false,
+                style_class: 'rwg-recent-label',
+                can_focus: false,
+            })
+        );
 
-		destroyIDs.map(id => {
-			this._historySectionCache[id].destroy();
-			delete this._historySectionCache[id];
-		});
-	}
+        this._historyCache = [];
+    }
+}
 
-	clear() {
-		this._cleanupHistoryCache([]);
-		this.removeAll();
-		this.addMenuItem(
-			new PopupMenu.PopupMenuItem('No recent wallpaper ...', {
-				activate: false,
-				hover: false,
-				style_class: 'rwg-recent-lable',
-				can_focus: false
-			})
-		);
-
-		this._historyCache = [];
-	}
-
+export {
+    StatusElement,
+    NewWallpaperElement,
+    HistorySection,
+    CurrentImageElement,
+    HistoryElement
 };
