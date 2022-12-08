@@ -1,165 +1,184 @@
-const Adw = imports.gi.Adw;
-const ExtensionUtils = imports.misc.extensionUtils;
-const Gio = imports.gi.Gio;
-const GLib = imports.gi.GLib;
-const GObject = imports.gi.GObject;
-const Gtk = imports.gi.Gtk;
+import * as Gio from 'gi://Gio';
+import * as GLib from 'gi://GLib';
+import * as GObject from 'gi://GObject';
+import * as Gtk from 'gi://Gtk';
+
+import * as Adw from '@gi/gtk4/adw/adw';
+import * as ExtensionUtils from '@gi/misc/extensionUtils';
+
+import * as Settings from './../settings.js';
+import * as Utils from './../utils.js';
+
+import {Logger} from './../logger.js';
+
+import {GenericJsonSettingsGroup} from './genericJson.js';
+import {LocalFolderSettingsGroup} from './localFolder.js';
+import {RedditSettingsGroup} from './reddit.js';
+import {UnsplashSettingsGroup} from './unsplash.js';
+import {UrlSourceSettingsGroup} from './urlSource.js';
+import {WallhavenSettingsGroup} from './wallhaven.js';
 
 const Self = ExtensionUtils.getCurrentExtension();
-const Settings = Self.imports.settings;
-const Utils = Self.imports.utils;
-
-const GenericJson = Self.imports.ui.genericJson;
-const LocalFolder = Self.imports.ui.localFolder;
-const Reddit = Self.imports.ui.reddit;
-const Unsplash = Self.imports.ui.unsplash;
-const UrlSource = Self.imports.ui.urlSource;
-const Wallhaven = Self.imports.ui.wallhaven;
 
 // https://gitlab.gnome.org/GNOME/gjs/-/blob/master/examples/gtk4-template.js
-var SourceRow = GObject.registerClass({
-	GTypeName: 'SourceRow',
-	Template: GLib.filename_to_uri(Self.path + '/ui/sourceRow.ui', null),
-	Children: [
-		'button_delete'
-	],
-	InternalChildren: [
-		'blocked_images_list',
-		'combo',
-		'settings_container',
-		'source_name'
-	]
+const SourceRow = GObject.registerClass({
+    GTypeName: 'SourceRow',
+    Template: GLib.filename_to_uri(`${Self.path}/ui/sourceRow.ui`, null),
+    Children: [
+        'button_delete',
+    ],
+    InternalChildren: [
+        'blocked_images_list',
+        'combo',
+        'settings_container',
+        'source_name',
+    ],
 }, class SourceRow extends Adw.ExpanderRow {
-	// This list is the same across all rows
-	static _stringList = null;
+    // This list is the same across all rows
+    static _stringList: Gtk.StringList;
 
-	constructor(id = null, params = {}) {
-		super(params);
+    // Children
+    button_delete!: Gtk.Button;
 
-		if (id === null) {
-			// New row
-			this.id = Date.now();
-		} else {
-			this.id = id;
-		}
+    // InternalChildren
+    private _blocked_images_list!: Adw.ExpanderRow;
+    private _combo!: Adw.ComboRow;
+    private _settings_container!: Adw.Clamp;
+    private _source_name!: Adw.EntryRow;
 
-		const path = `${Settings.RWG_SETTINGS_SCHEMA_PATH}/sources/general/${this.id}/`;
-		this._settings = new Settings.Settings(Settings.RWG_SETTINGS_SCHEMA_SOURCES_GENERAL, path);
+    private _settings;
+    private _logger = new Logger('RWG3', 'SourceRow');
 
-		if (this._stringList === null || this._stringList === undefined) {
-			// Fill combo from settings enum
+    id = String(Date.now());
 
-			let availableTypes = this._settings.getSchema().get_key('type').get_range(); //GLib.Variant (sv)
-			// (sv) = Tuple(%G_VARIANT_TYPE_STRING, %G_VARIANT_TYPE_VARIANT)
-			// s should be 'enum'
-			// v should be an array enumerating the possible values. Each item in the array is a possible valid value and no other values are valid.
-			// v is 'as'
-			availableTypes = availableTypes.get_child_value(1).get_variant().get_strv();
+    constructor(params: object | undefined, id?: string | null) {
+        super(params);
 
-			this._stringList = Gtk.StringList.new(availableTypes);
-		}
-		this._combo.model = this._stringList;
-		this._combo.selected = this._settings.get('type', 'enum');
+        if (id)
+            this.id = id;
 
-		this._settings.bind('name',
-			this._source_name,
-			'text',
-			Gio.SettingsBindFlags.DEFAULT);
-		this._settings.bind('enabled',
-			this,
-			'enable-expansion',
-			Gio.SettingsBindFlags.DEFAULT);
-		// Binding an enum isn't possible straight away.
-		// This would need bind_with_mapping() which isn't available in gjs?
-		// this._settings.bind('type',
-		// 	this._combo,
-		// 	'selected',
-		// 	Gio.SettingsBindFlags.DEFAULT);
+        const path = `${Settings.RWG_SETTINGS_SCHEMA_PATH}/sources/general/${this.id}/`;
+        this._settings = new Settings.Settings(Settings.RWG_SETTINGS_SCHEMA_SOURCES_GENERAL, path);
 
-		this._combo.connect('notify::selected', comboRow => {
-			this._settings.set('type', 'enum', comboRow.selected);
-			this._fillRow(comboRow.selected);
-		});
+        if (!SourceRow._stringList) {
+            // Fill combo from settings enum
 
-		this._fillRow(this._combo.selected);
+            const availableTypes = this._settings.getSchema().get_key('type').get_range(); // GLib.Variant (sv)
+            // (sv) = Tuple(%G_VARIANT_TYPE_STRING, %G_VARIANT_TYPE_VARIANT)
+            // s should be 'enum'
+            // v should be an array enumerating the possible values. Each item in the array is a possible valid value and no other values are valid.
+            // v is 'as'
+            const availableTypeNames = availableTypes.get_child_value(1).get_variant().get_strv();
 
-		let blockedImages = this._settings.get('blocked-images', 'strv');
-		blockedImages.forEach(filename => {
-			let blockedImageRow = new Adw.ActionRow();
-			blockedImageRow.set_title(filename);
+            SourceRow._stringList = Gtk.StringList.new(availableTypeNames);
+        }
+        this._combo.model = SourceRow._stringList;
+        this._combo.selected = this._settings.getEnum('type');
 
-			let button = new Gtk.Button();
-			button.set_valign(Gtk.Align.CENTER);
-			button.connect('clicked', () => {
-				this._removeBlockedImage(filename);
-				this._blocked_images_list.remove(blockedImageRow);
-			});
+        this._settings.bind('name',
+            this._source_name,
+            'text',
+            Gio.SettingsBindFlags.DEFAULT);
+        this._settings.bind('enabled',
+            this,
+            'enable-expansion',
+            Gio.SettingsBindFlags.DEFAULT);
+        // Binding an enum isn't possible straight away.
+        // This would need bind_with_mapping() which isn't available in gjs?
+        // this._settings.bind('type',
+        //     this._combo,
+        //     'selected',
+        //     Gio.SettingsBindFlags.DEFAULT);
 
-			let buttonContent = new Adw.ButtonContent();
-			buttonContent.set_icon_name("user-trash-symbolic")
+        this._combo.connect('notify::selected', (comboRow: Adw.ComboRow) => {
+            this._settings.setEnum('type', comboRow.selected);
+            this._fillRow(comboRow.selected);
+        });
 
-			button.set_child(buttonContent);
-			blockedImageRow.add_suffix(button);
-			this._blocked_images_list.add_row(blockedImageRow);
-			this._blocked_images_list.set_sensitive(true);
-		});
-	}
+        this._fillRow(this._combo.selected);
 
-	_fillRow(type) {
-		let targetWidget = this._getSettingsGroup(type);
-		if (targetWidget !== null) {
-			this._settings_container.set_child(targetWidget);
-		}
-	}
+        const blockedImages: string[] = this._settings.getStrv('blocked-images');
+        blockedImages.forEach(filename => {
+            const blockedImageRow = new Adw.ActionRow();
+            blockedImageRow.set_title(filename);
 
-	_getSettingsGroup(type = 0) {
-		let targetWidget;
-		switch (type) {
-			case 0: // unsplash
-				targetWidget = new Unsplash.UnsplashSettingsGroup(this.id);
-				break;
-			case 1: // wallhaven
-				targetWidget = new Wallhaven.WallhavenSettingsGroup(this.id);
-				break;
-			case 2: // reddit
-				targetWidget = new Reddit.RedditSettingsGroup(this.id);
-				break;
-			case 3: // generic JSON
-				targetWidget = new GenericJson.GenericJsonSettingsGroup(this.id);
-				break;
-			case 4: // Local Folder
-				targetWidget = new LocalFolder.LocalFolderSettingsGroup(this.id);
-				break;
-			case 5: // Static URL
-				targetWidget = new UrlSource.UrlSourceSettingsGroup(this.id);
-				break;
-			default:
-				targetWidget = null;
-				this.logger.error("The selected source has no corresponding widget!")
-				break;
-		}
-		return targetWidget;
-	}
+            const button = new Gtk.Button();
+            button.set_valign(Gtk.Align.CENTER);
+            button.connect('clicked', () => {
+                this._removeBlockedImage(filename);
+                this._blocked_images_list.remove(blockedImageRow);
+            });
 
-	_removeBlockedImage(filename) {
-		let blockedImages = this._settings.get('blocked-images', 'strv');
-		if (!blockedImages.includes(filename)) {
-			return;
-		}
+            const buttonContent = new Adw.ButtonContent();
+            buttonContent.set_icon_name('user-trash-symbolic');
 
-		blockedImages = Utils.Utils.removeItemOnce(blockedImages, filename);
-		this._settings.set('blocked-images', 'strv', blockedImages);
-	}
+            button.set_child(buttonContent);
+            blockedImageRow.add_suffix(button);
+            this._blocked_images_list.add_row(blockedImageRow);
+            this._blocked_images_list.set_sensitive(true);
+        });
+    }
 
-	clearConfig() {
-		for (const i of Array(6).keys()) {
-			let widget = this._getSettingsGroup(i);
-			widget.clearConfig();
-		}
+    private _fillRow(type: number) {
+        let targetWidget = this._getSettingsGroup(type);
+        if (targetWidget !== null)
+            this._settings_container.set_child(targetWidget);
+    }
 
-		this._settings.reset('blocked-images');
-		this._settings.reset('enabled');
-		this._settings.reset('name');
-		this._settings.reset('type');
-	}
+    private _getSettingsGroup(type = 0) {
+        let targetWidget = null;
+        switch (type) {
+        case 0: // unsplash
+            targetWidget = new UnsplashSettingsGroup(undefined, this.id);
+            break;
+        case 1: // wallhaven
+            targetWidget = new WallhavenSettingsGroup(undefined, this.id);
+            break;
+        case 2: // reddit
+            targetWidget = new RedditSettingsGroup(undefined, this.id);
+            break;
+        case 3: // generic JSON
+            targetWidget = new GenericJsonSettingsGroup(undefined, this.id);
+            break;
+        case 4: // Local Folder
+            targetWidget = new LocalFolderSettingsGroup(undefined, this.id);
+            break;
+        case 5: // Static URL
+            targetWidget = new UrlSourceSettingsGroup(undefined, this.id);
+            break;
+        default:
+            targetWidget = null;
+            this._logger.error('The selected source has no corresponding widget!');
+            break;
+        }
+        return targetWidget;
+    }
+
+    private _removeBlockedImage(filename: string) {
+        let blockedImages = this._settings.getStrv('blocked-images');
+        if (!blockedImages.includes(filename))
+            return;
+
+
+        blockedImages = Utils.removeItemOnce(blockedImages, filename);
+        this._settings.setStrv('blocked-images', blockedImages);
+    }
+
+    /**
+     * Clear all keys associated to this ID across all adapter
+     */
+    clearConfig() {
+        for (const i of Array(6).keys()) {
+            const widget = this._getSettingsGroup(i);
+            if (widget)
+                widget.clearConfig();
+        }
+
+        this._settings.reset('blocked-images');
+        this._settings.reset('enabled');
+        this._settings.reset('name');
+        this._settings.reset('type');
+    }
 });
+
+export {SourceRow};

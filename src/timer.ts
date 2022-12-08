@@ -1,153 +1,135 @@
-const GLib = imports.gi.GLib;
+import * as GLib from 'gi://GLib';
 
-const Self = imports.misc.extensionUtils.getCurrentExtension();
-const Prefs = Self.imports.settings;
-const LoggerModule = Self.imports.logger;
-
-let _afTimerInstance = null;
-
-// Singleton implementation of _AFTimer
-var AFTimer = function () {
-	if (!_afTimerInstance) {
-		_afTimerInstance = new _AFTimer();
-	}
-	return _afTimerInstance;
-};
-
-var AFTimerDestroySingleton = function () {
-	// ensure timer is removed
-	if (_afTimerInstance != null) {
-		_afTimerInstance.cleanup();
-	}
-
-	// clear reference
-	_afTimerInstance = null;
-}
+import {Logger} from './logger.js';
+import {Settings} from './settings.js';
 
 /**
  * Timer for the auto fetch feature.
  */
-var _AFTimer = class {
+class AFTimer {
+    private static _afTimerInstance?: AFTimer | null = null;
 
-	constructor() {
-		this.logger = new LoggerModule.Logger('RWG3', 'Timer');
+    private _logger = new Logger('RWG3', 'Timer');
+    private _settings = new Settings();
+    private _timeout?: number = undefined;
+    private _timeoutEndCallback?: () => void = undefined;
+    private _minutes = 30;
 
-		this._timeout = null;
-		this._timoutEndCallback = null;
-		this._minutes = 30;
+    static getTimer(): AFTimer {
+        if (!this._afTimerInstance)
+            this._afTimerInstance = new AFTimer();
 
-		this._settings = new Prefs.Settings();
-	}
+        return this._afTimerInstance;
+    }
 
-	isActive() {
-		return this._settings.get('auto-fetch', 'boolean');
-	}
+    static destroy() {
+        if (this._afTimerInstance)
+            this._afTimerInstance.cleanup();
 
-	remainingMinutes() {
-		let minutesElapsed = this._minutesElapsed();
-		let remainder = minutesElapsed % this._minutes;
-		return Math.max(this._minutes - remainder, 0);
-	}
+        this._afTimerInstance = null;
+    }
 
-	registerCallback(callback) {
-		this._timoutEndCallback = callback;
-	}
+    isActive() {
+        return this._settings.getBoolean('auto-fetch');
+    }
 
-	/**
-	 * Sets the minutes of the timer.
-	 *
-	 * @param minutes
-	 */
-	setMinutes(minutes) {
-		this._minutes = minutes;
-	}
+    remainingMinutes() {
+        const minutesElapsed = this._minutesElapsed();
+        const remainder = minutesElapsed % this._minutes;
+        return Math.max(this._minutes - remainder, 0);
+    }
 
-	/**
-	 * Start the timer.
-	 *
-	 * @return void
-	 */
-	start() {
-		this.cleanup();
+    registerCallback(callback: () => void) {
+        this._timeoutEndCallback = callback;
+    }
 
-		let last = this._settings.get('timer-last-trigger', 'int64');
-		if (last === 0) {
-			this.reset();
-		}
+    /**
+     * Sets the minutes of the timer.
+     *
+     * @param {number} minutes Number in minutes
+     */
+    setMinutes(minutes: number) {
+        this._minutes = minutes;
+    }
 
-		let millisRemaining = this.remainingMinutes() * 60 * 1000;
+    /**
+     * Start the timer.
+     */
+    start() {
+        this.cleanup();
 
-		// set new wallpaper if the interval was surpassed and set the timestamp to when it should have been updated
-		if (this._surpassedInterval()) {
-			if (this._timoutEndCallback) {
-				this._timoutEndCallback();
-			}
-			let millisOverdue = (this._minutes * 60 * 1000) - millisRemaining;
-			this._settings.set('timer-last-trigger', 'int64', Date.now() - millisOverdue);
-		}
+        const last = this._settings.getInt64('timer-last-trigger');
+        if (last === 0)
+            this.reset();
 
-		// actual timer function
-		this._timeout = GLib.timeout_add(GLib.PRIORITY_DEFAULT, millisRemaining, () => {
-			if (this._timoutEndCallback) {
-				this._timoutEndCallback();
-			}
+        const millisecondsRemaining = this.remainingMinutes() * 60 * 1000;
 
-			this.reset(); // reset timer
-			this.start(); // restart timer
-		});
-	}
+        // set new wallpaper if the interval was surpassed and set the timestamp to when it should have been updated
+        if (this._surpassedInterval()) {
+            if (this._timeoutEndCallback)
+                this._timeoutEndCallback();
 
-	/**
-	 * Stop the timer.
-	 *
-	 * @return void
-	 */
-	stop() {
-		this._settings.set('timer-last-trigger', 'int64', 0);
-		this.cleanup();
-	}
+            const millisecondsOverdue = (this._minutes * 60 * 1000) - millisecondsRemaining;
+            this._settings.setInt64('timer-last-trigger', Date.now() - millisecondsOverdue);
+        }
 
-	/**
-	 * Cleanup the timeout callback if it exists.
-	 *
-	 * @return void
-	 */
-	cleanup() {
-		if (this._timeout) { // only remove if a timeout is active
-			GLib.source_remove(this._timeout);
-			this._timeout = null;
-		}
-	}
+        // actual timer function
+        this._timeout = GLib.timeout_add(GLib.PRIORITY_DEFAULT, millisecondsRemaining, () => {
+            if (this._timeoutEndCallback)
+                this._timeoutEndCallback();
 
-	/**
-	 * Reset the timer.
-	 *
-	 * @return void
-	 */
-	reset() {
-		this._settings.set('timer-last-trigger', 'int64', new Date().getTime());
-		this.cleanup();
-	}
+            this.reset(); // reset timer
+            this.start(); // restart timer
 
-	_minutesElapsed() {
-		let now = Date.now();
-		let last = this._settings.get('timer-last-trigger', 'int64');
+            return true;
+        });
+    }
 
-		if (last === 0) {
-			return 0;
-		}
+    /**
+     * Stop the timer.
+     */
+    stop() {
+        this._settings.setInt64('timer-last-trigger', 0);
+        this.cleanup();
+    }
 
-		let elapsed = Math.max(now - last, 0);
-		return Math.floor(elapsed / (60 * 1000));
-	}
+    /**
+     * Cleanup the timeout callback if it exists.
+     */
+    cleanup() {
+        if (this._timeout) { // only remove if a timeout is active
+            GLib.source_remove(this._timeout);
+            this._timeout = undefined;
+        }
+    }
 
-	_surpassedInterval() {
-		let now = Date.now();
-		let last = this._settings.get('timer-last-trigger', 'int64');
-		let diff = now - last;
-		let intervalLength = this._minutes * 60 * 1000;
+    /**
+     * Reset the timer.
+     */
+    reset() {
+        this._settings.setInt64('timer-last-trigger', new Date().getTime());
+        this.cleanup();
+    }
 
-		return diff > intervalLength;
-	}
+    private _minutesElapsed() {
+        const now = Date.now();
+        const last: number = this._settings.getInt64('timer-last-trigger');
 
-};
+        if (last === 0)
+            return 0;
+
+        const elapsed = Math.max(now - last, 0);
+        return Math.floor(elapsed / (60 * 1000));
+    }
+
+    private _surpassedInterval() {
+        const now = Date.now();
+        const last = this._settings.getInt64('timer-last-trigger');
+        const diff = now - last;
+        const intervalLength = this._minutes * 60 * 1000;
+
+        return diff > intervalLength;
+    }
+}
+
+export {AFTimer};

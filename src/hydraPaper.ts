@@ -1,88 +1,73 @@
-const Gio = imports.gi.Gio;
+import * as Gio from 'gi://Gio';
+import * as GLib from 'gi://GLib';
 
-const Self = imports.misc.extensionUtils.getCurrentExtension();
-const Utils = Self.imports.utils;
+import * as Utils from './utils.js';
 
-var HydraPaper = class {
-	#hydraPaperCommand = null;
-	#hydraPaperCancellable = null;
+class HydraPaper {
+    private _command: string[] | null = null;
+    private _cancellable: Gio.Cancellable | null = null;
 
-	constructor() { }
+    isAvailable(): boolean {
+        if (this._command !== null)
+            return true;
 
-	/**
-	 * Check whether HydraPaper is available on this system.
-	 * @returns {boolean} - Whether HydraPaper is available
-	 */
-	async isAvailable() {
-		if (this.#hydraPaperCommand !== null) {
-			return true;
-		}
+        const normalPath = GLib.find_program_in_path('hydrapaper');
+        if (normalPath) {
+            this._command = [normalPath];
+            return true;
+        }
 
-		try {
-			// Normal installation:
-			await Utils.Utils.execCheck(['hydrapaper', '--help']);
+        const flatpakPath = GLib.find_program_in_path('org.gabmus.hydrapaper');
+        if (flatpakPath) {
+            this._command = [flatpakPath];
+            return true;
+        }
 
-			this.#hydraPaperCommand = ['hydrapaper'];
-			return true;
-		} catch (error) {
-			// logError(error);
-		}
+        return this._command !== null;
+    }
 
-		try {
-			// FlatPak installation:
-			await Utils.Utils.execCheck(['org.gabmus.hydrapaper', '--help']);
+    cancelRunning() {
+        if (this._cancellable === null)
+            return;
 
-			this.#hydraPaperCommand = ['org.gabmus.hydrapaper'];
-			return true;
-		} catch (error) {
-			// logError(error);
-		}
+        this._cancellable.cancel();
+        this._cancellable = null;
+    }
 
-		return this.#hydraPaperCommand !== null;
-	}
+    /**
+     * Run HydraPaper in CLI mode.
+     *
+     * HydraPaper will combine all images in wallpaperArray into a single image and save
+     * it into the users cache folder.
+     * Afterward HydraPaper will set the mode to 'spanned' and the 'picture-uri' or 'picture-uri-dark'.
+     *
+     * @param {string[]} wallpaperArray Array of image paths
+     * @param {boolean} darkmode Use darkmode, gives different image in cache path
+     */
+    async run(wallpaperArray: string[], darkmode: boolean = false) {
+        // Cancel already running processes before starting new ones
+        this.cancelRunning();
 
-	/**
-	 * Cancel all running processes
-	 * @returns
-	 */
-	cancelRunning() {
-		if (this.#hydraPaperCancellable === null) {
-			return;
-		}
+        // TODO: Proper error handling
+        if (this._command === null)
+            return;
 
-		this.#hydraPaperCancellable.cancel();
-		this.#hydraPaperCancellable = null;
-	}
+        // Needs a copy here
+        let command = [...this._command];
 
-	/**
-	 * Generate a new combined wallpaper from multiple paths.
-	 *
-	 * @param {Array<string>} wallpaperArray Array of wallpaper paths matching the monitor count
-	 * @param {boolean} darkmode Turn on darkmode, this results into a different cache file
-	 */
-	async run(wallpaperArray, darkmode) {
-		// Cancel already running processes before starting new ones
-		this.cancelRunning();
+        if (darkmode)
+            command.push('--darkmode');
 
-		// Needs a copy here
-		let hydraPaperCommand = [...this.#hydraPaperCommand];
+        command.push('--cli');
+        command = command.concat(wallpaperArray);
 
-		if (darkmode) {
-			hydraPaperCommand.push('--darkmode');
-		}
+        this._cancellable = new Gio.Cancellable();
 
-		hydraPaperCommand.push('--cli');
-		hydraPaperCommand = hydraPaperCommand.concat(wallpaperArray);
+        // hydrapaper [--darkmode] --cli PATH PATH PATH
+        await Utils.execCheck(command, this._cancellable);
 
-		try {
-			this.#hydraPaperCancellable = new Gio.Cancellable();
-
-			// hydrapaper [--darkmode] --cli PATH PATH PATH
-			await Utils.Utils.execCheck(hydraPaperCommand, this.#hydraPaperCancellable);
-
-			this.#hydraPaperCancellable = null;
-		} catch (error) {
-			logError(error);
-		}
-	}
+        this._cancellable = null;
+    }
 }
+
+export {HydraPaper};

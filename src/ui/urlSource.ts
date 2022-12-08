@@ -1,24 +1,35 @@
-const Adw = imports.gi.Adw;
-const ExtensionUtils = imports.misc.extensionUtils;
-const Gio = imports.gi.Gio;
-const GLib = imports.gi.GLib;
-const GObject = imports.gi.GObject;
+import * as Gio from 'gi://Gio';
+import * as GLib from 'gi://GLib';
+import * as GObject from 'gi://GObject';
+
+import * as Adw from '@gi/gtk4/adw/adw';
+import * as ExtensionUtils from '@gi/misc/extensionUtils';
+
+import * as Settings from './../settings.js';
 
 const Self = ExtensionUtils.getCurrentExtension();
-const Settings = Self.imports.settings;
 
-var UrlSourceSettingsGroup = GObject.registerClass({
+const UrlSourceSettingsGroup = GObject.registerClass({
     GTypeName: 'UrlSourceSettingsGroup',
-    Template: GLib.filename_to_uri(Self.path + '/ui/urlSource.ui', null),
+    Template: GLib.filename_to_uri(`${Self.path}/ui/urlSource.ui`, null),
     InternalChildren: [
         'author_name',
         'author_url',
         'domain',
         'image_url',
         'post_url',
-    ]
+    ],
 }, class UrlSourceSettingsGroup extends Adw.PreferencesGroup {
-    constructor(id, params = {}) {
+    // InternalChildren
+    private _author_name!: Adw.EntryRow;
+    private _author_url!: Adw.EntryRow;
+    private _domain!: Adw.EntryRow;
+    private _image_url!: Adw.EntryRow;
+    private _post_url!: Adw.EntryRow;
+
+    private _settings;
+
+    constructor(params: any | undefined, id: string) {
         super(params);
 
         const path = `${Settings.RWG_SETTINGS_SCHEMA_PATH}/sources/urlSource/${id}/`;
@@ -54,3 +65,5 @@ var UrlSourceSettingsGroup = GObject.registerClass({
         this._settings.reset('post-url');
     }
 });
+
+export {UrlSourceSettingsGroup};

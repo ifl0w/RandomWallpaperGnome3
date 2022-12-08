@@ -1,155 +1,140 @@
-const Self = imports.misc.extensionUtils.getCurrentExtension();
-const HistoryModule = Self.imports.history;
-const SettingsModule = Self.imports.settings;
-const SoupBowl = Self.imports.soupBowl;
-const Utils = Self.imports.utils;
+import * as SettingsModule from './../settings.js';
+import * as Utils from './../utils.js';
 
-const BaseAdapter = Self.imports.adapter.baseAdapter;
+import {BaseAdapter} from './../adapter/baseAdapter.js';
+import {HistoryEntry} from './../history.js';
+import {SoupBowl} from './../soupBowl.js';
 
-var UnsplashAdapter = class extends BaseAdapter.BaseAdapter {
-	constructor(id, name, wallpaperLocation) {
-		// Make sure we're not picking up a valid config
-		if (id === null) {
-			id = -1;
-		}
+class UnsplashAdapter extends BaseAdapter {
+    private _bowl = new SoupBowl();
+    private _sourceUrl = 'https://source.unsplash.com';
 
-		super({
-			id: id,
-			schemaID: SettingsModule.RWG_SETTINGS_SCHEMA_SOURCES_UNSPLASH,
-			schemaPath: `${SettingsModule.RWG_SETTINGS_SCHEMA_PATH}/sources/unsplash/${id}/`,
-			wallpaperLocation: wallpaperLocation,
-			name: name,
-			defaultName: 'Unsplash'
-		});
+    // default query options
+    private _options = {
+        'query': '',
+        'w': 1920,
+        'h': 1080,
+        'featured': false,
+        'constraintType': 0,
+        'constraintValue': '',
+    };
 
-		this._sourceUrl = 'https://source.unsplash.com';
+    constructor(id: string | null, name: string | null, wallpaperLocation: string) {
+        super({
+            defaultName: 'Unsplash',
+            id: id ?? '-1',
+            name,
+            schemaID: SettingsModule.RWG_SETTINGS_SCHEMA_SOURCES_UNSPLASH,
+            schemaPath: `${SettingsModule.RWG_SETTINGS_SCHEMA_PATH}/sources/unsplash/${id}/`,
+            wallpaperLocation,
+        });
+    }
 
-		// query options
-		this.options = {
-			'query': '',
-			'w': 1920,
-			'h': 1080,
-			'featured': false,
-			'constraintType': 0,
-			'constraintValue': '',
-		};
+    private async _getHistoryEntry(): Promise<HistoryEntry | null> {
+        this._readOptionsFromSettings();
+        const optionsString = this._generateOptionsString();
 
-		this.bowl = new SoupBowl.Bowl();
-	}
+        let url = `https://source.unsplash.com${optionsString}`;
+        url = encodeURI(url);
 
-	_getHistoryEntry() {
-		return new Promise((resolve, reject) => {
-			this._readOptionsFromSettings();
-			let optionsString = this._generateOptionsString();
+        this.logger.info(`Unsplash request to: ${url}`);
 
-			let url = `https://source.unsplash.com${optionsString}`;
-			url = encodeURI(url);
+        const message = this._bowl.newGetMessage(url);
 
-			this.logger.info(`Unsplash request to: ${url}`);
+        // unsplash redirects to actual file; we only want the file location
+        message.set_flags(this._bowl.MessageFlags.NO_REDIRECT);
 
-			let message = this.bowl.Soup.Message.new('GET', url);
-			if (message === null) {
-				reject("Could not create request.");
-			}
+        await this._bowl.send_and_receive(message);
 
-			// unsplash redirects to actual file; we only want the file location
-			message.set_flags(this.bowl.Soup.MessageFlags.NO_REDIRECT);
+        // expecting redirect
+        if (message.status_code !== 302)
+            throw new Error('Unexpected response status code (expected 302)');
 
-			this.bowl.send_and_receive(message, (_null_expected) => {
-				let imageLinkUrl;
+        const imageLinkUrl = message.response_headers.get_one('Location');
+        if (!imageLinkUrl)
+            throw new Error('No image link in response.');
 
-				// expecting redirect
-				if (message.status_code !== 302) {
-					reject("Unexpected response status code (expected 302)");
-				}
 
-				imageLinkUrl = message.response_headers.get_one('Location');
+        if (this._isImageBlocked(Utils.fileName(imageLinkUrl))) {
+            // Abort and try again
+            return null;
+        }
 
-				if (this._isImageBlocked(this.fileName(imageLinkUrl))) {
-					// Abort and try again
-					resolve(null);
-				}
+        const historyEntry = new HistoryEntry(null, this._sourceName, imageLinkUrl);
+        historyEntry.source.sourceUrl = this._sourceUrl;
+        historyEntry.source.imageLinkUrl = imageLinkUrl;
 
-				let historyEntry = new HistoryModule.HistoryEntry(null, this._sourceName, imageLinkUrl);
-				historyEntry.source.sourceUrl = this._sourceUrl;
-				historyEntry.source.imageLinkUrl = imageLinkUrl;
+        return historyEntry;
+    }
 
-				resolve(historyEntry);
-			});
-		});
-	}
+    async requestRandomImage() {
+        for (let i = 0; i < 5; i++) {
+            try {
+                // This should run sequentially
+                // eslint-disable-next-line no-await-in-loop
+                const historyEntry = await this._getHistoryEntry();
 
-	async requestRandomImage(callback) {
-		for (let i = 0; i < 5; i++) {
-			try {
-				let historyEntry = await this._getHistoryEntry();
+                if (historyEntry)
+                    return historyEntry;
+            } catch (error) {
+                this.logger.warn(`Failed getting image: ${error}`);
+                // Do not escalate yet, try again
+            }
 
-				if (historyEntry === null) {
-					// Image blocked, try again
-					continue;
-				}
+            // Image blocked, try again
+        }
 
-				if (callback) {
-					callback(historyEntry);
-				}
+        throw new Error('Only blocked images found.');
+    }
 
-				return;
-			} catch (error) {
-				this._error(error, callback);
-				return;
-			}
-		}
+    private _generateOptionsString() {
+        const options = this._options;
+        let optionsString = '';
 
-		this._error("Only blocked images found.", callback);
-	}
+        switch (options.constraintType) {
+        case 1:
+            optionsString = `/user/${options.constraintValue}/`;
+            break;
+        case 2:
+            optionsString = `/user/${options.constraintValue}/likes/`;
+            break;
+        case 3:
+            optionsString = `/collection/${options.constraintValue}/`;
+            break;
+        default:
+            if (options.featured)
+                optionsString = '/featured/';
+            else
+                optionsString = '/random/';
+        }
 
-	_generateOptionsString() {
-		let options = this.options;
-		let optionsString = "";
+        if (options.w && options.h)
+            optionsString += `${options.w}x${options.h}`;
 
-		switch (options.constraintType) {
-			case 1:
-				optionsString = `/user/${options.constraintValue}/`;
-				break;
-			case 2:
-				optionsString = `/user/${options.constraintValue}/likes/`;
-				break;
-			case 3:
-				optionsString = `/collection/${options.constraintValue}/`;
-				break;
-			default:
-				if (options.featured) {
-					optionsString = `/featured/`;
-				} else {
-					optionsString = `/random/`;
-				}
-		}
 
-		if (options.w && options.h) {
-			optionsString += `${options.w}x${options.h}`;
-		}
+        if (options.query) {
+            const q = options.query.replace(/\W/, ',');
+            optionsString += `?${q}`;
+        }
 
-		if (options.query) {
-			let q = options.query.replace(/\W/, ',');
-			optionsString += `?${q}`;
-		}
+        return optionsString;
+    }
 
-		return optionsString;
-	}
+    private _readOptionsFromSettings() {
+        this._options.w = this._settings.getInt('image-width');
+        this._options.h = this._settings.getInt('image-height');
 
-	_readOptionsFromSettings() {
-		this.options.w = this._settings.get('image-width', 'int');
-		this.options.h = this._settings.get('image-height', 'int');
+        this._options.constraintType = this._settings.getEnum('constraint-type');
+        this._options.constraintValue = this._settings.getString('constraint-value');
 
-		this.options.constraintType = this._settings.get('constraint-type', 'enum');
-		this.options.constraintValue = this._settings.get('constraint-value', 'string');
+        const keywords = this._settings.getString('keyword').split(',');
+        if (keywords.length > 0) {
+            const randomKeyword = keywords[Utils.getRandomNumber(keywords.length)];
+            this._options.query = randomKeyword.trim();
+        }
 
-		const keywords = this._settings.get('keyword', 'string').split(",");
-		if (keywords.length > 0) {
-			const randomKeyword = keywords[Utils.Utils.getRandomNumber(keywords.length)];
-			this.options.query = randomKeyword.trim();
-		}
+        this._options.featured = this._settings.getBoolean('featured-only');
+    }
+}
 
-		this.options.featured = this._settings.get('featured-only', 'boolean');
-	}
-};
+export {UnsplashAdapter};
