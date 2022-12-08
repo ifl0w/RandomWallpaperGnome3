@@ -1,177 +1,188 @@
-// Filesystem
-const Gio = imports.gi.Gio;
+import * as Gio from 'gi://Gio';
 
-const Self = imports.misc.extensionUtils.getCurrentExtension();
-const Prefs = Self.imports.settings;
-const Utils = Self.imports.utils;
+import * as Utils from './utils.js';
 
-const LoggerModule = Self.imports.logger;
+import {Settings} from './settings.js';
 
-var HistoryEntry = class {
+interface SourceInfo {
+    author: string | null;
+    authorUrl: string | null;
+    source: string | null;
+    sourceUrl: string | null;
+    imageDownloadUrl: string;
+    imageLinkUrl: string | null;
+}
 
-	constructor(author, source, url) {
-		this.id = null;
-		this.name = null;
-		this.path = null;
-		this.source = null;
-		this.timestamp = new Date().getTime();
-		this.adapter = {
-			id: null,
-			type: null
-		};
+interface AdapterInfo {
+    id: string | null;
+    type: number | null;
+}
 
-		this.source = {
-			author: author,
-			authorUrl: null,
-			source: source,
-			sourceUrl: null,
-			imageDownloadUrl: url, // URL used for downloading the image
-			imageLinkUrl: url // URL used for linking back to the website of the image
-		};
-	}
+class HistoryEntry {
+    timestamp = new Date().getTime();
+    id: string;
+    name: string;
+    path: string | null = null;
+    source: SourceInfo;
+    adapter: AdapterInfo = {
+        id: null,
+        type: null,
+    };
 
-};
+    constructor(author: string | null, source: string | null, url: string) {
+        this.source = {
+            author,
+            authorUrl: null,
+            source,
+            sourceUrl: null,
+            imageDownloadUrl: url, // URL used for downloading the image
+            imageLinkUrl: url, // URL used for linking back to the website of the image
+        };
 
-var HistoryController = class {
+        // extract the name from the url
+        this.name = Utils.fileName(this.source.imageDownloadUrl);
+        this.id = `${this.timestamp}_${this.name}`;
+    }
+}
 
-	constructor(wallpaperLocation) {
-		this.logger = new LoggerModule.Logger('RWG3', 'HistoryController');
-		this.size = 10;
-		this.history = [];
-		this._settings = new Prefs.Settings();
-		this._wallpaperLocation = wallpaperLocation;
+class HistoryController {
+    history: HistoryEntry[] = [];
+    size = 10;
 
-		this.load();
-	}
+    private _settings = new Settings();
+    private _wallpaperLocation: string;
 
-	insert(historyElement) {
-		this.history.unshift(historyElement);
-		this._deleteOldPictures();
-		this.save();
-	}
+    constructor(wallpaperLocation: string) {
+        this._wallpaperLocation = wallpaperLocation;
 
-	/**
-	 * Set the given id to to the first history element (the current one)
-	 * @param id
-	 * @returns {boolean}
-	 */
-	promoteToActive(id) {
-		let element = this.get(id);
-		if (element === null) {
-			return false;
-		}
+        this.load();
+    }
 
-		element.timestamp = new Date().getTime();
-		this.history = this.history.sort((elem1, elem2) => {
-			return elem1.timestamp < elem2.timestamp
-		});
-		this.save();
+    insert(historyElement: HistoryEntry) {
+        this.history.unshift(historyElement);
+        this._deleteOldPictures();
+        this.save();
+    }
 
-		return true;
-	}
+    /**
+     * Set the given id to to the first history element (the current one)
+     *
+     * @param {string} id ID of the historyEntry
+     */
+    promoteToActive(id: string): boolean {
+        const element = this.get(id);
+        if (element === null)
+            return false;
 
-	/**
-	 * Returns the corresponding HistoryEntry or null
-	 * @param id
-	 * @returns {*}
-	 */
-	get(id) {
-		for (let elem of this.history) {
-			if (elem.id == id) {
-				return elem;
-			}
-		}
 
-		return null;
-	}
+        element.timestamp = new Date().getTime();
+        this.history = this.history.sort((elem1, elem2) => {
+            return elem1.timestamp < elem2.timestamp ? 1 : 0;
+        });
+        this.save();
 
-	/**
-	 * Get the current history element.
-	 * @returns {HistoryElement}
-	 */
-	getCurrentElement() {
-		return this.history[0];
-	}
+        return true;
+    }
 
-	/**
-	 * Get a random HistoryEntry.
-	 * @returns {HistoryEntry}
-	 */
-	getRandom() {
-		return this.history[Utils.Utils.getRandomNumber(this.history.length)];
-	}
+    /**
+     * Returns the corresponding HistoryEntry or null
+     *
+     * @param {string} id ID of the historyEntry
+     */
+    get(id: string): HistoryEntry | null {
+        for (const elem of this.history) {
+            if (elem.id === id)
+                return elem;
+        }
 
-	/**
-	 * Load the history from the gschema
-	 */
-	load() {
-		this.size = this._settings.get('history-length', 'int');
-		let stringHistory = this._settings.get('history', 'strv');
-		this.history = stringHistory.map(elem => {
-			return JSON.parse(elem)
-		});
-	}
+        return null;
+    }
 
-	/**
-	 * Save the history to the gschema
-	 */
-	save() {
-		let stringHistory = this.history.map(elem => {
-			return JSON.stringify(elem)
-		});
-		this._settings.set('history', 'strv', stringHistory);
-		Gio.Settings.sync();
-	}
+    /**
+     * Get the current history element.
+     */
+    getCurrentElement(): HistoryEntry {
+        return this.history[0];
+    }
 
-	/**
-	 * Clear the history and delete all photos except the current one.
-	 * @returns {boolean}
-	 */
-	clear() {
-		let firstHistoryElement = this.history[0];
+    /**
+     * Get a random HistoryEntry.
+     */
+    getRandom(): HistoryEntry {
+        return this.history[Utils.getRandomNumber(this.history.length)];
+    }
 
-		if (firstHistoryElement)
-			this.history = [firstHistoryElement];
+    /**
+     * Load the history from the schema
+     */
+    load() {
+        this.size = this._settings.getInt('history-length');
 
-		let directory = Gio.file_new_for_path(this._wallpaperLocation);
-		let enumerator = directory.enumerate_children('', Gio.FileQueryInfoFlags.NONE, null);
+        const stringHistory: string[] = this._settings.getStrv('history');
+        this.history = stringHistory.map((elem: string) => {
+            return JSON.parse(elem);
+        });
+    }
 
-		let fileinfo;
-		let deleteFile;
+    /**
+     * Save the history to the schema
+     */
+    save() {
+        const stringHistory = this.history.map(elem => {
+            return JSON.stringify(elem);
+        });
+        this._settings.setStrv('history', stringHistory);
+        Gio.Settings.sync();
+    }
 
-		do {
+    /**
+     * Clear the history and delete all photos except the current one.
+     */
+    clear(): boolean {
+        const firstHistoryElement = this.history[0];
 
-			fileinfo = enumerator.next_file(null);
+        if (firstHistoryElement)
+            this.history = [firstHistoryElement];
 
-			if (!fileinfo) {
-				break;
-			}
+        const directory = Gio.file_new_for_path(this._wallpaperLocation);
+        const enumerator = directory.enumerate_children('', Gio.FileQueryInfoFlags.NONE, null);
 
-			let id = fileinfo.get_name();
+        let fileInfo;
+        let deleteFile;
 
-			// ignore hidden files and first element
-			if (id[0] != '.' && id != firstHistoryElement.id) {
-				deleteFile = Gio.file_new_for_path(this._wallpaperLocation + id);
-				deleteFile.delete(null);
-			}
+        do {
+            fileInfo = enumerator.next_file(null);
 
-		} while (fileinfo);
+            if (!fileInfo)
+                break;
 
-		this.save();
-		return true;
-	}
+            const id = fileInfo.get_name();
 
-	/**
-	 * Delete all pictures that have no slot in the history.
-	 * @private
-	 */
-	_deleteOldPictures() {
-		this.size = this._settings.get('history-length', 'int');
-		let deleteFile;
-		while (this.history.length > this.size) {
-			deleteFile = Gio.file_new_for_path(this.history.pop().path);
-			deleteFile.delete(null);
-		}
-	}
+            // ignore hidden files and first element
+            if (id[0] !== '.' && id !== firstHistoryElement.id) {
+                deleteFile = Gio.file_new_for_path(this._wallpaperLocation + id);
+                deleteFile.delete(null);
+            }
+        } while (fileInfo);
 
-};
+        this.save();
+        return true;
+    }
+
+    /**
+     * Delete all pictures that have no slot in the history.
+     */
+    private _deleteOldPictures() {
+        this.size = this._settings.getInt('history-length');
+        let deleteFile;
+        while (this.history.length > this.size) {
+            const path = this.history.pop()?.path;
+            if (path) {
+                deleteFile = Gio.file_new_for_path(path);
+                deleteFile.delete(null);
+            }
+        }
+    }
+}
+
+export {HistoryEntry, HistoryController};

@@ -1,0 +1,39 @@
+{
+    "compilerOptions": {
+        "experimentalDecorators": true,
+        "target": "ES2020",
+        "module": "es2020",
+        "sourceMap": false,
+        "strict": true,
+        "pretty": true,
+        "removeComments": false,
+        "baseUrl": "./src",
+        "allowSyntheticDefaultImports": true,
+        "outDir": "./randomwallpaper@iflow.space",
+        "moduleResolution": "node",
+        "skipLibCheck": true,
+        "lib": [
+            "ES2021"
+        ],
+        "paths": {
+            "@gi/*": ["../types/*"],
+        },
+        "typeRoots": [
+            "./node_modules/@gi-types",
+        ],
+        "types": [
+            "gjs-environment",
+            "base-types",
+            "gtk4-types",
+        ],
+
+    },
+    "include": [
+        "src/**/*.ts",
+        "randomwallpaper@iflow.space/**/*.js"
+    ],
+    "exclude": [
+        "./node_modules/**",
+        "./types/**"
+    ],
+}

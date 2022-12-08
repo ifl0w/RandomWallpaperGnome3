@@ -2,82 +2,82 @@ using Gtk 4.0;
 using Adw 1;
 
 template RedditSettingsGroup : Adw.PreferencesGroup {
-  title: _("General");
+    title: _("General");
 
-  Adw.EntryRow subreddits {
-    title: _("Subreddits - e.g.: wallpaper, wallpapers, minimalwallpaper");
-  }
-
-  Adw.ActionRow {
-    title: _("Minimal resolution");
-
-    SpinButton {
-      valign: center;
-      numeric: true;
-
-      adjustment: Adjustment min_width {
-        step-increment: 1;
-        page-increment: 10;
-        lower: 1;
-        upper: 1000000;
-      };
+    Adw.EntryRow subreddits {
+        title: _("Subreddits - e.g.: wallpaper, wallpapers, minimalwallpaper");
     }
 
-    Label {
-      label: "x";
+    Adw.ActionRow {
+        title: _("Minimal resolution");
+
+        SpinButton {
+            valign: center;
+            numeric: true;
+
+            adjustment: Adjustment min_width {
+                step-increment: 1;
+                page-increment: 10;
+                lower: 1;
+                upper: 1000000;
+            };
+        }
+
+        Label {
+            label: "x";
+        }
+
+        SpinButton {
+            valign: center;
+            numeric: true;
+
+            adjustment: Adjustment min_height {
+                step-increment: 1;
+                page-increment: 10;
+                lower: 1;
+                upper: 1000000;
+            };
+        }
     }
 
-    SpinButton {
-      valign: center;
-      numeric: true;
+    Adw.ActionRow {
+        title: _("Minimal image ratio");
 
-      adjustment: Adjustment min_height {
-        step-increment: 1;
-        page-increment: 10;
-        lower: 1;
-        upper: 1000000;
-      };
+        SpinButton {
+            valign: center;
+            numeric: true;
+
+            adjustment: Adjustment image_ratio1 {
+                step-increment: 1;
+                page-increment: 10;
+                lower: 1;
+                upper: 1000000;
+            };
+        }
+
+        Label {
+            label: ":";
+        }
+
+        SpinButton {
+            valign: center;
+            numeric: true;
+
+            adjustment: Adjustment image_ratio2 {
+                step-increment: 1;
+                page-increment: 10;
+                lower: 1;
+                upper: 1000000;
+            };
+        }
     }
-  }
 
-  Adw.ActionRow {
-    title: _("Minimal image ratio");
+    Adw.ActionRow {
+        title: "SFW";
+        subtitle: _("Safe for work");
 
-    SpinButton {
-      valign: center;
-      numeric: true;
-
-      adjustment: Adjustment image_ratio1 {
-        step-increment: 1;
-        page-increment: 10;
-        lower: 1;
-        upper: 1000000;
-      };
+        Switch allow_sfw {
+            valign: center;
+        }
     }
-
-    Label {
-      label: ":";
-    }
-
-    SpinButton {
-      valign: center;
-      numeric: true;
-
-      adjustment: Adjustment image_ratio2 {
-        step-increment: 1;
-        page-increment: 10;
-        lower: 1;
-        upper: 1000000;
-      };
-    }
-  }
-
-  Adw.ActionRow {
-    title: "SFW";
-    subtitle: _("Safe for work");
-
-    Switch allow_sfw {
-      valign: center;
-    }
-  }
 }

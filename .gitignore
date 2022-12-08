@@ -1,7 +1,11 @@
 .idea
-# ready to deploy to gnome extensions
-random-wallpaper-gnome3.zip
-randomwallpaper@iflow.space.zip
 
 # Temporary ui files
 **/*~
+
+# Generated stuff
+randomwallpaper@iflow.space/
+randomwallpaper@iflow.space.shell-extension.zip
+
+# Build stuff
+node_modules/

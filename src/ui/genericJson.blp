@@ -2,106 +2,106 @@ using Gtk 4.0;
 using Adw 1;
 
 template GenericJsonSettingsGroup : Adw.PreferencesGroup {
-  // title: _("Source Settings");
-  description: _("This feature requires some know how. However, many different wallpaper providers can be used with this generic JSON source.\nYou have to specify an URL to a JSON response and a path to the target image URL within the JSON response.\nYou can also define a prefix that will be added to the image URL.");
+    // title: _("Source Settings");
+    description: _("This feature requires some know how. However, many different wallpaper providers can be used with this generic JSON source.\nYou have to specify an URL to a JSON response and a path to the target image URL within the JSON response.\nYou can also define a prefix that will be added to the image URL.");
 
-  header-suffix: LinkButton {
-    valign: center;
-    uri: "https://github.com/ifl0w/RandomWallpaperGnome3/wiki/Generic-JSON-Source";
-
-    Adw.ButtonContent {
-      icon-name: "globe-symbolic";
-    }
-
-    styles [
-      "flat",
-    ]
-  };
-
-  Adw.PreferencesGroup {
-    title: _("General");
-
-    Adw.EntryRow domain {
-      title: _("Domain");
-      input-purpose: url;
-
-      LinkButton {
+    header-suffix: LinkButton {
         valign: center;
-        uri: bind domain.text;
+        uri: "https://github.com/ifl0w/RandomWallpaperGnome3/wiki/Generic-JSON-Source";
 
         Adw.ButtonContent {
-          icon-name: "globe-symbolic";
+            icon-name: "globe-symbolic";
         }
 
         styles [
-          "flat",
+            "flat",
         ]
-      }
-    }
+    };
 
-    Adw.EntryRow request_url {
-      title: _("Request URL");
-      input-purpose: url;
+    Adw.PreferencesGroup {
+        title: _("General");
 
-      LinkButton {
-        valign: center;
-        uri: bind request_url.text;
+        Adw.EntryRow domain {
+            title: _("Domain");
+            input-purpose: url;
 
-        Adw.ButtonContent {
-          icon-name: "globe-symbolic";
+            LinkButton {
+                valign: center;
+                uri: bind domain.text;
+
+                Adw.ButtonContent {
+                    icon-name: "globe-symbolic";
+                }
+
+                styles [
+                    "flat",
+                ]
+            }
         }
 
-        styles [
-          "flat",
-        ]
-      }
-    }
-  }
+        Adw.EntryRow request_url {
+            title: _("Request URL");
+            input-purpose: url;
 
-  Adw.PreferencesGroup {
-    title: _("Image");
+            LinkButton {
+                valign: center;
+                uri: bind request_url.text;
 
-    Adw.EntryRow image_path {
-      title: _("JSON Path");
-      input-purpose: free_form;
-    }
+                Adw.ButtonContent {
+                    icon-name: "globe-symbolic";
+                }
 
-    Adw.EntryRow image_prefix {
-      title: _("URL prefix");
-      input-purpose: free_form;
-    }
-  }
-
-  Adw.PreferencesGroup {
-    title: _("Post");
-
-    Adw.EntryRow post_path {
-      title: _("JSON Path");
-      input-purpose: free_form;
+                styles [
+                    "flat",
+                ]
+            }
+        }
     }
 
-    Adw.EntryRow post_prefix {
-      title: _("URL Prefix");
-      input-purpose: free_form;
-    }
-  }
+    Adw.PreferencesGroup {
+        title: _("Image");
 
-  Adw.PreferencesGroup {
-    title: _("Author");
+        Adw.EntryRow image_path {
+            title: _("JSON Path");
+            input-purpose: free_form;
+        }
 
-    Adw.EntryRow author_name_path {
-      title: _("Name JSON Path");
-      input-purpose: free_form;
-    }
-
-    Adw.EntryRow author_url_path {
-      title: _("URL JSON Path");
-      input-purpose: free_form;
+        Adw.EntryRow image_prefix {
+            title: _("URL prefix");
+            input-purpose: free_form;
+        }
     }
 
-    Adw.EntryRow author_url_prefix {
-      title: _("URL URL prefix");
-      input-purpose: free_form;
+    Adw.PreferencesGroup {
+        title: _("Post");
+
+        Adw.EntryRow post_path {
+            title: _("JSON Path");
+            input-purpose: free_form;
+        }
+
+        Adw.EntryRow post_prefix {
+            title: _("URL Prefix");
+            input-purpose: free_form;
+        }
     }
-  }
+
+    Adw.PreferencesGroup {
+        title: _("Author");
+
+        Adw.EntryRow author_name_path {
+            title: _("Name JSON Path");
+            input-purpose: free_form;
+        }
+
+        Adw.EntryRow author_url_path {
+            title: _("URL JSON Path");
+            input-purpose: free_form;
+        }
+
+        Adw.EntryRow author_url_prefix {
+            title: _("URL prefix");
+            input-purpose: free_form;
+        }
+    }
 }
