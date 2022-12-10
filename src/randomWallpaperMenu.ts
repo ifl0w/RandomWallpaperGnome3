@@ -17,45 +17,44 @@ const Self = ExtensionUtils.getCurrentExtension();
 
 class RandomWallpaperMenu {
     private _logger = new Logger('RWG3', 'RandomWallpaperEntry');
-    private _settings = new Settings.Settings();
     private _backendConnection = new Settings.Settings(Settings.RWG_SETTINGS_SCHEMA_BACKEND_CONNECTION);
+    private _settings = new Settings.Settings();
 
-    private _wallpaperController;
     private _currentBackgroundSection;
-    private _historySection;
     private _hidePanelIconHandler;
-
-    private panelMenu;
+    private _historySection;
+    private _panelMenu;
+    private _wallpaperController;
 
     constructor(wallpaperController: WallpaperController) {
         this._wallpaperController = wallpaperController;
 
-        this.panelMenu = new PanelMenu.Button(0, 'Random wallpaper');
+        this._panelMenu = new PanelMenu.Button(0, 'Random wallpaper');
 
         // PanelMenu Icon
         const statusIcon = new CustomElements.StatusElement();
-        this.panelMenu.add_child(statusIcon.icon);
+        this._panelMenu.add_child(statusIcon.icon);
         this._hidePanelIconHandler = this._settings.observe('hide-panel-icon', this.updatePanelMenuVisibility.bind(this));
 
         // new wallpaper button
         const newWallpaperItem = new CustomElements.NewWallpaperElement({});
-        this.panelMenu.menu.addMenuItem(newWallpaperItem);
+        this._panelMenu.menu.addMenuItem(newWallpaperItem);
 
-        this.panelMenu.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+        this._panelMenu.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 
         // Set fixed width so the preview images don't widen the menu
-        this.panelMenu.menu.actor.set_width(350);
+        this._panelMenu.menu.actor.set_width(350);
 
         // current background section
         this._currentBackgroundSection = new PopupMenu.PopupMenuSection();
-        this.panelMenu.menu.addMenuItem(this._currentBackgroundSection);
-        this.panelMenu.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+        this._panelMenu.menu.addMenuItem(this._currentBackgroundSection);
+        this._panelMenu.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 
         // history section
         this._historySection = new CustomElements.HistorySection();
-        this.panelMenu.menu.addMenuItem(this._historySection);
+        this._panelMenu.menu.addMenuItem(this._historySection);
 
-        this.panelMenu.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+        this._panelMenu.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 
         // Temporarily pause timer
         const pauseTimerItem = new PopupMenu.PopupSwitchMenuItem('Pause timer', false);
@@ -74,19 +73,19 @@ class RandomWallpaperMenu {
             pauseTimerItem.setToggleState(this._backendConnection.getBoolean('pause-timer'));
         });
 
-        this.panelMenu.menu.addMenuItem(pauseTimerItem);
+        this._panelMenu.menu.addMenuItem(pauseTimerItem);
 
         // clear history button
         const clearHistoryItem = new PopupMenu.PopupMenuItem('Clear History');
-        this.panelMenu.menu.addMenuItem(clearHistoryItem);
+        this._panelMenu.menu.addMenuItem(clearHistoryItem);
 
         // open wallpaper folder button
         const openFolder = new PopupMenu.PopupMenuItem('Open Wallpaper Folder');
-        this.panelMenu.menu.addMenuItem(openFolder);
+        this._panelMenu.menu.addMenuItem(openFolder);
 
         // settings button
         const openSettings = new PopupMenu.PopupMenuItem('Settings');
-        this.panelMenu.menu.addMenuItem(openSettings);
+        this._panelMenu.menu.addMenuItem(openSettings);
 
         // add eventlistener
         this._wallpaperController.registerStartLoadingHook(() => statusIcon.startLoading());
@@ -95,7 +94,13 @@ class RandomWallpaperMenu {
 
         // new wallpaper event
         newWallpaperItem.connect('activate', () => {
-            this._wallpaperController.fetchNewWallpaper().catch(logError);
+            this._wallpaperController.prohibitNewWallpaper = true;
+            this._wallpaperController.fetchNewWallpaper().then(() => {
+                this._wallpaperController.prohibitNewWallpaper = false;
+            }).catch(error => {
+                this._wallpaperController.prohibitNewWallpaper = false;
+                logError(error);
+            });
         });
 
         // clear history event
@@ -123,18 +128,20 @@ class RandomWallpaperMenu {
                 null);
         });
 
-        this.panelMenu.menu.actor.connect('show', () => {
+        this._panelMenu.menu.actor.connect('show', () => {
             newWallpaperItem.show();
         });
 
         // when the popupMenu disappears, check if the wallpaper is the original and
         // reset it if needed
-        this.panelMenu.menu.actor.connect('hide', () => {
-            this._wallpaperController.resetWallpaper();
+        this._panelMenu.menu.actor.connect('hide', () => {
+            if (!this._wallpaperController.prohibitNewWallpaper)
+                this._wallpaperController.resetWallpaper();
         });
 
-        this.panelMenu.menu.actor.connect('leave-event', () => {
-            this._wallpaperController.resetWallpaper();
+        this._panelMenu.menu.actor.connect('leave-event', () => {
+            if (!this._wallpaperController.prohibitNewWallpaper)
+                this._wallpaperController.resetWallpaper();
         });
 
         this._settings.observe('history', this.setHistoryList.bind(this));
@@ -145,12 +152,12 @@ class RandomWallpaperMenu {
         this.setHistoryList();
 
         // add to panel
-        Main.panel.addToStatusArea('random-wallpaper-menu', this.panelMenu);
+        Main.panel.addToStatusArea('random-wallpaper-menu', this._panelMenu);
     }
 
     cleanup() {
         this.clearHistoryList();
-        this.panelMenu.destroy();
+        this._panelMenu.destroy();
 
         // remove all signal handlers
         if (this._hidePanelIconHandler !== null)
@@ -159,9 +166,9 @@ class RandomWallpaperMenu {
 
     updatePanelMenuVisibility() {
         if (this._settings.getBoolean('hide-panel-icon'))
-            this.panelMenu.hide();
+            this._panelMenu.hide();
         else
-            this.panelMenu.show();
+            this._panelMenu.show();
     }
 
     setCurrentBackgroundElement() {
@@ -194,7 +201,8 @@ class RandomWallpaperMenu {
          */
         // eslint-disable-next-line no-unused-vars
         function onLeave(this: RandomWallpaperMenu, actor: typeof CustomElements.HistoryElement) {
-            this._wallpaperController.resetWallpaper();
+            if (!this._wallpaperController.prohibitNewWallpaper)
+                this._wallpaperController.resetWallpaper();
         }
 
         /**
@@ -202,8 +210,10 @@ class RandomWallpaperMenu {
          * @param {CustomElements.HistoryElement} actor The activating panel item
          */
         function onEnter(this: RandomWallpaperMenu, actor: typeof CustomElements.HistoryElement) {
-            // @ts-expect-error Typing fails for GObject.registerClass
-            this._wallpaperController.previewWallpaper(actor.historyEntry.id);
+            if (!this._wallpaperController.prohibitNewWallpaper) {
+                // @ts-expect-error Typing fails for GObject.registerClass
+                this._wallpaperController.previewWallpaper(actor.historyEntry.id);
+            }
         }
 
         /**
@@ -211,8 +221,14 @@ class RandomWallpaperMenu {
          * @param {CustomElements.HistoryElement} actor The activating panel item
          */
         function onSelect(this: RandomWallpaperMenu, actor: typeof CustomElements.HistoryElement) {
+            this._wallpaperController.prohibitNewWallpaper = true;
             // @ts-expect-error Typing fails for GObject.registerClass
-            this._wallpaperController.setWallpaper(actor.historyEntry.id);
+            this._wallpaperController.setWallpaper(actor.historyEntry.id).then(() => {
+                this._wallpaperController.prohibitNewWallpaper = false;
+            }).catch(error => {
+                this._wallpaperController.prohibitNewWallpaper = false;
+                logError(error);
+            });
         }
 
         this._historySection.updateList(history, onEnter.bind(this), onLeave.bind(this), onSelect.bind(this));

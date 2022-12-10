@@ -14,13 +14,17 @@ interface SourceInfo {
 }
 
 interface AdapterInfo {
+    /** Identifier to access the settings path */
     id: string | null;
+    /** Adapter type as enum */
     type: number | null;
 }
 
 class HistoryEntry {
     timestamp = new Date().getTime();
+    /** Unique identifier, concat of timestamp and name */
     id: string;
+    /** Basename of URI */
     name: string;
     path: string | null = null;
     source: SourceInfo;
@@ -69,7 +73,7 @@ class HistoryController {
      *
      * @param {string} id ID of the historyEntry
      */
-    promoteToActive(id: string): boolean {
+    promoteToActive(id: string) {
         const element = this.get(id);
         if (element === null)
             return false;
@@ -89,7 +93,7 @@ class HistoryController {
      *
      * @param {string} id ID of the historyEntry
      */
-    get(id: string): HistoryEntry | null {
+    get(id: string) {
         for (const elem of this.history) {
             if (elem.id === id)
                 return elem;
@@ -101,14 +105,23 @@ class HistoryController {
     /**
      * Get the current history element.
      */
-    getCurrentElement(): HistoryEntry {
+    getCurrentEntry() {
         return this.history[0];
+    }
+
+    getEntryByPath(path: string) {
+        for (const element of this.history) {
+            if (element.path === path)
+                return element;
+        }
+
+        return null;
     }
 
     /**
      * Get a random HistoryEntry.
      */
-    getRandom(): HistoryEntry {
+    getRandom() {
         return this.history[Utils.getRandomNumber(this.history.length)];
     }
 
@@ -138,7 +151,7 @@ class HistoryController {
     /**
      * Clear the history and delete all photos except the current one.
      */
-    clear(): boolean {
+    clear() {
         const firstHistoryElement = this.history[0];
 
         if (firstHistoryElement)
