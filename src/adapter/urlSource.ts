@@ -15,7 +15,7 @@ class UrlSourceAdapter extends BaseAdapter {
         });
     }
 
-    requestRandomImage() {
+    requestRandomImage(unusedCount: number) {
         const imageDownloadUrl = this._settings.getString('image-url');
         let authorName: string | null = this._settings.getString('author-name');
         const authorUrl = this._settings.getString('author-url');
@@ -40,7 +40,7 @@ class UrlSourceAdapter extends BaseAdapter {
         if (domainUrl !== '')
             historyEntry.source.sourceUrl = domainUrl;
 
-        return Promise.resolve(historyEntry);
+        return Promise.resolve([historyEntry]);
     }
 }
 

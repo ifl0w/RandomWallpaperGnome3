@@ -78,6 +78,7 @@ compile_js() {
 
 compile_schemas() {
     check_command "glib-compile-schemas"
+    mkdir -p "$DESTDIR/schemas/"
 
     # the pack command also compiles the schemas but only into the zip file
     glib-compile-schemas --targetdir="$DESTDIR/schemas" "$SRCDIR/schemas/"
