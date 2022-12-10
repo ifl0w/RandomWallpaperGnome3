@@ -79,9 +79,8 @@ class AFTimer {
                 this._timeoutEndCallback();
 
             this.reset(); // reset timer
-            this.start(); // restart timer
 
-            return true;
+            return GLib.SOURCE_CONTINUE;
         });
     }
 

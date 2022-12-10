@@ -6,7 +6,7 @@ import {HistoryEntry} from './../history.js';
 import {Logger} from './../logger.js';
 import {SoupBowl} from './../soupBowl.js';
 
-class BaseAdapter {
+abstract class BaseAdapter {
     logger: Logger;
 
     protected _settings: SettingsModule.Settings;
@@ -38,10 +38,10 @@ class BaseAdapter {
     /**
      * Retrieves a new url for an image and crafts a new HistoryEntry.
      *
+     * @param {number} count Number of requested wallpaper
      */
-    requestRandomImage(): Promise<HistoryEntry> {
-        throw new Error('requestRandomImage not implemented');
-    }
+    // eslint-disable-next-line no-unused-vars
+    abstract requestRandomImage (count: number): Promise<HistoryEntry[]>;
 
     /**
      * copy file from uri to local wallpaper directory and returns the full filepath
@@ -68,6 +68,15 @@ class BaseAdapter {
         fstream.close(null);
 
         return file;
+    }
+
+    protected _includesWallpaper(array: HistoryEntry[], uri: string) {
+        for (const element of array) {
+            if (element.source.imageDownloadUrl === uri)
+                return true;
+        }
+
+        return false;
     }
 
     /**

@@ -49,7 +49,8 @@ class RedditAdapter extends BaseAdapter {
         return string.replace(/&amp;/g, '&');
     }
 
-    async requestRandomImage() {
+    async requestRandomImage(count: number) {
+        const wallpaperResult: HistoryEntry[] = [];
         const subreddits = this._settings.getString('subreddits').split(',').map(s => s.trim()).join('+');
         const require_sfw = this._settings.getBoolean('allow-sfw');
 
@@ -58,55 +59,51 @@ class RedditAdapter extends BaseAdapter {
 
         const response_body_bytes = await this._bowl.send_and_receive(message);
 
-        try {
-            const response_body: RedditResponse = JSON.parse(ByteArray.toString(response_body_bytes));
+        const response_body: RedditResponse = JSON.parse(ByteArray.toString(response_body_bytes));
 
-            const submissions = response_body.data.children.filter(child => {
-                if (child.data.post_hint !== 'image')
-                    return false;
-                if (require_sfw)
-                    return child.data.over_18 === false;
+        const filteredSubmissions = response_body.data.children.filter(child => {
+            if (child.data.post_hint !== 'image')
+                return false;
+            if (require_sfw)
+                return child.data.over_18 === false;
 
-                const minWidth = this._settings.getInt('min-width');
-                const minHeight = this._settings.getInt('min-height');
-                if (child.data.preview.images[0].source.width < minWidth)
-                    return false;
-                if (child.data.preview.images[0].source.height < minHeight)
-                    return false;
+            const minWidth = this._settings.getInt('min-width');
+            const minHeight = this._settings.getInt('min-height');
+            if (child.data.preview.images[0].source.width < minWidth)
+                return false;
+            if (child.data.preview.images[0].source.height < minHeight)
+                return false;
 
-                const imageRatio1 = this._settings.getInt('image-ratio1');
-                const imageRatio2 = this._settings.getInt('image-ratio2');
-                if (child.data.preview.images[0].source.width / imageRatio1 * imageRatio2 < child.data.preview.images[0].source.height)
-                    return false;
-                return true;
-            });
+            const imageRatio1 = this._settings.getInt('image-ratio1');
+            const imageRatio2 = this._settings.getInt('image-ratio2');
+            if (child.data.preview.images[0].source.width / imageRatio1 * imageRatio2 < child.data.preview.images[0].source.height)
+                return false;
+            return true;
+        });
 
-            if (submissions.length === 0)
-                throw new Error('No suitable submissions found!');
+        if (filteredSubmissions.length === 0)
+            throw new Error('No suitable submissions found!');
 
-            let submission = null;
-            let imageDownloadUrl = null;
-            for (let i = 0; i < 5; i++) {
-                const random = Utils.getRandomNumber(submissions.length);
-                submission = submissions[random].data;
-                imageDownloadUrl = this._ampDecode(submission.preview.images[0].source.url);
+        for (let i = 0; i < 20 && wallpaperResult.length < count; i++) {
+            const random = Utils.getRandomNumber(filteredSubmissions.length);
+            const submission = filteredSubmissions[random].data;
+            const imageDownloadUrl = this._ampDecode(submission.preview.images[0].source.url);
 
-                if (!this._isImageBlocked(Utils.fileName(imageDownloadUrl)))
-                    break;
-
-                imageDownloadUrl = null;
-            }
-
-            if (!imageDownloadUrl || !submission)
-                throw new Error('Only blocked images found.');
+            if (this._isImageBlocked(Utils.fileName(imageDownloadUrl)))
+                continue;
 
             const historyEntry = new HistoryEntry(null, this._sourceName, imageDownloadUrl);
             historyEntry.source.sourceUrl = `https://www.reddit.com/${submission.subreddit_name_prefixed}`;
             historyEntry.source.imageLinkUrl = `https://www.reddit.com/${submission.permalink}`;
-            return historyEntry;
-        } catch (e) {
-            throw new Error(`Could not create request. (${e})`);
+
+            if (!this._includesWallpaper(wallpaperResult, historyEntry.source.imageDownloadUrl))
+                wallpaperResult.push(historyEntry);
         }
+
+        if (wallpaperResult.length === 0)
+            throw new Error('Only blocked images found.');
+
+        return wallpaperResult;
     }
 }
 
