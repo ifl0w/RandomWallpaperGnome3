@@ -51,7 +51,9 @@ class WallhavenAdapter extends BaseAdapter {
         });
     }
 
-    async requestRandomImage() {
+    async requestRandomImage(count: number) {
+        const wallpaperResult: HistoryEntry[] = [];
+
         this._readOptionsFromSettings();
         const optionsString = this._generateOptionsString(this._options);
 
@@ -69,31 +71,31 @@ class WallhavenAdapter extends BaseAdapter {
         if (!response || response.length === 0)
             throw new Error('Empty response');
 
-        let downloadURL: string | null = null;
-        let siteURL: string = '';
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < 10 && wallpaperResult.length < count; i++) {
             // get a random entry from the array
             const entry = response[Utils.getRandomNumber(response.length)];
-            downloadURL = entry.path;
-            siteURL = entry.url;
+            const siteURL = entry.url;
+            let downloadURL = entry.path;
 
-            if (!this._isImageBlocked(Utils.fileName(downloadURL)))
-                break;
+            if (this._isImageBlocked(Utils.fileName(downloadURL)))
+                continue;
 
-            downloadURL = null;
+            const apiKey = this._options['apikey'];
+            if (apiKey !== '')
+                downloadURL += `?apikey=${apiKey}`;
+
+            const historyEntry = new HistoryEntry(null, this._sourceName, downloadURL);
+            historyEntry.source.sourceUrl = 'https://wallhaven.cc/';
+            historyEntry.source.imageLinkUrl = siteURL;
+
+            if (!this._includesWallpaper(wallpaperResult, historyEntry.source.imageDownloadUrl))
+                wallpaperResult.push(historyEntry);
         }
 
-        if (!downloadURL)
+        if (wallpaperResult.length === 0)
             throw new Error('Only blocked images found.');
 
-        const apiKey = this._options['apikey'];
-        if (apiKey !== '')
-            downloadURL += `?apikey=${apiKey}`;
-
-        const historyEntry = new HistoryEntry(null, this._sourceName, downloadURL);
-        historyEntry.source.sourceUrl = 'https://wallhaven.cc/';
-        historyEntry.source.imageLinkUrl = siteURL;
-        return historyEntry;
+        return wallpaperResult;
     }
 
     private _generateOptionsString<T extends QueryOptions>(options: T) {

@@ -22,36 +22,38 @@ class LocalFolderAdapter extends BaseAdapter {
         });
     }
 
-    requestRandomImage(): Promise<HistoryEntry> {
+    requestRandomImage(count: number): Promise<HistoryEntry[]> {
         return new Promise((resolve, reject) => {
             const folder = Gio.File.new_for_path(this._settings.getString('folder'));
             const files = this._listDirectory(folder);
+            const wallpaperResult: HistoryEntry[] = [];
 
             if (files.length < 1) {
                 reject(new Error('No files found'));
                 return;
             }
 
-            let randomFilePath: string | null = null;
-            for (let i = 0; i < 5; i++) {
+            for (let i = 0; i < 20 && wallpaperResult.length < count; i++) {
                 const randomFile = files[Utils.getRandomNumber(files.length)];
-                randomFilePath = randomFile.get_uri();
+                const randomFilePath = randomFile.get_uri();
                 const randomFileName = randomFile.get_basename();
 
-                if (randomFileName && !this._isImageBlocked(randomFileName))
-                    break;
+                if (!randomFileName || this._isImageBlocked(randomFileName))
+                    continue;
 
-                randomFilePath = null;
+                const historyEntry = new HistoryEntry(null, this._sourceName, randomFilePath);
+                historyEntry.source.sourceUrl = this._wallpaperLocation;
+
+                if (!this._includesWallpaper(wallpaperResult, historyEntry.source.imageDownloadUrl))
+                    wallpaperResult.push(historyEntry);
             }
 
-            if (!randomFilePath) {
+            if (wallpaperResult.length === 0) {
                 reject(new Error('Only blocked images found'));
                 return;
             }
 
-            const historyEntry = new HistoryEntry(null, this._sourceName, randomFilePath);
-            historyEntry.source.sourceUrl = this._wallpaperLocation;
-            resolve(historyEntry);
+            resolve(wallpaperResult);
         });
     }
 
@@ -79,7 +81,6 @@ class LocalFolderAdapter extends BaseAdapter {
 
             if (info === null)
                 break;
-
 
             const child = iterator.get_child(info);
             const type = info.get_file_type();

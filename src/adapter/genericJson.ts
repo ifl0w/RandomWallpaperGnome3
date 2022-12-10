@@ -22,7 +22,9 @@ class GenericJsonAdapter extends BaseAdapter {
         });
     }
 
-    private async _getHistoryEntry() {
+    private async _getHistoryEntry(count: number) {
+        const wallpaperResult: HistoryEntry[] = [];
+
         let url = this._settings.getString('request-url');
         url = encodeURI(url);
 
@@ -41,86 +43,90 @@ class GenericJsonAdapter extends BaseAdapter {
         const authorNameJSONPath = this._settings.getString('author-name-path');
         const authorUrlJSONPath = this._settings.getString('author-url-path');
 
-        let returnObject;
-        let imageDownloadUrl;
-        for (let i = 0; i < 5; i++) {
-            returnObject = JSONPath.getTarget(response_body, imageJSONPath);
+        for (let i = 0; i < 5 && wallpaperResult.length < count; i++) {
+            const returnObject = JSONPath.getTarget(response_body, imageJSONPath);
+            if (!returnObject || (typeof returnObject.Object !== 'string' && typeof returnObject.Object !== 'number') || returnObject.Object === '')
+                throw new Error('Unexpected json member found');
 
-            if (returnObject && (typeof returnObject.Object === 'string' || typeof returnObject.Object === 'number') && returnObject.Object !== '') {
-                imageDownloadUrl = this._settings.getString('image-prefix') + String(returnObject.Object);
+            const imageDownloadUrl = this._settings.getString('image-prefix') + String(returnObject.Object);
+            const imageBlocked = this._isImageBlocked(Utils.fileName(imageDownloadUrl));
 
-                const imageBlocked = this._isImageBlocked(Utils.fileName(imageDownloadUrl));
-
-                if (!imageBlocked)
-                    break;
-
-                // Only retry with @random present in JSONPath
-                if (imageBlocked && !imageJSONPath.includes('@random')) {
-                    // Abort and try again
-                    return null;
-                }
+            // Don't retry without @random present in JSONPath
+            if (imageBlocked && !imageJSONPath.includes('@random')) {
+                // Abort and try again
+                return null;
             }
 
-            imageDownloadUrl = null;
+            if (imageBlocked)
+                continue;
+
+            // '@random' would yield different results so lets make sure the values stay
+            // the same as long as the path is identical
+            const samePath = imageJSONPath.substring(0, Utils.findFirstDifference(imageJSONPath, postJSONPath));
+
+            // count occurrences of '@random' to slice the array later
+            // https://stackoverflow.com/a/4009768
+            const occurrences = (samePath.match(/@random/g) || []).length;
+            const slicedRandomNumbers = returnObject?.RandomNumbers?.slice(0, occurrences);
+
+            // A bit cumbersome to handle "unknown" in the following parts:
+            // https://github.com/microsoft/TypeScript/issues/27706
+
+            let postUrl: string;
+            const postUrlObject = JSONPath.getTarget(response_body, postJSONPath, slicedRandomNumbers ? [...slicedRandomNumbers] : undefined, false)?.Object;
+            if (typeof postUrlObject === 'string' || typeof postUrlObject === 'number')
+                postUrl = this._settings.getString('post-prefix') + String(postUrlObject);
+            else
+                postUrl = '';
+
+            let authorName: string | null = null;
+            const authorNameObject = JSONPath.getTarget(response_body, authorNameJSONPath, slicedRandomNumbers ? [...slicedRandomNumbers] : undefined, false)?.Object;
+            if (typeof authorNameObject === 'string' && authorNameObject !== '')
+                authorName = authorNameObject;
+
+            let authorUrl: string;
+            const authorUrlObject = JSONPath.getTarget(response_body, authorUrlJSONPath, slicedRandomNumbers ? [...slicedRandomNumbers] : undefined, false)?.Object;
+            if (typeof authorUrlObject === 'string' || typeof authorUrlObject === 'number')
+                authorUrl = this._settings.getString('author-url-prefix') + String(authorUrlObject);
+            else
+                authorUrl = '';
+
+            const historyEntry = new HistoryEntry(authorName, this._sourceName, imageDownloadUrl);
+
+            if (authorUrl !== '')
+                historyEntry.source.authorUrl = authorUrl;
+
+            if (postUrl !== '')
+                historyEntry.source.imageLinkUrl = postUrl;
+
+            if (domainUrl !== '')
+                historyEntry.source.sourceUrl = domainUrl;
+
+            if (!this._includesWallpaper(wallpaperResult, historyEntry.source.imageDownloadUrl))
+                wallpaperResult.push(historyEntry);
         }
 
-        if (!imageDownloadUrl)
+        if (wallpaperResult.length === 0)
             throw new Error('Only blocked images found.');
 
-        // '@random' would yield different results so lets make sure the values stay
-        // the same as long as the path is identical
-        const samePath = imageJSONPath.substring(0, Utils.findFirstDifference(imageJSONPath, postJSONPath));
-
-        // count occurrences of '@random' to slice the array later
-        // https://stackoverflow.com/a/4009768
-        const occurrences = (samePath.match(/@random/g) || []).length;
-        const slicedRandomNumbers = returnObject?.RandomNumbers?.slice(0, occurrences);
-
-        // A bit cumbersome to handle "unknown" in the following parts:
-        // https://github.com/microsoft/TypeScript/issues/27706
-
-        let postUrl: string;
-        const postUrlObject = JSONPath.getTarget(response_body, postJSONPath, slicedRandomNumbers ? [...slicedRandomNumbers] : undefined, false)?.Object;
-        if (typeof postUrlObject === 'string' || typeof postUrlObject === 'number')
-            postUrl = this._settings.getString('post-prefix') + String(postUrlObject);
-        else
-            postUrl = '';
-
-        let authorName: string | null = null;
-        const authorNameObject = JSONPath.getTarget(response_body, authorNameJSONPath, slicedRandomNumbers ? [...slicedRandomNumbers] : undefined, false)?.Object;
-        if (typeof authorNameObject === 'string' && authorNameObject !== '')
-            authorName = authorNameObject;
-
-        let authorUrl: string;
-        const authorUrlObject = JSONPath.getTarget(response_body, authorUrlJSONPath, slicedRandomNumbers ? [...slicedRandomNumbers] : undefined, false)?.Object;
-        if (typeof authorUrlObject === 'string' || typeof authorUrlObject === 'number')
-            authorUrl = this._settings.getString('author-url-prefix') + String(authorUrlObject);
-        else
-            authorUrl = '';
-
-        const historyEntry = new HistoryEntry(authorName, this._sourceName, imageDownloadUrl);
-
-        if (authorUrl !== '')
-            historyEntry.source.authorUrl = authorUrl;
-
-        if (postUrl !== '')
-            historyEntry.source.imageLinkUrl = postUrl;
-
-        if (domainUrl !== '')
-            historyEntry.source.sourceUrl = domainUrl;
-
-        return historyEntry;
+        return wallpaperResult;
     }
 
-    async requestRandomImage() {
-        for (let i = 0; i < 5; i++) {
+    async requestRandomImage(count: number) {
+        const wallpaperResult: HistoryEntry[] = [];
+
+        for (let i = 0; i < 5 && wallpaperResult.length < count; i++) {
             try {
                 // This should run sequentially
                 // eslint-disable-next-line no-await-in-loop
-                const historyEntry = await this._getHistoryEntry();
+                const historyArray = await this._getHistoryEntry(count);
 
-                if (historyEntry)
-                    return historyEntry;
+                if (historyArray) {
+                    historyArray.forEach(element => {
+                        if (!this._includesWallpaper(wallpaperResult, element.source.imageDownloadUrl))
+                            wallpaperResult.push(element);
+                    });
+                }
             } catch (error) {
                 this.logger.warn(`Failed getting image: ${error}`);
                 // Do not escalate yet, try again
@@ -129,7 +135,10 @@ class GenericJsonAdapter extends BaseAdapter {
             // Image blocked, try again
         }
 
-        throw new Error('Only blocked images found.');
+        if (wallpaperResult.length === 0)
+            throw new Error('Only blocked images found.');
+
+        return wallpaperResult;
     }
 }
 

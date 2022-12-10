@@ -67,15 +67,17 @@ class UnsplashAdapter extends BaseAdapter {
         return historyEntry;
     }
 
-    async requestRandomImage() {
-        for (let i = 0; i < 5; i++) {
+    async requestRandomImage(count: number) {
+        const wallpaperResult: HistoryEntry[] = [];
+
+        for (let i = 0; i < 5 && wallpaperResult.length < count; i++) {
             try {
                 // This should run sequentially
                 // eslint-disable-next-line no-await-in-loop
                 const historyEntry = await this._getHistoryEntry();
 
-                if (historyEntry)
-                    return historyEntry;
+                if (historyEntry && !this._includesWallpaper(wallpaperResult, historyEntry.source.imageDownloadUrl))
+                    wallpaperResult.push(historyEntry);
             } catch (error) {
                 this.logger.warn(`Failed getting image: ${error}`);
                 // Do not escalate yet, try again
@@ -84,7 +86,10 @@ class UnsplashAdapter extends BaseAdapter {
             // Image blocked, try again
         }
 
-        throw new Error('Only blocked images found.');
+        if (wallpaperResult.length === 0)
+            throw new Error('Only blocked images found.');
+
+        return wallpaperResult;
     }
 
     private _generateOptionsString() {

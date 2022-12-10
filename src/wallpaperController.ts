@@ -27,6 +27,7 @@ Gio._promisify(Gio.File.prototype, 'move_async', 'move_finish');
 
 class WallpaperController {
     wallpaperLocation: string;
+    prohibitNewWallpaper = false;
 
     private _backendConnection = new SettingsModule.Settings(SettingsModule.RWG_SETTINGS_SCHEMA_BACKEND_CONNECTION);
     private _logger = new Logger('RWG3', 'WallpaperController');
@@ -56,7 +57,7 @@ class WallpaperController {
 
         this._historyController = new HistoryModule.HistoryController(this.wallpaperLocation);
 
-        // Bring values to defined stage
+        // Bring values to defined state
         this._backendConnection.setBoolean('clear-history', false);
         this._backendConnection.setBoolean('open-folder', false);
         this._backendConnection.setBoolean('pause-timer', false);
@@ -131,7 +132,19 @@ class WallpaperController {
             this._updateAutoFetching();
         } else {
             this._prohibitTimer = false;
+
+            // Switching the switch in the menu closes the menu which triggers a hover event
+            // Prohibit that from emitting because a paused timer could have surpassed the interval
+            // and try to fetch new wallpaper which would be interrupted by a wallpaper reset caused
+            // the the closing menu event.
+            this.prohibitNewWallpaper = true;
             this._updateAutoFetching();
+
+            // And activate emitting again after a second
+            GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, 1, () => {
+                this.prohibitNewWallpaper = false;
+                return GLib.SOURCE_REMOVE;
+            });
         }
     }
 
@@ -165,6 +178,8 @@ class WallpaperController {
             });
             this._timer.setMinutes(this._autoFetch.duration);
             this._timer.start();
+        } else if (this._prohibitTimer && this._autoFetch.active) {
+            this._timer.cleanup();
         } else {
             this._timer.stop();
         }
@@ -251,12 +266,19 @@ class WallpaperController {
     /**
      * Sets the wallpaper and the lock screen when enabled to the given path.
      *
-     * @param {string} path Path to the image
+     * @param {string[]} wallpaperArray Array of paths to the image
+     * @param {number} monitorCount Number of monitors to fill
      */
-    private async _setBackground(path: string) {
-        const background_setting = new SettingsModule.Settings('org.gnome.desktop.background');
-        const screensaver_setting = new SettingsModule.Settings('org.gnome.desktop.screensaver');
-        const wallpaperUri = `file://${path}`;
+    private async _setBackground(wallpaperArray: string[], monitorCount: number) {
+        const multiMonitor = monitorCount > 1 && this._hydraPaper.isAvailable();
+        const backgroundSettings = new SettingsModule.Settings('org.gnome.desktop.background');
+        const screensaverSettings = new SettingsModule.Settings('org.gnome.desktop.screensaver');
+
+        if (wallpaperArray.length < 1)
+            throw new Error('Empty wallpaper array');
+
+        const wallpaperUri = `file://${wallpaperArray[0]}`;
+        let usedWallpaperPaths: string[] = [];
 
         // <value value='0' nick='Background' />
         // <value value='1' nick='Lock Screen' />
@@ -265,60 +287,62 @@ class WallpaperController {
         const changeType = this._settings.getEnum('change-type');
 
         if (changeType === 0 || changeType === 2) {
-            try {
-                if (this._settings.getBoolean('multiple-displays') && this._hydraPaper.isAvailable()) {
-                    const wallpaperArray = this._fillMonitorsFromHistory(path);
+            if (multiMonitor) {
+                const newWallpaperPaths = this._fillMonitorsFromHistory(wallpaperArray, monitorCount);
 
-                    await this._hydraPaper.run(wallpaperArray);
+                await this._hydraPaper.run(newWallpaperPaths);
 
-                    // Manually set key for darkmode because that's way faster
-                    background_setting.setString('picture-uri-dark', background_setting.getString('picture-uri'));
-                } else {
-                    // set "picture-options" to "zoom" for single wallpapers
-                    // hydrapaper changes this to "spanned"
-                    background_setting.setString('picture-options', 'zoom');
-                    this._setPictureUriOfSettingsObject(background_setting, wallpaperUri);
-                }
-            } catch (error) {
-                this._logger.warn(String(error));
+                usedWallpaperPaths = newWallpaperPaths;
+
+                // Manually set key for darkmode because that's way faster
+                backgroundSettings.setString('picture-uri-dark', backgroundSettings.getString('picture-uri'));
+            } else {
+                // set "picture-options" to "zoom" for single wallpapers
+                // hydrapaper changes this to "spanned"
+                backgroundSettings.setString('picture-options', 'zoom');
+                this._setPictureUriOfSettingsObject(backgroundSettings, wallpaperUri);
+                usedWallpaperPaths.push(wallpaperUri);
             }
         }
 
         if (changeType === 1) {
-            try {
-                if (this._settings.getBoolean('multiple-displays') && this._hydraPaper.isAvailable()) {
-                    const wallpaperArray = this._fillMonitorsFromHistory(path);
+            if (multiMonitor) {
+                const newWallpaperPaths = this._fillMonitorsFromHistory(wallpaperArray, monitorCount);
 
-                    // Remember keys, HydraPaper will change these
-                    const tmpBackground = background_setting.getString('picture-uri-dark');
-                    const tmpMode = background_setting.getString('picture-options');
+                // Remember keys, HydraPaper will change these
+                const tmpBackground = backgroundSettings.getString('picture-uri-dark');
+                const tmpMode = backgroundSettings.getString('picture-options');
 
-                    // Force HydraPaper to target a different resulting image by using darkmode
-                    await this._hydraPaper.run(wallpaperArray, true);
+                // Force HydraPaper to target a different resulting image by using darkmode
+                await this._hydraPaper.run(newWallpaperPaths, true);
 
-                    screensaver_setting.setString('picture-options', 'spanned');
-                    this._setPictureUriOfSettingsObject(screensaver_setting, background_setting.getString('picture-uri-dark'));
+                newWallpaperPaths.forEach(path => {
+                    if (!usedWallpaperPaths.includes(path))
+                        usedWallpaperPaths.push(path);
+                });
 
-                    // HydraPaper possibly changed these, change them back
-                    background_setting.setString('picture-uri-dark', tmpBackground);
-                    background_setting.setString('picture-options', tmpMode);
-                } else {
-                    // set "picture-options" to "zoom" for single wallpapers
-                    screensaver_setting.setString('picture-options', 'zoom');
-                    this._setPictureUriOfSettingsObject(screensaver_setting, wallpaperUri);
-                }
-            } catch (error) {
-                this._logger.warn(String(error));
+                screensaverSettings.setString('picture-options', 'spanned');
+                this._setPictureUriOfSettingsObject(screensaverSettings, backgroundSettings.getString('picture-uri-dark'));
+
+                // HydraPaper possibly changed these, change them back
+                backgroundSettings.setString('picture-uri-dark', tmpBackground);
+                backgroundSettings.setString('picture-options', tmpMode);
+            } else {
+                // set "picture-options" to "zoom" for single wallpapers
+                screensaverSettings.setString('picture-options', 'zoom');
+                this._setPictureUriOfSettingsObject(screensaverSettings, wallpaperUri);
+                if (!usedWallpaperPaths.includes(wallpaperUri))
+                    usedWallpaperPaths.push(wallpaperUri);
             }
         }
 
         if (changeType === 2)
-            this._setPictureUriOfSettingsObject(screensaver_setting, background_setting.getString('picture-uri'));
+            this._setPictureUriOfSettingsObject(screensaverSettings, backgroundSettings.getString('picture-uri'));
 
-
+        // TODO: this ignores the lock-screen
         // Run general post command
         const commandString = this._settings.getString('general-post-command');
-        const generalPostCommandArray = this._getCommandArray(commandString, path);
+        const generalPostCommandArray = this._getCommandArray(commandString, backgroundSettings.getString('picture-uri'));
         if (generalPostCommandArray !== null) {
             try {
                 await Utils.execCheck(generalPostCommandArray);
@@ -326,25 +350,26 @@ class WallpaperController {
                 this._logger.warn(String(error));
             }
         }
+
+        return usedWallpaperPaths;
     }
 
-    private _fillMonitorsFromHistory(newWallpaperPath: string) {
-        const monitorCount = Utils.getMonitorCount();
-        const wallpaperArray = [newWallpaperPath];
+    private _fillMonitorsFromHistory(wallpaperArray: string[], monitorCount: number) {
+        const newWallpaperArray: string[] = [...wallpaperArray];
 
         // Abuse history to fill missing images
-        for (let index = 1; index < monitorCount; index++) {
+        for (let index = newWallpaperArray.length; index < monitorCount; index++) {
             let historyElement;
             do
                 historyElement = this._historyController.getRandom();
-            while (this._historyController.history.length > monitorCount && historyElement.path && wallpaperArray.includes(historyElement.path));
+            while (this._historyController.history.length > monitorCount && historyElement.path && newWallpaperArray.includes(historyElement.path));
             // ensure different wallpaper for all displays if possible
 
             if (historyElement.path)
-                wallpaperArray.push(historyElement.path);
+                newWallpaperArray.push(historyElement.path);
         }
 
-        return wallpaperArray;
+        return newWallpaperArray;
     }
 
     /**
@@ -380,62 +405,83 @@ class WallpaperController {
             setProp(property);
     }
 
-    setWallpaper(historyId: string) {
+    async setWallpaper(historyId: string) {
         const historyElement = this._historyController.get(historyId);
 
-        if (historyElement?.id && historyElement.path && this._historyController.promoteToActive(historyElement.id))
-            this._setBackground(historyElement.path).catch(logError);
-        else
+        if (historyElement?.id && historyElement.path && this._historyController.promoteToActive(historyElement.id)) {
+            const monitorCount = this._settings.getBoolean('multiple-displays') && this._hydraPaper.isAvailable() ? Utils.getMonitorCount() : 1;
+            const usedWallpapers = (await this._setBackground([historyElement.path], monitorCount)).reverse();
+            usedWallpapers.forEach(path => {
+                const id = this._historyController.getEntryByPath(path)?.id;
+                if (id)
+                    this._historyController.promoteToActive(id);
+            });
+        } else {
             this._logger.warn(`The history id (${historyId}) could not be found.`);
-            // TODO: Error handling history id not found.
+        }
+        // TODO: Error handling history id not found.
     }
 
     async fetchNewWallpaper() {
         this._startLoadingHooks.forEach(element => element());
 
         try {
+            const monitorCount = this._settings.getBoolean('multiple-displays') && this._hydraPaper.isAvailable() ? Utils.getMonitorCount() : 1;
+            const imageAdapters = this._getRandomAdapter(monitorCount);
+
             if (!this._prohibitTimer)
                 this._timer.reset(); // reset timer
 
-            const returnObject = this._getRandomAdapter();
+            const imageAdapter = this._getRandomAdapter();
+            const newWallpapers = await imageAdapter.adapter.requestRandomImage(monitorCount);
+            const fetchPromises = newWallpapers.map(element => {
+                element.adapter.id = imageAdapter.adapterId;
+                element.adapter.type = imageAdapter.adapterType;
 
-            let historyEntry: HistoryModule.HistoryEntry;
-            let sourceFile: Gio.File;
-            historyEntry = await returnObject.adapter.requestRandomImage();
+                this._logger.info(`Requesting image: ${element.source.imageDownloadUrl}`);
+                return imageAdapter.adapter.fetchFile(element);
+            });
 
-            this._logger.info(`Requesting image: ${historyEntry.source.imageDownloadUrl}`);
-            sourceFile = await returnObject.adapter.fetchFile(historyEntry);
-
-            historyEntry.adapter.id = returnObject.adapterId;
-            historyEntry.adapter.type = returnObject.adapterType;
+            // wait for all fetching images
+            // FIXME: shove this into the adapter itself so rate limiting can be adjusted
+            const imagePaths = await Promise.all(fetchPromises);
 
             // Move file to unique naming
-            const targetFolder = sourceFile.get_parent();
-            const targetFile = targetFolder?.get_child(historyEntry.id);
+            const movePromises = imagePaths.map((path, index) => {
+                const targetFolder = path.get_parent();
+                const targetFile = targetFolder?.get_child(newWallpapers[index].id);
 
-            if (!targetFile)
-                throw new Error('Failed getting targetFile');
+                if (!targetFile)
+                    throw new Error('Failed getting targetFile');
 
-            try {
+                newWallpapers[index].path = targetFile.get_path();
+
                 // This function is Gio._promisified
-                if (!await sourceFile.move_async(targetFile, Gio.FileCopyFlags.NONE, 0, null, null))
-                    throw new Error('Failed copying unique image.');
-            } catch (moveError) {
-                if (moveError === Gio.IOErrorEnum.EXISTS)
-                    this._logger.warn('Image already exists in location.');
-                else
-                    throw moveError;
-            }
+                return path.move_async(targetFile, Gio.FileCopyFlags.NONE, 0, null, null);
+            });
 
-            historyEntry.path = targetFile.get_path();
+            // wait for all images to be moved
+            await Promise.all(movePromises);
 
-            if (!historyEntry.path)
-                throw new Error('Failed getting historyEntry.path');
+            const wallpaperPaths = newWallpapers.map(element => {
+                if (element.path)
+                    return element.path;
 
-            await this._setBackground(historyEntry.path);
+                // eslint-disable-next-line
+                return;
+            }) as string[]; // cast because we made sure it's defined
+            const usedWallpapers = (await this._setBackground(wallpaperPaths, monitorCount)).reverse();
 
-            // insert file into history
-            this._historyController.insert(historyEntry);
+            usedWallpapers.forEach(path => {
+                const id = this._historyController.getEntryByPath(path)?.id;
+                if (id)
+                    this._historyController.promoteToActive(id);
+            });
+
+            // insert new wallpapers into history
+            newWallpapers.reverse().forEach(element => {
+                this._historyController.insert(element);
+            });
         } finally {
             this._stopLoadingHooks.forEach(element => element());
         }
@@ -477,13 +523,21 @@ class WallpaperController {
 
         this._timeout = GLib.timeout_add(GLib.PRIORITY_DEFAULT, delay, () => {
             this._timeout = null;
-            const currentWallpaperPath = this._historyController.getCurrentElement().path;
-            if (this._resetWallpaper && currentWallpaperPath) {
-                this._setBackground(currentWallpaperPath).catch(logError);
+
+            const currentWallpaperPaths: string[] = [];
+            for (let index = 0; index < Utils.getMonitorCount() && index < this._historyController.history.length; index++) {
+                const path = this._historyController.history[index].path;
+                if (path)
+                    currentWallpaperPaths.push(path);
+            }
+
+            if (this._resetWallpaper) {
+                this._setBackground(currentWallpaperPaths, 1).catch(logError);
                 this._resetWallpaper = false;
             } else if (this._previewId !== undefined) {
-                this._setBackground(this.wallpaperLocation + this._previewId).catch(logError);
+                this._setBackground([this.wallpaperLocation + this._previewId], Utils.getMonitorCount()).catch(logError);
             }
+
             return false;
         });
     }
