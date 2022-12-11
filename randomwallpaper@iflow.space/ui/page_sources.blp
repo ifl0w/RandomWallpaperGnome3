@@ -1,0 +1,24 @@
+using Gtk 4.0;
+using Adw 1;
+
+Adw.PreferencesPage page_sources {
+  title: _("Wallpaper Sources");
+  icon-name: "download-symbolic";
+
+  Adw.PreferencesGroup sources_list {
+    title: _("Configured Wallpaper Sources");
+
+    // Placeholder
+    header-suffix: Button {
+      sensitive: false;
+      styles [
+        "suggested-action",
+      ]
+
+      Adw.ButtonContent {
+        icon-name: "add-symbolic";
+        label: _("Add Source");
+      }
+    };
+  }
+}

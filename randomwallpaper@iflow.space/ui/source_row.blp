@@ -1,0 +1,102 @@
+using Gtk 4.0;
+using Adw 1;
+
+template SourceRow : Adw.ExpanderRow {
+  title: bind source_id.text;
+  subtitle: bind enabled.active;
+
+  Box {
+    orientation: vertical;
+    spacing: 14;
+
+    Adw.EntryRow source_id {
+      title: _("Identifier - Currently only used for Generic JSON Sources");
+      input-purpose: free_form;
+      text: _("My Source - (1080p)");
+    }
+
+    Adw.ActionRow {
+      title: _("Type");
+
+      ComboBoxText source_combo {
+        valign: center;
+        active: 0;
+
+        items [
+          "Unsplash",
+          "Wallhaven",
+          "Reddit",
+          _("Generic JSON"),
+        ]
+      }
+    }
+
+    // Don't know how I can connect a change signal to a Adw.ComboRow - nothing works
+    // Adw.ComboRow source_combo {
+    //   title: _("Type");
+    //   use-subtitle: true;
+
+    //   model: StringList {
+    //     strings [
+    //       "Unsplash",
+    //       "Wallhaven",
+    //       "Reddit",
+    //       _("Generic JSON"),
+    //     ]
+    //   };
+      // Adw.EnumListModel { ??????
+      //   enum-type: string;
+
+      //   Adw.EnumListItem [
+      //     {
+      //       value: 0;
+      //       nick: "Unsplash";
+      //     }, {
+      //       value: 1;
+      //       nick: "Wallhaven";
+      //     }, {
+      //       value: 2;
+      //       nick: "Reddit";
+      //     }, {
+      //       value: 3;
+      //       nick: _("Generic JSON");
+      //     },
+      //   ]
+      // };
+    // }
+
+    Adw.ActionRow {
+      title: _("Enabled");
+      // Placeholder
+      sensitive: false;
+
+      Switch enabled {
+        valign: center;
+        active: true;
+      }
+    }
+
+    Adw.ActionRow {
+      title: _("Delete this source");
+
+      Button {
+        // Placeholder
+        sensitive: false;
+        valign: center;
+
+        styles [
+          "destructive-action",
+        ]
+
+        Adw.ButtonContent {
+          icon-name: "user-trash-symbolic";
+          valign: center;
+        }
+      }
+    }
+
+    Adw.Clamp source_settings_container {
+      sensitive: bind enabled.active;
+    }
+  }
+}
