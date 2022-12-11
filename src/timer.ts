@@ -12,8 +12,9 @@ class AFTimer {
     private _logger = new Logger('RWG3', 'Timer');
     private _settings = new Settings();
     private _timeout?: number = undefined;
-    private _timeoutEndCallback?: () => void = undefined;
+    private _timeoutEndCallback?: () => Promise<void> = undefined;
     private _minutes = 30;
+    private _paused = false;
 
     static getTimer(): AFTimer {
         if (!this._afTimerInstance)
@@ -29,8 +30,37 @@ class AFTimer {
         this._afTimerInstance = null;
     }
 
+    /**
+     * Continue a paused timer.
+     *
+     * Removes the pause lock and starts the timer.
+     * If the trigger time was surpassed while paused the callback gets
+     * called directly and the next trigger is scheduled at the
+     * next correct time frame repeatedly.
+     */
+    continue() {
+        this._paused = false;
+        this.start();
+    }
+
     isActive() {
         return this._settings.getBoolean('auto-fetch');
+    }
+
+    isPaused() {
+        return this._paused;
+    }
+
+    /**
+     * Pauses the timer.
+     *
+     * This stops any currently running timer and prohibits starting
+     * until continue() was called.
+     * 'timer-last-trigger' stays the same.
+     */
+    pause() {
+        this._paused = true;
+        this.cleanup();
     }
 
     remainingMinutes() {
@@ -39,7 +69,7 @@ class AFTimer {
         return Math.max(this._minutes - remainder, 0);
     }
 
-    registerCallback(callback: () => void) {
+    registerCallback(callback: () => Promise<void>) {
         this._timeoutEndCallback = callback;
     }
 
@@ -54,20 +84,34 @@ class AFTimer {
 
     /**
      * Start the timer.
+     *
+     * Starts the timer if not paused.
+     * Removes any previously running timer.
+     * If the trigger time was surpassed the callback gets started
+     * directly and the next trigger is scheduled at the
+     * next correct time frame repeatedly.
      */
-    start() {
+    async start() {
+        if (this._paused)
+            return;
+
         this.cleanup();
 
         const last = this._settings.getInt64('timer-last-trigger');
         if (last === 0)
-            this.reset();
+            this._reset();
 
         const millisecondsRemaining = this.remainingMinutes() * 60 * 1000;
 
         // set new wallpaper if the interval was surpassed and set the timestamp to when it should have been updated
         if (this._surpassedInterval()) {
-            if (this._timeoutEndCallback)
-                this._timeoutEndCallback();
+            if (this._timeoutEndCallback) {
+                try {
+                    await this._timeoutEndCallback();
+                } catch (error) {
+                    this._logger.error(error);
+                }
+            }
 
             const millisecondsOverdue = (this._minutes * 60 * 1000) - millisecondsRemaining;
             this._settings.setInt64('timer-last-trigger', Date.now() - millisecondsOverdue);
@@ -75,12 +119,15 @@ class AFTimer {
 
         // actual timer function
         this._timeout = GLib.timeout_add(GLib.PRIORITY_DEFAULT, millisecondsRemaining, () => {
-            if (this._timeoutEndCallback)
-                this._timeoutEndCallback();
-
-            this.reset(); // reset timer
-
-            return GLib.SOURCE_CONTINUE;
+            if (this._timeoutEndCallback) {
+                this._timeoutEndCallback().then(() => {
+                    this._reset();
+                    this.start().catch(this._logger.error);
+                }).catch(this._logger.error).finally(() => {
+                    return GLib.SOURCE_REMOVE;
+                });
+            }
+            return GLib.SOURCE_REMOVE;
         });
     }
 
@@ -103,11 +150,10 @@ class AFTimer {
     }
 
     /**
-     * Reset the timer.
+     * Sets the last activation time to [now]. This doesn't affect already running timer.
      */
-    reset() {
+    private _reset() {
         this._settings.setInt64('timer-last-trigger', new Date().getTime());
-        this.cleanup();
     }
 
     private _minutesElapsed() {
