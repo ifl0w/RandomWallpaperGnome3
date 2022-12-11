@@ -40,7 +40,6 @@ class WallpaperController {
     private _logger = new Logger('RWG3', 'WallpaperController');
     private _settings = new SettingsModule.Settings();
     private _timer = Timer.getTimer();
-    private _prohibitTimer = false;
     private _historyController: HistoryModule.HistoryController;
     private _hydraPaper = new HydraPaper();
     private _autoFetch = {active: false, duration: 30};
@@ -135,17 +134,15 @@ class WallpaperController {
 
     private _pauseTimer() {
         if (this._backendConnection.getBoolean('pause-timer')) {
-            this._prohibitTimer = true;
-            this._updateAutoFetching();
+            this._timer.pause();
         } else {
-            this._prohibitTimer = false;
+            this._timer.continue();
 
             // Switching the switch in the menu closes the menu which triggers a hover event
             // Prohibit that from emitting because a paused timer could have surpassed the interval
             // and try to fetch new wallpaper which would be interrupted by a wallpaper reset caused
-            // the the closing menu event.
+            // by the closing menu event.
             this.prohibitNewWallpaper = true;
-            this._updateAutoFetching();
 
             // And activate emitting again after a second
             GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, 1, () => {
@@ -179,14 +176,12 @@ class WallpaperController {
         this._autoFetch.active = this._settings.getBoolean('auto-fetch');
 
         // only start timer if not in context of preferences window
-        if (!this._prohibitTimer && this._autoFetch.active) {
+        if (this._autoFetch.active) {
             this._timer.registerCallback(() => {
-                this.fetchNewWallpaper().catch(logError);
+                return this.fetchNewWallpaper();
             });
             this._timer.setMinutes(this._autoFetch.duration);
-            this._timer.start();
-        } else if (this._prohibitTimer && this._autoFetch.active) {
-            this._timer.cleanup();
+            this._timer.start().catch(this._logger.error);
         } else {
             this._timer.stop();
         }
@@ -477,8 +472,6 @@ class WallpaperController {
         this._startLoadingHooks.forEach(element => element());
 
         try {
-            this._timer.reset(); // reset timer
-
             const monitorCount = this._settings.getBoolean('multiple-displays') && this._hydraPaper.isAvailable() ? Utils.getMonitorCount() : 1;
             const imageAdapters = this._getRandomAdapter(monitorCount);
 
