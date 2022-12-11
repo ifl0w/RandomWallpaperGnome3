@@ -1,0 +1,89 @@
+using Gtk 4.0;
+using Adw 1;
+
+template UnsplashRow : Adw.PreferencesGroup {
+  // title: _("Source Settings");
+
+  Adw.EntryRow unsplash_keyword {
+    title: _("Keywords - Comma seperated");
+    input-purpose: free_form;
+  }
+
+  Adw.ActionRow {
+    title: _("Only Featured Images");
+    subtitle: _("This option results in a smaller image pool, but the images are considered to be of higher quality.");
+
+    Switch unsplash_featured_only {
+      valign: center;
+    }
+  }
+
+  Adw.ActionRow {
+    title: _("Image Dimensions");
+
+    SpinButton {
+      valign: center;
+      numeric: true;
+
+      adjustment: Adjustment unsplash_image_width {
+        step-increment: 1;
+        page-increment: 10;
+        lower: 1;
+        upper: 1000000;
+      };
+    }
+
+    Label {
+      label: "x";
+    }
+
+    SpinButton {
+      valign: center;
+      numeric: true;
+
+      adjustment: Adjustment unsplash_image_height {
+        step-increment: 1;
+        page-increment: 10;
+        lower: 1;
+        upper: 1000000;
+      };
+    }
+  }
+
+  Adw.PreferencesGroup {
+    title: _("Contraint");
+
+    Adw.ActionRow {
+      title: _("Type");
+
+      ComboBoxText unsplash_constraint_type {
+        valign: center;
+        active: 0;
+
+        items [
+          _("Unconstraint"),
+          _("User"),
+          _("User's Likes"),
+          _("Collection ID"),
+        ]
+      }
+    }
+
+    // Don't know how I can connect a change signal to a Adw.ComboRow - nothing works
+    // Adw.ComboRow unsplash_constraint_type {
+    //   title: _("Type");
+    //   model: StringList {
+    //     strings [
+    //       _("Unconstraint"),
+    //       _("User"),
+    //       _("User's Likes"),
+    //       _("Collection ID"),
+    //     ]
+    //   };
+    // }
+
+    Adw.EntryRow unsplash_constraint_value {
+      title: _("Value");
+    }
+  }
+}

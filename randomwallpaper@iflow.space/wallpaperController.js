@@ -98,7 +98,8 @@ var WallpaperController = class {
 	_requestRandomImageFromAdapter(callback) {
 		this.imageSourceAdapter = this._unsplashAdapter;
 
-		switch (this._settings.get('source', 'enum')) {
+		// FIXME: gsettings schema changed from enum to int
+		switch (this._settings.get('source', 'int')) {
 			case 0:
 				this.imageSourceAdapter = this._unsplashAdapter;
 				break;
