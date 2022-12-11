@@ -14,6 +14,16 @@ var AFTimer = function () {
 	return _afTimerInstance;
 };
 
+var AFTimerDestroySingleton = function () {
+	// ensure timer is removed
+	if (_afTimerInstance != null) {
+		_afTimerInstance.cleanup();
+	}
+
+	// clear reference
+	_afTimerInstance = null;
+}
+
 /**
  * Timer for the auto fetch feature.
  */

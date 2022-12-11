@@ -27,9 +27,8 @@ function disable() {
 	logger.info("Disable extension.");
 	panelMenu.cleanup();
 
-	// cleanup the timer singleton
-	let timer = new Timer.AFTimer();
-	timer.cleanup();
+	// destroy timer singleton
+	Timer.AFTimerDestroySingleton();
 
 	// clear references
 	wallpaperController = null;
