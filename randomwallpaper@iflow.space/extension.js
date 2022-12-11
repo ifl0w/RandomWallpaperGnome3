@@ -30,4 +30,9 @@ function disable() {
 	// cleanup the timer singleton
 	let timer = new Timer.AFTimer();
 	timer.cleanup();
+
+	// clear references
+	wallpaperController = null;
+	panelMenu = null;
+	logger = null;
 }
