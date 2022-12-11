@@ -67,7 +67,9 @@ abstract class BaseAdapter {
         fstream.write(response_data_bytes, null);
         fstream.close(null);
 
-        return file;
+        historyEntry.path = file.get_path();
+
+        return historyEntry;
     }
 
     protected _includesWallpaper(array: HistoryEntry[], uri: string) {
