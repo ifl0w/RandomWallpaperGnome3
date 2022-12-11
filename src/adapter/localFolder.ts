@@ -68,7 +68,9 @@ class LocalFolderAdapter extends BaseAdapter {
         if (!await sourceFile.copy_async(targetFile, Gio.FileCopyFlags.NONE, GLib.PRIORITY_DEFAULT, null, null))
             throw new Error('Failed copying image.');
 
-        return targetFile;
+        historyEntry.path = targetFile.get_path();
+
+        return historyEntry;
     }
 
     // https://gjs.guide/guides/gio/file-operations.html#recursively-deleting-a-directory

@@ -25,6 +25,13 @@ const Self = ExtensionUtils.getCurrentExtension();
 // https://gjs.guide/guides/gjs/asynchronous-programming.html#promisify-helper
 Gio._promisify(Gio.File.prototype, 'move_async', 'move_finish');
 
+interface RandomAdapterResult {
+            adapter: BaseAdapter,
+            id: string,
+            type: number,
+            imageCount: number
+        }
+
 class WallpaperController {
     wallpaperLocation: string;
     prohibitNewWallpaper = false;
@@ -188,79 +195,123 @@ class WallpaperController {
     /**
      randomly returns an enabled and configured SourceAdapter
      returns a default UnsplashAdapter in case of failure
+     *
+     * @param {number} count The amount of adapter requested
      */
-    private _getRandomAdapter() {
-        const sourceID = this._getRandomSource();
+    private _getRandomAdapter(count: number) {
+        const sourceIDs = this._getRandomSource(count);
+        const randomAdapterResult: RandomAdapterResult[] = [];
 
-        let imageSourceAdapter: BaseAdapter;
-        let sourceName = 'undefined';
-        let sourceType = -1;
+        if (sourceIDs.length < 1 || sourceIDs[0] === '-1') {
+            randomAdapterResult.push({
+                adapter: new UnsplashAdapter(null, null, this.wallpaperLocation),
+                id: '-1',
+                type: 0,
+                imageCount: count,
+            });
+            return randomAdapterResult;
+        }
 
-        if (sourceID !== '-1') {
+        /**
+         *
+         * @param {RandomAdapterResult[]} array Array of already chosen adapter
+         * @param {number} type Type of the source
+         */
+        function _arrayIncludes(array: RandomAdapterResult[], type: number) {
+            for (const element of array) {
+                if (element.type === type)
+                    return element;
+            }
+            return null;
+        }
+
+        for (let index = 0; index < sourceIDs.length; index++) {
+            const sourceID = sourceIDs[index];
             const path = `${SettingsModule.RWG_SETTINGS_SCHEMA_PATH}/sources/general/${sourceID}/`;
             const settingsGeneral = new SettingsModule.Settings(SettingsModule.RWG_SETTINGS_SCHEMA_SOURCES_GENERAL, path);
 
+            let imageSourceAdapter: BaseAdapter;
+            let sourceName = 'undefined';
+            let sourceType = -1;
+
             sourceName = settingsGeneral.getString('name');
             sourceType = settingsGeneral.getEnum('type');
-        }
 
-        try {
-            switch (sourceType) {
-            case 0:
-                imageSourceAdapter = new UnsplashAdapter(sourceID, sourceName, this.wallpaperLocation);
-                break;
-            case 1:
-                imageSourceAdapter = new WallhavenAdapter(sourceID, sourceName, this.wallpaperLocation);
-                break;
-            case 2:
-                imageSourceAdapter = new RedditAdapter(sourceID, sourceName, this.wallpaperLocation);
-                break;
-            case 3:
-                imageSourceAdapter = new GenericJsonAdapter(sourceID, sourceName, this.wallpaperLocation);
-                break;
-            case 4:
-                imageSourceAdapter = new LocalFolderAdapter(sourceID, sourceName, this.wallpaperLocation);
-                break;
-            case 5:
-                imageSourceAdapter = new UrlSourceAdapter(sourceID, sourceName, this.wallpaperLocation);
-                break;
-            default:
+            const availableAdapter = _arrayIncludes(randomAdapterResult, sourceType);
+            if (availableAdapter) {
+                availableAdapter.imageCount++;
+                continue;
+            }
+
+            try {
+                switch (sourceType) {
+                case 0:
+                    imageSourceAdapter = new UnsplashAdapter(sourceID, sourceName, this.wallpaperLocation);
+                    break;
+                case 1:
+                    imageSourceAdapter = new WallhavenAdapter(sourceID, sourceName, this.wallpaperLocation);
+                    break;
+                case 2:
+                    imageSourceAdapter = new RedditAdapter(sourceID, sourceName, this.wallpaperLocation);
+                    break;
+                case 3:
+                    imageSourceAdapter = new GenericJsonAdapter(sourceID, sourceName, this.wallpaperLocation);
+                    break;
+                case 4:
+                    imageSourceAdapter = new LocalFolderAdapter(sourceID, sourceName, this.wallpaperLocation);
+                    break;
+                case 5:
+                    imageSourceAdapter = new UrlSourceAdapter(sourceID, sourceName, this.wallpaperLocation);
+                    break;
+                default:
+                    imageSourceAdapter = new UnsplashAdapter(null, null, this.wallpaperLocation);
+                    sourceType = 0;
+                    break;
+                }
+            } catch (error) {
+                this._logger.warn('Had errors, fetching with default settings.');
                 imageSourceAdapter = new UnsplashAdapter(null, null, this.wallpaperLocation);
                 sourceType = 0;
-                break;
             }
-        } catch (error) {
-            this._logger.warn('Had errors, fetching with default settings.');
-            imageSourceAdapter = new UnsplashAdapter(null, null, this.wallpaperLocation);
-            sourceType = 0;
+
+            randomAdapterResult.push({
+                adapter: imageSourceAdapter,
+                id: sourceID,
+                type: sourceType,
+                imageCount: 1,
+            });
         }
 
-        return {
-            adapter: imageSourceAdapter,
-            adapterId: sourceID,
-            adapterType: sourceType,
-        };
+        return randomAdapterResult;
     }
 
-    private _getRandomSource() {
+    /**
+     *
+     * @param {number} count Amount of requested source IDs
+     * @returns Array of source IDs or ['-1'] in case of failure
+     */
+    private _getRandomSource(count: number) {
+        const sourceResult: string[] = [];
         const sources: string[] = this._settings.getStrv('sources');
 
         if (sources === null || sources.length < 1)
-            return '-1';
+            return ['-1'];
 
-
-        const enabled_sources = sources.filter(element => {
+        const enabledSources = sources.filter(element => {
             const path = `${SettingsModule.RWG_SETTINGS_SCHEMA_PATH}/sources/general/${element}/`;
             const settingsGeneral = new SettingsModule.Settings(SettingsModule.RWG_SETTINGS_SCHEMA_SOURCES_GENERAL, path);
             return settingsGeneral.getBoolean('enabled');
         });
 
-        if (enabled_sources === null || enabled_sources.length < 1)
-            return '-1';
+        if (enabledSources === null || enabledSources.length < 1)
+            return ['-1'];
 
+        for (let index = 0; index < count; index++) {
+            const chosenSource = enabledSources[Utils.getRandomNumber(enabledSources.length)];
+            sourceResult.push(chosenSource);
+        }
 
-        // https://stackoverflow.com/a/5915122
-        return enabled_sources[Utils.getRandomNumber(enabled_sources.length)];
+        return sourceResult;
     }
 
     /**
@@ -426,44 +477,56 @@ class WallpaperController {
         this._startLoadingHooks.forEach(element => element());
 
         try {
+            this._timer.reset(); // reset timer
+
             const monitorCount = this._settings.getBoolean('multiple-displays') && this._hydraPaper.isAvailable() ? Utils.getMonitorCount() : 1;
             const imageAdapters = this._getRandomAdapter(monitorCount);
 
-            if (!this._prohibitTimer)
-                this._timer.reset(); // reset timer
+            const randomImagePromises = imageAdapters.map(element => {
+                return element.adapter.requestRandomImage(element.imageCount);
+            });
+            const newWallpapers = await Promise.all(randomImagePromises);
 
-            const imageAdapter = this._getRandomAdapter();
-            const newWallpapers = await imageAdapter.adapter.requestRandomImage(monitorCount);
-            const fetchPromises = newWallpapers.map(element => {
-                element.adapter.id = imageAdapter.adapterId;
-                element.adapter.type = imageAdapter.adapterType;
+            const fetchPromises = newWallpapers.flatMap((array, index) => {
+                const fetchPromiseArray: Promise<HistoryModule.HistoryEntry>[] = [];
 
-                this._logger.info(`Requesting image: ${element.source.imageDownloadUrl}`);
-                return imageAdapter.adapter.fetchFile(element);
+                for (const element of array) {
+                    element.adapter.id = imageAdapters[index].id;
+                    element.adapter.type = imageAdapters[index].type;
+
+                    this._logger.info(`Requesting image: ${element.source.imageDownloadUrl}`);
+                    fetchPromiseArray.push(imageAdapters[index].adapter.fetchFile(element));
+                }
+
+                return fetchPromiseArray;
             });
 
             // wait for all fetching images
             // FIXME: shove this into the adapter itself so rate limiting can be adjusted
-            const imagePaths = await Promise.all(fetchPromises);
+            const newImageEntries = await Promise.all(fetchPromises);
 
             // Move file to unique naming
-            const movePromises = imagePaths.map((path, index) => {
-                const targetFolder = path.get_parent();
-                const targetFile = targetFolder?.get_child(newWallpapers[index].id);
+            const movePromises = newImageEntries.map(entry => {
+                if (!entry.path)
+                    return Promise.resolve(false);
+
+                const file = Gio.File.new_for_path(entry.path);
+                const targetFolder = file.get_parent();
+                const targetFile = targetFolder?.get_child(entry.id);
 
                 if (!targetFile)
                     throw new Error('Failed getting targetFile');
 
-                newWallpapers[index].path = targetFile.get_path();
+                entry.path = targetFile.get_path();
 
                 // This function is Gio._promisified
-                return path.move_async(targetFile, Gio.FileCopyFlags.NONE, 0, null, null);
+                return file.move_async(targetFile, Gio.FileCopyFlags.NONE, 0, null, null);
             });
 
             // wait for all images to be moved
             await Promise.all(movePromises);
 
-            const wallpaperPaths = newWallpapers.map(element => {
+            const wallpaperPaths = newImageEntries.map(element => {
                 if (element.path)
                     return element.path;
 
@@ -479,7 +542,7 @@ class WallpaperController {
             });
 
             // insert new wallpapers into history
-            newWallpapers.reverse().forEach(element => {
+            newImageEntries.reverse().forEach(element => {
                 this._historyController.insert(element);
             });
         } finally {

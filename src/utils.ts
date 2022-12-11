@@ -108,6 +108,7 @@ function getMonitorCount() {
  * @param {number} size Maximum
  */
 function getRandomNumber(size: number) {
+    // https://stackoverflow.com/a/5915122
     return Math.floor(Math.random() * size);
 }
 
