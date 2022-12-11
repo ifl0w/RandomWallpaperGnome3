@@ -1,0 +1,97 @@
+using Gtk 4.0;
+using Adw 1;
+
+template WallhavenRow : Adw.PreferencesGroup {
+  // title: _("Source Settings");
+
+  Adw.PreferencesGroup {
+    title: _("General");
+
+    Adw.EntryRow wallhaven_keyword {
+      title: _("Keywords - Comma seperated");
+      input-purpose: free_form;
+    }
+
+    Adw.PasswordEntryRow wallhaven_api_key {
+      title: _("API key");
+      input-purpose: password;
+
+      LinkButton {
+        valign: center;
+        uri: "https://wallhaven.cc/settings/account";
+
+        Adw.ButtonContent {
+          icon-name: "globe-symbolic";
+        }
+
+        styles [
+          "flat",
+        ]
+      }
+    }
+
+    Adw.EntryRow wallhaven_resolutions {
+      title: _("Resolutions: 1920x1080, 2560x1440");
+      input-purpose: free_form;
+      text: "";
+    }
+  }
+
+  Adw.PreferencesGroup {
+    title: _("Allowed content ratings");
+
+    Adw.ActionRow {
+      title: "SFW";
+      subtitle: _("Safe for work");
+
+      Switch wallhaven_allow_sfw {
+        valign: center;
+      }
+    }
+
+    Adw.ActionRow {
+      title: "Sketchy";
+
+      Switch wallhaven_allow_sketchy {
+        valign: center;
+      }
+    }
+
+    Adw.ActionRow {
+      title: "NSFW";
+      subtitle: _("Not safe for work");
+
+      Switch wallhaven_allow_nsfw {
+        valign: center;
+      }
+    }
+  }
+
+  Adw.PreferencesGroup {
+    title: _("Categories");
+
+    Adw.ActionRow {
+      title: "General";
+
+      Switch wallhaven_category_general {
+        valign: center;
+      }
+    }
+
+    Adw.ActionRow {
+      title: "Anime";
+
+      Switch wallhaven_category_anime {
+        valign: center;
+      }
+    }
+
+    Adw.ActionRow {
+      title: "People";
+
+      Switch wallhaven_category_people {
+        valign: center;
+      }
+    }
+  }
+}
