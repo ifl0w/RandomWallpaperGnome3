@@ -5,6 +5,6 @@
   "name": "Random Wallpaper",
   "description": "Fetches a random wallpaper from an online source and sets it as desktop background. \nThe desktop background can be updated periodically or manually.",
   "version": 29,
-  "semantic-version": "2.7.2",
+  "semantic-version": "2.7.3",
   "url": "https://github.com/ifl0w/RandomWallpaperGnome3"
 }
