@@ -1,0 +1,19 @@
+using Gtk 4.0;
+using Adw 1;
+
+template RedditRow : Adw.PreferencesGroup {
+  // title: _("Source Settings");
+
+  Adw.EntryRow reddit_subreddits {
+    title: _("Subreddits - e.g.: wallpaper, wallpapers, minimalwallpaper");
+  }
+
+  Adw.ActionRow {
+    title: "SFW";
+    subtitle: _("Safe for work");
+
+    Switch reddit_allow_sfw {
+      valign: center;
+    }
+  }
+}
