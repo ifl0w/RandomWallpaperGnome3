@@ -165,7 +165,8 @@ rules:
   no-return-assign: error
   no-return-await: error
   no-self-compare: error
-  no-shadow: error
+  no-shadow: off
+  "@typescript-eslint/no-shadow": error
   no-shadow-restricted-names: error
   no-spaced-func: error
   no-tabs: error
@@ -175,7 +176,8 @@ rules:
   no-undef-init: error
   no-unneeded-ternary: error
   no-unused-expressions: error
-  no-unused-vars:
+  no-unused-vars: off
+  "@typescript-eslint/no-unused-vars":
     - error
     # Vars use a suffix _ instead of a prefix because of file-scope private vars
     - varsIgnorePattern: (^unused|_$)

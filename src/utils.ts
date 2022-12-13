@@ -1,6 +1,11 @@
 import * as Gdk from 'gi://Gdk';
 import * as Gio from 'gi://Gio';
 import * as GLib from 'gi://GLib';
+import * as Gtk from 'gi://Gtk';
+
+import * as Adw from '@gi/gtk4/adw/adw';
+
+import {Settings} from './settings.js';
 
 /**
  * Returns a promise which resolves cleanly or rejects according to the underlying subprocess.
@@ -59,12 +64,35 @@ function fileName(uri: string) {
     while (_isURIEncoded(uri))
         uri = decodeURIComponent(uri);
 
-
     let base = uri.substring(uri.lastIndexOf('/') + 1);
     if (base.indexOf('?') >= 0)
         base = base.substring(0, base.indexOf('?'));
 
     return base;
+}
+
+/**
+ *
+ * @param {Adw.ComboRow} comboRow ComboRow to fill and connect
+ * @param {Settings} settings Settings schema to scan values for
+ * @param {string} key Key where to find values in the settings schema
+ */
+function fillComboRowFromEnum(comboRow: Adw.ComboRow, settings: Settings, key: string) {
+    // Fill combo from settings enum
+    const availableTypes = settings.getSchema().get_key(key).get_range(); // GLib.Variant (sv)
+    // (sv) = Tuple(%G_VARIANT_TYPE_STRING, %G_VARIANT_TYPE_VARIANT)
+    // s should be 'enum'
+    // v should be an array enumerating the possible values. Each item in the array is a possible valid value and no other values are valid.
+    // v is 'as'
+    const availableTypesNames = availableTypes.get_child_value(1).get_variant().get_strv();
+
+    const stringList = Gtk.StringList.new(availableTypesNames);
+    comboRow.model = stringList;
+    comboRow.selected = settings.getEnum(key);
+
+    comboRow.connect('notify::selected', (_comboRow: Adw.ComboRow) => {
+        settings.setEnum(key, _comboRow.selected);
+    });
 }
 
 // https://stackoverflow.com/a/32859917
@@ -137,10 +165,11 @@ function removeItemOnce<T>(array: T[], value: T) {
 }
 
 export {
+    execCheck,
+    fileName,
+    fillComboRowFromEnum,
+    findFirstDifference,
     getMonitorCount,
     getRandomNumber,
-    execCheck,
-    findFirstDifference,
-    fileName,
     removeItemOnce
 };
