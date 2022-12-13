@@ -1,51 +1,68 @@
-// TODO: use an enum once moved to TS
-const LOG_LEVEL = {
-    SILENT: 0,
-    ERROR: 1,
-    WARN: 2,
-    INFO: 3,
-    DEBUG: 4,
-};
+// https://gitlab.gnome.org/GNOME/gjs/-/blob/master/doc/Logging.md
 
-// TODO: add UI option or at least ENV variable (this is a quick workaround to conform to extension review requirements)
-const CURRENT_LOG_LEVEL = LOG_LEVEL.WARN;
+import {Settings} from './settings.js';
+
+const enum LogLevel {
+    SILENT,
+    ERROR,
+    WARNING,
+    INFO,
+    DEBUG,
+}
+type LogLevelStrings = keyof typeof LogLevel;
 
 class Logger {
     private _prefix: string;
     private _callingClass: string;
+    private _settings = new Settings();
 
     constructor(prefix: string, callingClass: string) {
         this._prefix = prefix;
         this._callingClass = callingClass;
     }
 
-    private _log(level: string, message: unknown) {
-        log(`${this._prefix} [${level}] >> ${this._callingClass} :: ${message}`);
+    private _log(level: LogLevelStrings, message: unknown) {
+        let errorMessage = String(message);
+
+        if (message instanceof Error)
+            errorMessage = message.message;
+
+        // This logs messages with GLib.LogLevelFlags.LEVEL_MESSAGE
+        log(`${this._prefix} [${level}] >> ${this._callingClass} :: ${errorMessage}`);
+
+        // Log stack trace if available
+        if (message instanceof Error && message.stack)
+            // This logs messages with GLib.LogLevelFlags.LEVEL_WARNING
+            logError(message);
     }
 
-    debug(message: string) {
-        if (CURRENT_LOG_LEVEL < LOG_LEVEL.DEBUG)
+    private _selectedLogLevel() {
+        return this._settings.getEnum('log-level');
+    }
+
+    debug(message: unknown) {
+        if (this._selectedLogLevel() < LogLevel.DEBUG)
             return;
 
         this._log('DEBUG', message);
     }
 
-    info(message: string) {
-        if (CURRENT_LOG_LEVEL < LOG_LEVEL.INFO)
+    info(message: unknown) {
+        if (this._selectedLogLevel() < LogLevel.INFO)
             return;
 
         this._log('INFO', message);
     }
 
-    warn(message: string) {
-        if (CURRENT_LOG_LEVEL < LOG_LEVEL.WARN)
+    warn(message: unknown) {
+        if (this._selectedLogLevel() < LogLevel.WARNING)
             return;
 
         this._log('WARNING', message);
     }
 
-    error(message: string) {
-        if (CURRENT_LOG_LEVEL < LOG_LEVEL.ERROR)
+    error(message: unknown) {
+        if (this._selectedLogLevel() < LogLevel.ERROR)
             return;
 
         this._log('ERROR', message);

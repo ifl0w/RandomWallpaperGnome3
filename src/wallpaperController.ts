@@ -56,7 +56,6 @@ class WallpaperController {
         if (!xdg_cache_home)
             xdg_cache_home = `${GLib.getenv('HOME')}/.cache`;
 
-
         this.wallpaperLocation = `${xdg_cache_home}/${Self.metadata['uuid']}/wallpapers/`;
         let mode = 0o0755;
         GLib.mkdir_with_parents(this.wallpaperLocation, mode);
@@ -73,7 +72,7 @@ class WallpaperController {
         this._backendConnection.observe('clear-history', () => this._clearHistory());
         this._backendConnection.observe('open-folder', () => this._openFolder());
         this._backendConnection.observe('pause-timer', () => this._pauseTimer());
-        this._backendConnection.observe('request-new-wallpaper', () => this._requestNewWallpaper().catch(logError));
+        this._backendConnection.observe('request-new-wallpaper', () => this._requestNewWallpaper().catch(this._logger.error));
 
         this._settings.observe('history-length', () => this._updateHistory());
         this._settings.observe('auto-fetch', () => this._updateAutoFetching());
@@ -85,7 +84,7 @@ class WallpaperController {
 
         // load a new wallpaper on startup
         if (this._settings.getBoolean('fetch-on-startup'))
-            this.fetchNewWallpaper().catch(logError);
+            this.fetchNewWallpaper().catch(this._logger.error);
 
         // Initialize favorites folder
         // TODO: There's probably a better place for this
@@ -588,10 +587,10 @@ class WallpaperController {
             }
 
             if (this._resetWallpaper) {
-                this._setBackground(currentWallpaperPaths, 1).catch(logError);
+                this._setBackground(currentWallpaperPaths, 1).catch(this._logger.error);
                 this._resetWallpaper = false;
             } else if (this._previewId !== undefined) {
-                this._setBackground([this.wallpaperLocation + this._previewId], Utils.getMonitorCount()).catch(logError);
+                this._setBackground([this.wallpaperLocation + this._previewId], Utils.getMonitorCount()).catch(this._logger.error);
             }
 
             return false;
