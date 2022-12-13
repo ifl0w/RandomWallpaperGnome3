@@ -128,7 +128,6 @@ class Settings {
         if (!schemaId)
             schemaId = Self.metadata['settings-schema'];
 
-
         // Expect USER extensions to have a schemas/ subfolder, otherwise assume a
         // SYSTEM extension that has been installed in the same prefix as the shell
         const schemaDir = Self.dir.get_child('schemas');
@@ -145,7 +144,6 @@ class Settings {
         const schemaObj = schemaSource?.lookup(schemaId, true);
         if (!schemaObj)
             throw new Error(`Schema ${schemaId} could not be found for extension ${Self.metadata.uuid}. Please check your installation`);
-
 
         return schemaObj;
     }

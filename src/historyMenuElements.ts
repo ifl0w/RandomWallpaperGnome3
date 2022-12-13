@@ -89,7 +89,7 @@ const HistoryElement = GObject.registerClass({
                 const authorItem = new PopupMenu.PopupMenuItem(`Image By: ${this.historyEntry.source.author}`);
                 authorItem.connect('activate', () => {
                     if (this.historyEntry.source.authorUrl)
-                        Utils.execCheck(['xdg-open', this.historyEntry.source.authorUrl]).catch(logError);
+                        Utils.execCheck(['xdg-open', this.historyEntry.source.authorUrl]).catch(this._logger.error);
                 });
 
                 this.menu.addMenuItem(authorItem);
@@ -100,7 +100,7 @@ const HistoryElement = GObject.registerClass({
                 const sourceItem = new PopupMenu.PopupMenuItem(`Image From: ${this.historyEntry.source.source}`);
                 sourceItem.connect('activate', () => {
                     if (this.historyEntry.source.sourceUrl)
-                        Utils.execCheck(['xdg-open', this.historyEntry.source.sourceUrl]).catch(logError);
+                        Utils.execCheck(['xdg-open', this.historyEntry.source.sourceUrl]).catch(this._logger.error);
                 });
 
                 this.menu.addMenuItem(sourceItem);
@@ -109,7 +109,7 @@ const HistoryElement = GObject.registerClass({
             const imageUrlItem = new PopupMenu.PopupMenuItem('Open Image In Browser');
             imageUrlItem.connect('activate', () => {
                 if (this.historyEntry.source.imageLinkUrl)
-                    Utils.execCheck(['xdg-open', this.historyEntry.source.imageLinkUrl]).catch(logError);
+                    Utils.execCheck(['xdg-open', this.historyEntry.source.imageLinkUrl]).catch(this._logger.error);
             });
 
             this.menu.addMenuItem(imageUrlItem);
@@ -132,7 +132,7 @@ const HistoryElement = GObject.registerClass({
 
         const copyToFavorites = new PopupMenu.PopupMenuItem('Save For Later');
         copyToFavorites.connect('activate', () => {
-            this._saveImage().catch(logError);
+            this._saveImage().catch(this._logger.error);
         });
         this.menu.addMenuItem(copyToFavorites);
 

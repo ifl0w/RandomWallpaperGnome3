@@ -1,9 +1,9 @@
 import * as Gio from 'gi://Gio';
 import * as Gtk from 'gi://Gtk';
 
+import * as Adw from '@gi/gtk4/adw/adw';
 import * as ExtensionUtils from '@gi/misc/extensionUtils';
 
-import * as Adw from '@gi/gtk4/adw/adw';
 import type * as SettingsNamespace from './settings.js';
 import type * as UtilsNamespace from './utils.js';
 import type * as LoggerNamespace from './logger.js';
@@ -19,7 +19,7 @@ const Self = ExtensionUtils.getCurrentExtension();
 /**
  *
  */
-// eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
 function init() {
     // Convenience.initTranslations();
 }
@@ -35,16 +35,15 @@ function init() {
  *
  * @param {Adw.PreferencesWindow} window Window the extension should fill
  */
-// eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
 function fillPreferencesWindow(window: Adw.PreferencesWindow) {
-    window.set_default_size(-1, 720);
+    window.set_default_size(600, 720);
     // temporary fill window to prevent error message until modules are loaded
     const tmpPage = new Adw.PreferencesPage();
     window.add(tmpPage);
 
     new RandomWallpaperSettings(window, tmpPage);
 }
-
 
 // 40 < Gnome < 42
 // function buildPrefsWidget() {
@@ -82,7 +81,8 @@ class RandomWallpaperSettings {
             this._builder.add_from_file(`${Self.path}/ui/pageGeneral.ui`);
             this._builder.add_from_file(`${Self.path}/ui/pageSources.ui`);
 
-            this._fillTypeComboRow();
+            Utils.fillComboRowFromEnum(this._builder.get_object('combo_background_type'), this._settings, 'change-type');
+            Utils.fillComboRowFromEnum(this._builder.get_object('log_level'), this._settings, 'log-level');
 
             this._settings.bind('minutes',
                 this._builder.get_object('duration_minutes'),
@@ -145,7 +145,7 @@ class RandomWallpaperSettings {
                 if (new module.HydraPaper().isAvailable())
                     // eslint-disable-next-line no-extra-parens
                     (this._builder.get_object('multiple_displays_row') as Adw.ActionRow).set_sensitive(true);
-            }).catch(logError);
+            }).catch(this._logger.error);
         }).catch(error => {
             logError(error);
             throw error;
@@ -173,26 +173,6 @@ class RandomWallpaperSettings {
         Utils = moduleUtils;
         SourceRow = moduleSourceRow.SourceRow;
         Settings = moduleSettings;
-    }
-
-    private _fillTypeComboRow() {
-        const comboRow: Adw.ComboRow = this._builder.get_object('combo_background_type');
-
-        // Fill combo from settings enum
-        const availableTypes = this._settings.getSchema().get_key('change-type').get_range(); // GLib.Variant (sv)
-        // (sv) = Tuple(%G_VARIANT_TYPE_STRING, %G_VARIANT_TYPE_VARIANT)
-        // s should be 'enum'
-        // v should be an array enumerating the possible values. Each item in the array is a possible valid value and no other values are valid.
-        // v is 'as'
-        const availableTypesNames = availableTypes.get_child_value(1).get_variant().get_strv();
-
-        const stringList = Gtk.StringList.new(availableTypesNames);
-        comboRow.model = stringList;
-        comboRow.selected = this._settings.getEnum('change-type');
-
-        comboRow.connect('notify::selected', _comboRow => {
-            this._settings.setEnum('change-type', _comboRow.selected);
-        });
     }
 
     private _bindButtons() {
