@@ -11,7 +11,7 @@ let RandomWallpaperMenu: typeof RandomWallpaperMenuNamespace | null = null;
 /**
  *
  */
-// eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
 function init() {
     return new Extension();
 }
@@ -36,12 +36,10 @@ class Extension {
             this._logger.info('Enable extension.');
             this._panelMenu.init();
         }).catch(error => {
-            if (this._logger) {
+            if (this._logger)
                 this._logger.error(error);
+            else
                 logError(error);
-            } else {
-                logError(error);
-            }
         });
     }
 

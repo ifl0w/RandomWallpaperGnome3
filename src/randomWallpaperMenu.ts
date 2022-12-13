@@ -99,7 +99,7 @@ class RandomWallpaperMenu {
                 this._wallpaperController.prohibitNewWallpaper = false;
             }).catch(error => {
                 this._wallpaperController.prohibitNewWallpaper = false;
-                logError(error);
+                this._logger.error(error);
             });
         });
 
@@ -111,7 +111,7 @@ class RandomWallpaperMenu {
         // Open Wallpaper Folder
         openFolder.connect('activate', () => {
             const uri = GLib.filename_to_uri(this._wallpaperController.wallpaperLocation, '');
-            Utils.execCheck(['xdg-open', uri]).catch(logError);
+            Utils.execCheck(['xdg-open', uri]).catch(this._logger.error);
         });
 
         openSettings.connect('activate', () => {
@@ -197,10 +197,9 @@ class RandomWallpaperMenu {
 
         /**
          * @this {RandomWallpaperMenu} RandomWallpaperMenu
-         * @param {CustomElements.HistoryElement} actor The activating panel item
+         * @param {CustomElements.HistoryElement} unusedActor The activating panel item
          */
-        // eslint-disable-next-line no-unused-vars
-        function onLeave(this: RandomWallpaperMenu, actor: typeof CustomElements.HistoryElement) {
+        function onLeave(this: RandomWallpaperMenu, unusedActor: typeof CustomElements.HistoryElement) {
             if (!this._wallpaperController.prohibitNewWallpaper)
                 this._wallpaperController.resetWallpaper();
         }
@@ -227,7 +226,7 @@ class RandomWallpaperMenu {
                 this._wallpaperController.prohibitNewWallpaper = false;
             }).catch(error => {
                 this._wallpaperController.prohibitNewWallpaper = false;
-                logError(error);
+                this._logger.error(error);
             });
         }
 
