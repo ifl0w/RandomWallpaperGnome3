@@ -59,6 +59,7 @@ class WallhavenAdapter extends BaseAdapter {
         const url = `https://wallhaven.cc/api/v1/search?${encodeURI(optionsString)}`;
         const message = this._bowl.newGetMessage(url);
 
+        this._logger.debug(`Search URL: ${url}`);
         const response_body_bytes = await this._bowl.send_and_receive(message);
 
         let response: WallhavenSearchResponse['data'];
