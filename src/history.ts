@@ -25,10 +25,10 @@ class HistoryEntry {
     /** Unique identifier, concat of timestamp and name */
     id: string;
     /** Basename of URI */
-    name: string;
+    name: string | null; // This can be null when an entry from an older version is mapped from settings
     path: string | null = null;
     source: SourceInfo;
-    adapter: AdapterInfo = {
+    adapter: AdapterInfo | null = { // This can be null when an entry from an older version is mapped from settings
         id: null,
         type: null,
     };
