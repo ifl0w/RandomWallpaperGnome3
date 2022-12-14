@@ -32,6 +32,7 @@ class LocalFolderAdapter extends BaseAdapter {
                 reject(new Error('No files found'));
                 return;
             }
+            this._logger.debug(`Found ${files.length} possible wallpaper in "${folder.get_path()}"`);
 
             for (let i = 0; i < 20 && wallpaperResult.length < count; i++) {
                 const randomFile = files[Utils.getRandomNumber(files.length)];

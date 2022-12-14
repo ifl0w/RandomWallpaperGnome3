@@ -42,6 +42,7 @@ class AFTimer {
         if (!this.isActive())
             return;
 
+        this._logger.debug('Continuing timer');
         this._paused = false;
         this.start();
     }
@@ -62,6 +63,7 @@ class AFTimer {
      * 'timer-last-trigger' stays the same.
      */
     pause() {
+        this._logger.debug('Timer paused');
         this._paused = true;
         this.cleanup();
     }
@@ -109,6 +111,8 @@ class AFTimer {
         // set new wallpaper if the interval was surpassed and set the timestamp to when it should have been updated
         if (this._surpassedInterval()) {
             if (this._timeoutEndCallback) {
+                this._logger.debug('Timer surpassed, running callback now');
+
                 try {
                     await this._timeoutEndCallback();
                 } catch (error) {
@@ -121,6 +125,7 @@ class AFTimer {
         }
 
         // actual timer function
+        this._logger.debug(`Starting timer, will run callback in ${millisecondsRemaining}ms`);
         this._timeout = GLib.timeout_add(GLib.PRIORITY_DEFAULT, millisecondsRemaining, () => {
             if (this._timeoutEndCallback) {
                 this._timeoutEndCallback().then(() => {
@@ -147,13 +152,15 @@ class AFTimer {
      */
     cleanup() {
         if (this._timeout) { // only remove if a timeout is active
+            this._logger.debug('Removing running timer');
             GLib.source_remove(this._timeout);
             this._timeout = undefined;
         }
     }
 
     /**
-     * Sets the last activation time to [now]. This doesn't affect already running timer.
+     * Sets the last activation time to [now]. This doesn't affect already running timer
+     * and will be ignored if the timer is paused.
      */
     private _reset() {
         this._settings.setInt64('timer-last-trigger', new Date().getTime());

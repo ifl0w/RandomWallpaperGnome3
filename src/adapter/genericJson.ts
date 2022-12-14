@@ -116,7 +116,7 @@ class GenericJsonAdapter extends BaseAdapter {
                     });
                 }
             } catch (error) {
-                this.logger.warn(`Failed getting image: ${error}`);
+                this._logger.warn(`Failed getting image: ${error}`);
                 // Do not escalate yet, try again
             }
 
