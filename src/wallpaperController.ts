@@ -511,7 +511,7 @@ class WallpaperController {
                         type: imageAdapters[index].type,
                     };
 
-                    this._logger.info(`Requesting image: ${element.source.imageDownloadUrl}`);
+                    this._logger.debug(`Requesting image: ${element.source.imageDownloadUrl}`);
                     fetchPromiseArray.push(imageAdapters[index].adapter.fetchFile(element));
                 }
 
@@ -520,6 +520,7 @@ class WallpaperController {
 
             // wait for all fetching images
             const newImageEntries = await Promise.all(fetchPromises);
+            this._logger.info(`Requested ${newImageEntries.length} new images.`);
 
             // Move file to unique naming
             const movePromises = newImageEntries.map(entry => {

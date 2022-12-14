@@ -1,11 +1,13 @@
 import * as Gio from 'gi://Gio';
 import * as GLib from 'gi://GLib';
+import {Logger} from './logger.js';
 
 import * as Utils from './utils.js';
 
 class HydraPaper {
     private _command: string[] | null = null;
     private _cancellable: Gio.Cancellable | null = null;
+    private _logger = new Logger('RWG3', 'HydraPaper');
 
     isAvailable(): boolean {
         if (this._command !== null)
@@ -30,6 +32,7 @@ class HydraPaper {
         if (this._cancellable === null)
             return;
 
+        this._logger.debug('Stopping running HydraPaper process.');
         this._cancellable.cancel();
         this._cancellable = null;
     }
@@ -64,6 +67,7 @@ class HydraPaper {
         this._cancellable = new Gio.Cancellable();
 
         // hydrapaper [--darkmode] --cli PATH PATH PATH
+        this._logger.debug(`Running command: ${command}`);
         await Utils.execCheck(command, this._cancellable);
 
         this._cancellable = null;

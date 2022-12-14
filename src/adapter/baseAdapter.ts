@@ -8,12 +8,12 @@ import {SoupBowl} from './../soupBowl.js';
 
 abstract class BaseAdapter {
     protected _bowl = new SoupBowl();
-    logger: Logger;
 
-    protected _settings: SettingsModule.Settings;
-    protected _wallpaperLocation: string;
-    protected _sourceName: string;
     protected _generalSettings: SettingsModule.Settings;
+    protected _logger: Logger;
+    protected _settings: SettingsModule.Settings;
+    protected _sourceName: string;
+    protected _wallpaperLocation: string;
 
     constructor(params: {
         defaultName: string;
@@ -24,7 +24,7 @@ abstract class BaseAdapter {
         wallpaperLocation: string;
     }) {
         const path = `${SettingsModule.RWG_SETTINGS_SCHEMA_PATH}/sources/general/${params.id}/`;
-        this.logger = new Logger('RWG3', `${params.defaultName} adapter`);
+        this._logger = new Logger('RWG3', `${params.defaultName} adapter`);
 
         this._wallpaperLocation = params.wallpaperLocation;
         this._settings = new SettingsModule.Settings(params.schemaID, params.schemaPath);
@@ -90,7 +90,7 @@ abstract class BaseAdapter {
         const blockedFilenames = this._generalSettings.getStrv('blocked-images');
 
         if (blockedFilenames.includes(filename)) {
-            this.logger.warn(`Image is blocked: ${filename}`);
+            this._logger.info(`Image is blocked: ${filename}`);
             return true;
         }
 
@@ -100,7 +100,7 @@ abstract class BaseAdapter {
     // eslint-disable-next-line no-unused-vars
     protected _error(err: string, callback?: (element: null, error: { error: string }) => void) {
         const error = {error: err};
-        this.logger.error(JSON.stringify(error));
+        this._logger.error(JSON.stringify(error));
 
         if (callback)
             callback(null, error);

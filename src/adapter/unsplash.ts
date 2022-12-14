@@ -35,7 +35,7 @@ class UnsplashAdapter extends BaseAdapter {
         let url = `https://source.unsplash.com${optionsString}`;
         url = encodeURI(url);
 
-        this.logger.info(`Unsplash request to: ${url}`);
+        this._logger.debug(`Unsplash request to: ${url}`);
 
         const message = this._bowl.newGetMessage(url);
 
@@ -77,7 +77,7 @@ class UnsplashAdapter extends BaseAdapter {
                 if (historyEntry && !this._includesWallpaper(wallpaperResult, historyEntry.source.imageDownloadUrl))
                     wallpaperResult.push(historyEntry);
             } catch (error) {
-                this.logger.warn(`Failed getting image: ${error}`);
+                this._logger.warn(`Failed getting image: ${error}`);
                 // Do not escalate yet, try again
             }
 
