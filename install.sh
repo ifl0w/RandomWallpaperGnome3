@@ -1,6 +1,6 @@
 #!/bin/bash
 
-datahome="${XDG_DATA_HOME:-HOME/.local/share}"
+datahome="${XDG_DATA_HOME:-$HOME/.local/share}"
 
 extensionFolder="randomwallpaper@iflow.space"
 sourcepath="$PWD/$extensionFolder"
@@ -11,7 +11,7 @@ if [ "$1" = "uninstall" ]; then
 	rm "$targetpath/$extensionFolder"
 else
 	echo "# Making extension directory"
-	mkdir -p $targetpath
+	mkdir -p "$targetpath"
 	echo "# Linking extension folder"
 	ln -s "$sourcepath" "$targetpath"
 fi
