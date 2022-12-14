@@ -8,24 +8,13 @@ import * as Utils from './utils.js';
  *
  * @param {unknown} inputObject A JSON object
  * @param {string} inputString JSONPath to follow, see wiki for syntax
- * @param {number[]} randomNumbers Array of pre-generated numbers
- * @param {boolean} newRandomness Whether to ignore a given randomNumbers array
  */
-function getTarget(inputObject: unknown, inputString: string, randomNumbers?: number[], newRandomness?: boolean): { Object: unknown, RandomNumbers?: number[] } | null {
+function getTarget(inputObject: unknown, inputString: string): [object: unknown, chosenPath: string] {
     if (!inputObject)
-        return null;
+        return [null, ''];
 
-    if (inputString.length === 0) {
-        return {
-            Object: inputObject,
-            RandomNumbers: randomNumbers,
-        };
-    }
-
-    if (!randomNumbers) {
-        randomNumbers = [];
-        newRandomness = true;
-    }
+    if (inputString.length === 0)
+        return [inputObject, inputString];
 
     let startDot = inputString.indexOf('.');
     if (startDot === -1)
@@ -40,9 +29,10 @@ function getTarget(inputObject: unknown, inputString: string, randomNumbers?: nu
         // Expect Object here
         const targetObject = _getObjectMember(inputObject, keyString);
         if (!targetObject)
-            return null;
+            return [null, ''];
 
-        return getTarget(targetObject, inputStringTail, randomNumbers, newRandomness);
+        const [object, path] = getTarget(targetObject, inputStringTail);
+        return [object, inputString.slice(0, inputString.length - inputStringTail.length) + path];
     } else {
         const indexString = keyString.slice(startParentheses + 1, keyString.length - 1);
         keyString = keyString.slice(0, startParentheses);
@@ -50,30 +40,20 @@ function getTarget(inputObject: unknown, inputString: string, randomNumbers?: nu
         // Expect an Array at this point
         const targetObject = _getObjectMember(inputObject, keyString);
         if (!targetObject || !Array.isArray(targetObject))
-            return null;
+            return [null, ''];
 
         switch (indexString) {
         case '@random': {
-            let randomNumber: number = -1;
-            let randomElement: unknown = null;
-
-            if (!newRandomness && randomNumbers.length > 0) {
-                // Take and remove first element
-                randomNumber = randomNumbers.shift() ?? -1;
-                randomElement = targetObject[randomNumber];
-            } else {
-                [randomElement, randomNumber] = _randomElement(targetObject);
-
-                if (newRandomness)
-                    randomNumbers.push(randomNumber);
-            }
-
-            return getTarget(randomElement, inputStringTail, randomNumbers, newRandomness);
+            const [chosenElement, chosenNumber] = _randomElement(targetObject);
+            const [object, path] = getTarget(chosenElement, inputStringTail);
+            return [object, inputString.slice(0, inputString.length - inputStringTail.length).replace('@random', String(chosenNumber)) + path];
         }
         // add special keywords here
-        default:
+        default: {
             // expecting integer
-            return getTarget(targetObject[parseInt(indexString)], inputStringTail, randomNumbers, newRandomness);
+            const [object, path] = getTarget(targetObject[parseInt(indexString)], inputStringTail);
+            return [object, inputString.slice(0, inputString.length - inputStringTail.length) + path];
+        }
         }
     }
 }
@@ -106,4 +86,32 @@ function _randomElement<T>(array: Array<T>): [T, number] {
     return [array[randomNumber], randomNumber];
 }
 
-export {getTarget};
+/**
+ * Replace '@random' according to an already resolved path.
+ *
+ * '@random' would yield different results so this makes sure the values stay
+ * the same as long as the path is identical.
+ *
+ * @param {string} randomPath Path containing '@random' to resolve
+ * @param {string} resolvedPath Path with resolved '@random'
+ */
+function replaceRandomInPath(randomPath: string, resolvedPath: string): string {
+    if (!randomPath.includes('@random'))
+        return randomPath;
+
+    let newPath = randomPath;
+    while (newPath.includes('@random')) {
+        const startRandom = newPath.indexOf('@random');
+
+        // abort if path is not equal up to this point
+        if (newPath.substring(0, startRandom) !== resolvedPath.substring(0, startRandom))
+            break;
+
+        const endParenthesis = resolvedPath.indexOf(']', startRandom);
+        newPath = newPath.replace('@random', resolvedPath.substring(startRandom, endParenthesis));
+    }
+
+    return newPath;
+}
+
+export {getTarget, replaceRandomInPath};
