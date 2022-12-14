@@ -483,8 +483,10 @@ class WallpaperController {
                 const fetchPromiseArray: Promise<HistoryModule.HistoryEntry>[] = [];
 
                 for (const element of array) {
-                    element.adapter.id = imageAdapters[index].id;
-                    element.adapter.type = imageAdapters[index].type;
+                    element.adapter = {
+                        id: imageAdapters[index].id,
+                        type: imageAdapters[index].type,
+                    };
 
                     this._logger.info(`Requesting image: ${element.source.imageDownloadUrl}`);
                     fetchPromiseArray.push(imageAdapters[index].adapter.fetchFile(element));
