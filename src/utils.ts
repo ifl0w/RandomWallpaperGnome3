@@ -113,7 +113,7 @@ function findFirstDifference(str1: string, str2: string) {
 /**
  *
  */
-function getMonitorCount() {
+function getMonitorCount(): number {
     // Gdk 4.8+
     // Gdk.DisplayManager.get()
     // displayManager.get_default_display()
@@ -126,9 +126,13 @@ function getMonitorCount() {
 
     // Gdk < 4.8
     const defaultDisplay = Gdk.Display.get_default();
+
+    if (!defaultDisplay)
+        return 1;
+
     // FIXME: wrong version in definition
     // @ts-expect-error
-    return defaultDisplay.get_n_monitors();
+    return defaultDisplay.get_n_monitors() as number;
 }
 
 /**
