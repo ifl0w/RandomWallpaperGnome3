@@ -39,6 +39,9 @@ class AFTimer {
      * next correct time frame repeatedly.
      */
     continue() {
+        if (!this.isActive())
+            return;
+
         this._paused = false;
         this.start();
     }
