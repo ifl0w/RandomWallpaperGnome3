@@ -5,7 +5,7 @@
         <value value='0' nick='Background' />
         <value value='1' nick='Lock Screen' />
         <value value='2' nick='Background and Lock Screen' />
-        <!-- <value value='3' nick='Background and Lock Screen independently' /> -->
+        <value value='3' nick='Background and Lock Screen independently' />
     </enum>
 
     <enum id='org.gnome.shell.extensions.space.iflow.randomwallpaper.log-levels'>
