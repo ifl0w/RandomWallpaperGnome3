@@ -311,33 +311,26 @@ class WallpaperController {
     /**
      * Sets the wallpaper and the lock screen when enabled to the given path.
      *
-     * @param {string[]} wallpaperArray Array of paths to the image
-     * @param {number} monitorCount Number of monitors to fill
+     * Types:
+     * 0: Background
+     * 1: Lock screen
+     * 2: Background and lock screen
+     *
+     * @param {string[]} wallpaperPaths Array of paths to the image
+     * @param {number} type Types to change
      */
-    private async _setBackground(wallpaperArray: string[], monitorCount: number) {
-        const multiMonitor = monitorCount > 1 && this._hydraPaper.isAvailable();
+    private async _setBackground(wallpaperPaths: string[], type: number = 0) {
         const backgroundSettings = new SettingsModule.Settings('org.gnome.desktop.background');
         const screensaverSettings = new SettingsModule.Settings('org.gnome.desktop.screensaver');
 
-        if (wallpaperArray.length < 1)
+        if (wallpaperPaths.length < 1)
             throw new Error('Empty wallpaper array');
 
-        const wallpaperUri = `file://${wallpaperArray[0]}`;
-        let usedWallpaperPaths: string[] = [];
+        const wallpaperUri = `file://${wallpaperPaths[0]}`;
 
-        // <value value='0' nick='Background' />
-        // <value value='1' nick='Lock Screen' />
-        // <value value='2' nick='Background and Lock Screen' />
-        // TODO: <value value='3' nick='Background and Lock Screen independently' />
-        const changeType = this._settings.getEnum('change-type');
-
-        if (changeType === 0 || changeType === 2) {
-            if (multiMonitor) {
-                const newWallpaperPaths = this._fillMonitorsFromHistory(wallpaperArray, monitorCount);
-
-                await this._hydraPaper.run(newWallpaperPaths);
-
-                usedWallpaperPaths = newWallpaperPaths;
+        if (type === 0 || type === 2) {
+            if (wallpaperPaths.length > 1) {
+                await this._hydraPaper.run(wallpaperPaths);
 
                 // Manually set key for darkmode because that's way faster
                 backgroundSettings.setString('picture-uri-dark', backgroundSettings.getString('picture-uri'));
@@ -346,25 +339,17 @@ class WallpaperController {
                 // hydrapaper changes this to "spanned"
                 backgroundSettings.setString('picture-options', 'zoom');
                 this._setPictureUriOfSettingsObject(backgroundSettings, wallpaperUri);
-                usedWallpaperPaths.push(wallpaperUri);
             }
         }
 
-        if (changeType === 1) {
-            if (multiMonitor) {
-                const newWallpaperPaths = this._fillMonitorsFromHistory(wallpaperArray, monitorCount);
-
+        if (type === 1) {
+            if (wallpaperPaths.length > 1) {
                 // Remember keys, HydraPaper will change these
                 const tmpBackground = backgroundSettings.getString('picture-uri-dark');
                 const tmpMode = backgroundSettings.getString('picture-options');
 
                 // Force HydraPaper to target a different resulting image by using darkmode
-                await this._hydraPaper.run(newWallpaperPaths, true);
-
-                newWallpaperPaths.forEach(path => {
-                    if (!usedWallpaperPaths.includes(path))
-                        usedWallpaperPaths.push(path);
-                });
+                await this._hydraPaper.run(wallpaperPaths, true);
 
                 screensaverSettings.setString('picture-options', 'spanned');
                 this._setPictureUriOfSettingsObject(screensaverSettings, backgroundSettings.getString('picture-uri-dark'));
@@ -376,45 +361,47 @@ class WallpaperController {
                 // set "picture-options" to "zoom" for single wallpapers
                 screensaverSettings.setString('picture-options', 'zoom');
                 this._setPictureUriOfSettingsObject(screensaverSettings, wallpaperUri);
-                if (!usedWallpaperPaths.includes(wallpaperUri))
-                    usedWallpaperPaths.push(wallpaperUri);
             }
         }
 
-        if (changeType === 2)
+        if (type === 2)
             this._setPictureUriOfSettingsObject(screensaverSettings, backgroundSettings.getString('picture-uri'));
-
-        // TODO: this ignores the lock-screen
-        // Run general post command
-        const commandString = this._settings.getString('general-post-command');
-        const generalPostCommandArray = this._getCommandArray(commandString, backgroundSettings.getString('picture-uri'));
-        if (generalPostCommandArray !== null) {
-            try {
-                await Utils.execCheck(generalPostCommandArray);
-            } catch (error) {
-                this._logger.warn(String(error));
-            }
-        }
-
-        return usedWallpaperPaths;
     }
 
-    private _fillMonitorsFromHistory(wallpaperArray: string[], monitorCount: number) {
+    // Run general post command
+    private _runPostCommands() {
+        const backgroundSettings = new SettingsModule.Settings('org.gnome.desktop.background');
+        const commandString = this._settings.getString('general-post-command');
+
+        // Read the current wallpaper uri from settings because it could be a merged wallpaper from HydraPaper
+        const currentWallpaperPath = backgroundSettings.getString('picture-uri');
+
+        // TODO: this ignores the lock-screen
+        const generalPostCommandArray = this._getCommandArray(commandString, currentWallpaperPath);
+        if (generalPostCommandArray !== null) {
+            // Do not await this call, let it be one shot
+            Utils.execCheck(generalPostCommandArray).catch(this._logger.error);
+        }
+    }
+
+    private _fillDisplaysFromHistory(wallpaperArray: string[], requestCount?: number) {
+        const count = requestCount ?? this._getCurrentDisplayCount();
         const newWallpaperArray: string[] = [...wallpaperArray];
 
         // Abuse history to fill missing images
-        for (let index = newWallpaperArray.length; index < monitorCount; index++) {
-            let historyElement;
+        for (let index = newWallpaperArray.length; index < count; index++) {
+            let historyElement: HistoryModule.HistoryEntry;
             do
                 historyElement = this._historyController.getRandom();
-            while (this._historyController.history.length > monitorCount && historyElement.path && newWallpaperArray.includes(historyElement.path));
-            // ensure different wallpaper for all displays if possible
+            while (this._historyController.history.length > count && historyElement.path && newWallpaperArray.includes(historyElement.path));
+            // try to ensure different wallpaper for all displays if possible
 
             if (historyElement.path)
                 newWallpaperArray.push(historyElement.path);
         }
 
-        return newWallpaperArray;
+        // Trim array if we have too many images, possibly by having a too long input array
+        return newWallpaperArray.slice(0, count);
     }
 
     /**
@@ -454,9 +441,18 @@ class WallpaperController {
         const historyElement = this._historyController.get(historyId);
 
         if (historyElement?.id && historyElement.path && this._historyController.promoteToActive(historyElement.id)) {
-            const monitorCount = this._settings.getBoolean('multiple-displays') && this._hydraPaper.isAvailable() ? Utils.getMonitorCount() : 1;
-            const usedWallpapers = (await this._setBackground([historyElement.path], monitorCount)).reverse();
-            usedWallpapers.forEach(path => {
+            const changeType = this._settings.getEnum('change-type');
+            const usedWallpaperPaths = this._fillDisplaysFromHistory([historyElement.path]);
+
+            // ignore changeType === 3 because that doesn't make sense
+            // when requesting a specific history entry
+            if (changeType > 2)
+                await this._setBackground(usedWallpaperPaths, 2);
+            else
+                await this._setBackground(usedWallpaperPaths, changeType);
+
+            this._runPostCommands();
+            usedWallpaperPaths.reverse().forEach(path => {
                 const id = this._historyController.getEntryByPath(path)?.id;
                 if (id)
                     this._historyController.promoteToActive(id);
@@ -471,7 +467,17 @@ class WallpaperController {
         this._startLoadingHooks.forEach(element => element());
 
         try {
-            const monitorCount = this._settings.getBoolean('multiple-displays') && this._hydraPaper.isAvailable() ? Utils.getMonitorCount() : 1;
+            // <value value='0' nick='Background' />
+            // <value value='1' nick='Lock Screen' />
+            // <value value='2' nick='Background and Lock Screen' />
+            // <value value='3' nick='Background and Lock Screen independently' />
+            const changeType = this._settings.getEnum('change-type');
+            let monitorCount = this._getCurrentDisplayCount();
+
+            // Request double the amount of displays if we need background and lock screen
+            if (changeType === 3)
+                monitorCount *= 2;
+
             const imageAdapters = this._getRandomAdapter(monitorCount);
 
             const randomImagePromises = imageAdapters.map(element => {
@@ -520,16 +526,25 @@ class WallpaperController {
             // wait for all images to be moved
             await Promise.all(movePromises);
 
-            const wallpaperPaths = newImageEntries.map(element => {
+            const newWallpaperPaths = newImageEntries.map(element => {
                 if (element.path)
                     return element.path;
 
                 // eslint-disable-next-line
                 return;
             }) as string[]; // cast because we made sure it's defined
-            const usedWallpapers = (await this._setBackground(wallpaperPaths, monitorCount)).reverse();
+            const usedWallpaperPaths = this._fillDisplaysFromHistory(newWallpaperPaths, monitorCount);
 
-            usedWallpapers.forEach(path => {
+            if (changeType === 3) {
+                // Half the images for the background
+                await this._setBackground(usedWallpaperPaths.slice(0, monitorCount / 2), 0);
+                // Half the images for the lock screen
+                await this._setBackground(usedWallpaperPaths.slice(monitorCount / 2), 1);
+            } else {
+                await this._setBackground(usedWallpaperPaths, changeType);
+            }
+
+            usedWallpaperPaths.reverse().forEach(path => {
                 const id = this._historyController.getEntryByPath(path)?.id;
                 if (id)
                     this._historyController.promoteToActive(id);
@@ -539,6 +554,8 @@ class WallpaperController {
             newImageEntries.reverse().forEach(element => {
                 this._historyController.insert(element);
             });
+
+            this._runPostCommands();
         } finally {
             this._stopLoadingHooks.forEach(element => element());
         }
@@ -572,6 +589,22 @@ class WallpaperController {
         return null;
     }
 
+    /**
+     * Get the current number of displays.
+     *
+     * This also takes the user setting and HydraPaper availability into account
+     * and lies accordingly by reporting only 1 display.
+     */
+    private _getCurrentDisplayCount() {
+        if (!this._settings.getBoolean('multiple-displays'))
+            return 1;
+
+        if (!this._hydraPaper.isAvailable())
+            return 1;
+
+        return Utils.getMonitorCount();
+    }
+
     private _backgroundTimeout(delay?: number) {
         if (this._timeout)
             return;
@@ -582,20 +615,24 @@ class WallpaperController {
             this._timeout = null;
 
             const currentWallpaperPaths: string[] = [];
-            for (let index = 0; index < Utils.getMonitorCount() && index < this._historyController.history.length; index++) {
+            for (let index = 0; index < this._getCurrentDisplayCount() && index < this._historyController.history.length; index++) {
                 const path = this._historyController.history[index].path;
                 if (path)
                     currentWallpaperPaths.push(path);
             }
+            const oldWallpaperPaths = this._fillDisplaysFromHistory(currentWallpaperPaths);
 
+            // Only change the background - the lock screen wouldn't be visible anyway
+            // because this function is only used for hover preview
             if (this._resetWallpaper) {
-                this._setBackground(currentWallpaperPaths, 1).catch(this._logger.error);
+                this._setBackground(oldWallpaperPaths, 0).catch(this._logger.error);
                 this._resetWallpaper = false;
             } else if (this._previewId !== undefined) {
-                this._setBackground([this.wallpaperLocation + this._previewId], Utils.getMonitorCount()).catch(this._logger.error);
+                const newWallpaperPaths = this._fillDisplaysFromHistory([this.wallpaperLocation + this._previewId]);
+                this._setBackground(newWallpaperPaths, 0).catch(this._logger.error);
             }
 
-            return false;
+            return GLib.SOURCE_REMOVE;
         });
     }
 
