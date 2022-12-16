@@ -341,7 +341,7 @@ class HistorySection extends PopupMenu.PopupMenuSection {
     /**
      * Cache HistoryElements for performance of long histories.
      */
-    private _historySectionCache = new Map<string, typeof HistoryElement>();
+    private _historySectionCache = new Map<string, InstanceType<typeof HistoryElement>>();
     private _historyCache: HistoryModule.HistoryEntry[] = [];
 
     constructor() {
@@ -355,8 +355,12 @@ class HistorySection extends PopupMenu.PopupMenuSection {
         this.actor.add_actor(this.box);
     }
 
-    // eslint-disable-next-line no-unused-vars
-    updateList(history: HistoryModule.HistoryEntry[], onEnter: (actor: typeof HistoryElement) => void, onLeave: (actor: typeof HistoryElement) => void, onSelect: (actor: typeof HistoryElement) => void) {
+    updateList(
+        history: HistoryModule.HistoryEntry[],
+        onEnter: (actor: InstanceType<typeof HistoryElement>) => void,
+        onLeave: (actor: InstanceType<typeof HistoryElement>) => void,
+        onSelect: (actor: InstanceType<typeof HistoryElement>) => void
+    ) {
         if (this._historyCache.length <= 1)
             this.removeAll(); // remove empty history element
 
@@ -368,29 +372,18 @@ class HistorySection extends PopupMenu.PopupMenuSection {
             if (!historyID)
                 continue;
 
-            // Typing fails here for our own class derived from GObject.registerClass
-            // FIXME: Expect a whole lot of ignore comments here:
-
             let cachedHistoryElement = this._historySectionCache.get(historyID);
             if (!cachedHistoryElement) {
-                // @ts-expect-error
                 cachedHistoryElement = new HistoryElement(undefined, history[i], i);
-                // @ts-expect-error
                 cachedHistoryElement.actor.connect('key-focus-in', onEnter);
-                // @ts-expect-error
                 cachedHistoryElement.actor.connect('key-focus-out', onLeave);
-                // @ts-expect-error
                 cachedHistoryElement.actor.connect('enter-event', onEnter);
 
-                // @ts-expect-error
                 cachedHistoryElement.connect('activate', onSelect);
-                // @ts-expect-error
                 this._historySectionCache.set(historyID, cachedHistoryElement);
 
-                // @ts-expect-error
                 this.addMenuItem(cachedHistoryElement, i - 1);
             } else {
-                // @ts-expect-error
                 cachedHistoryElement.setIndex(i);
             }
 
@@ -405,8 +398,6 @@ class HistorySection extends PopupMenu.PopupMenuSection {
         const destroyIDs = Array.from(this._historySectionCache.keys()).filter(i => existingIDs.indexOf(i) === -1);
 
         destroyIDs.forEach(id => {
-            // Same as the block above, typing from GObject.registerClass fails
-            // @ts-expect-error
             this._historySectionCache.get(id)?.destroy();
             this._historySectionCache.delete(id);
         });
