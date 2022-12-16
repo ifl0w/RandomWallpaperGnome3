@@ -519,7 +519,6 @@ class WallpaperController {
             });
 
             // wait for all fetching images
-            // FIXME: shove this into the adapter itself so rate limiting can be adjusted
             const newImageEntries = await Promise.all(fetchPromises);
 
             // Move file to unique naming
