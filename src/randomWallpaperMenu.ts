@@ -209,32 +209,30 @@ class RandomWallpaperMenu {
 
         /**
          * @this {RandomWallpaperMenu} RandomWallpaperMenu
-         * @param {CustomElements.HistoryElement} unusedActor The activating panel item
+         * @param {InstanceType<typeof CustomElements.HistoryElement>} unusedActor The activating panel item
          */
-        function onLeave(this: RandomWallpaperMenu, unusedActor: typeof CustomElements.HistoryElement) {
+        function onLeave(this: RandomWallpaperMenu, unusedActor: InstanceType<typeof CustomElements.HistoryElement>) {
             if (!this._wallpaperController.prohibitNewWallpaper && this._savedBackgroundUri)
                 this._wallpaperController.resetWallpaper(this._savedBackgroundUri);
         }
 
         /**
          * @this {RandomWallpaperMenu} RandomWallpaperMenu
-         * @param {CustomElements.HistoryElement} actor The activating panel item
+         * @param {InstanceType<typeof CustomElements.HistoryElement>} actor The activating panel item
          */
-        function onEnter(this: RandomWallpaperMenu, actor: typeof CustomElements.HistoryElement) {
-            if (!this._wallpaperController.prohibitNewWallpaper) {
-                // @ts-expect-error Typing fails for GObject.registerClass
+        function onEnter(this: RandomWallpaperMenu, actor: InstanceType<typeof CustomElements.HistoryElement>) {
+            if (!this._wallpaperController.prohibitNewWallpaper)
                 this._wallpaperController.previewWallpaper(actor.historyEntry.id);
-            }
         }
 
         /**
          * @this {RandomWallpaperMenu} RandomWallpaperMenu
-         * @param {CustomElements.HistoryElement} actor The activating panel item
+         * @param {InstanceType<typeof CustomElements.HistoryElement>} actor The activating panel item
          */
-        function onSelect(this: RandomWallpaperMenu, actor: typeof CustomElements.HistoryElement) {
+        function onSelect(this: RandomWallpaperMenu, actor: InstanceType<typeof CustomElements.HistoryElement>) {
             // Make sure no other preview or reset event overwrites our setWallpaper!
             this._wallpaperController.prohibitNewWallpaper = true;
-            // @ts-expect-error Typing fails for GObject.registerClass
+
             this._wallpaperController.setWallpaper(actor.historyEntry.id).then(() => {
                 this._wallpaperController.prohibitNewWallpaper = false;
 
