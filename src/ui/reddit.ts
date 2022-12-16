@@ -32,7 +32,7 @@ const RedditSettingsGroup = GObject.registerClass({
 
     private _settings;
 
-    constructor(params: any | undefined, id: string) {
+    constructor(params: Partial<Adw.PreferencesGroup.ConstructorProperties> | undefined, id: string) {
         super(params);
 
         const path = `${Settings.RWG_SETTINGS_SCHEMA_PATH}/sources/reddit/${id}/`;
