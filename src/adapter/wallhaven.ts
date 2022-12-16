@@ -5,7 +5,6 @@ import * as Utils from './../utils.js';
 
 import {BaseAdapter} from './../adapter/baseAdapter.js';
 import {HistoryEntry} from './../history.js';
-import {SoupBowl} from './../soupBowl.js';
 
 interface QueryOptions {
     q: string,
@@ -29,7 +28,6 @@ interface WallhavenSearchResponse {
 }
 
 class WallhavenAdapter extends BaseAdapter {
-    private _bowl = new SoupBowl();
     private _options: QueryOptions = {
         q: '',
         apikey: '',

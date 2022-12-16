@@ -3,10 +3,8 @@ import * as Utils from './../utils.js';
 
 import {BaseAdapter} from './../adapter/baseAdapter.js';
 import {HistoryEntry} from './../history.js';
-import {SoupBowl} from './../soupBowl.js';
 
 class UnsplashAdapter extends BaseAdapter {
-    private _bowl = new SoupBowl();
     private _sourceUrl = 'https://source.unsplash.com';
 
     // default query options

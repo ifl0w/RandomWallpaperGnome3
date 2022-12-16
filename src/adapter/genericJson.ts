@@ -6,11 +6,8 @@ import * as Utils from './../utils.js';
 
 import {BaseAdapter} from './../adapter/baseAdapter.js';
 import {HistoryEntry} from './../history.js';
-import {SoupBowl} from './../soupBowl.js';
 
 class GenericJsonAdapter extends BaseAdapter {
-    private _bowl = new SoupBowl();
-
     constructor(id: string, name: string, wallpaperLocation: string) {
         super({
             defaultName: 'Generic JSON Source',

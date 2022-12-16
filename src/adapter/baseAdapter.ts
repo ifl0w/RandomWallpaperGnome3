@@ -7,6 +7,7 @@ import {Logger} from './../logger.js';
 import {SoupBowl} from './../soupBowl.js';
 
 abstract class BaseAdapter {
+    protected _bowl = new SoupBowl();
     logger: Logger;
 
     protected _settings: SettingsModule.Settings;
@@ -50,15 +51,14 @@ abstract class BaseAdapter {
      * @param {HistoryEntry} historyEntry The historyEntry to fetch
      */
     async fetchFile(historyEntry: HistoryEntry) {
-        const bowl = new SoupBowl();
-
         const file = Gio.file_new_for_path(`${this._wallpaperLocation}/${String(historyEntry.name)}`);
         const fstream = file.replace(null, false, Gio.FileCreateFlags.NONE, null);
 
-        // start the download
-        let request = bowl.newGetMessage(historyEntry.source.imageDownloadUrl);
+        // craft new message from details
+        let request = this._bowl.newGetMessage(historyEntry.source.imageDownloadUrl);
 
-        const response_data_bytes = await bowl.send_and_receive(request);
+        // start the download
+        const response_data_bytes = await this._bowl.send_and_receive(request);
         if (!response_data_bytes) {
             fstream.close(null);
             throw new Error('Not a valid image response');
