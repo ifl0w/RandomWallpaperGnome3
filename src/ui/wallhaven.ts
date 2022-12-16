@@ -56,7 +56,7 @@ const WallhavenSettingsGroup = GObject.registerClass({
     private _colorDialog: Gtk.ColorChooserDialog | undefined;
     private _settings;
 
-    constructor(params: object | undefined, id: string) {
+    constructor(params: Partial<Adw.PreferencesGroup.ConstructorProperties> | undefined, id: string) {
         super(params);
 
         const path = `${Settings.RWG_SETTINGS_SCHEMA_PATH}/sources/wallhaven/${id}/`;

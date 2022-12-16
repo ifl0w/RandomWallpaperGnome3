@@ -51,7 +51,7 @@ const SourceRow = GObject.registerClass({
 
     id = String(Date.now());
 
-    constructor(params: object | undefined, id?: string | null) {
+    constructor(params: Partial<Adw.ExpanderRow.ConstructorProperties> | undefined, id?: string | null) {
         super(params);
 
         if (id)
