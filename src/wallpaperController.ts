@@ -335,9 +335,13 @@ class WallpaperController {
                 // Manually set key for darkmode because that's way faster
                 backgroundSettings.setString('picture-uri-dark', backgroundSettings.getString('picture-uri'));
             } else {
-                // set "picture-options" to "zoom" for single wallpapers
-                // hydrapaper changes this to "spanned"
-                backgroundSettings.setString('picture-options', 'zoom');
+                if (wallpaperUri.includes('merged_wallpaper'))
+                    // merged wallpapers need mode "spanned"
+                    backgroundSettings.setString('picture-options', 'spanned');
+                else
+                    // single wallpapers need mode "zoom"
+                    backgroundSettings.setString('picture-options', 'zoom');
+
                 this._setPictureUriOfSettingsObject(backgroundSettings, wallpaperUri);
             }
         }
@@ -358,14 +362,27 @@ class WallpaperController {
                 backgroundSettings.setString('picture-uri-dark', tmpBackground);
                 backgroundSettings.setString('picture-options', tmpMode);
             } else {
-                // set "picture-options" to "zoom" for single wallpapers
-                screensaverSettings.setString('picture-options', 'zoom');
+                if (wallpaperUri.includes('merged_wallpaper'))
+                    // merged wallpapers need mode "spanned"
+                    screensaverSettings.setString('picture-options', 'spanned');
+                else
+                    // single wallpapers need mode "zoom"
+                    screensaverSettings.setString('picture-options', 'zoom');
+
                 this._setPictureUriOfSettingsObject(screensaverSettings, wallpaperUri);
             }
         }
 
-        if (type === 2)
+        if (type === 2) {
+            if (wallpaperUri.includes('merged_wallpaper'))
+                // merged wallpapers need mode "spanned"
+                screensaverSettings.setString('picture-options', 'spanned');
+            else
+                // single wallpapers need mode "zoom"
+                screensaverSettings.setString('picture-options', 'zoom');
+
             this._setPictureUriOfSettingsObject(screensaverSettings, backgroundSettings.getString('picture-uri'));
+        }
     }
 
     // Run general post command
@@ -605,8 +622,8 @@ class WallpaperController {
         return Utils.getMonitorCount();
     }
 
-    private _backgroundTimeout(delay?: number) {
-        if (this._timeout)
+    private _backgroundTimeout(paths?: string[], delay?: number) {
+        if (this._timeout || !paths)
             return;
 
         delay = delay || 200;
@@ -614,22 +631,13 @@ class WallpaperController {
         this._timeout = GLib.timeout_add(GLib.PRIORITY_DEFAULT, delay, () => {
             this._timeout = null;
 
-            const currentWallpaperPaths: string[] = [];
-            for (let index = 0; index < this._getCurrentDisplayCount() && index < this._historyController.history.length; index++) {
-                const path = this._historyController.history[index].path;
-                if (path)
-                    currentWallpaperPaths.push(path);
-            }
-            const oldWallpaperPaths = this._fillDisplaysFromHistory(currentWallpaperPaths);
-
             // Only change the background - the lock screen wouldn't be visible anyway
             // because this function is only used for hover preview
             if (this._resetWallpaper) {
-                this._setBackground(oldWallpaperPaths, 0).catch(this._logger.error);
+                this._setBackground(paths, 0).catch(this._logger.error);
                 this._resetWallpaper = false;
             } else if (this._previewId !== undefined) {
-                const newWallpaperPaths = this._fillDisplaysFromHistory([this.wallpaperLocation + this._previewId]);
-                this._setBackground(newWallpaperPaths, 0).catch(this._logger.error);
+                this._setBackground(paths, 0).catch(this._logger.error);
             }
 
             return GLib.SOURCE_REMOVE;
@@ -641,14 +649,22 @@ class WallpaperController {
             this._previewId = historyId;
             this._resetWallpaper = false;
 
-            this._backgroundTimeout(delay);
+            // Do not fill other displays here.
+            // This is so HydraPaper will not overwrite the current merged background path
+            // with the preview image.
+            // We could move the image to a safe place with caveats:
+            // * temporarily (seems expensive for a simple preview)
+            // TODO: verify: * permanently (would break HydraPaperDaemon)
+            const newWallpaperPaths = [this.wallpaperLocation + this._previewId];
+
+            this._backgroundTimeout(newWallpaperPaths, delay);
         }
     }
 
-    resetWallpaper() {
+    resetWallpaper(uri: string) {
         if (!this._settings.getBoolean('disable-hover-preview')) {
             this._resetWallpaper = true;
-            this._backgroundTimeout();
+            this._backgroundTimeout([GLib.filename_from_uri(uri)[0]]);
         }
     }
 
