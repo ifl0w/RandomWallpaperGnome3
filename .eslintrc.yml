@@ -106,7 +106,8 @@ rules:
     - error
     - allowEmptyCatch: true
   no-extra-bind: error
-  no-extra-parens:
+  no-extra-parens: off
+  '@typescript-eslint/no-extra-parens':
     - error
     - all
     - conditionalAssign: false

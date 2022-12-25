@@ -102,7 +102,6 @@ class WallhavenAdapter extends BaseAdapter {
         for (const key in options) {
             if (options.hasOwnProperty(key)) {
                 if (Array.isArray(options[key]))
-                    // eslint-disable-next-line no-extra-parens
                     optionsString += `${key}=${(options[key] as Array<string>).join()}&`;
                 else if (options[key] !== '')
                     optionsString += `${key}=${options[key]}&`;
