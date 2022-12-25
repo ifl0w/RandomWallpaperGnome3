@@ -295,10 +295,16 @@
             <description>The keyword will be used to search images.</description>
         </key>
 
-        <key type='s' name='resolutions'>
-            <default>"1920x1200, 1920x1080, 2560x1440, 2560x1600, 3840x1080"</default>
-            <summary>Resolutions</summary>
-            <description>The acceptable resolutions.</description>
+        <key type='s' name='minimal-resolution'>
+            <default>"1920x1080"</default>
+            <summary>Minimal Resolution</summary>
+            <description>The least acceptable resolution.</description>
+        </key>
+
+        <key type='s' name='aspect-ratios'>
+            <default>"16x9,16x10"</default>
+            <summary>Aspect ratios</summary>
+            <description>List of acceptable aspect ratios.</description>
         </key>
 
     </schema>
