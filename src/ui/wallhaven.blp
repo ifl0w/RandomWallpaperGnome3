@@ -30,8 +30,14 @@ template WallhavenSettingsGroup : Adw.PreferencesGroup {
             }
         }
 
-        Adw.EntryRow resolutions {
-            title: _("Resolutions: 1920x1080, 2560x1440");
+        Adw.EntryRow minimal_resolution {
+            title: _("Minimal resolution: 1920x1080");
+            input-purpose: free_form;
+            text: "";
+        }
+
+        Adw.EntryRow aspect_ratios {
+            title: _("Allowed aspect ratios: 16x9,16x10");
             input-purpose: free_form;
             text: "";
         }

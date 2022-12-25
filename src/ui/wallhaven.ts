@@ -19,13 +19,14 @@ const WallhavenSettingsGroup = GObject.registerClass({
         'allow_sfw',
         'allow_sketchy',
         'api_key',
+        'aspect_ratios',
         'button_color_undo',
         'button_color',
         'category_anime',
         'category_general',
         'category_people',
         'keyword',
-        'resolutions',
+        'minimal_resolution',
         'row_color',
     ],
 }, class WallhavenSettingsGroup extends Adw.PreferencesGroup {
@@ -44,13 +45,14 @@ const WallhavenSettingsGroup = GObject.registerClass({
     private _allow_sfw!: Gtk.Switch;
     private _allow_sketchy!: Gtk.Switch;
     private _api_key!: Adw.EntryRow;
+    private _aspect_ratios!: Adw.EntryRow;
     private _button_color_undo!: Gtk.Button;
     private _button_color!: Gtk.Button;
     private _category_anime!: Gtk.Switch;
     private _category_general!: Gtk.Switch;
     private _category_people!: Gtk.Switch;
     private _keyword!: Adw.EntryRow;
-    private _resolutions!: Adw.EntryRow;
+    private _minimal_resolution!: Adw.EntryRow;
     private _row_color!: Adw.ActionRow;
 
     private _colorDialog: Gtk.ColorChooserDialog | undefined;
@@ -98,8 +100,12 @@ const WallhavenSettingsGroup = GObject.registerClass({
             this._keyword,
             'text',
             Gio.SettingsBindFlags.DEFAULT);
-        this._settings.bind('resolutions',
-            this._resolutions,
+        this._settings.bind('minimal-resolution',
+            this._minimal_resolution,
+            'text',
+            Gio.SettingsBindFlags.DEFAULT);
+        this._settings.bind('aspect-ratios',
+            this._aspect_ratios,
             'text',
             Gio.SettingsBindFlags.DEFAULT);
 
