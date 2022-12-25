@@ -74,6 +74,7 @@ var WallpaperController = class {
 		let duration = 0;
 		duration += this._settings.get('minutes', 'int');
 		duration += this._settings.get('hours', 'int') * 60;
+		if (duration < 1) {duration = 1;}
 		this._autoFetch.duration = duration;
 		this._autoFetch.active = this._settings.get('auto-fetch', 'boolean');
 
