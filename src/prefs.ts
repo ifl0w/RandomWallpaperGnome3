@@ -129,12 +129,10 @@ class RandomWallpaperSettings {
 
             this._sources.forEach(id => {
                 const sourceRow = new SourceRow(undefined, id);
-                // eslint-disable-next-line no-extra-parens
                 (this._builder.get_object('sources_list') as Adw.PreferencesGroup).add(sourceRow);
 
                 sourceRow.button_delete.connect('clicked', () => {
                     sourceRow.clearConfig();
-                    // eslint-disable-next-line no-extra-parens
                     (this._builder.get_object('sources_list') as Adw.PreferencesGroup).remove(sourceRow);
                     Utils.removeItemOnce(this._sources, id);
                     this._saveSources();
@@ -143,7 +141,6 @@ class RandomWallpaperSettings {
 
             import('./hydraPaper.js').then(module => {
                 if (new module.HydraPaper().isAvailable())
-                    // eslint-disable-next-line no-extra-parens
                     (this._builder.get_object('multiple_displays_row') as Adw.ActionRow).set_sensitive(true);
             }).catch(this._logger.error);
         }).catch(error => {
