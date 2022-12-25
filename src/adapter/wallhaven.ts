@@ -12,10 +12,10 @@ interface QueryOptions {
     purity: string,
     sorting: string,
     categories: string,
-    resolutions: string[],
+    // resolutions: string[],
     colors: string,
-    // atleast: string,
-    // ratios: string[],
+    atleast: string,
+    ratios: string[],
     // order: string,
     // topRange: string,
 }
@@ -34,7 +34,8 @@ class WallhavenAdapter extends BaseAdapter {
         purity: '110', // SFW, sketchy
         sorting: 'random',
         categories: '111', // General, Anime, People
-        resolutions: ['1920x1200', '2560x1440'],
+        atleast: '1920x1080',
+        ratios: ['16x9'],
         colors: '',
     };
 
@@ -119,8 +120,9 @@ class WallhavenAdapter extends BaseAdapter {
         }
         this._options.apikey = this._settings.getString('api-key');
 
-        this._options.resolutions = this._settings.getString('resolutions').split(',');
-        this._options.resolutions = this._options.resolutions.map(elem => {
+        this._options.atleast = this._settings.getString('minimal-resolution');
+        this._options.ratios = this._settings.getString('aspect-ratios').split(',');
+        this._options.ratios = this._options.ratios.map(elem => {
             return elem.trim();
         });
 
