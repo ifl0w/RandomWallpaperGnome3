@@ -62,8 +62,10 @@ class HistoryController {
         this.load();
     }
 
-    insert(historyElement: HistoryEntry) {
-        this.history.unshift(historyElement);
+    insert(historyElements: HistoryEntry[]) {
+        for (const historyElement of historyElements)
+            this.history.unshift(historyElement);
+
         this._deleteOldPictures();
         this.save();
     }

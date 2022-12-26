@@ -568,9 +568,7 @@ class WallpaperController {
             });
 
             // insert new wallpapers into history
-            newImageEntries.reverse().forEach(element => {
-                this._historyController.insert(element);
-            });
+            this._historyController.insert(newImageEntries.reverse());
 
             this._runPostCommands();
         } finally {
