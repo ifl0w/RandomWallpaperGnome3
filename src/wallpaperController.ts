@@ -48,7 +48,7 @@ class WallpaperController {
     private _timeout: number | null = null;
     /** functions will be called upon loading a new wallpaper */
     private _startLoadingHooks: (() => void)[] = [];
-    /** functions will be called when loading a new wallpaper stopped. If an error occurred then the error will be passed as parameter. */
+    /** functions will be called when loading a new wallpaper stopped. */
     private _stopLoadingHooks: (() => void)[] = [];
 
     constructor() {
