@@ -8,7 +8,7 @@ import * as SettingsModule from './settings.js';
 import * as Utils from './utils.js';
 
 import {AFTimer as Timer} from './timer.js';
-import {HydraPaper} from './hydraPaper.js';
+import {getWallpaperManager} from './manager/wallpaperManager.js';
 import {Logger} from './logger.js';
 
 // SourceAdapter
@@ -41,7 +41,7 @@ class WallpaperController {
     private _settings = new SettingsModule.Settings();
     private _timer = Timer.getTimer();
     private _historyController: HistoryModule.HistoryController;
-    private _hydraPaper = new HydraPaper();
+    private _wallpaperManager = getWallpaperManager();
     private _autoFetch = {active: false, duration: 30};
     private _previewId: string | undefined;
     private _resetWallpaper = false;
@@ -328,52 +328,37 @@ class WallpaperController {
 
         const wallpaperUri = `file://${wallpaperPaths[0]}`;
 
+        if (wallpaperPaths.length > 1 && this._wallpaperManager) {
+            await this._wallpaperManager.setWallpaper(wallpaperPaths, type, backgroundSettings, screensaverSettings);
+            return;
+        }
+
         if (type === 0 || type === 2) {
-            if (wallpaperPaths.length > 1) {
-                await this._hydraPaper.run(wallpaperPaths);
+            // FIXME: 'merged_wallpaper' is hardcoded for HydraPaper
+            if (wallpaperUri.includes('merged_wallpaper'))
+            // merged wallpapers need mode "spanned"
+                backgroundSettings.setString('picture-options', 'spanned');
+            else
+            // single wallpapers need mode "zoom"
+                backgroundSettings.setString('picture-options', 'zoom');
 
-                // Manually set key for darkmode because that's way faster
-                backgroundSettings.setString('picture-uri-dark', backgroundSettings.getString('picture-uri'));
-            } else {
-                if (wallpaperUri.includes('merged_wallpaper'))
-                    // merged wallpapers need mode "spanned"
-                    backgroundSettings.setString('picture-options', 'spanned');
-                else
-                    // single wallpapers need mode "zoom"
-                    backgroundSettings.setString('picture-options', 'zoom');
-
-                this._setPictureUriOfSettingsObject(backgroundSettings, wallpaperUri);
-            }
+            Utils.setPictureUriOfSettingsObject(backgroundSettings, wallpaperUri);
         }
 
         if (type === 1) {
-            if (wallpaperPaths.length > 1) {
-                // Remember keys, HydraPaper will change these
-                const tmpBackground = backgroundSettings.getString('picture-uri-dark');
-                const tmpMode = backgroundSettings.getString('picture-options');
-
-                // Force HydraPaper to target a different resulting image by using darkmode
-                await this._hydraPaper.run(wallpaperPaths, true);
-
+            // FIXME: 'merged_wallpaper' is hardcoded for HydraPaper
+            if (wallpaperUri.includes('merged_wallpaper'))
+            // merged wallpapers need mode "spanned"
                 screensaverSettings.setString('picture-options', 'spanned');
-                this._setPictureUriOfSettingsObject(screensaverSettings, backgroundSettings.getString('picture-uri-dark'));
+            else
+            // single wallpapers need mode "zoom"
+                screensaverSettings.setString('picture-options', 'zoom');
 
-                // HydraPaper possibly changed these, change them back
-                backgroundSettings.setString('picture-uri-dark', tmpBackground);
-                backgroundSettings.setString('picture-options', tmpMode);
-            } else {
-                if (wallpaperUri.includes('merged_wallpaper'))
-                    // merged wallpapers need mode "spanned"
-                    screensaverSettings.setString('picture-options', 'spanned');
-                else
-                    // single wallpapers need mode "zoom"
-                    screensaverSettings.setString('picture-options', 'zoom');
-
-                this._setPictureUriOfSettingsObject(screensaverSettings, wallpaperUri);
-            }
+            Utils.setPictureUriOfSettingsObject(screensaverSettings, wallpaperUri);
         }
 
         if (type === 2) {
+            // FIXME: 'merged_wallpaper' is hardcoded for HydraPaper
             if (wallpaperUri.includes('merged_wallpaper'))
                 // merged wallpapers need mode "spanned"
                 screensaverSettings.setString('picture-options', 'spanned');
@@ -381,7 +366,7 @@ class WallpaperController {
                 // single wallpapers need mode "zoom"
                 screensaverSettings.setString('picture-options', 'zoom');
 
-            this._setPictureUriOfSettingsObject(screensaverSettings, backgroundSettings.getString('picture-uri'));
+            Utils.setPictureUriOfSettingsObject(screensaverSettings, backgroundSettings.getString('picture-uri'));
         }
     }
 
@@ -419,39 +404,6 @@ class WallpaperController {
 
         // Trim array if we have too many images, possibly by having a too long input array
         return newWallpaperArray.slice(0, count);
-    }
-
-    /**
-     * Set the picture-uri property of the given settings object to the path.
-     * Precondition: the settings object has to be a valid Gio settings object with the picture-uri property.
-     *
-     * @param {SettingsModule.Settings} settings The settings schema object containing the keys to change
-     * @param {string} uri The picture URI to be set
-     */
-    private _setPictureUriOfSettingsObject(settings: SettingsModule.Settings, uri: string) {
-        /*
-         inspired from:
-         https://bitbucket.org/LukasKnuth/backslide/src/7e36a49fc5e1439fa9ed21e39b09b61eca8df41a/backslide@codeisland.org/settings.js?at=master
-         */
-        const setProp = (property: string) => {
-            if (settings.isWritable(property)) {
-                // Set a new Background-Image (should show up immediately):
-                settings.setString(property, uri);
-            } else {
-                throw new Error(`Property not writable: ${property}`);
-            }
-        };
-
-        const availableKeys = settings.listKeys();
-
-        let property = 'picture-uri';
-        if (availableKeys.indexOf(property) !== -1)
-            setProp(property);
-
-
-        property = 'picture-uri-dark';
-        if (availableKeys.indexOf(property) !== -1)
-            setProp(property);
     }
 
     async setWallpaper(historyId: string) {
@@ -614,7 +566,7 @@ class WallpaperController {
         if (!this._settings.getBoolean('multiple-displays'))
             return 1;
 
-        if (!this._hydraPaper.isAvailable())
+        if (!this._wallpaperManager?.isAvailable())
             return 1;
 
         return Utils.getMonitorCount();
