@@ -168,6 +168,39 @@ function removeItemOnce<T>(array: T[], value: T) {
     return array;
 }
 
+/**
+ * Set the picture-uri property of the given settings object to the path.
+ * Precondition: the settings object has to be a valid Gio settings object with the picture-uri property.
+ *
+ * @param {Settings} settings The settings schema object containing the keys to change
+ * @param {string} uri The picture URI to be set
+ */
+function setPictureUriOfSettingsObject(settings: Settings, uri: string) {
+    /*
+     * inspired from:
+     * https://bitbucket.org/LukasKnuth/backslide/src/7e36a49fc5e1439fa9ed21e39b09b61eca8df41a/backslide@codeisland.org/settings.js?at=master
+     */
+    const setProp = (property: string) => {
+        if (settings.isWritable(property)) {
+            // Set a new Background-Image (should show up immediately):
+            settings.setString(property, uri);
+        } else {
+            throw new Error(`Property not writable: ${property}`);
+        }
+    };
+
+    const availableKeys = settings.listKeys();
+
+    let property = 'picture-uri';
+    if (availableKeys.indexOf(property) !== -1)
+        setProp(property);
+
+
+    property = 'picture-uri-dark';
+    if (availableKeys.indexOf(property) !== -1)
+        setProp(property);
+}
+
 export {
     execCheck,
     fileName,
@@ -175,5 +208,6 @@ export {
     findFirstDifference,
     getMonitorCount,
     getRandomNumber,
-    removeItemOnce
+    removeItemOnce,
+    setPictureUriOfSettingsObject
 };
