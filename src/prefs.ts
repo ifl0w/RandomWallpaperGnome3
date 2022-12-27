@@ -139,8 +139,8 @@ class RandomWallpaperSettings {
                 });
             });
 
-            import('./hydraPaper.js').then(module => {
-                if (new module.HydraPaper().isAvailable())
+            import('./manager/wallpaperManager.js').then(module => {
+                if (module.getWallpaperManager()?.isAvailable())
                     (this._builder.get_object('multiple_displays_row') as Adw.ActionRow).set_sensitive(true);
             }).catch(this._logger.error);
         }).catch(error => {
