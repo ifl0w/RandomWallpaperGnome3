@@ -1,10 +1,13 @@
 import * as Gio from 'gi://Gio';
 import * as GLib from 'gi://GLib';
-import {Logger} from './logger.js';
 
-import * as Utils from './utils.js';
+import * as Utils from '../utils.js';
 
-class HydraPaper {
+import {Logger} from '../logger.js';
+import {WallpaperManager} from './wallpaperManager.js';
+import {Settings} from '../settings.js';
+
+class HydraPaper implements WallpaperManager {
     private _command: string[] | null = null;
     private _cancellable: Gio.Cancellable | null = null;
     private _logger = new Logger('RWG3', 'HydraPaper');
@@ -47,7 +50,7 @@ class HydraPaper {
      * @param {string[]} wallpaperArray Array of image paths
      * @param {boolean} darkmode Use darkmode, gives different image in cache path
      */
-    async run(wallpaperArray: string[], darkmode: boolean = false) {
+    private async _run(wallpaperArray: string[], darkmode: boolean = false) {
         // Cancel already running processes before starting new ones
         this.cancelRunning();
 
@@ -71,6 +74,34 @@ class HydraPaper {
         await Utils.execCheck(command, this._cancellable);
 
         this._cancellable = null;
+    }
+
+    async setWallpaper(wallpaperPaths: string[], mode: number, backgroundSettings?: Settings, screensaverSettings?: Settings) {
+        if ((mode === 0 || mode === 2) && backgroundSettings) {
+            await this._run(wallpaperPaths);
+
+            // Manually set key for darkmode because that's way faster
+            backgroundSettings.setString('picture-uri-dark', backgroundSettings.getString('picture-uri'));
+        }
+
+        if (mode === 1 && backgroundSettings && screensaverSettings) {
+            // Remember keys, HydraPaper will change these
+            const tmpBackground = backgroundSettings.getString('picture-uri-dark');
+            const tmpMode = backgroundSettings.getString('picture-options');
+
+            // Force HydraPaper to target a different resulting image by using darkmode
+            await this._run(wallpaperPaths, true);
+
+            screensaverSettings.setString('picture-options', 'spanned');
+            Utils.setPictureUriOfSettingsObject(screensaverSettings, backgroundSettings.getString('picture-uri-dark'));
+
+            // HydraPaper possibly changed these, change them back
+            backgroundSettings.setString('picture-uri-dark', tmpBackground);
+            backgroundSettings.setString('picture-options', tmpMode);
+        }
+
+        if (mode === 2 && screensaverSettings && backgroundSettings)
+            Utils.setPictureUriOfSettingsObject(screensaverSettings, backgroundSettings.getString('picture-uri'));
     }
 }
 
