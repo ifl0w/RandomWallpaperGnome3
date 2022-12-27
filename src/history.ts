@@ -163,8 +163,6 @@ class HistoryController {
         const enumerator = directory.enumerate_children('', Gio.FileQueryInfoFlags.NONE, null);
 
         let fileInfo;
-        let deleteFile;
-
         do {
             fileInfo = enumerator.next_file(null);
 
@@ -175,7 +173,7 @@ class HistoryController {
 
             // ignore hidden files and first element
             if (id[0] !== '.' && id !== firstHistoryElement.id) {
-                deleteFile = Gio.file_new_for_path(this._wallpaperLocation + id);
+                const deleteFile = Gio.file_new_for_path(this._wallpaperLocation + id);
                 deleteFile.delete(null);
             }
         } while (fileInfo);
@@ -189,11 +187,10 @@ class HistoryController {
      */
     private _deleteOldPictures() {
         this.size = this._settings.getInt('history-length');
-        let deleteFile;
         while (this.history.length > this.size) {
             const path = this.history.pop()?.path;
             if (path) {
-                deleteFile = Gio.file_new_for_path(path);
+                const deleteFile = Gio.file_new_for_path(path);
                 deleteFile.delete(null);
             }
         }
