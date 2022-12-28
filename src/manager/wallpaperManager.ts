@@ -1,6 +1,7 @@
 import type {Settings} from './../settings.js';
 
 import {HydraPaper} from './hydraPaper.js';
+import {Superpaper} from './superPaper.js';
 
 abstract class WallpaperManager {
     abstract isAvailable(): boolean;
@@ -27,9 +28,12 @@ abstract class WallpaperManager {
  */
 function getWallpaperManager(): WallpaperManager | null {
     const hydraPaper = new HydraPaper();
-
     if (hydraPaper.isAvailable())
         return hydraPaper;
+
+    const superpaper = new Superpaper();
+    if (superpaper.isAvailable())
+        return superpaper;
 
     return null;
 }
