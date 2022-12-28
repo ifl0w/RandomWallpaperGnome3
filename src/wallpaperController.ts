@@ -334,8 +334,8 @@ class WallpaperController {
         }
 
         if (type === 0 || type === 2) {
-            // FIXME: 'merged_wallpaper' is hardcoded for HydraPaper
-            if (wallpaperUri.includes('merged_wallpaper'))
+            // FIXME: These are currently hardcoded for the few available wallpaperManager
+            if (wallpaperUri.includes('merged_wallpaper') || wallpaperUri.includes('cli-a') || wallpaperUri.includes('cli-b'))
             // merged wallpapers need mode "spanned"
                 backgroundSettings.setString('picture-options', 'spanned');
             else
@@ -346,8 +346,8 @@ class WallpaperController {
         }
 
         if (type === 1) {
-            // FIXME: 'merged_wallpaper' is hardcoded for HydraPaper
-            if (wallpaperUri.includes('merged_wallpaper'))
+            // FIXME: These are currently hardcoded for the few available wallpaperManager
+            if (wallpaperUri.includes('merged_wallpaper') || wallpaperUri.includes('cli-a') || wallpaperUri.includes('cli-b'))
             // merged wallpapers need mode "spanned"
                 screensaverSettings.setString('picture-options', 'spanned');
             else
@@ -358,8 +358,8 @@ class WallpaperController {
         }
 
         if (type === 2) {
-            // FIXME: 'merged_wallpaper' is hardcoded for HydraPaper
-            if (wallpaperUri.includes('merged_wallpaper'))
+            // FIXME: These are currently hardcoded for the few available wallpaperManager
+            if (wallpaperUri.includes('merged_wallpaper') || wallpaperUri.includes('cli-a') || wallpaperUri.includes('cli-b'))
                 // merged wallpapers need mode "spanned"
                 screensaverSettings.setString('picture-options', 'spanned');
             else
