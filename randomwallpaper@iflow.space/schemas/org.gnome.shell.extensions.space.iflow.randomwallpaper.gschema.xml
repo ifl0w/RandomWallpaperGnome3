@@ -66,7 +66,7 @@
         <key type='b' name='change-lock-screen'>
             <default>false</default>
             <summary>Change lock screen</summary>
-            <description>Weather the gnome lock screen should also be set to the new wallpaper.</description>
+            <description>Whether the gnome lock screen should also be set to the new wallpaper.</description>
         </key>
 
         <key type='b' name='disable-hover-preview'>
@@ -159,33 +159,33 @@
         <key type='b' name='allow-sfw'>
             <default>true</default>
             <summary>SFW</summary>
-            <description>Weather safe images are allowed.</description>
+            <description>Whether safe images are allowed.</description>
         </key>
         <key type='b' name='allow-sketchy'>
             <default>false</default>
             <summary>Sketchy</summary>
-            <description>Weather sketchy images are allowed.</description>
+            <description>Whether sketchy images are allowed.</description>
         </key>
         <key type='b' name='allow-nsfw'>
             <default>false</default>
             <summary>NSFW</summary>
-            <description>Weather not safe images are allowed.</description>
+            <description>Whether not safe images are allowed.</description>
         </key>
 
         <key type='b' name='category-general'>
             <default>true</default>
             <summary>Category General</summary>
-            <description>Weather the general category should be searched.</description>
+            <description>Whether the general category should be searched.</description>
         </key>
         <key type='b' name='category-anime'>
             <default>true</default>
             <summary>Category Anime</summary>
-            <description>Weather the anime category should be searched.</description>
+            <description>Whether the anime category should be searched.</description>
         </key>
         <key type='b' name='category-people'>
             <default>true</default>
             <summary>Category People</summary>
-            <description>Weather the people category should be searched.</description>
+            <description>Whether the people category should be searched.</description>
         </key>
     </schema>
 
