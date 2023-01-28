@@ -151,10 +151,20 @@
             <summary>Api key</summary>
             <description>The wallheven api key.</description>
         </key>
-        <key type='s' name='resolutions'>
-            <default>"1920x1200, 1920x1080, 2560x1440, 2560x1600, 3840x1080"</default>
-            <summary>Resolutions</summary>
-            <description>The acceptable resolutions.</description>
+        <key type='s' name='ratios'>
+            <default>"16x9, 16x10"</default>
+            <summary>Ratios</summary>
+            <description>The acceptable ratios.</description>
+        </key>
+        <key type='i' name='wallhaven-minimal-width'>
+            <default>0</default>
+            <summary>Minimal Width</summary>
+            <description>The minimal width for image.</description>
+        </key>
+        <key type='i' name='wallhaven-minimal-height'>
+            <default>0</default>
+            <summary>Minimal Height</summary>
+            <description>The minimal height for image.</description>
         </key>
         <key type='b' name='allow-sfw'>
             <default>true</default>

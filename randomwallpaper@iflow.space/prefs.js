@@ -206,11 +206,19 @@ var RandomWallpaperSettings = class {
 			this._builder.get_object('wallhaven-api-key'),
 			'text',
 			Gio.SettingsBindFlags.DEFAULT);
-		this._wallhaven_settings.bind('resolutions',
-			this._builder.get_object('wallhaven-resolutions'),
+		this._wallhaven_settings.bind('ratios',
+			this._builder.get_object('wallhaven-ratios'),
 			'text',
 			Gio.SettingsBindFlags.DEFAULT);
-
+		this._wallhaven_settings.bind('wallhaven-minimal-width',
+			this._builder.get_object('wallhaven-minimal-width'),
+			'value',
+			Gio.SettingsBindFlags.DEFAULT);
+		this._wallhaven_settings.bind('wallhaven-minimal-height',
+			this._builder.get_object('wallhaven-minimal-height'),
+			'value',
+			Gio.SettingsBindFlags.DEFAULT);
+		
 		this._wallhaven_settings.bind('category-general',
 			this._builder.get_object('wallhaven-category-general'),
 			'active',

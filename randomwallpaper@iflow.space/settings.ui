@@ -1146,19 +1146,84 @@ You can also define a prefix that will be added to the image URL.</property>
         </child>
       </object>
     </child>
+
     <child>
       <object class="GtkLabel">
         <property name="visible">1</property>
         <property name="margin-top">10</property>
         <property name="halign">start</property>
-        <property name="label" translatable="yes">Resolutions</property>
+        <property name="label" translatable="yes">Ratios</property>
       </object>
     </child>
     <child>
-      <object class="GtkEntry" id="wallhaven-resolutions">
+      <object class="GtkEntry" id="wallhaven-ratios">
         <property name="visible">1</property>
         <property name="can-focus">1</property>
-        <property name="placeholder-text" translatable="yes">1920x1080, 1920x1200</property>
+        <property name="placeholder-text" translatable="yes">16x9, 16x10 (leave blank for all)</property>
+      </object>
+    </child>
+
+    <child>
+    <object class="GtkAdjustment" id="wallhaven-minimal-height">
+        <property name="lower">0</property>
+        <property name="upper">1000000</property>
+        <property name="step-increment">10</property>
+        <property name="page-increment">10</property>
+    </object>
+    <object class="GtkAdjustment" id="wallhaven-minimal-width">
+        <property name="lower">0</property>
+        <property name="upper">1000000</property>
+        <property name="step-increment">10</property>
+        <property name="page-increment">10</property>
+    </object>
+
+      <object class="GtkBox">
+        <property name="visible">1</property>
+        <property name="spacing">10</property>
+        <property name="margin-bottom">10</property>
+        <child>
+          <object class="GtkBox">
+            <property name="visible">1</property>
+            <property name="hexpand">1</property>
+            <property name="orientation">vertical</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">1</property>
+                <property name="halign">start</property>
+                <property name="label" translatable="yes">Minimal Width</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkSpinButton">
+                <property name="visible">1</property>
+                <property name="can-focus">1</property>
+                <property name="adjustment">wallhaven-minimal-width</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="visible">1</property>
+            <property name="hexpand">1</property>
+            <property name="orientation">vertical</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">1</property>
+                <property name="halign">start</property>
+                <property name="label" translatable="yes">Minimal Height</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkSpinButton">
+                <property name="visible">1</property>
+                <property name="can-focus">1</property>
+                <property name="adjustment">wallhaven-minimal-height</property>
+              </object>
+            </child>
+          </object>
+        </child>
+
       </object>
     </child>
   </object>

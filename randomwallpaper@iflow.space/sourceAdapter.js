@@ -186,7 +186,8 @@ var WallhavenAdapter = class extends BaseAdapter {
 			'purity': '110', // SFW, sketchy
 			'sorting': 'random',
 			'categories': '111', // General, Anime, People
-			'resolutions': ['1920x1200', '2560x1440']
+			'ratios': ['16x9', '16x10'],
+			'atleast': '0x0' // Minimal size for image
 		};
 
 		this._settings = new SettingsModule.Settings(RWG_SETTINGS_SCHEMA_WALLHAVEN);
@@ -260,10 +261,14 @@ var WallhavenAdapter = class extends BaseAdapter {
 		}
 		this.options.apikey = this._settings.get('wallhaven-api-key', 'string');
 
-		this.options.resolutions = this._settings.get('resolutions', 'string').split(',');
-		this.options.resolutions = this.options.resolutions.map((elem) => {
+		this.options.ratios = this._settings.get('ratios', 'string').split(',');
+		this.options.ratios = this.options.ratios.map((elem) => {
 			return elem.trim();
 		});
+
+		let minimal_width = this._settings.get('wallhaven-minimal-width', 'int');
+		let minimal_height = this._settings.get('wallhaven-minimal-height', 'int');
+		this.options.atleast = minimal_width + "x" + minimal_height;
 
 		let categories = [];
 		categories.push(+this._settings.get('category-general', 'boolean')); // + is implicit conversion to int
