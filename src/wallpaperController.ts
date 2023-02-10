@@ -375,8 +375,9 @@ class WallpaperController {
         const backgroundSettings = new SettingsModule.Settings('org.gnome.desktop.background');
         const commandString = this._settings.getString('general-post-command');
 
-        // Read the current wallpaper uri from settings because it could be a merged wallpaper from HydraPaper
-        const currentWallpaperPath = backgroundSettings.getString('picture-uri');
+        // Read the current wallpaper uri from settings because it could be a merged wallpaper
+        // Remove prefix "file://" to get the real path
+        const currentWallpaperPath = backgroundSettings.getString('picture-uri').slice(7);
 
         // TODO: this ignores the lock-screen
         const generalPostCommandArray = this._getCommandArray(commandString, currentWallpaperPath);
