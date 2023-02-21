@@ -1,0 +1,87 @@
+const Gio = imports.gi.Gio;
+
+const Self = imports.misc.extensionUtils.getCurrentExtension();
+const SettingsModule = Self.imports.settings;
+const HistoryModule = Self.imports.history;
+
+const BaseAdapter = Self.imports.adapter.baseAdapter;
+
+const RWG_SETTINGS_SCHEMA_LOCAL_FOLDER = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.localFolder';
+
+var LocalFolderAdapter = class extends BaseAdapter.BaseAdapter {
+	constructor(id, wallpaperLocation) {
+		super(wallpaperLocation);
+
+		let path = `/org/gnome/shell/extensions/space-iflow-randomwallpaper/sources/localFolder/${id}/`;
+		this._settings = new SettingsModule.Settings(RWG_SETTINGS_SCHEMA_LOCAL_FOLDER, path);
+	}
+
+	requestRandomImage(callback) {
+		const folder = Gio.file_new_for_path(this._settings.get('folder', 'string'));
+		let files = this._listDirectory(folder);
+
+		if (files === null || files.length < 1) {
+			this._error("Empty array.", callback);
+		}
+
+		let randomFile = files[Math.floor(Math.random() * files.length)].get_path();
+
+		let identifier = this._settings.get("name", "string");
+		if (identifier === null || identifier === "") {
+			identifier = 'Local Folder';
+		}
+
+		if (callback) {
+			let historyEntry = new HistoryModule.HistoryEntry(null, identifier, randomFile);
+			historyEntry.source.sourceUrl = this._wallpaperLocation;
+			callback(historyEntry);
+		}
+	}
+
+	fetchFile(path, callback) {
+		let date = new Date();
+		let sourceFile = Gio.file_new_for_path(path);
+		let name = `${date.getTime()}_${sourceFile.get_basename()}`
+		let targetFile = Gio.file_new_for_path(this._wallpaperLocation + String(name));
+
+		// https://gjs.guide/guides/gio/file-operations.html#copying-and-moving-files
+		sourceFile.copy(targetFile, Gio.FileCopyFlags.NONE, null, null);
+
+		if (callback) {
+			callback(name, targetFile.get_path());
+		}
+	}
+
+	// https://gjs.guide/guides/gio/file-operations.html#recursively-deleting-a-directory
+	_listDirectory(directory) {
+		const iterator = directory.enumerate_children('standard::*', Gio.FileQueryInfoFlags.NONE, null);
+
+		let files = [];
+		while (true) {
+			const info = iterator.next_file(null);
+
+			if (info === null) {
+				break;
+			}
+
+			const child = iterator.get_child(info);
+			const type = info.get_file_type();
+
+			switch (type) {
+				case Gio.FileType.DIRECTORY:
+					files = files.concat(this._listDirectory(child));
+					break;
+
+				default:
+					break;
+			}
+
+			let contentType = info.get_content_type();
+			if (contentType === 'image/png' || contentType === 'image/jpeg') {
+				files.push(child);
+			}
+		}
+
+		return files;
+	}
+};
