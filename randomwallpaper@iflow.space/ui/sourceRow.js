@@ -11,6 +11,7 @@ const Unsplash = Self.imports.ui.unsplash;
 const Wallhaven = Self.imports.ui.wallhaven;
 const Reddit = Self.imports.ui.reddit;
 const GenericJson = Self.imports.ui.genericJson;
+const LocalFolder = Self.imports.ui.localFolder;
 
 // https://gitlab.gnome.org/GNOME/gjs/-/blob/master/examples/gtk4-template.js
 var SourceRow = GObject.registerClass({
@@ -69,6 +70,9 @@ var SourceRow = GObject.registerClass({
 				break;
 			case 3: // generic JSON
 				targetWidget = new GenericJson.GenericJsonSettingsGroup(this);
+				break;
+			case 4: // Local Folder
+				targetWidget = new LocalFolder.LocalFolderSettingsGroup(this);
 				break;
 			default:
 				targetWidget = null;
