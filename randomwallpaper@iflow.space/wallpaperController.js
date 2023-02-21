@@ -6,12 +6,16 @@ const GLib = imports.gi.GLib;
 
 //self
 const Self = imports.misc.extensionUtils.getCurrentExtension();
-const SourceAdapter = Self.imports.sourceAdapter;
+const HistoryModule = Self.imports.history;
+const LoggerModule = Self.imports.logger;
 const Prefs = Self.imports.settings;
 const Timer = Self.imports.timer;
-const HistoryModule = Self.imports.history;
 
-const LoggerModule = Self.imports.logger;
+// SourceAdapter
+const GenericJsonAdapter = Self.imports.adapter.genericJson;
+const RedditAdapter = Self.imports.adapter.reddit;
+const UnsplashAdapter = Self.imports.adapter.unsplash;
+const WallhavenAdapter = Self.imports.adapter.wallhaven;
 
 const RWG_SETTINGS_SCHEMA_BACKEND_CONNECTION = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.backend-connection';
 
@@ -136,26 +140,30 @@ var WallpaperController = class {
 	 */
 	_getRandomAdapter() {
 		let imageSourceAdapter = null;
-
 		let source = this._getRandomSource();
 
-		switch (source.type) {
-			case 0:
-				imageSourceAdapter = new SourceAdapter.UnsplashAdapter(source.id);
-				break;
-			case 1:
-				imageSourceAdapter = new SourceAdapter.WallhavenAdapter(source.id);
-				break;
-			case 2:
-				imageSourceAdapter = new SourceAdapter.RedditAdapter(source.id);
-				break;
-			case 3:
-				imageSourceAdapter = new SourceAdapter.GenericJsonAdapter(source.id);
-				break;
-			default:
-				imageSourceAdapter = new SourceAdapter.UnsplashAdapter(null);
-				// TODO: log error and abort, raise exception?
-				break;
+		try {
+			switch (source.type) {
+				case 0:
+					imageSourceAdapter = new UnsplashAdapter.UnsplashAdapter(source.id, this.wallpaperlocation);
+					break;
+				case 1:
+					imageSourceAdapter = new WallhavenAdapter.WallhavenAdapter(source.id, this.wallpaperlocation);
+					break;
+				case 2:
+					imageSourceAdapter = new RedditAdapter.RedditAdapter(source.id, this.wallpaperlocation);
+					break;
+				case 3:
+					imageSourceAdapter = new GenericJsonAdapter.GenericJsonAdapter(source.id, this.wallpaperlocation);
+					break;
+				default:
+					imageSourceAdapter = new UnsplashAdapter.UnsplashAdapter(null, this.wallpaperlocation);
+					// TODO: log error and abort, raise exception?
+					break;
+			}
+		} catch (error) {
+			this.logger.warn("Had errors, fetching with default settings.");
+			imageSourceAdapter = new UnsplashAdapter.UnsplashAdapter(null, this.wallpaperlocation);
 		}
 
 		return imageSourceAdapter;
