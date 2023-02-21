@@ -4,7 +4,7 @@ const Gtk = imports.gi.Gtk;
 const ExtensionUtils = imports.misc.extensionUtils;
 
 const Self = ExtensionUtils.getCurrentExtension();
-const SourceRow = Self.imports.ui.source_row;
+const SourceRow = Self.imports.ui.sourceRow;
 const Settings = Self.imports.settings;
 const WallpaperController = Self.imports.wallpaperController;
 const LoggerModule = Self.imports.logger;
@@ -52,8 +52,8 @@ var RandomWallpaperSettings = class {
 
 		this._builder = new Gtk.Builder();
 		//this._builder.set_translation_domain(Self.metadata['gettext-domain']);
-		this._builder.add_from_file(Self.path + '/ui/page_general.ui');
-		this._builder.add_from_file(Self.path + '/ui/page_sources.ui');
+		this._builder.add_from_file(Self.path + '/ui/pageGeneral.ui');
+		this._builder.add_from_file(Self.path + '/ui/pageSources.ui');
 
 		this._loadSources();
 
@@ -105,7 +105,7 @@ var RandomWallpaperSettings = class {
 			this._builder.get_object('sources_list').add(new_row);
 			this.available_rows[new_row.id] = new_row;
 
-			this._bind_source_row(new_row);
+			this._bindSourceRow(new_row);
 		});
 	}
 
@@ -141,11 +141,11 @@ var RandomWallpaperSettings = class {
 			this.available_rows[source_row.id] = source_row;
 			this._builder.get_object('sources_list').add(source_row);
 
-			this._bind_source_row(source_row);
+			this._bindSourceRow(source_row);
 		});
 	}
 
-	_bind_source_row(source_row) {
+	_bindSourceRow(source_row) {
 		source_row.connect('notify::expanded', (row) => {
 			if (!row.expanded) {
 				this._saveSources();
