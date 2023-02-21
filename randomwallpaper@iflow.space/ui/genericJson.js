@@ -11,7 +11,7 @@ const RWG_SETTINGS_SCHEMA_GENERIC_JSON = 'org.gnome.shell.extensions.space.iflow
 
 var GenericJsonSettingsGroup = GObject.registerClass({
     GTypeName: 'GenericJsonSettingsGroup',
-    Template: GLib.filename_to_uri(Self.path + '/ui/generic_json.ui', null),
+    Template: GLib.filename_to_uri(Self.path + '/ui/genericJson.ui', null),
     InternalChildren: [
         'author_name_path',
         'author_url_path',
