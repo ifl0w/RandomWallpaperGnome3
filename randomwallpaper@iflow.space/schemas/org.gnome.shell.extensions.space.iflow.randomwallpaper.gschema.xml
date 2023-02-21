@@ -325,4 +325,19 @@
 
     </schema>
 
+    <schema id='org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.localFolder'>
+        <key type='s' name='name'>
+            <default>"Local Folder"</default>
+            <summary>Name</summary>
+            <description>Name for this source.</description>
+        </key>
+
+        <key type='s' name='folder'>
+            <default>""</default>
+            <summary>Folder</summary>
+            <description>The folder will be searched.</description>
+        </key>
+
+    </schema>
+
 </schemalist>

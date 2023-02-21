@@ -13,6 +13,7 @@ const Timer = Self.imports.timer;
 
 // SourceAdapter
 const GenericJsonAdapter = Self.imports.adapter.genericJson;
+const LocalFolderAdapter = Self.imports.adapter.localFolder;
 const RedditAdapter = Self.imports.adapter.reddit;
 const UnsplashAdapter = Self.imports.adapter.unsplash;
 const WallhavenAdapter = Self.imports.adapter.wallhaven;
@@ -155,6 +156,9 @@ var WallpaperController = class {
 					break;
 				case 3:
 					imageSourceAdapter = new GenericJsonAdapter.GenericJsonAdapter(source.id, this.wallpaperlocation);
+					break;
+				case 4:
+					imageSourceAdapter = new LocalFolderAdapter.LocalFolderAdapter(source.id, this.wallpaperlocation);
 					break;
 				default:
 					imageSourceAdapter = new UnsplashAdapter.UnsplashAdapter(null, this.wallpaperlocation);

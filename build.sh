@@ -11,6 +11,7 @@ glib-compile-schemas "$BASEDIR/schemas/"
 # cd "$BASEDIR/ui" || exit 1
 blueprint-compiler batch-compile "$BASEDIR/ui" "$BASEDIR/ui" \
     "$BASEDIR/ui/genericJson.blp" \
+    "$BASEDIR/ui/localFolder.blp" \
     "$BASEDIR/ui/pageGeneral.blp" \
     "$BASEDIR/ui/pageSources.blp" \
     "$BASEDIR/ui/reddit.blp" \

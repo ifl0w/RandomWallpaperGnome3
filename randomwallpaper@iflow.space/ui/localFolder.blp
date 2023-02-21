@@ -1,0 +1,18 @@
+using Gtk 4.0;
+using Adw 1;
+
+template LocalFolderSettingsGroup : Adw.PreferencesGroup {
+  title: _("General");
+
+  Adw.EntryRow folder_row {
+    title: "Folder";
+
+    Button folder {
+      valign: center;
+
+      Adw.ButtonContent {
+        icon-name: "document-open-symbolic";
+      }
+    }
+  }
+}
