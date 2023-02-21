@@ -98,7 +98,7 @@ class LocalFolderAdapter extends BaseAdapter {
             }
 
             const contentType = info.get_content_type();
-            if (contentType === 'image/png' || contentType === 'image/jpeg')
+            if (contentType?.startsWith('image/'))
                 files.push(child);
         }
 
