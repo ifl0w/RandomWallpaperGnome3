@@ -10,12 +10,12 @@ const Convenience = Self.imports.convenience;
 const Unsplash = Self.imports.ui.unsplash;
 const Wallhaven = Self.imports.ui.wallhaven;
 const Reddit = Self.imports.ui.reddit;
-const GenericJson = Self.imports.ui.generic_json;
+const GenericJson = Self.imports.ui.genericJson;
 
 // https://gitlab.gnome.org/GNOME/gjs/-/blob/master/examples/gtk4-template.js
 var SourceRow = GObject.registerClass({
     GTypeName: 'SourceRow',
-    Template: GLib.filename_to_uri(Self.path + '/ui/source_row.ui', null),
+    Template: GLib.filename_to_uri(Self.path + '/ui/sourceRow.ui', null),
     Children: [
         'button_delete',
         'combo',
