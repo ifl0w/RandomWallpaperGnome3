@@ -64,13 +64,13 @@ Requires [`blueprint-compiler`](https://jwestman.pages.gitlab.gnome.org/blueprin
 Run `./build.sh` to compile ui files.
 
 ## Adding predefined sources
-1. Build UI for settings using the [blueprint-compiler](https://jwestman.pages.gitlab.gnome.org/blueprint-compiler/) language in `…/ui/my_source.blp` - see [Workbench](https://apps.gnome.org/app/re.sonny.Workbench/) for a live preview editor.
+1. Build UI for settings using the [blueprint-compiler](https://jwestman.pages.gitlab.gnome.org/blueprint-compiler/) language in `…/ui/mySource.blp` - see [Workbench](https://apps.gnome.org/app/re.sonny.Workbench/) for a live preview editor.
     * Add the file to `build.sh`
 1. Create a settings layout to the `…/schemas/….gschema.xml`
-1. Create your logic hooking the settings in a `…/ui/my_source.js`
-1. Add the new source to `…/ui/source_row.js`
-    * As string for the the ComboRow in `…/ui/source_row.blp`
 1. Create a adapter to read the settings and fetching the images and additional information in `…/sourceAdapter.js`
+1. Create your logic hooking the settings in a `…/ui/mySource.js`
+1. Add the new source to `…/ui/sourceRow.js`
+    * As string for the the ComboRow in `…/ui/sourceRow.blp`
     * Add your adapter to `…/wallpaperController.js`
 
 ## Support Me
