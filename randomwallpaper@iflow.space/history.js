@@ -10,6 +10,7 @@ var HistoryEntry = class {
 
 	constructor(author, source, url) {
 		this.id = null;
+		this.name = null;
 		this.path = null;
 		this.source = null;
 		this.timestamp = new Date().getTime();

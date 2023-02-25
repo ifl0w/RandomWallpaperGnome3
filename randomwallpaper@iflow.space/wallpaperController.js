@@ -77,6 +77,31 @@ var WallpaperController = class {
 		}
 
 		this.currentWallpaper = this._getCurrentWallpaper();
+
+		// Initialize favorites folder
+		// TODO: There's probably a better place for this
+		let favoritesFolder = this._settings.get('favorites-folder', 'string');
+		if (favoritesFolder === "") {
+			const directoryPictures = GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_PICTURES);
+
+			if (directoryPictures === null) {
+				// Pictures not set up
+				const directoryDownloads = GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DOWNLOAD);
+
+				if (directoryDownloads === null) {
+					const xdg_data_home = GLib.get_user_data_dir();
+					favoritesFolder = Gio.File.new_for_path(xdg_data_home);
+				} else {
+					favoritesFolder = Gio.File.new_for_path(directoryDownloads);
+				}
+			} else {
+				favoritesFolder = Gio.File.new_for_path(directoryPictures);
+			}
+
+			favoritesFolder = favoritesFolder.get_child(Self.metadata['uuid']);
+
+			this._settings.set('favorites-folder', 'string', favoritesFolder.get_path());
+		}
 	}
 
 	_clearHistory() {
@@ -313,10 +338,29 @@ var WallpaperController = class {
 					return;
 				}
 
-				historyElement.path = path;
-				historyElement.id = historyId;
+				historyElement.name = String(historyId);
+				historyElement.id = `${historyElement.timestamp}_${historyElement.name}`; // timestamp ensures uniqueness
 
-				this._setBackground(path, () => {
+				// Move file to unique naming
+				let sourceFile = Gio.File.new_for_path(path);
+				let targetFolder = sourceFile.get_parent();
+				let targetFile = targetFolder.get_child(historyElement.id);
+
+				try {
+					if (!sourceFile.move(targetFile, Gio.FileCopyFlags.NONE, null, null)) {
+						this.logger.warning('Failed copying unique image.');
+						return;
+					}
+				} catch (error) {
+					if (error === Gio.IOErrorEnum.EXISTS) {
+						this.logger.warning('Image already exists in location.');
+						return;
+					}
+				}
+
+				historyElement.path = targetFile.get_path();
+
+				this._setBackground(historyElement.path, () => {
 					// insert file into history
 					this._historyController.insert(historyElement);
 					this.currentWallpaper = this._getCurrentWallpaper();

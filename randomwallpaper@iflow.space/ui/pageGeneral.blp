@@ -57,24 +57,6 @@ Adw.PreferencesPage page_general {
   Adw.PreferencesGroup {
     title: _("History");
 
-    Adw.ActionRow {
-      title: _("History length");
-      subtitle: _("The number of wallpapers that will be shown in the history and stored in the wallpaper folder of this extension.");
-
-      SpinButton {
-        valign: center;
-        numeric: true;
-
-        adjustment: Adjustment history_length {
-          lower: 1;
-          upper: 100;
-          value: 10;
-          step-increment: 1;
-          page-increment: 10;
-        };
-      }
-    }
-
     header-suffix: Box {
       spacing: 14;
 
@@ -100,6 +82,36 @@ Adw.PreferencesPage page_general {
         ]
       }
     };
+
+    Adw.ActionRow {
+      title: _("History length");
+      subtitle: _("The number of wallpapers that will be shown in the history and stored in the wallpaper folder of this extension.");
+
+      SpinButton {
+        valign: center;
+        numeric: true;
+
+        adjustment: Adjustment history_length {
+          lower: 1;
+          upper: 100;
+          value: 10;
+          step-increment: 1;
+          page-increment: 10;
+        };
+      }
+    }
+
+    Adw.EntryRow row_favorites_folder{
+      title: _("Save for later folder");
+
+      Button button_favorites_folder {
+        valign: center;
+
+        Adw.ButtonContent {
+          icon-name: "folder-open-symbolic";
+        }
+      }
+    }
   }
 
   Adw.PreferencesGroup {
