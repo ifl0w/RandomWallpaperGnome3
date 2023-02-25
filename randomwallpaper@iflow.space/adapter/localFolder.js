@@ -39,9 +39,8 @@ var LocalFolderAdapter = class extends BaseAdapter.BaseAdapter {
 	}
 
 	fetchFile(path, callback) {
-		let date = new Date();
 		let sourceFile = Gio.file_new_for_path(path);
-		let name = `${date.getTime()}_${sourceFile.get_basename()}`
+		let name = sourceFile.get_basename()
 		let targetFile = Gio.file_new_for_path(this._wallpaperLocation + String(name));
 
 		// https://gjs.guide/guides/gio/file-operations.html#copying-and-moving-files

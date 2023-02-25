@@ -4,10 +4,12 @@ const Util = imports.misc.util;
 const GdkPixbuf = imports.gi.GdkPixbuf;
 const Clutter = imports.gi.Clutter;
 const Cogl = imports.gi.Cogl;
+const Gio = imports.gi.Gio;
 const Gtk = imports.gi.Gtk;
 const GObject = imports.gi.GObject;
 
 const Self = imports.misc.extensionUtils.getCurrentExtension();
+const Settings = Self.imports.settings;
 const LoggerModule = Self.imports.logger;
 const Timer = Self.imports.timer;
 
@@ -21,6 +23,7 @@ var HistoryElement = GObject.registerClass({
 		this.setAsWallpaperItem = null;
 		this.previewItem = null;
 		this._previewActor = null;
+		this._settings = new Settings.Settings();
 
 		let timestamp = historyEntry.timestamp;
 		let date = new Date(timestamp);
@@ -96,6 +99,35 @@ var HistoryElement = GObject.registerClass({
 		} else {
 			this.menu.addMenuItem(new PopupMenu.PopupMenuItem('Unknown source.'));
 		}
+
+		this.copyToFavorites = new PopupMenu.PopupMenuItem('Save for later');
+		this.copyToFavorites.connect('activate', () => {
+			let sourceFile = Gio.File.new_for_path(this.historyEntry.path);
+			let targetFolder = Gio.File.new_for_path(this._settings.get('favorites-folder', 'string'));
+			let targetFile = targetFolder.get_child(historyEntry.name);
+
+			try {
+				if (!targetFolder.make_directory_with_parents(null)) {
+					this.logger.warning('Could not create directories.');
+					return;
+				}
+			} catch (error) {
+				if (error === Gio.IOErrorEnum.EXISTS) { }
+			}
+
+			try {
+				if (!sourceFile.copy(targetFile, Gio.FileCopyFlags.NONE, null, null)) {
+					this.logger.warning('Failed copying image.');
+					return;
+				}
+			} catch (error) {
+				if (error === Gio.IOErrorEnum.EXISTS) {
+					this.logger.warning('Image already exists in location.');
+					return;
+				}
+			}
+		});
+		this.menu.addMenuItem(this.copyToFavorites);
 
 		this.setAsWallpaperItem = new PopupMenu.PopupMenuItem('Set As Wallpaper');
 		this.setAsWallpaperItem.connect('activate', () => {

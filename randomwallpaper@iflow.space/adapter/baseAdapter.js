@@ -48,8 +48,7 @@ var BaseAdapter = class {
 	 */
 	fetchFile(uri, callback) {
 		//extract the name from the url and
-		let date = new Date();
-		let name = date.getTime() + '_' + this.fileName(uri); // timestamp ensures uniqueness
+		let name = this.fileName(uri);
 
 		let bowl = new SoupBowl.Bowl();
 
