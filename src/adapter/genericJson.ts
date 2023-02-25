@@ -32,7 +32,7 @@ class GenericJsonAdapter extends BaseAdapter {
         if (!response_body_bytes)
             throw new Error('Error fetching response.');
 
-        const response_body = JSON.parse(ByteArray.toString(response_body_bytes));
+        const response_body: unknown = JSON.parse(ByteArray.toString(response_body_bytes));
         const imageJSONPath = this._settings.getString('image-path');
         const postJSONPath = this._settings.getString('post-path');
         const domainUrl = this._settings.getString('domain');
@@ -115,7 +115,8 @@ class GenericJsonAdapter extends BaseAdapter {
                     });
                 }
             } catch (error) {
-                this._logger.warn(`Failed getting image: ${error}`);
+                this._logger.warn('Failed getting image');
+                this._logger.warn(error);
                 // Do not escalate yet, try again
             }
 

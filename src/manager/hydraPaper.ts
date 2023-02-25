@@ -70,7 +70,7 @@ class HydraPaper implements WallpaperManager {
         this._cancellable = new Gio.Cancellable();
 
         // hydrapaper [--darkmode] --cli PATH PATH PATH
-        this._logger.debug(`Running command: ${command}`);
+        this._logger.debug(`Running command: ${command.toString()}`);
         await Utils.execCheck(command, this._cancellable);
 
         this._cancellable = null;

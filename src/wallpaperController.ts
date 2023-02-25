@@ -53,11 +53,17 @@ class WallpaperController {
 
     constructor() {
         let xdg_cache_home = GLib.getenv('XDG_CACHE_HOME');
-        if (!xdg_cache_home)
-            xdg_cache_home = `${GLib.getenv('HOME')}/.cache`;
+        if (!xdg_cache_home) {
+            const home = GLib.getenv('HOME');
+
+            if (home)
+                xdg_cache_home = `${home}/.cache`;
+            else
+                xdg_cache_home = '/tmp';
+        }
 
         this.wallpaperLocation = `${xdg_cache_home}/${Self.metadata['uuid']}/wallpapers/`;
-        let mode = 0o0755;
+        const mode = 0o0755;
         GLib.mkdir_with_parents(this.wallpaperLocation, mode);
 
         this._historyController = new HistoryModule.HistoryController(this.wallpaperLocation);
@@ -72,7 +78,9 @@ class WallpaperController {
         this._backendConnection.observe('clear-history', () => this._clearHistory());
         this._backendConnection.observe('open-folder', () => this._openFolder());
         this._backendConnection.observe('pause-timer', () => this._pauseTimer());
-        this._backendConnection.observe('request-new-wallpaper', () => this._requestNewWallpaper().catch(this._logger.error));
+        this._backendConnection.observe('request-new-wallpaper', () => this._requestNewWallpaper().catch(error => {
+            this._logger.error(error);
+        }));
 
         this._settings.observe('history-length', () => this._updateHistory());
         this._settings.observe('auto-fetch', () => this._updateAutoFetching());
@@ -83,8 +91,11 @@ class WallpaperController {
         this._updateAutoFetching();
 
         // load a new wallpaper on startup
-        if (this._settings.getBoolean('fetch-on-startup'))
-            this.fetchNewWallpaper().catch(this._logger.error);
+        if (this._settings.getBoolean('fetch-on-startup')) {
+            this.fetchNewWallpaper().catch(error => {
+                this._logger.error(error);
+            });
+        }
 
         // Initialize favorites folder
         // TODO: There's probably a better place for this
@@ -125,7 +136,7 @@ class WallpaperController {
 
     private _openFolder() {
         if (this._backendConnection.getBoolean('open-folder')) {
-            let uri = GLib.filename_to_uri(this.wallpaperLocation, '');
+            const uri = GLib.filename_to_uri(this.wallpaperLocation, '');
             Gio.AppInfo.launch_default_for_uri(uri, Gio.AppLaunchContext.new());
             this._backendConnection.setBoolean('open-folder', false);
         }
@@ -180,7 +191,9 @@ class WallpaperController {
                 return this.fetchNewWallpaper();
             });
             this._timer.setMinutes(this._autoFetch.duration);
-            this._timer.start().catch(this._logger.error);
+            this._timer.start().catch(error => {
+                this._logger.error(error);
+            });
         } else {
             this._timer.stop();
         }
@@ -383,7 +396,9 @@ class WallpaperController {
         const generalPostCommandArray = this._getCommandArray(commandString, currentWallpaperPath);
         if (generalPostCommandArray !== null) {
             // Do not await this call, let it be one shot
-            Utils.execCheck(generalPostCommandArray).catch(this._logger.error);
+            Utils.execCheck(generalPostCommandArray).catch(error => {
+                this._logger.error(error);
+            });
         }
     }
 
@@ -511,7 +526,7 @@ class WallpaperController {
             return null;
 
         // Replace variables
-        const variables = new Map();
+        const variables = new Map<string, string>();
         variables.set('%wallpaper_path%', historyElementPath);
 
         variables.forEach((value, key) => {
@@ -560,10 +575,14 @@ class WallpaperController {
             // Only change the background - the lock screen wouldn't be visible anyway
             // because this function is only used for hover preview
             if (this._resetWallpaper) {
-                this._setBackground(paths, 0).catch(this._logger.error);
+                this._setBackground(paths, 0).catch(error => {
+                    this._logger.error(error);
+                });
                 this._resetWallpaper = false;
             } else if (this._previewId !== undefined) {
-                this._setBackground(paths, 0).catch(this._logger.error);
+                this._setBackground(paths, 0).catch(error => {
+                    this._logger.error(error);
+                });
             }
 
             return GLib.SOURCE_REMOVE;

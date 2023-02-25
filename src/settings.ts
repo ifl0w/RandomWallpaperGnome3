@@ -88,7 +88,7 @@ class Settings {
         if (this._settings.set_boolean(key, value))
             this._save();
         else
-            throw new Error(`Could not set ${key} (type: boolean) with the value ${value}`);
+            throw new Error(`Could not set ${key} (type: boolean) with the value ${String(value)}`);
     }
 
     setEnum(key: string, value: number) {
@@ -116,7 +116,7 @@ class Settings {
         if (this._settings.set_strv(key, value))
             this._save();
         else
-            throw new Error(`Could not set ${key} (type: string[]) with the value ${value}`);
+            throw new Error(`Could not set ${key} (type: string[]) with the value "${value.toString()}"`);
     }
 
     private _save() {

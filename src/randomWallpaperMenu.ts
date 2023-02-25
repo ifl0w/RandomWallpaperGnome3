@@ -113,11 +113,12 @@ class RandomWallpaperMenu {
         // Open Wallpaper Folder
         openFolder.connect('activate', () => {
             const uri = GLib.filename_to_uri(this._wallpaperController.wallpaperLocation, '');
-            Utils.execCheck(['xdg-open', uri]).catch(this._logger.error);
+            Utils.execCheck(['xdg-open', uri]).catch(error => {
+                this._logger.error(error);
+            });
         });
 
         openSettings.connect('activate', () => {
-            // FIXME: Unhandled promise rejection. To suppress this warning, add an error handler to your promise chain with .catch() or a try-catch block around your await expression.
             Gio.DBus.session.call(
                 'org.gnome.Shell.Extensions',
                 '/org/gnome/Shell/Extensions',
@@ -127,7 +128,9 @@ class RandomWallpaperMenu {
                 null,
                 Gio.DBusCallFlags.NONE,
                 -1,
-                null);
+                null).catch(error => {
+                this._logger.error(error);
+            });
         });
 
         this._panelMenu.menu.connect('open-state-changed', (_, open) => {

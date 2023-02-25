@@ -80,7 +80,7 @@ class Superpaper implements WallpaperManager {
 
         this._cancellable = new Gio.Cancellable();
 
-        this._logger.debug(`Running command: "${command}"`);
+        this._logger.debug(`Running command: ${command.toString()}`);
         await Utils.execCheck(command, this._cancellable);
 
         this._cancellable = null;
