@@ -57,10 +57,6 @@ var RandomWallpaperSettings = class {
 
 		this._loadSources();
 
-		this._settings.bind('history-length',
-			this._builder.get_object('history_length'),
-			'value',
-			Gio.SettingsBindFlags.DEFAULT);
 		this._settings.bind('minutes',
 			this._builder.get_object('duration_minutes'),
 			'value',
@@ -91,6 +87,7 @@ var RandomWallpaperSettings = class {
 			Gio.SettingsBindFlags.DEFAULT);
 
 		this._bindButtons();
+		this._bindHistorySection(window);
 
 		window.connect('close-request', () => {
 			this._saveSources();
@@ -128,6 +125,28 @@ var RandomWallpaperSettings = class {
 			this._backendConnection.set('request-new-wallpaper', 'boolean', true);
 		});
 
+		this._builder.get_object('button_new_source').connect('clicked', () => {
+			let source_row = new SourceRow.SourceRow();
+			this.available_rows[source_row.id] = source_row;
+			this._builder.get_object('sources_list').add(source_row);
+
+			this._bindSourceRow(source_row);
+		});
+	}
+
+	_bindHistorySection(window) {
+		let entryRow = this._builder.get_object('row_favorites_folder');
+		entryRow.text = this._settings.get_string('favorites-folder');
+
+		this._settings.bind('history-length',
+			this._builder.get_object('history_length'),
+			'value',
+			Gio.SettingsBindFlags.DEFAULT);
+		this._settings.bind('favorites-folder',
+			entryRow,
+			'text',
+			Gio.SettingsBindFlags.DEFAULT);
+
 		this._builder.get_object('clear_history').connect('clicked', () => {
 			this._backendConnection.set('clear-history', 'boolean', true);
 		});
@@ -136,12 +155,28 @@ var RandomWallpaperSettings = class {
 			this._backendConnection.set('open-folder', 'boolean', true);
 		});
 
-		this._builder.get_object('button_new_source').connect('clicked', () => {
-			let source_row = new SourceRow.SourceRow();
-			this.available_rows[source_row.id] = source_row;
-			this._builder.get_object('sources_list').add(source_row);
+		this._builder.get_object('button_favorites_folder').connect('clicked', () => {
+			// For GTK 4.10+
+			// Gtk.FileDialog();
 
-			this._bindSourceRow(source_row);
+			// https://stackoverflow.com/a/54487948
+			this._saveDialog = new Gtk.FileChooserNative({
+				title: 'Choose a Wallpaper Folder',
+				action: Gtk.FileChooserAction.SELECT_FOLDER,
+				accept_label: 'Open',
+				cancel_label: 'Cancel',
+				transient_for: window,
+				modal: true,
+			});
+
+			this._saveDialog.connect('response', (dialog, response_id) => {
+				if (response_id === Gtk.ResponseType.ACCEPT) {
+					entryRow.text = this._saveDialog.get_file().get_path();
+				}
+				this._saveDialog.destroy();
+			});
+
+			this._saveDialog.show();
 		});
 	}
 

@@ -80,6 +80,12 @@
             <description>A mapping with available configured wallpaper sources as stringified JSON.</description>
         </key>
 
+        <key type='s' name='favorites-folder'>
+            <default>""</default>
+            <summary>Favorites Folder</summary>
+            <description>Saved images will land in this folder.</description>
+        </key>
+
     </schema>
 
     <schema path="/org/gnome/shell/extensions/space-iflow-randomwallpaper/backend-connection/"
