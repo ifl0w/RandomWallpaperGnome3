@@ -61,12 +61,11 @@ class WallhavenAdapter extends BaseAdapter {
         this._logger.debug(`Search URL: ${url}`);
         const response_body_bytes = await this._bowl.send_and_receive(message);
 
-        let response: WallhavenSearchResponse['data'];
-        try {
-            response = JSON.parse(ByteArray.toString(response_body_bytes)).data;
-        } catch {
-            throw new Error('Error parsing API.');
-        }
+        const wallhavenResponse = JSON.parse(ByteArray.toString(response_body_bytes)) as unknown;
+        if (!this._isWallhavenResponse(wallhavenResponse))
+            throw new Error('Unexpected response');
+
+        const response = wallhavenResponse.data;
         if (!response || response.length === 0)
             throw new Error('Empty response');
 
@@ -104,12 +103,23 @@ class WallhavenAdapter extends BaseAdapter {
             if (options.hasOwnProperty(key)) {
                 if (Array.isArray(options[key]))
                     optionsString += `${key}=${(options[key] as Array<string>).join()}&`;
-                else if (options[key] !== '')
-                    optionsString += `${key}=${options[key]}&`;
+                else if (typeof options[key] === 'string' && options[key] !== '')
+                    optionsString += `${key}=${options[key] as string}&`;
             }
         }
 
         return optionsString;
+    }
+
+    private _isWallhavenResponse(object: unknown): object is WallhavenSearchResponse {
+        if (typeof object === 'object' &&
+            object &&
+            'data' in object &&
+            Array.isArray(object.data)
+        )
+            return true;
+
+        return false;
     }
 
     private _readOptionsFromSettings() {
@@ -126,13 +136,13 @@ class WallhavenAdapter extends BaseAdapter {
             return elem.trim();
         });
 
-        let categories = [];
+        const categories = [];
         categories.push(Number(this._settings.getBoolean('category-general'))); // + is implicit conversion to int
         categories.push(Number(this._settings.getBoolean('category-anime')));
         categories.push(Number(this._settings.getBoolean('category-people')));
         this._options.categories = categories.join('');
 
-        let purity = [];
+        const purity = [];
         purity.push(Number(this._settings.getBoolean('allow-sfw')));
         purity.push(Number(this._settings.getBoolean('allow-sketchy')));
         purity.push(Number(this._settings.getBoolean('allow-nsfw')));

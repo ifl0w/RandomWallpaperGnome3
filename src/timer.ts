@@ -44,7 +44,10 @@ class AFTimer {
 
         this._logger.debug('Continuing timer');
         this._paused = false;
-        this.start();
+
+        // We don't care about awaiting. This should start immediately and
+        // run continuously in the background.
+        void this.start();
     }
 
     isActive() {
@@ -130,8 +133,12 @@ class AFTimer {
             if (this._timeoutEndCallback) {
                 this._timeoutEndCallback().then(() => {
                     this._reset();
-                    this.start().catch(this._logger.error);
-                }).catch(this._logger.error).finally(() => {
+                    this.start().catch(error => {
+                        this._logger.error(error);
+                    });
+                }).catch(error => {
+                    this._logger.error(error);
+                }).finally(() => {
                     return GLib.SOURCE_REMOVE;
                 });
             }

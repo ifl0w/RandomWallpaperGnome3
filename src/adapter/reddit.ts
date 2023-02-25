@@ -55,7 +55,9 @@ class RedditAdapter extends BaseAdapter {
 
         const response_body_bytes = await this._bowl.send_and_receive(message);
 
-        const response_body: RedditResponse = JSON.parse(ByteArray.toString(response_body_bytes));
+        const response_body = JSON.parse(ByteArray.toString(response_body_bytes)) as unknown;
+        if (!this._isRedditResponse(response_body))
+            throw new Error('Unexpected response');
 
         const filteredSubmissions = response_body.data.children.filter(child => {
             if (child.data.post_hint !== 'image')
@@ -100,6 +102,20 @@ class RedditAdapter extends BaseAdapter {
             throw new Error('Only blocked images found.');
 
         return wallpaperResult;
+    }
+
+    private _isRedditResponse(object: unknown): object is RedditResponse {
+        if (typeof object === 'object' &&
+            object &&
+            'data' in object &&
+            typeof object.data === 'object' &&
+            object.data &&
+            'children' in object.data &&
+            Array.isArray(object.data.children)
+        )
+            return true;
+
+        return false;
     }
 }
 

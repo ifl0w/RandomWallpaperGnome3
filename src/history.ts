@@ -137,8 +137,12 @@ class HistoryController {
         this.size = this._settings.getInt('history-length');
 
         const stringHistory: string[] = this._settings.getStrv('history');
-        this.history = stringHistory.map((elem: string) => {
-            return JSON.parse(elem);
+        this.history = stringHistory.map<HistoryEntry>((elem: string) => {
+            const unknownObject = JSON.parse(elem) as unknown;
+            if (!this._isHistoryEntry(unknownObject))
+                throw new Error('Failed loading history data.');
+
+            return unknownObject;
         });
     }
 
@@ -197,6 +201,21 @@ class HistoryController {
                 deleteFile.delete(null);
             }
         }
+    }
+
+    private _isHistoryEntry(object: unknown): object is HistoryEntry {
+        if (typeof object === 'object' &&
+            object &&
+            'timestamp' in object &&
+            typeof object.timestamp === 'number' &&
+            'id' in object &&
+            typeof object.id === 'string' &&
+            'path' in object &&
+            typeof object.path === 'string'
+        )
+            return true;
+
+        return false;
     }
 }
 
