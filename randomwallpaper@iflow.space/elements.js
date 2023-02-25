@@ -12,9 +12,9 @@ const LoggerModule = Self.imports.logger;
 const Timer = Self.imports.timer;
 
 var HistoryElement = GObject.registerClass({
-			 GTypeName: 'HistoryElement',
-	 }, class HistoryElement extends PopupMenu.PopupSubMenuMenuItem {
-				_init(historyEntry, index) {
+	GTypeName: 'HistoryElement',
+}, class HistoryElement extends PopupMenu.PopupSubMenuMenuItem {
+	_init(historyEntry, index) {
 		super._init("", false);
 		this.logger = new LoggerModule.Logger('RWG3', 'HistoryElement');
 		this.historyEntry = null;
@@ -103,11 +103,11 @@ var HistoryElement = GObject.registerClass({
 		});
 
 		if (index !== 0) {
-			this.menu.addMenuItem(new PopupMenu.PopupBaseMenuItem({can_focus: false, reactive: false})); // theme independent spacing
+			this.menu.addMenuItem(new PopupMenu.PopupBaseMenuItem({ can_focus: false, reactive: false })); // theme independent spacing
 			this.menu.addMenuItem(this.setAsWallpaperItem);
 		}
 
-		this.previewItem = new PopupMenu.PopupBaseMenuItem({can_focus: false, reactive: false});
+		this.previewItem = new PopupMenu.PopupBaseMenuItem({ can_focus: false, reactive: false });
 		this.menu.addMenuItem(this.previewItem);
 
 		/*
@@ -133,7 +133,7 @@ var HistoryElement = GObject.registerClass({
 						height,
 						pixbuf.get_rowstride()
 					);
-					this._previewActor = new Clutter.Actor({height: height, width: width});
+					this._previewActor = new Clutter.Actor({ height: height, width: width });
 					this._previewActor.set_content(image);
 
 					this.previewItem.actor.add_actor(this._previewActor);
@@ -147,12 +147,12 @@ var HistoryElement = GObject.registerClass({
 	setIndex(index) {
 		this.prefixLabel.set_text(String(index));
 	}
-	 }
+}
 );
 
 var CurrentImageElement = GObject.registerClass({
-			 GTypeName: 'CurrentImageElement',
-	 }, class CurrentImageElement extends HistoryElement {
+	GTypeName: 'CurrentImageElement',
+}, class CurrentImageElement extends HistoryElement {
 
 	_init(historyElement) {
 		super._init(historyElement, 0);
@@ -170,8 +170,8 @@ var CurrentImageElement = GObject.registerClass({
  * The remaining time will only be displayed if the af-feature is activated.
  */
 var NewWallpaperElement = GObject.registerClass({
-			 GTypeName: 'NewWallpaperElement',
-	 }, class NewWallpaperElement extends PopupMenu.PopupBaseMenuItem {
+	GTypeName: 'NewWallpaperElement',
+}, class NewWallpaperElement extends PopupMenu.PopupBaseMenuItem {
 
 	_init(params) {
 		super._init(params);
