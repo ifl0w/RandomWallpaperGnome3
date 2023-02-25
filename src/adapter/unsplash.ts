@@ -23,7 +23,7 @@ class UnsplashAdapter extends BaseAdapter {
             id: id ?? '-1',
             name,
             schemaID: SettingsModule.RWG_SETTINGS_SCHEMA_SOURCES_UNSPLASH,
-            schemaPath: `${SettingsModule.RWG_SETTINGS_SCHEMA_PATH}/sources/unsplash/${id}/`,
+            schemaPath: `${SettingsModule.RWG_SETTINGS_SCHEMA_PATH}/sources/unsplash/${id ?? '-1'}/`,
         });
     }
 
@@ -76,7 +76,8 @@ class UnsplashAdapter extends BaseAdapter {
                 if (historyEntry && !this._includesWallpaper(wallpaperResult, historyEntry.source.imageDownloadUrl))
                     wallpaperResult.push(historyEntry);
             } catch (error) {
-                this._logger.warn(`Failed getting image: ${error}`);
+                this._logger.warn('Failed getting image.');
+                this._logger.warn(error);
                 // Do not escalate yet, try again
             }
 

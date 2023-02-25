@@ -129,11 +129,11 @@ class RandomWallpaperSettings {
 
             this._sources.forEach(id => {
                 const sourceRow = new SourceRow(undefined, id);
-                (this._builder.get_object('sources_list') as Adw.PreferencesGroup).add(sourceRow);
+                this._builder.get_object<Adw.PreferencesGroup>('sources_list').add(sourceRow);
 
                 sourceRow.button_delete.connect('clicked', () => {
                     sourceRow.clearConfig();
-                    (this._builder.get_object('sources_list') as Adw.PreferencesGroup).remove(sourceRow);
+                    this._builder.get_object<Adw.PreferencesGroup>('sources_list').remove(sourceRow);
                     Utils.removeItemOnce(this._sources, id);
                     this._saveSources();
                 });
@@ -141,11 +141,15 @@ class RandomWallpaperSettings {
 
             import('./manager/wallpaperManager.js').then(module => {
                 if (module.getWallpaperManager()?.isAvailable())
-                    (this._builder.get_object('multiple_displays_row') as Adw.ActionRow).set_sensitive(true);
-            }).catch(this._logger.error);
+                    this._builder.get_object<Adw.ActionRow>('multiple_displays_row').set_sensitive(true);
+            }).catch(error => {
+                this._logger.error(error);
+            });
         }).catch(error => {
-            logError(error);
-            throw error;
+            if (error instanceof Error)
+                logError(error);
+            else
+                logError(new Error('Unknown error'));
         });
     }
 
@@ -192,7 +196,7 @@ class RandomWallpaperSettings {
             this._backendConnection.setBoolean('request-new-wallpaper', true);
         });
 
-        const sourceRowList = this._builder.get_object('sources_list') as Adw.PreferencesGroup;
+        const sourceRowList = this._builder.get_object<Adw.PreferencesGroup>('sources_list');
         this._builder.get_object('button_new_source').connect('clicked', () => {
             const sourceRow = new SourceRow();
             sourceRowList.add(sourceRow);
@@ -209,7 +213,7 @@ class RandomWallpaperSettings {
     }
 
     private _bindHistorySection(window: Adw.PreferencesWindow) {
-        const entryRow = this._builder.get_object('row_favorites_folder') as Adw.EntryRow;
+        const entryRow = this._builder.get_object<Adw.EntryRow>('row_favorites_folder');
         entryRow.text = this._settings.getString('favorites-folder');
 
         this._settings.bind('history-length',
@@ -263,10 +267,10 @@ class RandomWallpaperSettings {
         this._sources = this._settings.getStrv('sources');
 
         // this._sources.sort((a, b) => {
-        // let path1 = `${Settings.RWG_SETTINGS_SCHEMA_PATH}/sources/general/${a}/`;
-        // let settingsGeneral1 = new Settings.Settings(Settings.RWG_SETTINGS_SCHEMA_SOURCES_GENERAL, path1);
-        // let path2 = `${Settings.RWG_SETTINGS_SCHEMA_PATH}/sources/general/${b}/`;
-        // let settingsGeneral2 = new Settings.Settings(Settings.RWG_SETTINGS_SCHEMA_SOURCES_GENERAL, path2);
+        // const path1 = `${Settings.RWG_SETTINGS_SCHEMA_PATH}/sources/general/${a}/`;
+        // const settingsGeneral1 = new Settings.Settings(Settings.RWG_SETTINGS_SCHEMA_SOURCES_GENERAL, path1);
+        // const path2 = `${Settings.RWG_SETTINGS_SCHEMA_PATH}/sources/general/${b}/`;
+        // const settingsGeneral2 = new Settings.Settings(Settings.RWG_SETTINGS_SCHEMA_SOURCES_GENERAL, path2);
 
         // const nameA = settingsGeneral1.get('name', 'string').toUpperCase();
         // const nameB = settingsGeneral2.get('name', 'string').toUpperCase();
@@ -275,10 +279,10 @@ class RandomWallpaperSettings {
         // });
 
         this._sources.sort((a, b) => {
-            let path1 = `${Settings.RWG_SETTINGS_SCHEMA_PATH}/sources/general/${a}/`;
-            let settingsGeneral1 = new Settings.Settings(Settings.RWG_SETTINGS_SCHEMA_SOURCES_GENERAL, path1);
-            let path2 = `${Settings.RWG_SETTINGS_SCHEMA_PATH}/sources/general/${b}/`;
-            let settingsGeneral2 = new Settings.Settings(Settings.RWG_SETTINGS_SCHEMA_SOURCES_GENERAL, path2);
+            const path1 = `${Settings.RWG_SETTINGS_SCHEMA_PATH}/sources/general/${a}/`;
+            const settingsGeneral1 = new Settings.Settings(Settings.RWG_SETTINGS_SCHEMA_SOURCES_GENERAL, path1);
+            const path2 = `${Settings.RWG_SETTINGS_SCHEMA_PATH}/sources/general/${b}/`;
+            const settingsGeneral2 = new Settings.Settings(Settings.RWG_SETTINGS_SCHEMA_SOURCES_GENERAL, path2);
             return settingsGeneral1.getEnum('type') - settingsGeneral2.getEnum('type');
         });
     }

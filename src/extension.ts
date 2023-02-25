@@ -38,8 +38,10 @@ class Extension {
         }).catch(error => {
             if (this._logger)
                 this._logger.error(error);
-            else
+            else if (error instanceof Error)
                 logError(error);
+            else
+                logError(new Error('Unknown error'));
         });
     }
 

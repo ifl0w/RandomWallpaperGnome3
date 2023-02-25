@@ -132,6 +132,7 @@ function getMonitorCount(): number {
 
     // FIXME: wrong version in definition
     // @ts-expect-error
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     return defaultDisplay.get_n_monitors() as number;
 }
 

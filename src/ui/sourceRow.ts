@@ -120,7 +120,7 @@ const SourceRow = GObject.registerClass({
     }
 
     private _fillRow(type: number) {
-        let targetWidget = this._getSettingsGroup(type);
+        const targetWidget = this._getSettingsGroup(type);
         if (targetWidget !== null)
             this._settings_container.set_child(targetWidget);
     }

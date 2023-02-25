@@ -52,7 +52,7 @@ abstract class BaseAdapter {
         const fstream = file.replace(null, false, Gio.FileCreateFlags.NONE, null);
 
         // craft new message from details
-        let request = this._bowl.newGetMessage(historyEntry.source.imageDownloadUrl);
+        const request = this._bowl.newGetMessage(historyEntry.source.imageDownloadUrl);
 
         // start the download
         const response_data_bytes = await this._bowl.send_and_receive(request);

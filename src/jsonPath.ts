@@ -44,7 +44,7 @@ function getTarget(inputObject: unknown, inputString: string): [object: unknown,
 
         switch (indexString) {
         case '@random': {
-            const [chosenElement, chosenNumber] = _randomElement(targetObject);
+            const [chosenElement, chosenNumber] = _randomElement<unknown>(targetObject);
             const [object, path] = getTarget(chosenElement, inputStringTail);
             return [object, inputString.slice(0, inputString.length - inputStringTail.length).replace('@random', String(chosenNumber)) + path];
         }
