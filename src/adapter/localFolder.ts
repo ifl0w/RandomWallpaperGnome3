@@ -31,7 +31,7 @@ class LocalFolderAdapter extends BaseAdapter {
                 reject(new Error('No files found'));
                 return;
             }
-            this._logger.debug(`Found ${files.length} possible wallpaper in "${folder.get_path()}"`);
+            this._logger.debug(`Found ${files.length} possible wallpaper in "${this._settings.getString('folder')}"`);
 
             for (let i = 0; i < 20 && wallpaperResult.length < count; i++) {
                 const randomFile = files[Utils.getRandomNumber(files.length)];
@@ -64,6 +64,7 @@ class LocalFolderAdapter extends BaseAdapter {
         // https://gjs.guide/guides/gio/file-operations.html#copying-and-moving-files
         // This function was rewritten by Gio._promisify
         // @ts-expect-error
+        // eslint-disable-next-line @typescript-eslint/await-thenable
         if (!await sourceFile.copy_async(targetFile, Gio.FileCopyFlags.NONE, GLib.PRIORITY_DEFAULT, null, null))
             throw new Error('Failed copying image.');
 

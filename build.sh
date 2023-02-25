@@ -89,8 +89,20 @@ compile_schemas() {
 format_js() {
     check_command "npm"
 
+    # Circumvent not found typescript rules that might be mentioned in code comments but will give an error
+    # when only checking with javascript rules
+    # https://stackoverflow.com/questions/64614131/how-can-i-disable-definition-for-rule-custom-rule-was-not-found-errors
+    shopt -s globstar nullglob
+    for file in "$DESTDIR"/**/*.js; do
+        sed -i -E "s#@typescript-eslint/await-thenable##g" "$file"
+        sed -i -E "s#@typescript-eslint/no-unused-vars##g" "$file"
+        sed -i -E "s#@typescript-eslint/no-unsafe-argument##g" "$file"
+        sed -i -E "s#@typescript-eslint/no-unsafe-member-access##g" "$file"
+        sed -i -E "s#@typescript-eslint/no-unsafe-call##g" "$file"
+    done
+
     # Format js using the official gjs stylesheet and a few manual quirks
-    npx --silent eslint --config "$SCRIPTDIR/.eslintrc-gjs.yml" --fix "$DESTDIR/**/*.js"
+    npx --silent eslint --no-eslintrc --config "$SCRIPTDIR/.eslintrc-gjs.yml" --fix "$DESTDIR/**/*.js"
 }
 
 check_ts() {

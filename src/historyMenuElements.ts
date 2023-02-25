@@ -88,8 +88,11 @@ const HistoryElement = GObject.registerClass({
                 this.historyEntry.source.authorUrl !== null) {
                 const authorItem = new PopupMenu.PopupMenuItem(`Image By: ${this.historyEntry.source.author}`);
                 authorItem.connect('activate', () => {
-                    if (this.historyEntry.source.authorUrl)
-                        Utils.execCheck(['xdg-open', this.historyEntry.source.authorUrl]).catch(this._logger.error);
+                    if (this.historyEntry.source.authorUrl) {
+                        Utils.execCheck(['xdg-open', this.historyEntry.source.authorUrl]).catch(error => {
+                            this._logger.error(error);
+                        });
+                    }
                 });
 
                 this.menu.addMenuItem(authorItem);
@@ -99,8 +102,11 @@ const HistoryElement = GObject.registerClass({
                 this.historyEntry.source.sourceUrl !== null) {
                 const sourceItem = new PopupMenu.PopupMenuItem(`Image From: ${this.historyEntry.source.source}`);
                 sourceItem.connect('activate', () => {
-                    if (this.historyEntry.source.sourceUrl)
-                        Utils.execCheck(['xdg-open', this.historyEntry.source.sourceUrl]).catch(this._logger.error);
+                    if (this.historyEntry.source.sourceUrl) {
+                        Utils.execCheck(['xdg-open', this.historyEntry.source.sourceUrl]).catch(error => {
+                            this._logger.error(error);
+                        });
+                    }
                 });
 
                 this.menu.addMenuItem(sourceItem);
@@ -108,8 +114,11 @@ const HistoryElement = GObject.registerClass({
 
             const imageUrlItem = new PopupMenu.PopupMenuItem('Open Image In Browser');
             imageUrlItem.connect('activate', () => {
-                if (this.historyEntry.source.imageLinkUrl)
-                    Utils.execCheck(['xdg-open', this.historyEntry.source.imageLinkUrl]).catch(this._logger.error);
+                if (this.historyEntry.source.imageLinkUrl) {
+                    Utils.execCheck(['xdg-open', this.historyEntry.source.imageLinkUrl]).catch(error => {
+                        this._logger.error(error);
+                    });
+                }
             });
 
             this.menu.addMenuItem(imageUrlItem);
@@ -132,7 +141,9 @@ const HistoryElement = GObject.registerClass({
 
         const copyToFavorites = new PopupMenu.PopupMenuItem('Save For Later');
         copyToFavorites.connect('activate', () => {
-            this._saveImage().catch(this._logger.error);
+            this._saveImage().catch(error => {
+                this._logger.error(error);
+            });
         });
         this.menu.addMenuItem(copyToFavorites);
 
@@ -222,14 +233,18 @@ const HistoryElement = GObject.registerClass({
 
         // This function was rewritten by Gio._promisify
         // @ts-expect-error
+        // eslint-disable-next-line @typescript-eslint/await-thenable
         if (!await sourceFile.copy_async(targetFile, Gio.FileCopyFlags.NONE, GLib.PRIORITY_DEFAULT, null, null))
             throw new Error('Failed copying image.');
 
         // https://gjs.guide/guides/gio/file-operations.html#writing-file-contents
         // This function was rewritten by Gio._promisify
         // @ts-expect-error
+        // eslint-disable-next-line @typescript-eslint/await-thenable
         const [success, message]: [boolean, string] = await targetInfoFile.replace_contents_bytes_async(
-            // @ts-expect-error Don't know from where to import
+            // FIXME: Don't know from where to import
+            // @ts-expect-error
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call
             new TextEncoder().encode(JSON.stringify(this.historyEntry.source, null, '\t')),
             null,
             false,
@@ -324,7 +339,9 @@ class StatusElement {
     }
 
     startLoading() {
-        // @ts-expect-error Don't know where this is defined
+        // FIXME: Don't know where this is defined
+        // @ts-expect-error
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
         this.icon.ease({
             opacity: 20,
             duration: 1337,
