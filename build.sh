@@ -76,6 +76,8 @@ compile_js() {
     sed -i -E "s#export \{\};##g" "$DESTDIR/extension.js"
 }
 
+# TODO: Drop compiled schemas when only targeting Gnome 44+
+# https://gjs.guide/extensions/upgrading/gnome-shell-44.html#gsettings-schema
 compile_schemas() {
     check_command "glib-compile-schemas"
     mkdir -p "$DESTDIR/schemas/"
