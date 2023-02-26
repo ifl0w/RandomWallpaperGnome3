@@ -4,14 +4,13 @@ import {BaseAdapter} from './../adapter/baseAdapter.js';
 import {HistoryEntry} from './../history.js';
 
 class UrlSourceAdapter extends BaseAdapter {
-    constructor(id: string, name: string, wallpaperLocation: string) {
+    constructor(id: string, name: string) {
         super({
             defaultName: 'Static URL',
             id,
             name,
             schemaID: SettingsModule.RWG_SETTINGS_SCHEMA_SOURCES_URL_SOURCE,
             schemaPath: `${SettingsModule.RWG_SETTINGS_SCHEMA_PATH}/sources/urlSource/${id}/`,
-            wallpaperLocation,
         });
     }
 
