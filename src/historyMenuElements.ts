@@ -214,7 +214,10 @@ const HistoryElement = GObject.registerClass({
             if (!targetFolder.make_directory_with_parents(null))
                 throw new Error('Could not create directories.');
         } catch (error) {
-            if (error === Gio.IOErrorEnum.EXISTS) { /** noop */ }
+            if (error instanceof GLib.Error && error.matches(Gio.IOErrorEnum, Gio.IOErrorEnum.EXISTS)) // noop
+                this._logger.debug('Folder already exists.');
+            else // escalate
+                throw error;
         }
 
         // This function was rewritten by Gio._promisify
