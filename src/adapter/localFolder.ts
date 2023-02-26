@@ -11,14 +11,13 @@ import {HistoryEntry} from './../history.js';
 Gio._promisify(Gio.File.prototype, 'copy_async', 'copy_finish');
 
 class LocalFolderAdapter extends BaseAdapter {
-    constructor(id: string, name: string, wallpaperLocation: string) {
+    constructor(id: string, name: string) {
         super({
             defaultName: 'Local Folder',
             id,
             name,
             schemaID: SettingsModule.RWG_SETTINGS_SCHEMA_SOURCES_LOCAL_FOLDER,
             schemaPath: `${SettingsModule.RWG_SETTINGS_SCHEMA_PATH}/sources/localFolder/${id}/`,
-            wallpaperLocation,
         });
     }
 
@@ -43,7 +42,7 @@ class LocalFolderAdapter extends BaseAdapter {
                     continue;
 
                 const historyEntry = new HistoryEntry(null, this._sourceName, randomFilePath);
-                historyEntry.source.sourceUrl = this._wallpaperLocation;
+                historyEntry.source.sourceUrl = randomFilePath;
 
                 if (!this._includesWallpaper(wallpaperResult, historyEntry.source.imageDownloadUrl))
                     wallpaperResult.push(historyEntry);
@@ -60,16 +59,13 @@ class LocalFolderAdapter extends BaseAdapter {
 
     async fetchFile(historyEntry: HistoryEntry) {
         const sourceFile = Gio.File.new_for_uri(historyEntry.source.imageDownloadUrl);
-        const name = sourceFile.get_basename();
-        const targetFile = Gio.File.new_for_path(this._wallpaperLocation + String(name));
+        const targetFile = Gio.File.new_for_path(historyEntry.path);
 
         // https://gjs.guide/guides/gio/file-operations.html#copying-and-moving-files
         // This function was rewritten by Gio._promisify
         // @ts-expect-error
         if (!await sourceFile.copy_async(targetFile, Gio.FileCopyFlags.NONE, GLib.PRIORITY_DEFAULT, null, null))
             throw new Error('Failed copying image.');
-
-        historyEntry.path = targetFile.get_path();
 
         return historyEntry;
     }

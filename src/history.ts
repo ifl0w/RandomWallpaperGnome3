@@ -4,6 +4,9 @@ import * as Utils from './utils.js';
 
 import {Settings} from './settings.js';
 
+// Gets filled by the HistoryController which is constructed at extension startup
+let _wallpaperLocation: string;
+
 interface SourceInfo {
     author: string | null;
     authorUrl: string | null;
@@ -26,7 +29,7 @@ class HistoryEntry {
     id: string;
     /** Basename of URI */
     name: string | null; // This can be null when an entry from an older version is mapped from settings
-    path: string | null = null;
+    path: string;
     source: SourceInfo;
     adapter: AdapterInfo | null = { // This can be null when an entry from an older version is mapped from settings
         id: null,
@@ -46,6 +49,7 @@ class HistoryEntry {
         // extract the name from the url
         this.name = Utils.fileName(this.source.imageDownloadUrl);
         this.id = `${this.timestamp}_${this.name}`;
+        this.path = `${_wallpaperLocation}/${this.id}`;
     }
 }
 
@@ -54,10 +58,9 @@ class HistoryController {
     size = 10;
 
     private _settings = new Settings();
-    private _wallpaperLocation: string;
 
     constructor(wallpaperLocation: string) {
-        this._wallpaperLocation = wallpaperLocation;
+        _wallpaperLocation = wallpaperLocation;
 
         this.load();
     }
@@ -159,7 +162,7 @@ class HistoryController {
         if (firstHistoryElement)
             this.history = [firstHistoryElement];
 
-        const directory = Gio.file_new_for_path(this._wallpaperLocation);
+        const directory = Gio.file_new_for_path(_wallpaperLocation);
         const enumerator = directory.enumerate_children('', Gio.FileQueryInfoFlags.NONE, null);
 
         let fileInfo;
@@ -173,7 +176,7 @@ class HistoryController {
 
             // ignore hidden files and first element
             if (id[0] !== '.' && id !== firstHistoryElement.id) {
-                const deleteFile = Gio.file_new_for_path(this._wallpaperLocation + id);
+                const deleteFile = Gio.file_new_for_path(_wallpaperLocation + id);
                 deleteFile.delete(null);
             }
         } while (fileInfo);

@@ -31,14 +31,13 @@ interface RedditSubmission {
 }
 
 class RedditAdapter extends BaseAdapter {
-    constructor(id: string, name: string, wallpaperLocation: string) {
+    constructor(id: string, name: string) {
         super({
             defaultName: 'Reddit',
             id,
             name,
             schemaID: SettingsModule.RWG_SETTINGS_SCHEMA_SOURCES_REDDIT,
             schemaPath: `${SettingsModule.RWG_SETTINGS_SCHEMA_PATH}/sources/reddit/${id}/`,
-            wallpaperLocation,
         });
     }
 
