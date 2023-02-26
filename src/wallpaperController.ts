@@ -198,7 +198,7 @@ class WallpaperController {
 
         if (sourceIDs.length < 1 || sourceIDs[0] === '-1') {
             randomAdapterResult.push({
-                adapter: new UnsplashAdapter(null, null, this.wallpaperLocation),
+                adapter: new UnsplashAdapter(null, null),
                 id: '-1',
                 type: 0,
                 imageCount: count,
@@ -240,31 +240,31 @@ class WallpaperController {
             try {
                 switch (sourceType) {
                 case 0:
-                    imageSourceAdapter = new UnsplashAdapter(sourceID, sourceName, this.wallpaperLocation);
+                    imageSourceAdapter = new UnsplashAdapter(sourceID, sourceName);
                     break;
                 case 1:
-                    imageSourceAdapter = new WallhavenAdapter(sourceID, sourceName, this.wallpaperLocation);
+                    imageSourceAdapter = new WallhavenAdapter(sourceID, sourceName);
                     break;
                 case 2:
-                    imageSourceAdapter = new RedditAdapter(sourceID, sourceName, this.wallpaperLocation);
+                    imageSourceAdapter = new RedditAdapter(sourceID, sourceName);
                     break;
                 case 3:
-                    imageSourceAdapter = new GenericJsonAdapter(sourceID, sourceName, this.wallpaperLocation);
+                    imageSourceAdapter = new GenericJsonAdapter(sourceID, sourceName);
                     break;
                 case 4:
-                    imageSourceAdapter = new LocalFolderAdapter(sourceID, sourceName, this.wallpaperLocation);
+                    imageSourceAdapter = new LocalFolderAdapter(sourceID, sourceName);
                     break;
                 case 5:
-                    imageSourceAdapter = new UrlSourceAdapter(sourceID, sourceName, this.wallpaperLocation);
+                    imageSourceAdapter = new UrlSourceAdapter(sourceID, sourceName);
                     break;
                 default:
-                    imageSourceAdapter = new UnsplashAdapter(null, null, this.wallpaperLocation);
+                    imageSourceAdapter = new UnsplashAdapter(null, null);
                     sourceType = 0;
                     break;
                 }
             } catch (error) {
                 this._logger.warn('Had errors, fetching with default settings.');
-                imageSourceAdapter = new UnsplashAdapter(null, null, this.wallpaperLocation);
+                imageSourceAdapter = new UnsplashAdapter(null, null);
                 sourceType = 0;
             }
 
@@ -475,34 +475,9 @@ class WallpaperController {
             const newImageEntries = await Promise.all(fetchPromises);
             this._logger.info(`Requested ${newImageEntries.length} new images.`);
 
-            // Move file to unique naming
-            const movePromises = newImageEntries.map(entry => {
-                if (!entry.path)
-                    return Promise.resolve(false);
-
-                const file = Gio.File.new_for_path(entry.path);
-                const targetFolder = file.get_parent();
-                const targetFile = targetFolder?.get_child(entry.id);
-
-                if (!targetFile)
-                    throw new Error('Failed getting targetFile');
-
-                entry.path = targetFile.get_path();
-
-                // This function is Gio._promisified
-                return file.move_async(targetFile, Gio.FileCopyFlags.NONE, 0, null, null);
-            });
-
-            // wait for all images to be moved
-            await Promise.all(movePromises);
-
             const newWallpaperPaths = newImageEntries.map(element => {
-                if (element.path)
-                    return element.path;
-
-                // eslint-disable-next-line
-                return;
-            }) as string[]; // cast because we made sure it's defined
+                return element.path;
+            });
             const usedWallpaperPaths = this._fillDisplaysFromHistory(newWallpaperPaths, monitorCount);
 
             if (changeType === 3) {

@@ -13,7 +13,6 @@ abstract class BaseAdapter {
     protected _logger: Logger;
     protected _settings: SettingsModule.Settings;
     protected _sourceName: string;
-    protected _wallpaperLocation: string;
 
     constructor(params: {
         defaultName: string;
@@ -21,12 +20,10 @@ abstract class BaseAdapter {
         name: string | null;
         schemaID: string;
         schemaPath: string;
-        wallpaperLocation: string;
     }) {
         const path = `${SettingsModule.RWG_SETTINGS_SCHEMA_PATH}/sources/general/${params.id}/`;
         this._logger = new Logger('RWG3', `${params.defaultName} adapter`);
 
-        this._wallpaperLocation = params.wallpaperLocation;
         this._settings = new SettingsModule.Settings(params.schemaID, params.schemaPath);
         this._sourceName = params.name ?? params.defaultName;
 
@@ -51,7 +48,7 @@ abstract class BaseAdapter {
      * @param {HistoryEntry} historyEntry The historyEntry to fetch
      */
     async fetchFile(historyEntry: HistoryEntry) {
-        const file = Gio.file_new_for_path(`${this._wallpaperLocation}/${String(historyEntry.name)}`);
+        const file = Gio.file_new_for_path(historyEntry.path);
         const fstream = file.replace(null, false, Gio.FileCreateFlags.NONE, null);
 
         // craft new message from details
@@ -66,8 +63,6 @@ abstract class BaseAdapter {
 
         fstream.write(response_data_bytes, null);
         fstream.close(null);
-
-        historyEntry.path = file.get_path();
 
         return historyEntry;
     }
