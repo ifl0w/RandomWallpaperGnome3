@@ -17,14 +17,13 @@ class UnsplashAdapter extends BaseAdapter {
         'constraintValue': '',
     };
 
-    constructor(id: string | null, name: string | null, wallpaperLocation: string) {
+    constructor(id: string | null, name: string | null) {
         super({
             defaultName: 'Unsplash',
             id: id ?? '-1',
             name,
             schemaID: SettingsModule.RWG_SETTINGS_SCHEMA_SOURCES_UNSPLASH,
             schemaPath: `${SettingsModule.RWG_SETTINGS_SCHEMA_PATH}/sources/unsplash/${id}/`,
-            wallpaperLocation,
         });
     }
 

@@ -8,14 +8,13 @@ import {BaseAdapter} from './../adapter/baseAdapter.js';
 import {HistoryEntry} from './../history.js';
 
 class GenericJsonAdapter extends BaseAdapter {
-    constructor(id: string, name: string, wallpaperLocation: string) {
+    constructor(id: string, name: string) {
         super({
             defaultName: 'Generic JSON Source',
             id,
             name,
             schemaID: SettingsModule.RWG_SETTINGS_SCHEMA_SOURCES_GENERIC_JSON,
             schemaPath: `${SettingsModule.RWG_SETTINGS_SCHEMA_PATH}/sources/genericJSON/${id}/`,
-            wallpaperLocation,
         });
     }
 

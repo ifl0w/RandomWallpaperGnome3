@@ -39,12 +39,11 @@ class WallhavenAdapter extends BaseAdapter {
         colors: '',
     };
 
-    constructor(id: string, name: string, wallpaperLocation: string) {
+    constructor(id: string, name: string) {
         super({
             id,
             schemaID: SettingsModule.RWG_SETTINGS_SCHEMA_SOURCES_WALLHAVEN,
             schemaPath: `${SettingsModule.RWG_SETTINGS_SCHEMA_PATH}/sources/wallhaven/${id}/`,
-            wallpaperLocation,
             name,
             defaultName: 'Wallhaven',
         });
