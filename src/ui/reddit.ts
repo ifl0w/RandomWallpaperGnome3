@@ -65,12 +65,7 @@ const RedditSettingsGroup = GObject.registerClass({
     }
 
     clearConfig() {
-        this._settings.reset('allow-sfw');
-        this._settings.reset('image-ratio1');
-        this._settings.reset('image-ratio2');
-        this._settings.reset('min-height');
-        this._settings.reset('min-width');
-        this._settings.reset('subreddits');
+        this._settings.resetSchema();
     }
 });
 

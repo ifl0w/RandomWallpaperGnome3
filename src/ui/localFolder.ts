@@ -65,7 +65,7 @@ const LocalFolderSettingsGroup = GObject.registerClass({
     }
 
     clearConfig() {
-        this._settings.reset('folder');
+        this._settings.resetSchema();
     }
 });
 

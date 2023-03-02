@@ -84,6 +84,11 @@ class Settings {
         this._settings.reset(keyName);
     }
 
+    resetSchema() {
+        for (const key of this._settings.settings_schema.list_keys())
+            this.reset(key);
+    }
+
     setBoolean(key: string, value: boolean) {
         if (this._settings.set_boolean(key, value))
             this._save();

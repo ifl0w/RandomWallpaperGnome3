@@ -174,10 +174,7 @@ const SourceRow = GObject.registerClass({
                 widget.clearConfig();
         }
 
-        this._settings.reset('blocked-images');
-        this._settings.reset('enabled');
-        this._settings.reset('name');
-        this._settings.reset('type');
+        this._settings.resetSchema();
     }
 });
 
