@@ -58,11 +58,7 @@ const UrlSourceSettingsGroup = GObject.registerClass({
     }
 
     clearConfig() {
-        this._settings.reset('author-name');
-        this._settings.reset('author-url');
-        this._settings.reset('domain');
-        this._settings.reset('image-url');
-        this._settings.reset('post-url');
+        this._settings.resetSchema();
     }
 });
 

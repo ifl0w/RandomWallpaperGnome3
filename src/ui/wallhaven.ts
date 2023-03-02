@@ -154,16 +154,7 @@ const WallhavenSettingsGroup = GObject.registerClass({
     }
 
     clearConfig() {
-        this._settings.reset('allow-nsfw');
-        this._settings.reset('allow-sfw');
-        this._settings.reset('allow-sketchy');
-        this._settings.reset('api-key');
-        this._settings.reset('category-anime');
-        this._settings.reset('category-general');
-        this._settings.reset('category-people');
-        this._settings.reset('color');
-        this._settings.reset('keyword');
-        this._settings.reset('resolutions');
+        this._settings.resetSchema();
     }
 });
 
