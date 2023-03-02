@@ -82,15 +82,7 @@ const GenericJsonSettingsGroup = GObject.registerClass({
     }
 
     clearConfig() {
-        this._settings.reset('author-name-path');
-        this._settings.reset('author-url-path');
-        this._settings.reset('author-url-prefix');
-        this._settings.reset('domain');
-        this._settings.reset('image-path');
-        this._settings.reset('image-prefix');
-        this._settings.reset('post-path');
-        this._settings.reset('post-prefix');
-        this._settings.reset('request-url');
+        this._settings.resetSchema();
     }
 });
 
