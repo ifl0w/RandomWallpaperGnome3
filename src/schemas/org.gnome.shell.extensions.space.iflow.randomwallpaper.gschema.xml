@@ -143,15 +143,6 @@
 
     </schema>
 
-    <enum id='org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.types'>
-        <value value='0' nick='Unsplash' />
-        <value value='1' nick='Wallhaven' />
-        <value value='2' nick='Reddit' />
-        <value value='3' nick='Generic JSON' />
-        <value value='4' nick='Local Folder' />
-        <value value='5' nick='Static URL' />
-    </enum>
-
     <schema id='org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.general'>
 
         <key type='as' name='blocked-images'>
@@ -172,8 +163,8 @@
             <description>Name for this source.</description>
         </key>
 
-        <key name='type' enum='org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.types'>
-            <default>"Unsplash"</default>
+        <key type='i' name='type'>
+            <default>0</default>
             <summary>Type</summary>
             <description>The type of this source.</description>
         </key>
