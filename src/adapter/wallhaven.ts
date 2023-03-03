@@ -69,9 +69,8 @@ class WallhavenAdapter extends BaseAdapter {
         if (!response || response.length === 0)
             throw new Error('Empty response');
 
-        for (let i = 0; i < 10 && wallpaperResult.length < count; i++) {
-            // get a random entry from the array
-            const entry = response[Utils.getRandomNumber(response.length)];
+        for (let i = 0; i < response.length && wallpaperResult.length < count; i++) {
+            const entry = response[i];
             const siteURL = entry.url;
             let downloadURL = entry.path;
 
