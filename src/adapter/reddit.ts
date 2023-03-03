@@ -82,7 +82,7 @@ class RedditAdapter extends BaseAdapter {
         if (filteredSubmissions.length === 0)
             throw new Error('No suitable submissions found!');
 
-        for (let i = 0; i < 20 && wallpaperResult.length < count; i++) {
+        for (let i = 0; i < filteredSubmissions.length && wallpaperResult.length < count; i++) {
             const random = Utils.getRandomNumber(filteredSubmissions.length);
             const submission = filteredSubmissions[random].data;
             const imageDownloadUrl = this._ampDecode(submission.preview.images[0].source.url);
