@@ -4,6 +4,9 @@ import * as Utils from './../utils.js';
 import {BaseAdapter} from './../adapter/baseAdapter.js';
 import {HistoryEntry} from './../history.js';
 
+/** How many times the service should be queried at maximum. */
+const MAX_SERVICE_RETRIES = 5;
+
 class UnsplashAdapter extends BaseAdapter {
     private _sourceUrl = 'https://source.unsplash.com';
 
@@ -67,7 +70,7 @@ class UnsplashAdapter extends BaseAdapter {
     async requestRandomImage(count: number) {
         const wallpaperResult: HistoryEntry[] = [];
 
-        for (let i = 0; i < 5 && wallpaperResult.length < count; i++) {
+        for (let i = 0; i < MAX_SERVICE_RETRIES && wallpaperResult.length < count; i++) {
             try {
                 // This should run sequentially
                 // eslint-disable-next-line no-await-in-loop
