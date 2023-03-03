@@ -137,7 +137,7 @@ class WallhavenAdapter extends BaseAdapter {
         });
 
         const categories = [];
-        categories.push(Number(this._settings.getBoolean('category-general'))); // + is implicit conversion to int
+        categories.push(Number(this._settings.getBoolean('category-general')));
         categories.push(Number(this._settings.getBoolean('category-anime')));
         categories.push(Number(this._settings.getBoolean('category-people')));
         this._options.categories = categories.join('');
