@@ -7,6 +7,43 @@ import * as Adw from '@gi/gtk4/adw/adw';
 
 import {Settings} from './settings.js';
 
+// Generated code produces a no-shadow rule error:
+// 'SourceType' is already declared in the upper scope on line 7 column 5  no-shadow
+/* eslint-disable */
+enum SourceType {
+    UNSPLASH = 0,
+    WALLHAVEN,
+    REDDIT,
+    GENERIC_JSON,
+    LOCAL_FOLDER,
+    STATIC_URL,
+}
+/* eslint-enable */
+
+/**
+ *
+ * @param {SourceType} value The enum value to request
+ */
+function getSourceTypeName(value: SourceType): string {
+    switch (value) {
+    case SourceType.UNSPLASH:
+        return 'Unsplash';
+    case SourceType.WALLHAVEN:
+        return 'Wallhaven';
+    case SourceType.REDDIT:
+        return 'Reddit';
+    case SourceType.GENERIC_JSON:
+        return 'Generic JSON';
+    case SourceType.LOCAL_FOLDER:
+        return 'Local Folder';
+    case SourceType.STATIC_URL:
+        return 'Static URL';
+
+    default:
+        return 'Unsplash';
+    }
+}
+
 /**
  * Returns a promise which resolves cleanly or rejects according to the underlying subprocess.
  *
@@ -203,6 +240,8 @@ function setPictureUriOfSettingsObject(settings: Settings, uri: string) {
 }
 
 export {
+    SourceType,
+    getSourceTypeName,
     execCheck,
     fileName,
     fillComboRowFromEnum,
