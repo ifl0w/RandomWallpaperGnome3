@@ -148,7 +148,7 @@ const HistoryElement = GObject.registerClass({
         this.menu.addMenuItem(copyToFavorites);
 
         // Static URLs can't block images (yet?)
-        if (this.historyEntry.adapter?.type !== 5) {
+        if (this.historyEntry.adapter?.type !== Utils.SourceType.STATIC_URL) {
             const blockImage = new PopupMenu.PopupMenuItem('Add To Blocklist');
             blockImage.connect('activate', () => {
                 this._addToBlocklist(this.historyEntry);

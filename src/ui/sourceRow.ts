@@ -61,19 +61,21 @@ const SourceRow = GObject.registerClass({
         this._settings = new Settings.Settings(Settings.RWG_SETTINGS_SCHEMA_SOURCES_GENERAL, path);
 
         if (!SourceRow._stringList) {
-            // Fill combo from settings enum
+            const availableTypeNames: string[] = [];
 
-            const availableTypes = this._settings.getSchema().get_key('type').get_range(); // GLib.Variant (sv)
-            // (sv) = Tuple(%G_VARIANT_TYPE_STRING, %G_VARIANT_TYPE_VARIANT)
-            // s should be 'enum'
-            // v should be an array enumerating the possible values. Each item in the array is a possible valid value and no other values are valid.
-            // v is 'as'
-            const availableTypeNames = availableTypes.get_child_value(1).get_variant().get_strv();
+            // Fill combo from enum
+            // https://stackoverflow.com/a/39372911
+            for (const type in Utils.SourceType) {
+                if (isNaN(Number(type)))
+                    continue;
+
+                availableTypeNames.push(Utils.getSourceTypeName(Number(type)));
+            }
 
             SourceRow._stringList = Gtk.StringList.new(availableTypeNames);
         }
         this._combo.model = SourceRow._stringList;
-        this._combo.selected = this._settings.getEnum('type');
+        this._combo.selected = this._settings.getInt('type');
 
         this._settings.bind('name',
             this._source_name,
@@ -83,15 +85,9 @@ const SourceRow = GObject.registerClass({
             this,
             'enable-expansion',
             Gio.SettingsBindFlags.DEFAULT);
-        // Binding an enum isn't possible straight away.
-        // This would need bind_with_mapping() which isn't available in gjs?
-        // this._settings.bind('type',
-        //     this._combo,
-        //     'selected',
-        //     Gio.SettingsBindFlags.DEFAULT);
 
         this._combo.connect('notify::selected', (comboRow: Adw.ComboRow) => {
-            this._settings.setEnum('type', comboRow.selected);
+            this._settings.setInt('type', comboRow.selected);
             this._fillRow(comboRow.selected);
         });
 
@@ -128,22 +124,22 @@ const SourceRow = GObject.registerClass({
     private _getSettingsGroup(type = 0) {
         let targetWidget = null;
         switch (type) {
-        case 0: // unsplash
+        case Utils.SourceType.UNSPLASH:
             targetWidget = new UnsplashSettingsGroup(undefined, this.id);
             break;
-        case 1: // wallhaven
+        case Utils.SourceType.WALLHAVEN:
             targetWidget = new WallhavenSettingsGroup(undefined, this.id);
             break;
-        case 2: // reddit
+        case Utils.SourceType.REDDIT:
             targetWidget = new RedditSettingsGroup(undefined, this.id);
             break;
-        case 3: // generic JSON
+        case Utils.SourceType.GENERIC_JSON:
             targetWidget = new GenericJsonSettingsGroup(undefined, this.id);
             break;
-        case 4: // Local Folder
+        case Utils.SourceType.LOCAL_FOLDER:
             targetWidget = new LocalFolderSettingsGroup(undefined, this.id);
             break;
-        case 5: // Static URL
+        case Utils.SourceType.STATIC_URL:
             targetWidget = new UrlSourceSettingsGroup(undefined, this.id);
             break;
         default:

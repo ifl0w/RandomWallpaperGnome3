@@ -283,7 +283,7 @@ class RandomWallpaperSettings {
             const settingsGeneral1 = new Settings.Settings(Settings.RWG_SETTINGS_SCHEMA_SOURCES_GENERAL, path1);
             const path2 = `${Settings.RWG_SETTINGS_SCHEMA_PATH}/sources/general/${b}/`;
             const settingsGeneral2 = new Settings.Settings(Settings.RWG_SETTINGS_SCHEMA_SOURCES_GENERAL, path2);
-            return settingsGeneral1.getEnum('type') - settingsGeneral2.getEnum('type');
+            return settingsGeneral1.getInt('type') - settingsGeneral2.getInt('type');
         });
     }
 

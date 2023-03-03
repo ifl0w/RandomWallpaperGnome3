@@ -103,6 +103,13 @@ class Settings {
             throw new Error(`Could not set ${key} (type: number) with the value ${value}`);
     }
 
+    setInt(key: string, value: number) {
+        if (this._settings.set_int(key, value))
+            this._save();
+        else
+            throw new Error(`Could not set ${key} (type: number) with the value ${value}`);
+    }
+
     setInt64(key: string, value: number) {
         if (this._settings.set_int64(key, value))
             this._save();
