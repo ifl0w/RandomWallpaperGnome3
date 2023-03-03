@@ -242,7 +242,7 @@ class WallpaperController {
             let sourceType = -1;
 
             sourceName = settingsGeneral.getString('name');
-            sourceType = settingsGeneral.getEnum('type');
+            sourceType = settingsGeneral.getInt('type');
 
             const availableAdapter = _arrayIncludes(randomAdapterResult, sourceType);
             if (availableAdapter) {
@@ -252,22 +252,22 @@ class WallpaperController {
 
             try {
                 switch (sourceType) {
-                case 0:
+                case Utils.SourceType.UNSPLASH:
                     imageSourceAdapter = new UnsplashAdapter(sourceID, sourceName);
                     break;
-                case 1:
+                case Utils.SourceType.WALLHAVEN:
                     imageSourceAdapter = new WallhavenAdapter(sourceID, sourceName);
                     break;
-                case 2:
+                case Utils.SourceType.REDDIT:
                     imageSourceAdapter = new RedditAdapter(sourceID, sourceName);
                     break;
-                case 3:
+                case Utils.SourceType.GENERIC_JSON:
                     imageSourceAdapter = new GenericJsonAdapter(sourceID, sourceName);
                     break;
-                case 4:
+                case Utils.SourceType.LOCAL_FOLDER:
                     imageSourceAdapter = new LocalFolderAdapter(sourceID, sourceName);
                     break;
-                case 5:
+                case Utils.SourceType.STATIC_URL:
                     imageSourceAdapter = new UrlSourceAdapter(sourceID, sourceName);
                     break;
                 default:
@@ -278,7 +278,7 @@ class WallpaperController {
             } catch (error) {
                 this._logger.warn('Had errors, fetching with default settings.');
                 imageSourceAdapter = new UnsplashAdapter(null, null);
-                sourceType = 0;
+                sourceType = Utils.SourceType.UNSPLASH;
             }
 
             randomAdapterResult.push({
