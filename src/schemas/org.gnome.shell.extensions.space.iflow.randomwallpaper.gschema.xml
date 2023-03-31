@@ -310,26 +310,26 @@
 
         <key type='i' name='image-ratio1'>
             <default>16</default>
-            <summary>Image Ratio</summary>
-            <description>The minimal ratio 1.</description>
+            <summary>Image width ratio</summary>
+            <description>The minimal width ratio part.</description>
         </key>
 
         <key type='i' name='image-ratio2'>
             <default>10</default>
-            <summary>Image Width</summary>
-            <description>The minimal ratio 2.</description>
+            <summary>Image height ratio</summary>
+            <description>The minimal height ratio part.</description>
         </key>
 
         <key type='i' name='min-height'>
             <default>1080</default>
             <summary>Image Height</summary>
-            <description>The minimal height of fetched image.</description>
+            <description>The minimal height of the fetched image.</description>
         </key>
 
         <key type='i' name='min-width'>
             <default>1920</default>
             <summary>Image Width</summary>
-            <description>The minimal width of fetched image.</description>
+            <description>The minimal width of the fetched image.</description>
         </key>
 
         <key type='s' name='subreddits'>
