@@ -37,7 +37,10 @@ class SoupBowl {
      * @returns {Soup.Message} Crafted message
      */
     newGetMessage(uri: string): Soup.Message {
-        return Soup.Message.new('GET', uri);
+        const message = Soup.Message.new('GET', uri);
+        // set User-Agent to appear more like a standard browser
+        message.request_headers.append('User-Agent', 'Mozilla/5.0');
+        return message;
     }
 
     // Possibly wrong version here causing ignores to type checks
