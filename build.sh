@@ -4,6 +4,8 @@ UUID="randomwallpaper@iflow.space"
 
 # fail on error
 set -e
+# log executed commands
+set -x
 
 # https://unix.stackexchange.com/a/20325
 if [[ $EUID -eq 0 ]]; then
@@ -30,7 +32,7 @@ setup_environment() {
     check_command "npm"
 
     # install, config in package.json
-    npm --silent install
+    npm install
 
     # Delete output directory, everything will be rewritten
     rm -r "$DESTDIR" &>/dev/null || true
@@ -47,7 +49,7 @@ compile_js() {
     check_command "npm"
 
     # TypeScript to JavaScript, config in tsconfig.json
-    npx --silent tsc
+    npx tsc
 
     # extension.js and prefs.js can't be modules (yet) while dynamically loaded by GJS…
     # https://gjs.guide/extensions/overview/imports-and-modules.html#imports-and-modules
@@ -85,13 +87,13 @@ format_js() {
     done
 
     # Format js using the official gjs stylesheet and a few manual quirks
-    npx --silent eslint --no-eslintrc --config "$SCRIPTDIR/.eslintrc-gjs.yml" --fix "$DESTDIR/**/*.js"
+    npx eslint --no-eslintrc --config "$SCRIPTDIR/.eslintrc-gjs.yml" --fix "$DESTDIR/**/*.js"
 }
 
 check_ts() {
     check_command "npm"
 
-    npx --silent eslint "$SRCDIR/**/*.ts"
+    npx eslint "$SRCDIR/**/*.ts"
 }
 
 copy_static_files() {
