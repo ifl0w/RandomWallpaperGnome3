@@ -1,14 +1,12 @@
 import * as Utils from '../utils.js';
 
 import {ExternalWallpaperManager} from './externalWallpaperManager.js';
-import {Logger} from './../logger.js';
 
 /**
  * Wrapper for Superpaper using it as a manager.
  */
 class Superpaper extends ExternalWallpaperManager {
     protected readonly _possibleCommands = ['superpaper'];
-    protected _logger = new Logger('RWG3', 'Superpaper');
 
     /**
      * Sets the background image in light and dark mode.

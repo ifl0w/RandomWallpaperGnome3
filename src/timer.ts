@@ -9,7 +9,6 @@ import {Settings} from './settings.js';
 class AFTimer {
     private static _afTimerInstance?: AFTimer | null = null;
 
-    private _logger = new Logger('RWG3', 'Timer');
     private _settings = new Settings();
     private _timeout?: number = undefined;
     private _timeoutEndCallback?: () => Promise<void> = undefined;
@@ -50,7 +49,7 @@ class AFTimer {
         if (!this.isEnabled())
             return;
 
-        this._logger.debug('Continuing timer');
+        Logger.debug('Continuing timer', this);
         this._paused = false;
 
         // We don't care about awaiting. This should start immediately and
@@ -84,7 +83,7 @@ class AFTimer {
      * 'timer-last-trigger' stays the same.
      */
     pause(): void {
-        this._logger.debug('Timer paused');
+        Logger.debug('Timer paused', this);
         this._paused = true;
         this.cleanup();
     }
@@ -147,12 +146,12 @@ class AFTimer {
         const intervalSurpassed = this._surpassedInterval();
         if (forceTrigger || intervalSurpassed) {
             if (this._timeoutEndCallback) {
-                this._logger.debug('Running callback now');
+                Logger.debug('Running callback now', this);
 
                 try {
                     await this._timeoutEndCallback();
                 } catch (error) {
-                    this._logger.error(error);
+                    Logger.error(error, this);
                 }
             }
         }
@@ -164,14 +163,14 @@ class AFTimer {
         }
 
         // actual timer function
-        this._logger.debug(`Starting timer, will run callback in ${millisecondsRemaining}ms`);
+        Logger.debug(`Starting timer, will run callback in ${millisecondsRemaining}ms`, this);
         this._timeout = GLib.timeout_add(GLib.PRIORITY_DEFAULT, millisecondsRemaining, () => {
             // Reset time immediately to avoid shifting the timer
             this._reset();
 
             // Call this function again and forcefully skip the surpassed timer check so it will run the timeoutEndCallback
             this.start(true).catch(error => {
-                this._logger.error(error);
+                Logger.error(error, this);
             });
 
             return GLib.SOURCE_REMOVE;
@@ -191,7 +190,7 @@ class AFTimer {
      */
     cleanup(): void {
         if (this._timeout) { // only remove if a timeout is active
-            this._logger.debug('Removing running timer');
+            Logger.debug('Removing running timer', this);
             GLib.source_remove(this._timeout);
             this._timeout = undefined;
         }

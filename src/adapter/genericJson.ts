@@ -4,6 +4,7 @@ import * as Utils from './../utils.js';
 
 import {BaseAdapter} from './../adapter/baseAdapter.js';
 import {HistoryEntry} from './../history.js';
+import {Logger} from './../logger.js';
 
 /** How many times the service should be queried at maximum. */
 const MAX_SERVICE_RETRIES = 5;
@@ -48,7 +49,7 @@ class GenericJsonAdapter extends BaseAdapter {
 
         const message = this._bowl.newGetMessage(url);
         if (message === null) {
-            this._logger.error('Could not create request.');
+            Logger.error('Could not create request.', this);
             throw wallpaperResult;
         }
 
@@ -57,7 +58,7 @@ class GenericJsonAdapter extends BaseAdapter {
             const response_body_bytes = await this._bowl.send_and_receive(message);
             response_body = JSON.parse(new TextDecoder().decode(response_body_bytes)) as unknown;
         } catch (error) {
-            this._logger.error(error);
+            Logger.error(error, this);
             throw wallpaperResult;
         }
 
@@ -70,7 +71,7 @@ class GenericJsonAdapter extends BaseAdapter {
         for (let i = 0; i < MAX_ARRAY_RETRIES + count && wallpaperResult.length < count; i++) {
             const [returnObject, resolvedPath] = JSONPath.getTarget(response_body, imageJSONPath);
             if (!returnObject || (typeof returnObject !== 'string' && typeof returnObject !== 'number') || returnObject === '') {
-                this._logger.error('Unexpected json member found');
+                Logger.error('Unexpected json member found', this);
                 break;
             }
 
@@ -124,7 +125,7 @@ class GenericJsonAdapter extends BaseAdapter {
         }
 
         if (wallpaperResult.length < count) {
-            this._logger.warn('Returning less images than requested.');
+            Logger.warn('Returning less images than requested.', this);
             throw wallpaperResult;
         }
 
@@ -151,7 +152,7 @@ class GenericJsonAdapter extends BaseAdapter {
                 // eslint-disable-next-line no-await-in-loop
                 historyArray = await this._getHistoryEntry(count);
             } catch (error) {
-                this._logger.warn('Failed getting image');
+                Logger.warn('Failed getting image', this);
 
                 if (Array.isArray(error) && error.length > 0 && error[0] instanceof HistoryEntry)
                     historyArray = error as HistoryEntry[];
@@ -168,7 +169,7 @@ class GenericJsonAdapter extends BaseAdapter {
         }
 
         if (wallpaperResult.length < count) {
-            this._logger.warn('Returning less images than requested.');
+            Logger.warn('Returning less images than requested.', this);
             throw wallpaperResult;
         }
 

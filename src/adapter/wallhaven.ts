@@ -5,6 +5,7 @@ import * as Utils from './../utils.js';
 
 import {BaseAdapter} from './../adapter/baseAdapter.js';
 import {HistoryEntry} from './../history.js';
+import {Logger} from './../logger.js';
 
 interface QueryOptions {
     /**
@@ -82,25 +83,25 @@ class WallhavenAdapter extends BaseAdapter {
         if (apiKey !== '')
             message.requestHeaders.append('X-API-Key', apiKey);
 
-        this._logger.debug(`Search URL: ${url}`);
+        Logger.debug(`Search URL: ${url}`, this);
 
         let wallhavenResponse;
         try {
             const response_body_bytes = await this._bowl.send_and_receive(message);
             wallhavenResponse = JSON.parse(new TextDecoder().decode(response_body_bytes)) as unknown;
         } catch (error) {
-            this._logger.error(error);
+            Logger.error(error, this);
             throw wallpaperResult;
         }
 
         if (!this._isWallhavenResponse(wallhavenResponse)) {
-            this._logger.error('Unexpected response');
+            Logger.error('Unexpected response', this);
             throw wallpaperResult;
         }
 
         const response = wallhavenResponse.data;
         if (!response || response.length === 0) {
-            this._logger.error('Empty response');
+            Logger.error('Empty response', this);
             throw wallpaperResult;
         }
 
@@ -121,7 +122,7 @@ class WallhavenAdapter extends BaseAdapter {
         }
 
         if (wallpaperResult.length < count) {
-            this._logger.warn('Returning less images than requested.');
+            Logger.warn('Returning less images than requested.', this);
             throw wallpaperResult;
         }
 

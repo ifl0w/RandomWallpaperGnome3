@@ -147,7 +147,7 @@ function getMonitorCount(): number {
     if (count)
         return count;
 
-    new Logger('RWG3', 'Utils').warn('Unable to get monitor count!');
+    Logger.warn('Unable to get monitor count!');
     return 1;
 }
 

@@ -12,41 +12,37 @@ enum LogLevel {
     DEBUG,
 }
 /* eslint-enable */
-type LogLevelStrings = keyof typeof LogLevel;
+
+const LOG_PREFIX = 'RandomWallpaper';
 
 /**
- *
+ * A convenience logger class.
  */
 class Logger {
-    private _prefix: string;
-    private _callingClass: string;
-    private _settings = new Settings();
-
-    /**
-     * Create a new logging helper.
-     *
-     * @param {string} prefix Custom string to prepend
-     * @param {string} callingClass Class this logger writes messages for
-     */
-    constructor(prefix: string, callingClass: string) {
-        this._prefix = prefix;
-        this._callingClass = callingClass;
-    }
+    private static _SETTINGS: Settings | null = null;
 
     /**
      * Helper function to safely log to the console.
      *
-     * @param {LogLevelStrings} level String representation of the selected log level
+     * @param {LogLevel} level the selected log level
      * @param {unknown} message Message to send, ideally an Error() or string
+     * @param {object} sourceInstance Object where the log originates from (i.e., the source context)
      */
-    private _log(level: LogLevelStrings, message: unknown): void {
+    private static _log(level: LogLevel, message: unknown, sourceInstance?: object): void {
+        if (Logger._selectedLogLevel() < level)
+            return;
+
         let errorMessage = String(message);
 
         if (message instanceof Error)
             errorMessage = message.message;
 
+        let sourceName = '';
+        if (sourceInstance)
+            sourceName = ` >> ${sourceInstance.constructor.name}`;
+
         // This logs messages with GLib.LogLevelFlags.LEVEL_MESSAGE
-        log(`${this._prefix} [${level}] >> ${this._callingClass} :: ${errorMessage}`);
+        log(`${LOG_PREFIX} [${LogLevel[level]}]${sourceName} :: ${errorMessage}`);
 
         // Log stack trace if available
         if (message instanceof Error && message.stack)
@@ -59,109 +55,78 @@ class Logger {
      *
      * @returns {LogLevel} Log level
      */
-    private _selectedLogLevel(): LogLevel {
-        return this._settings.getInt('log-level') as LogLevel;
+    private static _selectedLogLevel(): LogLevel {
+        // lazy initialization of the settings object
+        if (Logger._SETTINGS === null)
+            Logger._SETTINGS = new Settings();
+
+        return Logger._SETTINGS.getInt('log-level');
     }
 
     /**
      * Log a DEBUG message.
      *
      * @param {unknown} message Message to send, ideally an Error() or string
+     * @param {object} sourceInstance Object where the log originates from (i.e., the source context)
      */
-    debug(message: unknown): void {
-        if (this._selectedLogLevel() < LogLevel.DEBUG)
-            return;
-
-        this._log('DEBUG', message);
+    static debug(message: unknown, sourceInstance?: object): void {
+        Logger._log(LogLevel.DEBUG, message, sourceInstance);
     }
 
     /**
      * Log an INFO message.
      *
      * @param {unknown} message Message to send, ideally an Error() or string
+     * @param {object} sourceInstance Object where the log originates from (i.e., the source context)
      */
-    info(message: unknown): void {
-        if (this._selectedLogLevel() < LogLevel.INFO)
-            return;
-
-        this._log('INFO', message);
+    static info(message: unknown, sourceInstance?: object): void {
+        Logger._log(LogLevel.INFO, message, sourceInstance);
     }
 
     /**
      * Log a WARN message.
      *
      * @param {unknown} message Message to send, ideally an Error() or string
+     * @param {object} sourceInstance Object where the log originates from (i.e., the source context)
      */
-    warn(message: unknown): void {
-        if (this._selectedLogLevel() < LogLevel.WARNING)
-            return;
-
-        this._log('WARNING', message);
+    static warn(message: unknown, sourceInstance?: object): void {
+        Logger._log(LogLevel.WARNING, message, sourceInstance);
     }
 
     /**
      * Log an ERROR message.
      *
      * @param {unknown} message Message to send, ideally an Error() or string
+     * @param {object} sourceInstance Object where the log originates from (i.e., the source context)
      */
-    error(message: unknown): void {
-        if (this._selectedLogLevel() < LogLevel.ERROR)
-            return;
-
-        this._log('ERROR', message);
-    }
-}
-
-/**
- * Retrieve the human readable enum name.
- *
- * @param {LogLevel} level The mode to name
- * @returns {string} Name
- */
-function _getLogLevelName(level: LogLevel): string {
-    let name: string;
-
-    switch (level) {
-    case LogLevel.SILENT:
-        name = 'Silent';
-        break;
-    case LogLevel.ERROR:
-        name = 'Error';
-        break;
-    case LogLevel.WARNING:
-        name = 'Warning';
-        break;
-    case LogLevel.INFO:
-        name = 'Info';
-        break;
-    case LogLevel.DEBUG:
-        name = 'Debug';
-        break;
-
-    default:
-        name = 'LogLevel name not found';
-        break;
+    static error(message: unknown, sourceInstance?: object): void {
+        Logger._log(LogLevel.ERROR, message, sourceInstance);
     }
 
-    return name;
-}
+    /**
+     * Get a list of human readable enum entries.
+     *
+     * @returns {string[]} Array with key names
+     */
+    static getLogLevelNameList(): string[] {
+        const list: string[] = [];
 
-/**
- * Get a list of human readable enum entries.
- *
- * @returns {string[]} Array with key names
- */
-function getLogLevelNameList(): string[] {
-    const list: string[] = [];
+        const values = Object.values(LogLevel).filter(v => !isNaN(Number(v)));
+        for (const i of values)
+            list.push(`${LogLevel[i as number]}`);
 
-    const values = Object.values(LogLevel).filter(v => !isNaN(Number(v)));
-    for (const i of values)
-        list.push(_getLogLevelName(i as LogLevel));
+        return list;
+    }
 
-    return list;
+    /**
+     * Remove references hold by this class
+     */
+    static destroy(): void {
+        // clear reference to settings object
+        Logger._SETTINGS = null;
+    }
 }
 
 export {
-    Logger,
-    getLogLevelNameList
+    Logger
 };

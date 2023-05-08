@@ -28,7 +28,6 @@ const Self = ExtensionUtils.getCurrentExtension();
  * PanelMenu for this extension.
  */
 class RandomWallpaperMenu {
-    private _logger = new Logger('RWG3', 'RandomWallpaperEntry');
     private _backendConnection = new Settings.Settings(Settings.RWG_SETTINGS_SCHEMA_BACKEND_CONNECTION);
     private _savedBackgroundUri: string | null = null;
     private _settings = new Settings.Settings();
@@ -117,7 +116,7 @@ class RandomWallpaperMenu {
             this._wallpaperController.prohibitNewWallpaper = true;
             this._wallpaperController.fetchNewWallpaper().then(() => {
             }).catch(error => {
-                this._logger.error(error);
+                Logger.error(error, this);
             }).finally(() => {
                 this._wallpaperController.prohibitNewWallpaper = false;
             });
@@ -132,7 +131,7 @@ class RandomWallpaperMenu {
         openFolder.connect('activate', () => {
             const uri = GLib.filename_to_uri(this._wallpaperController.wallpaperLocation, '');
             Utils.execCheck(['xdg-open', uri]).catch(error => {
-                this._logger.error(error);
+                Logger.error(error, this);
             });
         });
 
@@ -147,7 +146,7 @@ class RandomWallpaperMenu {
                 Gio.DBusCallFlags.NONE,
                 -1,
                 null).catch(error => {
-                this._logger.error(error);
+                Logger.error(error, this);
             });
         });
 
@@ -294,7 +293,7 @@ class RandomWallpaperMenu {
                 }
             }).catch(error => {
                 this._wallpaperController.prohibitNewWallpaper = false;
-                this._logger.error(error);
+                Logger.error(error, this);
             });
         }
 
