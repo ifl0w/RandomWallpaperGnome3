@@ -5,6 +5,7 @@ import * as Utils from '../utils.js';
 
 import {DefaultWallpaperManager} from './defaultWallpaperManager.js';
 import {Mode, WallpaperManager} from './wallpaperManager.js';
+import {Logger} from '../logger.js';
 
 /**
  * Abstract base class for external manager to implement.
@@ -103,7 +104,7 @@ abstract class ExternalWallpaperManager extends WallpaperManager {
         if (this._cancellable === null)
             return;
 
-        this._logger.debug('Stopping manager process.');
+        Logger.debug('Stopping manager process.', this);
         this._cancellable.cancel();
         this._cancellable = null;
     }
@@ -125,7 +126,7 @@ abstract class ExternalWallpaperManager extends WallpaperManager {
 
         this._cancellable = new Gio.Cancellable();
 
-        this._logger.debug(`Running command: ${command.toString()}`);
+        Logger.debug(`Running command: ${command.toString()}`, this);
         await Utils.execCheck(command, this._cancellable);
 
         this._cancellable = null;

@@ -74,7 +74,6 @@ class HistoryController {
     history: HistoryEntry[] = [];
     size = 10;
 
-    private _logger = new Logger('RWG3', 'HistoryController');
     private _settings = new Settings();
 
     /**
@@ -267,7 +266,7 @@ class HistoryController {
              * This tries to avoid invalid states later on because we would have thrown here and therefore skip saving.
              */
             if (file.get_parent()?.query_exists(null) && error instanceof GLib.Error && error.matches(Gio.IOErrorEnum, Gio.IOErrorEnum.NOT_FOUND)) {
-                this._logger.warn(`Ignoring Gio.IOErrorEnum.NOT_FOUND: ${file.get_path() ?? 'undefined'}`);
+                Logger.warn(`Ignoring Gio.IOErrorEnum.NOT_FOUND: ${file.get_path() ?? 'undefined'}`, this);
                 return;
             }
 

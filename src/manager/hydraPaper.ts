@@ -1,14 +1,12 @@
 import * as Utils from '../utils.js';
 
 import {ExternalWallpaperManager} from './externalWallpaperManager.js';
-import {Logger} from '../logger.js';
 
 /**
  * Wrapper for HydraPaper using it as a manager.
  */
 class HydraPaper extends ExternalWallpaperManager {
     protected readonly _possibleCommands = ['hydrapaper', 'org.gabmus.hydrapaper'];
-    protected _logger = new Logger('RWG3', 'HydraPaper');
 
     /**
      * Sets the background image in light and dark mode.

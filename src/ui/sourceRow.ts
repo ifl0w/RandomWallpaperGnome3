@@ -48,7 +48,6 @@ const SourceRow = GObject.registerClass({
     private _source_name!: Adw.EntryRow;
 
     private _settings;
-    private _logger = new Logger('RWG3', 'SourceRow');
 
     id = String(Date.now());
 
@@ -171,7 +170,7 @@ const SourceRow = GObject.registerClass({
             break;
         default:
             targetWidget = null;
-            this._logger.error('The selected source has no corresponding widget!');
+            Logger.error('The selected source has no corresponding widget!', this);
             break;
         }
         return targetWidget;
