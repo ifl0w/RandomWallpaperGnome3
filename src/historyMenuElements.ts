@@ -25,7 +25,6 @@ Gio._promisify(Gio.File.prototype, 'replace_contents_bytes_async', 'replace_cont
 const HistoryElement = GObject.registerClass({
     GTypeName: 'HistoryElement',
 }, class HistoryElement extends PopupMenu.PopupSubMenuMenuItem {
-    private _logger = new Logger('RWG3', 'HistoryElement');
     private _settings = new Settings.Settings();
 
     private _prefixLabel;
@@ -98,7 +97,7 @@ const HistoryElement = GObject.registerClass({
                 authorItem.connect('activate', () => {
                     if (this.historyEntry.source.authorUrl) {
                         Utils.execCheck(['xdg-open', this.historyEntry.source.authorUrl]).catch(error => {
-                            this._logger.error(error);
+                            Logger.error(error, this);
                         });
                     }
                 });
@@ -112,7 +111,7 @@ const HistoryElement = GObject.registerClass({
                 sourceItem.connect('activate', () => {
                     if (this.historyEntry.source.sourceUrl) {
                         Utils.execCheck(['xdg-open', this.historyEntry.source.sourceUrl]).catch(error => {
-                            this._logger.error(error);
+                            Logger.error(error, this);
                         });
                     }
                 });
@@ -124,7 +123,7 @@ const HistoryElement = GObject.registerClass({
             imageUrlItem.connect('activate', () => {
                 if (this.historyEntry.source.imageLinkUrl) {
                     Utils.execCheck(['xdg-open', this.historyEntry.source.imageLinkUrl]).catch(error => {
-                        this._logger.error(error);
+                        Logger.error(error, this);
                     });
                 }
             });
@@ -150,7 +149,7 @@ const HistoryElement = GObject.registerClass({
         const copyToFavorites = new PopupMenu.PopupMenuItem('Save For Later');
         copyToFavorites.connect('activate', () => {
             this._saveImage().catch(error => {
-                this._logger.error(error);
+                Logger.error(error, this);
             });
         });
         this.menu.addMenuItem(copyToFavorites);
@@ -173,7 +172,7 @@ const HistoryElement = GObject.registerClass({
                     return;
 
                 if (!this.historyEntry.path) {
-                    this._logger.error('Image path in entry not found');
+                    Logger.error('Image path in entry not found', this);
                     return;
                 }
 
@@ -197,7 +196,7 @@ const HistoryElement = GObject.registerClass({
 
                     previewItem.actor.add_actor(this._previewActor);
                 } catch (exception) {
-                    this._logger.error(String(exception));
+                    Logger.error(String(exception), this);
                 }
             }
         });
@@ -210,7 +209,7 @@ const HistoryElement = GObject.registerClass({
      */
     private _addToBlocklist(): void {
         if (!this.historyEntry.adapter?.id || this.historyEntry.adapter.id === '-1' || !this.historyEntry.name) {
-            this._logger.error('Image entry is missing information');
+            Logger.error('Image entry is missing information', this);
             return;
         }
 
@@ -242,7 +241,7 @@ const HistoryElement = GObject.registerClass({
                 throw new Error('Could not create directories.');
         } catch (error) {
             if (error instanceof GLib.Error && error.matches(Gio.IOErrorEnum, Gio.IOErrorEnum.EXISTS)) // noop
-                this._logger.debug('Folder already exists.');
+                Logger.debug('Folder already exists.', this);
             else // escalate
                 throw error;
         }

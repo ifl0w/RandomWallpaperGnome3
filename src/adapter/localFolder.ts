@@ -6,6 +6,7 @@ import * as Utils from './../utils.js';
 
 import {BaseAdapter} from './../adapter/baseAdapter.js';
 import {HistoryEntry} from './../history.js';
+import {Logger} from './../logger.js';
 
 // https://gjs.guide/guides/gjs/asynchronous-programming.html#promisify-helper
 Gio._promisify(Gio.File.prototype, 'copy_async', 'copy_finish');
@@ -44,11 +45,11 @@ class LocalFolderAdapter extends BaseAdapter {
             const wallpaperResult: HistoryEntry[] = [];
 
             if (files.length < 1) {
-                this._logger.error('No files found');
+                Logger.error('No files found', this);
                 reject(wallpaperResult);
                 return;
             }
-            this._logger.debug(`Found ${files.length} possible wallpaper in "${this._settings.getString('folder')}"`);
+            Logger.debug(`Found ${files.length} possible wallpaper in "${this._settings.getString('folder')}"`, this);
 
             const shuffledFiles = Utils.shuffleArray(files);
 
@@ -63,7 +64,7 @@ class LocalFolderAdapter extends BaseAdapter {
             }
 
             if (wallpaperResult.length < count) {
-                this._logger.warn('Returning less images than requested.');
+                Logger.warn('Returning less images than requested.', this);
                 reject(wallpaperResult);
                 return;
             }
