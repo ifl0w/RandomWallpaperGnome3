@@ -11,42 +11,35 @@ enum LogLevel {
     INFO,
     DEBUG,
 }
-/* eslint-enable */
-type LogLevelStrings = keyof typeof LogLevel;
+
+const LOG_PREFIX = 'RandomWallpaper';
+const SETTINGS = new Settings();
 
 /**
  *
  */
 class Logger {
-    private _prefix: string;
-    private _callingClass: string;
-    private _settings = new Settings();
-
-    /**
-     * Create a new logging helper.
-     *
-     * @param {string} prefix Custom string to prepend
-     * @param {string} callingClass Class this logger writes messages for
-     */
-    constructor(prefix: string, callingClass: string) {
-        this._prefix = prefix;
-        this._callingClass = callingClass;
-    }
-
     /**
      * Helper function to safely log to the console.
      *
      * @param {LogLevelStrings} level String representation of the selected log level
      * @param {unknown} message Message to send, ideally an Error() or string
      */
-    private _log(level: LogLevelStrings, message: unknown): void {
+    private static _log(level: LogLevel, message: unknown, sourceInstance?: Object) {
+        if (Logger._selectedLogLevel() < level)
+            return;
+
         let errorMessage = String(message);
 
         if (message instanceof Error)
             errorMessage = message.message;
 
+        let sourceName = '';
+        if (sourceInstance)
+            sourceName = ` >> ${sourceInstance.constructor.name}`;
+
         // This logs messages with GLib.LogLevelFlags.LEVEL_MESSAGE
-        log(`${this._prefix} [${level}] >> ${this._callingClass} :: ${errorMessage}`);
+        log(`${LOG_PREFIX} [${LogLevel[level]}]${sourceName} :: ${errorMessage}`);
 
         // Log stack trace if available
         if (message instanceof Error && message.stack)
@@ -59,8 +52,8 @@ class Logger {
      *
      * @returns {LogLevel} Log level
      */
-    private _selectedLogLevel(): LogLevel {
-        return this._settings.getInt('log-level') as LogLevel;
+    private static _selectedLogLevel(): LogLevel {
+        return SETTINGS.getEnum('log-level');
     }
 
     /**
@@ -68,11 +61,8 @@ class Logger {
      *
      * @param {unknown} message Message to send, ideally an Error() or string
      */
-    debug(message: unknown): void {
-        if (this._selectedLogLevel() < LogLevel.DEBUG)
-            return;
-
-        this._log('DEBUG', message);
+    static debug(message: unknown, sourceInstance?: Object) {
+        Logger._log(LogLevel.DEBUG, message, sourceInstance);
     }
 
     /**
@@ -80,11 +70,8 @@ class Logger {
      *
      * @param {unknown} message Message to send, ideally an Error() or string
      */
-    info(message: unknown): void {
-        if (this._selectedLogLevel() < LogLevel.INFO)
-            return;
-
-        this._log('INFO', message);
+    static info(message: unknown, sourceInstance?: Object) {
+        Logger._log(LogLevel.INFO, message, sourceInstance);
     }
 
     /**
@@ -92,11 +79,8 @@ class Logger {
      *
      * @param {unknown} message Message to send, ideally an Error() or string
      */
-    warn(message: unknown): void {
-        if (this._selectedLogLevel() < LogLevel.WARNING)
-            return;
-
-        this._log('WARNING', message);
+    static warn(message: unknown, sourceInstance?: Object) {
+        Logger._log(LogLevel.WARNING, message, sourceInstance);
     }
 
     /**
@@ -104,11 +88,8 @@ class Logger {
      *
      * @param {unknown} message Message to send, ideally an Error() or string
      */
-    error(message: unknown): void {
-        if (this._selectedLogLevel() < LogLevel.ERROR)
-            return;
-
-        this._log('ERROR', message);
+    static error(message: unknown, sourceInstance?: Object) {
+        Logger._log(LogLevel.ERROR, message, sourceInstance);
     }
 }
 

@@ -2,6 +2,7 @@ import * as SettingsModule from './../settings.js';
 
 import {BaseAdapter} from './../adapter/baseAdapter.js';
 import {HistoryEntry} from './../history.js';
+import {Logger} from './../logger.js';
 
 /**
  * Adapter for using a single static URL as an image source.
@@ -46,7 +47,7 @@ class UrlSourceAdapter extends BaseAdapter {
         const postUrl = this._settings.getString('domain');
 
         if (imageDownloadUrl === '') {
-            this._logger.error('Missing download url');
+            Logger.error('Missing download url', this);
             throw wallpaperResult;
         }
 

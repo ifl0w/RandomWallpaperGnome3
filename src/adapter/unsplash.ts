@@ -3,6 +3,7 @@ import * as Utils from './../utils.js';
 
 import {BaseAdapter} from './../adapter/baseAdapter.js';
 import {HistoryEntry} from './../history.js';
+import {Logger} from './../logger.js';
 
 /** How many times the service should be queried at maximum. */
 const MAX_SERVICE_RETRIES = 5;
@@ -62,7 +63,7 @@ class UnsplashAdapter extends BaseAdapter {
         let url = `https://source.unsplash.com${optionsString}`;
         url = encodeURI(url);
 
-        this._logger.debug(`Unsplash request to: ${url}`);
+        Logger.debug(`Unsplash request to: ${url}`, this);
 
         const message = this._bowl.newGetMessage(url);
 
@@ -113,8 +114,8 @@ class UnsplashAdapter extends BaseAdapter {
                 if (!this._includesWallpaper(wallpaperResult, historyEntry.source.imageDownloadUrl))
                     wallpaperResult.push(historyEntry);
             } catch (error) {
-                this._logger.warn('Failed getting image.');
-                this._logger.warn(error);
+                Logger.warn('Failed getting image.', this);
+                Logger.warn(error, this);
                 // Do not escalate yet, try again
             }
 
@@ -122,7 +123,7 @@ class UnsplashAdapter extends BaseAdapter {
         }
 
         if (wallpaperResult.length < count) {
-            this._logger.warn('Returning less images than requested.');
+            Logger.warn('Returning less images than requested.', this);
             throw wallpaperResult;
         }
 

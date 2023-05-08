@@ -11,13 +11,13 @@ const ExtensionUtils = imports.misc.extensionUtils;
 
 import type * as SettingsNamespace from './settings.js';
 import type * as UtilsNamespace from './utils.js';
-import type * as LoggerNamespace from './logger.js';
+import * as LoggerNamespace from './logger.js';
 import type * as SourceRowNamespace from './ui/sourceRow.js';
 import type {ExtensionMeta} from 'ExtensionMeta';
 
 let Settings: typeof SettingsNamespace;
 let Utils: typeof UtilsNamespace;
-let Logger: typeof LoggerNamespace;
+let Logger: typeof LoggerNamespace.Logger | null = null;
 let SourceRow: typeof SourceRowNamespace.SourceRow;
 
 const Self = ExtensionUtils.getCurrentExtension();
@@ -62,7 +62,6 @@ function fillPreferencesWindow(window: InstanceType<typeof Adw.PreferencesWindow
  * Main settings class for everything related to the settings window.
  */
 class RandomWallpaperSettings {
-    private _logger!: LoggerNamespace.Logger;
     private _settings!: SettingsNamespace.Settings;
     private _backendConnection!: SettingsNamespace.Settings;
 
@@ -86,7 +85,6 @@ class RandomWallpaperSettings {
             if (!Logger || !Settings || !Utils || !SourceRow)
                 throw new Error('Error with imports');
 
-            this._logger = new Logger.Logger('RWG3', 'RandomWallpaper.Settings');
             this._settings = new Settings.Settings();
             this._backendConnection = new Settings.Settings(Settings.RWG_SETTINGS_SCHEMA_BACKEND_CONNECTION);
 
@@ -105,11 +103,16 @@ class RandomWallpaperSettings {
                     'selected',
                     Gio.SettingsBindFlags.DEFAULT);
             }).catch(error => {
-                this._logger.error(error);
+                if (Logger)
+                    Logger.error(error);
+                else if (error instanceof Error)
+                    logError(error);
+                else
+                    logError(new Error('Unknown error'));
             });
 
             const comboLogLevel = this._builder.get_object<InstanceType<typeof Adw.ComboRow>>('log_level');
-            comboLogLevel.model = Gtk.StringList.new(Logger.getLogLevelNameList());
+            comboLogLevel.model = Gtk.StringList.new(LoggerNamespace.getLogLevelNameList());
             this._settings.bind('log-level',
                 comboLogLevel,
                 'selected',
@@ -175,7 +178,12 @@ class RandomWallpaperSettings {
                 if (manager.canHandleMultipleImages)
                     this._builder.get_object<InstanceType<typeof Adw.ActionRow>>('multiple_displays_row').set_sensitive(true);
             }).catch(error => {
-                this._logger.error(error);
+                if (Logger)
+                    Logger.error(error);
+                else if (error instanceof Error)
+                    logError(error);
+                else
+                    logError(new Error('Unknown error'));
             });
         }).catch(error => {
             if (error instanceof Error)
@@ -203,7 +211,7 @@ class RandomWallpaperSettings {
 
         const [moduleLogger, moduleUtils, moduleSourceRow, moduleSettings] = await Promise.all(
             [loggerPromise, utilsPromise, sourceRowPromise, settingsPromise]);
-        Logger = moduleLogger;
+        Logger = moduleLogger.Logger;
         Utils = moduleUtils;
         SourceRow = moduleSourceRow.SourceRow;
         Settings = moduleSettings;

@@ -10,8 +10,6 @@ import type {Settings} from '../settings.js';
  * Unable to handle multiple displays.
  */
 class DefaultWallpaperManager extends WallpaperManager {
-    protected _logger = new Logger('RWG3', 'DefaultManager');
-
     /**
      * Sets the background image in light and dark mode.
      *
@@ -21,7 +19,7 @@ class DefaultWallpaperManager extends WallpaperManager {
     protected async _setBackground(wallpaperPaths: string[]): Promise<void> {
         // The default manager can't handle multiple displays
         if (wallpaperPaths.length > 1)
-            this._logger.warn('Single handling manager called with multiple images!');
+            Logger.warn('Single handling manager called with multiple images!', this);
 
         await DefaultWallpaperManager.setSingleBackground(`file://${wallpaperPaths[0]}`, this._backgroundSettings);
 
@@ -37,7 +35,7 @@ class DefaultWallpaperManager extends WallpaperManager {
     protected async _setLockScreen(wallpaperPaths: string[]): Promise<void> {
         // The default manager can't handle multiple displays
         if (wallpaperPaths.length > 1)
-            this._logger.warn('Single handling manager called with multiple images!');
+            Logger.warn('Single handling manager called with multiple images!', this);
 
         await DefaultWallpaperManager.setSingleLockScreen(`file://${wallpaperPaths[0]}`, this._backgroundSettings, this._screensaverSettings);
 
