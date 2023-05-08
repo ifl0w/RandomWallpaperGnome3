@@ -13,7 +13,6 @@ abstract class BaseAdapter {
     protected _bowl = new SoupBowl();
 
     protected _generalSettings: SettingsModule.Settings;
-    protected _logger: Logger;
     protected _settings: SettingsModule.Settings;
     protected _sourceName: string;
 
@@ -38,7 +37,6 @@ abstract class BaseAdapter {
         schemaPath: string;
     }) {
         const path = `${SettingsModule.RWG_SETTINGS_SCHEMA_PATH}/sources/general/${params.id}/`;
-        this._logger = new Logger('RWG3', `${params.defaultName} adapter`);
 
         this._settings = new SettingsModule.Settings(params.schemaID, params.schemaPath);
         this._sourceName = params.name ?? params.defaultName;
@@ -113,7 +111,7 @@ abstract class BaseAdapter {
         const blockedFilenames = this._generalSettings.getStrv('blocked-images');
 
         if (blockedFilenames.includes(filename)) {
-            this._logger.info(`Image is blocked: ${filename}`);
+            Logger.info(`Image is blocked: ${filename}`, this);
             return true;
         }
 

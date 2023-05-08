@@ -1,8 +1,6 @@
 import GLib from 'gi://GLib';
 import Soup from 'gi://Soup';
 
-import {Logger} from './logger.js';
-
 /**
  * A compatibility and convenience wrapper around the Soup API.
  *
@@ -12,7 +10,6 @@ import {Logger} from './logger.js';
 class SoupBowl {
     MessageFlags = Soup.MessageFlags;
 
-    private _logger = new Logger('RWG3', 'BaseAdapter');
     private _session = new Soup.Session();
 
     /**

@@ -41,7 +41,6 @@ class WallpaperController {
     prohibitNewWallpaper = false;
 
     private _backendConnection = new SettingsModule.Settings(SettingsModule.RWG_SETTINGS_SCHEMA_BACKEND_CONNECTION);
-    private _logger = new Logger('RWG3', 'WallpaperController');
     private _settings = new SettingsModule.Settings();
     private _timer = Timer.getTimer();
     private _historyController: HistoryModule.HistoryController;
@@ -91,7 +90,7 @@ class WallpaperController {
         this._observedBackgroundValues.push(this._backendConnection.observe('open-folder', () => this._openFolder()));
         this._observedBackgroundValues.push(this._backendConnection.observe('pause-timer', () => this._pauseTimer()));
         this._observedBackgroundValues.push(this._backendConnection.observe('request-new-wallpaper', () => this._requestNewWallpaper().catch(error => {
-            this._logger.error(error);
+            Logger.error(error, this);
         })));
 
         this._observedValues.push(this._settings.observe('history-length', () => this._updateHistory()));
@@ -116,7 +115,7 @@ class WallpaperController {
             // load a new wallpaper on startup, but don't when the timer already fetched one because of a surpassed timer interval
             if (this._settings.getBoolean('fetch-on-startup') && (!this._timer.isEnabled() || this._timer.minutesElapsed() > 1)) {
                 this.fetchNewWallpaper().catch(error => {
-                    this._logger.error(error);
+                    Logger.error(error, this);
                 });
             }
 
@@ -250,7 +249,7 @@ class WallpaperController {
             });
             this._timer.setMinutes(this._autoFetch.duration);
             this._timer.start().catch(error => {
-                this._logger.error(error);
+                Logger.error(error, this);
             });
         } else {
             this._timer.stop();
@@ -347,7 +346,7 @@ class WallpaperController {
                     break;
                 }
             } catch (error) {
-                this._logger.warn('Had errors, fetching with default settings.');
+                Logger.warn('Had errors, fetching with default settings.', this);
                 imageSourceAdapter = new UnsplashAdapter(null, null);
                 sourceType = Utils.SourceType.UNSPLASH;
             }
@@ -411,7 +410,7 @@ class WallpaperController {
         if (generalPostCommandArray !== null) {
             // Do not await this call, let it be one shot
             Utils.execCheck(generalPostCommandArray).catch(error => {
-                this._logger.error(error);
+                Logger.error(error, this);
             });
         }
     }
@@ -469,7 +468,7 @@ class WallpaperController {
                     this._historyController.promoteToActive(id);
             });
         } else {
-            this._logger.warn(`The history id (${historyId}) could not be found.`);
+            Logger.warn(`The history id (${historyId}) could not be found.`, this);
         }
         // TODO: Error handling history id not found.
     }
@@ -513,7 +512,7 @@ class WallpaperController {
                         type: imageAdapters[index].type,
                     };
 
-                    this._logger.debug(`Requesting image: ${element.source.imageDownloadUrl}`);
+                    Logger.debug(`Requesting image: ${element.source.imageDownloadUrl}`, this);
                     fetchPromiseArray.push(imageAdapters[index].adapter.fetchFile(element));
                 }
 
@@ -524,7 +523,7 @@ class WallpaperController {
                 throw new Error('Unable to request new images.');
 
             // wait for all fetching images
-            this._logger.info(`Requesting ${fetchPromises.length} new images.`);
+            Logger.info(`Requesteing ${fetchPromises.length} new images.`, this);
             const newImageEntriesPromiseResults = await Promise.allSettled(fetchPromises);
 
             const newImageEntries = newImageEntriesPromiseResults.map(element => {
@@ -536,7 +535,7 @@ class WallpaperController {
                 return element instanceof HistoryModule.HistoryEntry;
             }) as HistoryModule.HistoryEntry[];
 
-            this._logger.debug(`Fetched ${newImageEntries.length} new images.`);
+            Logger.debug(`Fetched ${newImageEntries.length} new images.`, this);
             const newWallpaperPaths = newImageEntries.map(element => {
                 return element.path;
             });
@@ -545,7 +544,7 @@ class WallpaperController {
                 throw new Error('Unable to fetch new images.');
 
             if (newWallpaperPaths.length < monitorCount)
-                this._logger.warn('Unable to fill all displays with new images.');
+                Logger.warn('Unable to fill all displays with new images.', this);
 
             const usedWallpaperPaths = this._fillDisplaysFromHistory(newWallpaperPaths, monitorCount);
 
@@ -562,7 +561,7 @@ class WallpaperController {
 
             this._runPostCommands();
         } catch (error) {
-            this._logger.error(error);
+            Logger.error(error, this);
         } finally {
             this._stopLoadingHooks.forEach(element => element());
         }
@@ -600,7 +599,7 @@ class WallpaperController {
             // etc. are not supported).
             return GLib.shell_parse_argv(string)[1];
         } catch (e) {
-            this._logger.warn(String(e));
+            Logger.warn(String(e), this);
         }
 
         return null;
@@ -646,12 +645,12 @@ class WallpaperController {
             // because this function is only used for hover preview
             if (this._resetWallpaper) {
                 this._wallpaperManager.setWallpaper(paths).catch(error => {
-                    this._logger.error(error);
+                    Logger.error(error, this);
                 });
                 this._resetWallpaper = false;
             } else if (this._previewId !== undefined) {
                 this._wallpaperManager.setWallpaper(paths).catch(error => {
-                    this._logger.error(error);
+                    Logger.error(error, this);
                 });
             }
 

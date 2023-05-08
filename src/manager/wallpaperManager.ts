@@ -1,4 +1,3 @@
-import {Logger} from '../logger.js';
 import {Settings} from './../settings.js';
 
 // Generated code produces a no-shadow rule error
@@ -22,7 +21,6 @@ enum Mode {
 abstract class WallpaperManager {
     public canHandleMultipleImages = false;
 
-    protected abstract _logger: Logger;
     protected _backgroundSettings = new Settings('org.gnome.desktop.background');
     protected _screensaverSettings = new Settings('org.gnome.desktop.screensaver');
 
