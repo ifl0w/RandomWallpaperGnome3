@@ -101,6 +101,9 @@ class RedditAdapter extends BaseAdapter {
         if (wallpaperResult.length === 0)
             throw new Error('Only blocked images found.');
 
+        if (wallpaperResult.length < count)
+            this._logger.warn('Found some blocked images after multiple retries. Returning less images than requested.');
+
         return wallpaperResult;
     }
 
