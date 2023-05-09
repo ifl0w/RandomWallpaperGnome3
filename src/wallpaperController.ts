@@ -390,7 +390,7 @@ class WallpaperController {
 
         // Read the current wallpaper uri from settings because it could be a merged wallpaper
         // Remove prefix "file://" to get the real path
-        const currentWallpaperPath = backgroundSettings.getString('picture-uri').slice(7);
+        const currentWallpaperPath = backgroundSettings.getString('picture-uri').replace(/^file:\/\//, '');
 
         // TODO: this ignores the lock-screen
         const generalPostCommandArray = this._getCommandArray(commandString, currentWallpaperPath);
