@@ -53,6 +53,9 @@ class LocalFolderAdapter extends BaseAdapter {
                 return;
             }
 
+            if (wallpaperResult.length < count)
+                this._logger.warn('Found some blocked images after multiple retries. Returning less images than requested.');
+
             resolve(wallpaperResult);
         });
     }
