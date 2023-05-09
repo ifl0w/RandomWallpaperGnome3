@@ -70,7 +70,7 @@ class UnsplashAdapter extends BaseAdapter {
     async requestRandomImage(count: number) {
         const wallpaperResult: HistoryEntry[] = [];
 
-        for (let i = 0; i < MAX_SERVICE_RETRIES && wallpaperResult.length < count; i++) {
+        for (let i = 0; i < MAX_SERVICE_RETRIES + count && wallpaperResult.length < count; i++) {
             try {
                 // This should run sequentially
                 // eslint-disable-next-line no-await-in-loop
