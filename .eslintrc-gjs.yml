@@ -1,9 +1,16 @@
+# Try our best to adhere to the guidelines:
+# https://gjs.guide/extensions/review-guidelines/review-guidelines.html#code-must-not-be-obfuscated
+
+# Contains some additional styling rules to automatically fix generated javascript:
+# *  At the 'padding-line-between-statements:' rule:
+#    https://eslint.org/docs/latest/rules/padding-line-between-statements
+# * 'sourceType: "module"' as additional 'parserOptions:'
+
+# Official GJS styling: https://gitlab.gnome.org/GNOME/gjs/-/blob/fb11886617fe6b332427cdb5b23b740fc4193d2c/.eslintrc.yml
 ---
 # SPDX-License-Identifier: MIT OR LGPL-2.0-or-later
 # SPDX-FileCopyrightText: 2018 Claudio André <claudioandre.br@gmail.com>
 
-# Contains some additional styling rules to autofix generated javascript
-# https://eslint.org/docs/latest/rules/padding-line-between-statements
 env:
   es2021: true
 extends: 'eslint:recommended'
