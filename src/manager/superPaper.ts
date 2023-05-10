@@ -64,7 +64,7 @@ class Superpaper implements WallpaperManager {
     // * Sets picture-option to spanned
     // * Sets both picture-uri options
     // * Can use only single images
-    private async _run(wallpaperArray: string[]) {
+    private async _run(wallpaperArray: string[]): Promise<void> {
         // Cancel already running processes before starting new ones
         this.cancelRunning();
 

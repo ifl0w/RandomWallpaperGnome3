@@ -57,7 +57,7 @@ const UrlSourceSettingsGroup = GObject.registerClass({
             Gio.SettingsBindFlags.DEFAULT);
     }
 
-    clearConfig() {
+    clearConfig(): void {
         this._settings.resetSchema();
     }
 });

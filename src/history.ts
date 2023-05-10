@@ -65,7 +65,7 @@ class HistoryController {
         this.load();
     }
 
-    insert(historyElements: HistoryEntry[]) {
+    insert(historyElements: HistoryEntry[]): void {
         for (const historyElement of historyElements)
             this.history.unshift(historyElement);
 
@@ -78,7 +78,7 @@ class HistoryController {
      *
      * @param {string} id ID of the historyEntry
      */
-    promoteToActive(id: string) {
+    promoteToActive(id: string): boolean {
         const element = this.get(id);
         if (element === null)
             return false;
@@ -98,7 +98,7 @@ class HistoryController {
      *
      * @param {string} id ID of the historyEntry
      */
-    get(id: string) {
+    get(id: string): HistoryEntry | null {
         for (const elem of this.history) {
             if (elem.id === id)
                 return elem;
@@ -110,11 +110,11 @@ class HistoryController {
     /**
      * Get the current history element.
      */
-    getCurrentEntry() {
+    getCurrentEntry(): HistoryEntry {
         return this.history[0];
     }
 
-    getEntryByPath(path: string) {
+    getEntryByPath(path: string): HistoryEntry | null {
         for (const element of this.history) {
             if (element.path === path)
                 return element;
@@ -126,14 +126,14 @@ class HistoryController {
     /**
      * Get a random HistoryEntry.
      */
-    getRandom() {
+    getRandom(): HistoryEntry {
         return this.history[Utils.getRandomNumber(this.history.length)];
     }
 
     /**
      * Load the history from the schema
      */
-    load() {
+    load(): void {
         this.size = this._settings.getInt('history-length');
 
         const stringHistory: string[] = this._settings.getStrv('history');
@@ -149,7 +149,7 @@ class HistoryController {
     /**
      * Save the history to the schema
      */
-    save() {
+    save(): void {
         const stringHistory = this.history.map(elem => {
             return JSON.stringify(elem);
         });
@@ -160,7 +160,7 @@ class HistoryController {
     /**
      * Clear the history and delete all photos except the current one.
      */
-    clear() {
+    clear(): boolean {
         const firstHistoryElement = this.history[0];
 
         if (firstHistoryElement)
@@ -192,7 +192,7 @@ class HistoryController {
     /**
      * Delete all pictures that have no slot in the history.
      */
-    private _deleteOldPictures() {
+    private _deleteOldPictures(): void {
         this.size = this._settings.getInt('history-length');
         while (this.history.length > this.size) {
             const path = this.history.pop()?.path;

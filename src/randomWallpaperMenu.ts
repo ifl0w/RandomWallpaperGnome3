@@ -162,7 +162,7 @@ class RandomWallpaperMenu {
         this._settings.observe('history', this.setHistoryList.bind(this));
     }
 
-    init() {
+    init(): void {
         this.updatePanelMenuVisibility();
         this.setHistoryList();
 
@@ -170,7 +170,7 @@ class RandomWallpaperMenu {
         Main.panel.addToStatusArea('random-wallpaper-menu', this._panelMenu);
     }
 
-    cleanup() {
+    cleanup(): void {
         this.clearHistoryList();
         this._panelMenu.destroy();
 
@@ -179,14 +179,14 @@ class RandomWallpaperMenu {
             this._settings.disconnect(this._hidePanelIconHandler);
     }
 
-    updatePanelMenuVisibility() {
+    updatePanelMenuVisibility(): void {
         if (this._settings.getBoolean('hide-panel-icon'))
             this._panelMenu.hide();
         else
             this._panelMenu.show();
     }
 
-    setCurrentBackgroundElement() {
+    setCurrentBackgroundElement(): void {
         this._currentBackgroundSection.removeAll();
 
         const historyController = this._wallpaperController.getHistoryController();
@@ -198,7 +198,7 @@ class RandomWallpaperMenu {
         }
     }
 
-    setHistoryList() {
+    setHistoryList(): void {
         this._wallpaperController.update();
         this.setCurrentBackgroundElement();
 
@@ -214,7 +214,7 @@ class RandomWallpaperMenu {
          * @this {RandomWallpaperMenu} RandomWallpaperMenu
          * @param {InstanceType<typeof CustomElements.HistoryElement>} unusedActor The activating panel item
          */
-        function onLeave(this: RandomWallpaperMenu, unusedActor: InstanceType<typeof CustomElements.HistoryElement>) {
+        function onLeave(this: RandomWallpaperMenu, unusedActor: InstanceType<typeof CustomElements.HistoryElement>): void {
             if (!this._wallpaperController.prohibitNewWallpaper && this._savedBackgroundUri)
                 this._wallpaperController.resetWallpaper(this._savedBackgroundUri);
         }
@@ -223,7 +223,7 @@ class RandomWallpaperMenu {
          * @this {RandomWallpaperMenu} RandomWallpaperMenu
          * @param {InstanceType<typeof CustomElements.HistoryElement>} actor The activating panel item
          */
-        function onEnter(this: RandomWallpaperMenu, actor: InstanceType<typeof CustomElements.HistoryElement>) {
+        function onEnter(this: RandomWallpaperMenu, actor: InstanceType<typeof CustomElements.HistoryElement>): void {
             if (!this._wallpaperController.prohibitNewWallpaper)
                 this._wallpaperController.previewWallpaper(actor.historyEntry.id);
         }
@@ -232,7 +232,7 @@ class RandomWallpaperMenu {
          * @this {RandomWallpaperMenu} RandomWallpaperMenu
          * @param {InstanceType<typeof CustomElements.HistoryElement>} actor The activating panel item
          */
-        function onSelect(this: RandomWallpaperMenu, actor: InstanceType<typeof CustomElements.HistoryElement>) {
+        function onSelect(this: RandomWallpaperMenu, actor: InstanceType<typeof CustomElements.HistoryElement>): void {
             // Make sure no other preview or reset event overwrites our setWallpaper!
             this._wallpaperController.prohibitNewWallpaper = true;
 
@@ -257,7 +257,7 @@ class RandomWallpaperMenu {
         this._historySection.updateList(history, onEnter.bind(this), onLeave.bind(this), onSelect.bind(this));
     }
 
-    clearHistoryList() {
+    clearHistoryList(): void {
         this._historySection.clear();
     }
 }

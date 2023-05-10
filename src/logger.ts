@@ -21,7 +21,7 @@ class Logger {
         this._callingClass = callingClass;
     }
 
-    private _log(level: LogLevelStrings, message: unknown) {
+    private _log(level: LogLevelStrings, message: unknown): void {
         let errorMessage = String(message);
 
         if (message instanceof Error)
@@ -36,32 +36,32 @@ class Logger {
             logError(message);
     }
 
-    private _selectedLogLevel() {
+    private _selectedLogLevel(): number {
         return this._settings.getEnum('log-level');
     }
 
-    debug(message: unknown) {
+    debug(message: unknown): void {
         if (this._selectedLogLevel() < LogLevel.DEBUG)
             return;
 
         this._log('DEBUG', message);
     }
 
-    info(message: unknown) {
+    info(message: unknown): void {
         if (this._selectedLogLevel() < LogLevel.INFO)
             return;
 
         this._log('INFO', message);
     }
 
-    warn(message: unknown) {
+    warn(message: unknown): void {
         if (this._selectedLogLevel() < LogLevel.WARNING)
             return;
 
         this._log('WARNING', message);
     }
 
-    error(message: unknown) {
+    error(message: unknown): void {
         if (this._selectedLogLevel() < LogLevel.ERROR)
             return;
 

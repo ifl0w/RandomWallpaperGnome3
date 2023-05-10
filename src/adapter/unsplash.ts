@@ -67,7 +67,7 @@ class UnsplashAdapter extends BaseAdapter {
         return historyEntry;
     }
 
-    async requestRandomImage(count: number) {
+    async requestRandomImage(count: number): Promise<HistoryEntry[]> {
         const wallpaperResult: HistoryEntry[] = [];
 
         for (let i = 0; i < MAX_SERVICE_RETRIES + count && wallpaperResult.length < count; i++) {
@@ -95,7 +95,7 @@ class UnsplashAdapter extends BaseAdapter {
         return wallpaperResult;
     }
 
-    private _generateOptionsString() {
+    private _generateOptionsString(): string {
         const options = this._options;
         let optionsString = '';
 
@@ -128,7 +128,7 @@ class UnsplashAdapter extends BaseAdapter {
         return optionsString;
     }
 
-    private _readOptionsFromSettings() {
+    private _readOptionsFromSettings(): void {
         this._options.w = this._settings.getInt('image-width');
         this._options.h = this._settings.getInt('image-height');
 

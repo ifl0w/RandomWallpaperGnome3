@@ -195,7 +195,7 @@ const HistoryElement = GObject.registerClass({
         });
     }
 
-    private _addToBlocklist(entry: HistoryModule.HistoryEntry) {
+    private _addToBlocklist(entry: HistoryModule.HistoryEntry): void {
         if (!entry.adapter?.id || entry.adapter.id === '-1' || !entry.name) {
             this._logger.error('Image entry is missing information');
             return;
@@ -212,7 +212,7 @@ const HistoryElement = GObject.registerClass({
         generalSettings.setStrv('blocked-images', blockedFilenames);
     }
 
-    private async _saveImage() {
+    private async _saveImage(): Promise<void> {
         if (!this.historyEntry.path || !this.historyEntry.name)
             throw new Error('Image entry is missing information');
 
@@ -255,7 +255,7 @@ const HistoryElement = GObject.registerClass({
             throw new Error(`Failed writing file contents: ${message}`);
     }
 
-    setIndex(index: number) {
+    setIndex(index: number): void {
         this._prefixLabel.set_text(`${String(index)}.`);
     }
 });
@@ -304,7 +304,7 @@ class NewWallpaperElement extends PopupMenu.PopupBaseMenuItem {
         this.actor.add_child(container);
     }
 
-    show() {
+    show(): void {
         if (this._timer.isActive()) {
             const remainingMinutes = this._timer.remainingMinutes();
             const minutes = remainingMinutes % 60;
@@ -338,7 +338,7 @@ class StatusElement {
         });
     }
 
-    startLoading() {
+    startLoading(): void {
         // FIXME: Don't know where this is defined
         // @ts-expect-error
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
@@ -351,7 +351,7 @@ class StatusElement {
         });
     }
 
-    stopLoading() {
+    stopLoading(): void {
         this.icon.remove_all_transitions();
         this.icon.opacity = 255;
     }
@@ -380,7 +380,7 @@ class HistorySection extends PopupMenu.PopupMenuSection {
         onEnter: (actor: InstanceType<typeof HistoryElement>) => void,
         onLeave: (actor: InstanceType<typeof HistoryElement>) => void,
         onSelect: (actor: InstanceType<typeof HistoryElement>) => void
-    ) {
+    ): void {
         if (this._historyCache.length <= 1)
             this.removeAll(); // remove empty history element
 
@@ -414,7 +414,7 @@ class HistorySection extends PopupMenu.PopupMenuSection {
         this._historyCache = history;
     }
 
-    private _cleanupHistoryCache(existingIDs: string[]) {
+    private _cleanupHistoryCache(existingIDs: string[]): void {
         const destroyIDs = Array.from(this._historySectionCache.keys()).filter(i => existingIDs.indexOf(i) === -1);
 
         destroyIDs.forEach(id => {
@@ -423,7 +423,7 @@ class HistorySection extends PopupMenu.PopupMenuSection {
         });
     }
 
-    clear() {
+    clear(): void {
         this._cleanupHistoryCache([]);
         this.removeAll();
         this.addMenuItem(

@@ -31,7 +31,7 @@ class HydraPaper implements WallpaperManager {
         return this._command !== null;
     }
 
-    cancelRunning() {
+    cancelRunning(): void {
         if (this._cancellable === null)
             return;
 
@@ -50,7 +50,7 @@ class HydraPaper implements WallpaperManager {
      * @param {string[]} wallpaperArray Array of image paths
      * @param {boolean} darkmode Use darkmode, gives different image in cache path
      */
-    private async _run(wallpaperArray: string[], darkmode: boolean = false) {
+    private async _run(wallpaperArray: string[], darkmode: boolean = false): Promise<void> {
         // Cancel already running processes before starting new ones
         this.cancelRunning();
 
@@ -76,7 +76,7 @@ class HydraPaper implements WallpaperManager {
         this._cancellable = null;
     }
 
-    async setWallpaper(wallpaperPaths: string[], mode: number, backgroundSettings?: Settings, screensaverSettings?: Settings) {
+    async setWallpaper(wallpaperPaths: string[], mode: number, backgroundSettings?: Settings, screensaverSettings?: Settings): Promise<void> {
         if ((mode === 0 || mode === 2) && backgroundSettings) {
             await this._run(wallpaperPaths);
 
