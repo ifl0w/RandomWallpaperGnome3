@@ -20,7 +20,7 @@ const Self = ExtensionUtils.getCurrentExtension();
  *
  */
 // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
-function init() {
+function init(): void {
     // Convenience.initTranslations();
 }
 
@@ -36,7 +36,7 @@ function init() {
  * @param {Adw.PreferencesWindow} window Window the extension should fill
  */
 // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
-function fillPreferencesWindow(window: Adw.PreferencesWindow) {
+function fillPreferencesWindow(window: Adw.PreferencesWindow): void {
     window.set_default_size(600, 720);
     // temporary fill window to prevent error message until modules are loaded
     const tmpPage = new Adw.PreferencesPage();
@@ -157,7 +157,7 @@ class RandomWallpaperSettings {
      * Import modules ES6 style instead the built-in gjs style.
      * Allows proper async/await in imported modules.
      */
-    private async _importModules() {
+    private async _importModules(): Promise<void> {
         // All imports as dynamic loads to work around the fact this module won't be in a topmost
         // context inside the gnome shell and can't use import statements (yet).
         // PopOS' tiling extension and RoundedCorners Extension work around the above limitation by
@@ -176,7 +176,7 @@ class RandomWallpaperSettings {
         Settings = moduleSettings;
     }
 
-    private _bindButtons() {
+    private _bindButtons(): void {
         const newWallpaperButton: Adw.ActionRow = this._builder.get_object('request_new_wallpaper');
         const newWallpaperButtonLabel = newWallpaperButton.get_child() as Gtk.Label | null;
         const origNewWallpaperText = newWallpaperButtonLabel?.get_label() ?? 'Request New Wallpaper';
@@ -212,7 +212,7 @@ class RandomWallpaperSettings {
         });
     }
 
-    private _bindHistorySection(window: Adw.PreferencesWindow) {
+    private _bindHistorySection(window: Adw.PreferencesWindow): void {
         const entryRow = this._builder.get_object<Adw.EntryRow>('row_favorites_folder');
         entryRow.text = this._settings.getString('favorites-folder');
 
@@ -263,7 +263,7 @@ class RandomWallpaperSettings {
     /**
      * Load the config from the schema
      */
-    private _loadSources() {
+    private _loadSources(): void {
         this._sources = this._settings.getStrv('sources');
 
         // this._sources.sort((a, b) => {
@@ -287,7 +287,7 @@ class RandomWallpaperSettings {
         });
     }
 
-    private _saveSources() {
+    private _saveSources(): void {
         this._settings.setStrv('sources', this._sources);
     }
 }

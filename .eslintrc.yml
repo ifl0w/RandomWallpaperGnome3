@@ -52,6 +52,7 @@ rules:
     - property
   eol-last: error
   eqeqeq: error
+  "@typescript-eslint/explicit-function-return-type": error
   func-call-spacing: error
   func-name-matching: error
   func-style:

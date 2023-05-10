@@ -92,14 +92,14 @@ const UnsplashSettingsGroup = GObject.registerClass({
         });
     }
 
-    private _unsplashUnconstrained(comboRow: Adw.ComboRow, enable: boolean, targetElement: Gtk.Widget) {
+    private _unsplashUnconstrained(comboRow: Adw.ComboRow, enable: boolean, targetElement: Gtk.Widget): void {
         if (comboRow.selected === 0)
             targetElement.set_sensitive(enable);
         else
             targetElement.set_sensitive(!enable);
     }
 
-    clearConfig() {
+    clearConfig(): void {
         this._settings.resetSchema();
     }
 });

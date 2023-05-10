@@ -126,7 +126,7 @@ class WallpaperController {
         }
     }
 
-    private _clearHistory() {
+    private _clearHistory(): void {
         if (this._backendConnection.getBoolean('clear-history')) {
             this.update();
             this.deleteHistory();
@@ -134,7 +134,7 @@ class WallpaperController {
         }
     }
 
-    private _openFolder() {
+    private _openFolder(): void {
         if (this._backendConnection.getBoolean('open-folder')) {
             const uri = GLib.filename_to_uri(this.wallpaperLocation, '');
             Gio.AppInfo.launch_default_for_uri(uri, Gio.AppLaunchContext.new());
@@ -142,7 +142,7 @@ class WallpaperController {
         }
     }
 
-    private _pauseTimer() {
+    private _pauseTimer(): void {
         if (this._backendConnection.getBoolean('pause-timer')) {
             this._timer.pause();
         } else {
@@ -162,7 +162,7 @@ class WallpaperController {
         }
     }
 
-    private async _requestNewWallpaper() {
+    private async _requestNewWallpaper(): Promise<void> {
         if (this._backendConnection.getBoolean('request-new-wallpaper')) {
             this.update();
             try {
@@ -174,11 +174,11 @@ class WallpaperController {
         }
     }
 
-    private _updateHistory() {
+    private _updateHistory(): void {
         this._historyController.load();
     }
 
-    private _updateAutoFetching() {
+    private _updateAutoFetching(): void {
         let duration = 0;
         duration += this._settings.getInt('minutes');
         duration += this._settings.getInt('hours') * 60;
@@ -205,7 +205,7 @@ class WallpaperController {
      *
      * @param {number} count The amount of adapter requested
      */
-    private _getRandomAdapter(count: number) {
+    private _getRandomAdapter(count: number): RandomAdapterResult[] {
         const sourceIDs = this._getRandomSource(count);
         const randomAdapterResult: RandomAdapterResult[] = [];
 
@@ -224,7 +224,7 @@ class WallpaperController {
          * @param {RandomAdapterResult[]} array Array of already chosen adapter
          * @param {number} type Type of the source
          */
-        function _arrayIncludes(array: RandomAdapterResult[], type: number) {
+        function _arrayIncludes(array: RandomAdapterResult[], type: number): RandomAdapterResult | null {
             for (const element of array) {
                 if (element.type === type)
                     return element;
@@ -297,7 +297,7 @@ class WallpaperController {
      * @param {number} count Amount of requested source IDs
      * @returns Array of source IDs or ['-1'] in case of failure
      */
-    private _getRandomSource(count: number) {
+    private _getRandomSource(count: number): string[] {
         const sourceResult: string[] = [];
         const sources: string[] = this._settings.getStrv('sources');
 
@@ -332,7 +332,7 @@ class WallpaperController {
      * @param {string[]} wallpaperPaths Array of paths to the image
      * @param {number} type Types to change
      */
-    private async _setBackground(wallpaperPaths: string[], type: number = 0) {
+    private async _setBackground(wallpaperPaths: string[], type: number = 0): Promise<void> {
         const backgroundSettings = new SettingsModule.Settings('org.gnome.desktop.background');
         const screensaverSettings = new SettingsModule.Settings('org.gnome.desktop.screensaver');
 
@@ -384,7 +384,7 @@ class WallpaperController {
     }
 
     // Run general post command
-    private _runPostCommands() {
+    private _runPostCommands(): void {
         const backgroundSettings = new SettingsModule.Settings('org.gnome.desktop.background');
         const commandString = this._settings.getString('general-post-command');
 
@@ -402,7 +402,7 @@ class WallpaperController {
         }
     }
 
-    private _fillDisplaysFromHistory(wallpaperArray: string[], requestCount?: number) {
+    private _fillDisplaysFromHistory(wallpaperArray: string[], requestCount?: number): string[] {
         const count = requestCount ?? this._getCurrentDisplayCount();
         const newWallpaperArray: string[] = [...wallpaperArray];
 
@@ -422,7 +422,7 @@ class WallpaperController {
         return newWallpaperArray.slice(0, count);
     }
 
-    async setWallpaper(historyId: string) {
+    async setWallpaper(historyId: string): Promise<void> {
         const historyElement = this._historyController.get(historyId);
 
         if (historyElement?.id && historyElement.path && this._historyController.promoteToActive(historyElement.id)) {
@@ -448,7 +448,7 @@ class WallpaperController {
         // TODO: Error handling history id not found.
     }
 
-    async fetchNewWallpaper() {
+    async fetchNewWallpaper(): Promise<void> {
         this._startLoadingHooks.forEach(element => element());
 
         try {
@@ -551,7 +551,7 @@ class WallpaperController {
     }
 
     // TODO: Change to original historyElement if more variable get exposed
-    private _getCommandArray(commandString: string, historyElementPath: string) {
+    private _getCommandArray(commandString: string, historyElementPath: string): string[] | null {
         let string = commandString;
         if (string === '')
             return null;
@@ -584,7 +584,7 @@ class WallpaperController {
      * This also takes the user setting and HydraPaper availability into account
      * and lies accordingly by reporting only 1 display.
      */
-    private _getCurrentDisplayCount() {
+    private _getCurrentDisplayCount(): number {
         if (!this._settings.getBoolean('multiple-displays'))
             return 1;
 
@@ -594,7 +594,7 @@ class WallpaperController {
         return Utils.getMonitorCount();
     }
 
-    private _backgroundTimeout(paths?: string[], delay?: number) {
+    private _backgroundTimeout(paths?: string[], delay?: number): void {
         if (this._timeout || !paths)
             return;
 
@@ -620,7 +620,7 @@ class WallpaperController {
         });
     }
 
-    previewWallpaper(historyId: string, delay?: number) {
+    previewWallpaper(historyId: string, delay?: number): void {
         if (!this._settings.getBoolean('disable-hover-preview')) {
             this._previewId = historyId;
             this._resetWallpaper = false;
@@ -637,36 +637,36 @@ class WallpaperController {
         }
     }
 
-    resetWallpaper(uri: string) {
+    resetWallpaper(uri: string): void {
         if (!this._settings.getBoolean('disable-hover-preview')) {
             this._resetWallpaper = true;
             this._backgroundTimeout([GLib.filename_from_uri(uri)[0]]);
         }
     }
 
-    getHistoryController() {
+    getHistoryController(): HistoryModule.HistoryController {
         return this._historyController;
     }
 
-    deleteHistory() {
+    deleteHistory(): void {
         this._historyController.clear();
     }
 
-    update() {
+    update(): void {
         this._updateHistory();
     }
 
-    registerStartLoadingHook(fn: () => void) {
+    registerStartLoadingHook(fn: () => void): void {
         if (typeof fn === 'function')
             this._startLoadingHooks.push(fn);
     }
 
-    registerStopLoadingHook(fn: () => void) {
+    registerStopLoadingHook(fn: () => void): void {
         if (typeof fn === 'function')
             this._stopLoadingHooks.push(fn);
     }
 
-    private _bailOutWithCallback(msg: string, callback?: () => void) {
+    private _bailOutWithCallback(msg: string, callback?: () => void): void {
         this._logger.error(msg);
 
         if (callback)

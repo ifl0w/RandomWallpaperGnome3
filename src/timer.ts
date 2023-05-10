@@ -23,7 +23,7 @@ class AFTimer {
         return this._afTimerInstance;
     }
 
-    static destroy() {
+    static destroy(): void {
         if (this._afTimerInstance)
             this._afTimerInstance.cleanup();
 
@@ -38,7 +38,7 @@ class AFTimer {
      * called directly and the next trigger is scheduled at the
      * next correct time frame repeatedly.
      */
-    continue() {
+    continue(): void {
         if (!this.isActive())
             return;
 
@@ -50,11 +50,11 @@ class AFTimer {
         void this.start();
     }
 
-    isActive() {
+    isActive(): boolean {
         return this._settings.getBoolean('auto-fetch');
     }
 
-    isPaused() {
+    isPaused(): boolean {
         return this._paused;
     }
 
@@ -65,19 +65,19 @@ class AFTimer {
      * until continue() was called.
      * 'timer-last-trigger' stays the same.
      */
-    pause() {
+    pause(): void {
         this._logger.debug('Timer paused');
         this._paused = true;
         this.cleanup();
     }
 
-    remainingMinutes() {
+    remainingMinutes(): number {
         const minutesElapsed = this._minutesElapsed();
         const remainder = minutesElapsed % this._minutes;
         return Math.max(this._minutes - remainder, 0);
     }
 
-    registerCallback(callback: () => Promise<void>) {
+    registerCallback(callback: () => Promise<void>): void {
         this._timeoutEndCallback = callback;
     }
 
@@ -86,7 +86,7 @@ class AFTimer {
      *
      * @param {number} minutes Number in minutes
      */
-    setMinutes(minutes: number) {
+    setMinutes(minutes: number): void {
         this._minutes = minutes;
     }
 
@@ -99,7 +99,7 @@ class AFTimer {
      * directly and the next trigger is scheduled at the
      * next correct time frame repeatedly.
      */
-    async start() {
+    async start(): Promise<void> {
         if (this._paused)
             return;
 
@@ -149,7 +149,7 @@ class AFTimer {
     /**
      * Stop the timer.
      */
-    stop() {
+    stop(): void {
         this._settings.setInt64('timer-last-trigger', 0);
         this.cleanup();
     }
@@ -157,7 +157,7 @@ class AFTimer {
     /**
      * Cleanup the timeout callback if it exists.
      */
-    cleanup() {
+    cleanup(): void {
         if (this._timeout) { // only remove if a timeout is active
             this._logger.debug('Removing running timer');
             GLib.source_remove(this._timeout);
@@ -169,11 +169,11 @@ class AFTimer {
      * Sets the last activation time to [now]. This doesn't affect already running timer
      * and will be ignored if the timer is paused.
      */
-    private _reset() {
+    private _reset(): void {
         this._settings.setInt64('timer-last-trigger', new Date().getTime());
     }
 
-    private _minutesElapsed() {
+    private _minutesElapsed(): number {
         const now = Date.now();
         const last: number = this._settings.getInt64('timer-last-trigger');
 
@@ -184,7 +184,7 @@ class AFTimer {
         return Math.floor(elapsed / (60 * 1000));
     }
 
-    private _surpassedInterval() {
+    private _surpassedInterval(): boolean {
         const now = Date.now();
         const last = this._settings.getInt64('timer-last-trigger');
         const diff = now - last;

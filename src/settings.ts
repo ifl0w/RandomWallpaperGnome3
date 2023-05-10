@@ -31,11 +31,11 @@ class Settings {
         }
     }
 
-    bind(keyName: string, gObject: GObject.Object, property: string, settingsBindFlags: Gio.SettingsBindFlags) {
+    bind(keyName: string, gObject: GObject.Object, property: string, settingsBindFlags: Gio.SettingsBindFlags): void {
         this._settings.bind(keyName, gObject, property, settingsBindFlags);
     }
 
-    disconnect(handler: number) {
+    disconnect(handler: number): void {
         return this._settings.disconnect(handler);
     }
 
@@ -63,79 +63,79 @@ class Settings {
         return this._settings.get_strv(key);
     }
 
-    getSchema() {
+    getSchema(): Gio.SettingsSchema {
         return this._settings.settings_schema;
     }
 
-    isWritable(key: string) {
+    isWritable(key: string): boolean {
         return this._settings.is_writable(key);
     }
 
-    listKeys() {
+    listKeys(): string[] {
         return this._settings.list_keys();
     }
 
     // eslint-disable-next-line no-unused-vars
-    observe(key: string, callback: (...args: any[]) => any) {
+    observe(key: string, callback: (...args: any[]) => any): number {
         return this._settings.connect(`changed::${key}`, callback);
     }
 
-    reset(keyName: string) {
+    reset(keyName: string): void {
         this._settings.reset(keyName);
     }
 
-    resetSchema() {
+    resetSchema(): void {
         for (const key of this._settings.settings_schema.list_keys())
             this.reset(key);
     }
 
-    setBoolean(key: string, value: boolean) {
+    setBoolean(key: string, value: boolean): void {
         if (this._settings.set_boolean(key, value))
             this._save();
         else
             throw new Error(`Could not set ${key} (type: boolean) with the value ${String(value)}`);
     }
 
-    setEnum(key: string, value: number) {
+    setEnum(key: string, value: number): void {
         if (this._settings.set_enum(key, value))
             this._save();
         else
             throw new Error(`Could not set ${key} (type: number) with the value ${value}`);
     }
 
-    setInt(key: string, value: number) {
+    setInt(key: string, value: number): void {
         if (this._settings.set_int(key, value))
             this._save();
         else
             throw new Error(`Could not set ${key} (type: number) with the value ${value}`);
     }
 
-    setInt64(key: string, value: number) {
+    setInt64(key: string, value: number): void {
         if (this._settings.set_int64(key, value))
             this._save();
         else
             throw new Error(`Could not set ${key} (type: number64) with the value ${value}`);
     }
 
-    setString(key: string, value: string) {
+    setString(key: string, value: string): void {
         if (this._settings.set_string(key, value))
             this._save();
         else
             throw new Error(`Could not set ${key} (type: string) with the value ${value}`);
     }
 
-    setStrv(key: string, value: string[]) {
+    setStrv(key: string, value: string[]): void {
         if (this._settings.set_strv(key, value))
             this._save();
         else
             throw new Error(`Could not set ${key} (type: string[]) with the value "${value.toString()}"`);
     }
 
-    private _save() {
+    private _save(): void {
         Gio.Settings.sync(); // Necessary: http://stackoverflow.com/questions/9985140
     }
 
-    private _getSchema(schemaId?: string) {
+    private _getSchema(schemaId?: string): Gio.SettingsSchema {
         // https://gitlab.gnome.org/GNOME/gnome-shell/-/blob/gnome-43/js/misc/extensionUtils.js#L211
         if (!schemaId)
             schemaId = Self.metadata['settings-schema'];
