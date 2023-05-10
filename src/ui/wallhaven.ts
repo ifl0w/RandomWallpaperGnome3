@@ -153,7 +153,7 @@ const WallhavenSettingsGroup = GObject.registerClass({
         });
     }
 
-    clearConfig() {
+    clearConfig(): void {
         this._settings.resetSchema();
     }
 });

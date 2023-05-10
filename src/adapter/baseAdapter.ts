@@ -48,7 +48,7 @@ abstract class BaseAdapter {
      *
      * @param {HistoryEntry} historyEntry The historyEntry to fetch
      */
-    async fetchFile(historyEntry: HistoryEntry) {
+    async fetchFile(historyEntry: HistoryEntry): Promise<HistoryEntry> {
         const file = Gio.file_new_for_path(historyEntry.path);
         const fstream = file.replace(null, false, Gio.FileCreateFlags.NONE, null);
 
@@ -68,7 +68,7 @@ abstract class BaseAdapter {
         return historyEntry;
     }
 
-    protected _includesWallpaper(array: HistoryEntry[], uri: string) {
+    protected _includesWallpaper(array: HistoryEntry[], uri: string): boolean {
         for (const element of array) {
             if (element.source.imageDownloadUrl === uri)
                 return true;
@@ -82,7 +82,7 @@ abstract class BaseAdapter {
      *
      * @param {string} filename Name of the image
      */
-    protected _isImageBlocked(filename: string) {
+    protected _isImageBlocked(filename: string): boolean {
         const blockedFilenames = this._generalSettings.getStrv('blocked-images');
 
         if (blockedFilenames.includes(filename)) {
@@ -94,7 +94,7 @@ abstract class BaseAdapter {
     }
 
     // eslint-disable-next-line no-unused-vars
-    protected _error(err: string, callback?: (element: null, error: { error: string }) => void) {
+    protected _error(err: string, callback?: (element: null, error: { error: string }) => void): void {
         const error = {error: err};
         this._logger.error(JSON.stringify(error));
 

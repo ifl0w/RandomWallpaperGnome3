@@ -24,7 +24,7 @@ class SoupBowl {
             throw new Error('Unknown libsoup version');
     }
 
-    newGetMessage(uri: string) {
+    newGetMessage(uri: string): Soup.Message {
         return Soup.Message.new('GET', uri);
     }
 

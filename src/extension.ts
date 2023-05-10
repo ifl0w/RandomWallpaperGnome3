@@ -12,7 +12,7 @@ let RandomWallpaperMenu: typeof RandomWallpaperMenuNamespace | null = null;
  *
  */
 // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
-function init() {
+function init(): Extension {
     return new Extension();
 }
 
@@ -22,7 +22,7 @@ class Extension {
     private _panelMenu: RandomWallpaperMenuNamespace.RandomWallpaperMenu | null = null;
     private _timer: AFTimer.AFTimer | null = null;
 
-    enable() {
+    enable(): void {
         // Dynamically load own modules. This allows us to use proper ES6 Modules
         this._importModules().then(() => {
             if (!Logger || !Timer || !WallpaperController || !RandomWallpaperMenu)
@@ -45,7 +45,7 @@ class Extension {
         });
     }
 
-    disable() {
+    disable(): void {
         if (this._logger)
             this._logger.info('Disable extension.');
 
@@ -67,7 +67,7 @@ class Extension {
         RandomWallpaperMenu = null;
     }
 
-    private async _importModules() {
+    private async _importModules(): Promise<void> {
         // All imports as dynamic loads to work around the fact this module won't be in a topmost
         // context inside the gnome shell and can't use import statements (yet).
         // PopOS' tiling extension and RoundedCorners Extension work around the above limitation by

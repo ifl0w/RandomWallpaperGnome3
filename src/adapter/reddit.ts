@@ -41,11 +41,11 @@ class RedditAdapter extends BaseAdapter {
         });
     }
 
-    private _ampDecode(string: string) {
+    private _ampDecode(string: string): string {
         return string.replace(/&amp;/g, '&');
     }
 
-    async requestRandomImage(count: number) {
+    async requestRandomImage(count: number): Promise<HistoryEntry[]> {
         const wallpaperResult: HistoryEntry[] = [];
         const subreddits = this._settings.getString('subreddits').split(',').map(s => s.trim()).join('+');
         const require_sfw = this._settings.getBoolean('allow-sfw');

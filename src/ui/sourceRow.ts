@@ -115,13 +115,19 @@ const SourceRow = GObject.registerClass({
         });
     }
 
-    private _fillRow(type: number) {
+    private _fillRow(type: number): void {
         const targetWidget = this._getSettingsGroup(type);
         if (targetWidget !== null)
             this._settings_container.set_child(targetWidget);
     }
 
-    private _getSettingsGroup(type = 0) {
+    private _getSettingsGroup(type = 0): GObject.RegisteredPrototype<InstanceType<typeof UnsplashSettingsGroup>, { [key: string]: GObject.ParamSpec<unknown>; }, unknown[]>
+     | GObject.RegisteredPrototype<InstanceType<typeof WallhavenSettingsGroup>, { [key: string]: GObject.ParamSpec<unknown>; }, unknown[]>
+     | GObject.RegisteredPrototype<InstanceType<typeof RedditSettingsGroup>, { [key: string]: GObject.ParamSpec<unknown>; }, unknown[]>
+     | GObject.RegisteredPrototype<InstanceType<typeof GenericJsonSettingsGroup>, { [key: string]: GObject.ParamSpec<unknown>; }, unknown[]>
+     | GObject.RegisteredPrototype<InstanceType<typeof LocalFolderSettingsGroup>, { [key: string]: GObject.ParamSpec<unknown>; }, unknown[]>
+     | GObject.RegisteredPrototype<InstanceType<typeof UrlSourceSettingsGroup>, { [key: string]: GObject.ParamSpec<unknown>; }, unknown[]>
+     | null {
         let targetWidget = null;
         switch (type) {
         case Utils.SourceType.UNSPLASH:
@@ -150,7 +156,7 @@ const SourceRow = GObject.registerClass({
         return targetWidget;
     }
 
-    private _removeBlockedImage(filename: string) {
+    private _removeBlockedImage(filename: string): void {
         let blockedImages = this._settings.getStrv('blocked-images');
         if (!blockedImages.includes(filename))
             return;
@@ -163,7 +169,7 @@ const SourceRow = GObject.registerClass({
     /**
      * Clear all keys associated to this ID across all adapter
      */
-    clearConfig() {
+    clearConfig(): void {
         for (const i of Array(6).keys()) {
             const widget = this._getSettingsGroup(i);
             if (widget)

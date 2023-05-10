@@ -50,7 +50,7 @@ function getSourceTypeName(value: SourceType): string {
  * @param {string[]} argv String array of command and parameter
  * @param {Gio.Cancellable} [cancellable] Object to cancel the command later in lifetime
  */
-function execCheck(argv: string[], cancellable?: Gio.Cancellable | null) {
+function execCheck(argv: string[], cancellable?: Gio.Cancellable | null): Promise<void> {
     let cancelId = 0;
     const proc = new Gio.Subprocess({
         argv,
@@ -97,7 +97,7 @@ function execCheck(argv: string[], cancellable?: Gio.Cancellable | null) {
  *
  * @param {string} uri URI to scan
  */
-function fileName(uri: string) {
+function fileName(uri: string): string {
     while (_isURIEncoded(uri))
         uri = decodeURIComponent(uri);
 
@@ -114,7 +114,7 @@ function fileName(uri: string) {
  * @param {Settings} settings Settings schema to scan values for
  * @param {string} key Key where to find values in the settings schema
  */
-function fillComboRowFromEnum(comboRow: Adw.ComboRow, settings: Settings, key: string) {
+function fillComboRowFromEnum(comboRow: Adw.ComboRow, settings: Settings, key: string): void {
     // Fill combo from settings enum
     const availableTypes = settings.getSchema().get_key(key).get_range(); // GLib.Variant (sv)
     // (sv) = Tuple(%G_VARIANT_TYPE_STRING, %G_VARIANT_TYPE_VARIANT)
@@ -138,7 +138,7 @@ function fillComboRowFromEnum(comboRow: Adw.ComboRow, settings: Settings, key: s
  * @param {string} str1 String to compare
  * @param {string} str2 String to compare
  */
-function findFirstDifference(str1: string, str2: string) {
+function findFirstDifference(str1: string, str2: string): number {
     let i = 0;
     if (str1 === str2)
         return -1;
@@ -177,7 +177,7 @@ function getMonitorCount(): number {
  *
  * @param {number} size Maximum
  */
-function getRandomNumber(size: number) {
+function getRandomNumber(size: number): number {
     // https://stackoverflow.com/a/5915122
     return Math.floor(Math.random() * size);
 }
@@ -186,7 +186,7 @@ function getRandomNumber(size: number) {
  *
  * @param {string} uri The URI to check
  */
-function _isURIEncoded(uri: string) {
+function _isURIEncoded(uri: string): boolean {
     uri = uri || '';
 
     return uri !== decodeURIComponent(uri);
@@ -198,7 +198,7 @@ function _isURIEncoded(uri: string) {
  * @param {Array<T>} array Array of items
  * @param {T} value Item to remove
  */
-function removeItemOnce<T>(array: T[], value: T) {
+function removeItemOnce<T>(array: T[], value: T): T[] {
     const index = array.indexOf(value);
     if (index > -1)
         array.splice(index, 1);
@@ -213,12 +213,12 @@ function removeItemOnce<T>(array: T[], value: T) {
  * @param {Settings} settings The settings schema object containing the keys to change
  * @param {string} uri The picture URI to be set
  */
-function setPictureUriOfSettingsObject(settings: Settings, uri: string) {
+function setPictureUriOfSettingsObject(settings: Settings, uri: string): void {
     /*
      * inspired from:
      * https://bitbucket.org/LukasKnuth/backslide/src/7e36a49fc5e1439fa9ed21e39b09b61eca8df41a/backslide@codeisland.org/settings.js?at=master
      */
-    const setProp = (property: string) => {
+    const setProp = (property: string): void => {
         if (settings.isWritable(property)) {
             // Set a new Background-Image (should show up immediately):
             settings.setString(property, uri);

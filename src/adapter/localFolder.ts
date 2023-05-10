@@ -59,7 +59,7 @@ class LocalFolderAdapter extends BaseAdapter {
         });
     }
 
-    async fetchFile(historyEntry: HistoryEntry) {
+    async fetchFile(historyEntry: HistoryEntry): Promise<HistoryEntry> {
         const sourceFile = Gio.File.new_for_uri(historyEntry.source.imageDownloadUrl);
         const targetFile = Gio.File.new_for_path(historyEntry.path);
 
