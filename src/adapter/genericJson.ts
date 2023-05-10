@@ -31,12 +31,16 @@ class GenericJsonAdapter extends BaseAdapter {
         url = encodeURI(url);
 
         const message = this._bowl.newGetMessage(url);
-        if (message === null)
-            throw new Error('Could not create request.');
+        if (message === null) {
+            this._logger.error('Could not create request.');
+            throw wallpaperResult;
+        }
 
         const response_body_bytes = await this._bowl.send_and_receive(message);
-        if (!response_body_bytes)
-            throw new Error('Error fetching response.');
+        if (!response_body_bytes) {
+            this._logger.error('Error fetching response.');
+            throw wallpaperResult;
+        }
 
         const response_body: unknown = JSON.parse(ByteArray.toString(response_body_bytes));
         const imageJSONPath = this._settings.getString('image-path');
@@ -47,8 +51,10 @@ class GenericJsonAdapter extends BaseAdapter {
 
         for (let i = 0; i < MAX_ARRAY_RETRIES + count && wallpaperResult.length < count; i++) {
             const [returnObject, resolvedPath] = JSONPath.getTarget(response_body, imageJSONPath);
-            if (!returnObject || (typeof returnObject !== 'string' && typeof returnObject !== 'number') || returnObject === '')
-                throw new Error('Unexpected json member found');
+            if (!returnObject || (typeof returnObject !== 'string' && typeof returnObject !== 'number') || returnObject === '') {
+                this._logger.error('Unexpected json member found');
+                break;
+            }
 
             const imageDownloadUrl = this._settings.getString('image-prefix') + String(returnObject);
             const imageBlocked = this._isImageBlocked(Utils.fileName(imageDownloadUrl));
@@ -56,7 +62,7 @@ class GenericJsonAdapter extends BaseAdapter {
             // Don't retry without @random present in JSONPath
             if (imageBlocked && !imageJSONPath.includes('@random')) {
                 // Abort and try again
-                return null;
+                break;
             }
 
             if (imageBlocked)
@@ -99,8 +105,10 @@ class GenericJsonAdapter extends BaseAdapter {
                 wallpaperResult.push(historyEntry);
         }
 
-        if (wallpaperResult.length === 0)
-            throw new Error('Only blocked images found.');
+        if (wallpaperResult.length < count) {
+            this._logger.warn('Returning less images than requested.');
+            throw wallpaperResult;
+        }
 
         return wallpaperResult;
     }
@@ -109,31 +117,33 @@ class GenericJsonAdapter extends BaseAdapter {
         const wallpaperResult: HistoryEntry[] = [];
 
         for (let i = 0; i < MAX_SERVICE_RETRIES + count && wallpaperResult.length < count; i++) {
+            let historyArray: HistoryEntry[] = [];
+
             try {
                 // This should run sequentially
                 // eslint-disable-next-line no-await-in-loop
-                const historyArray = await this._getHistoryEntry(count);
-
-                if (historyArray) {
-                    historyArray.forEach(element => {
-                        if (!this._includesWallpaper(wallpaperResult, element.source.imageDownloadUrl))
-                            wallpaperResult.push(element);
-                    });
-                }
+                historyArray = await this._getHistoryEntry(count);
             } catch (error) {
                 this._logger.warn('Failed getting image');
-                this._logger.warn(error);
+
+                if (Array.isArray(error) && error.length > 0 && error[0] instanceof HistoryEntry)
+                    historyArray = error as HistoryEntry[];
+
                 // Do not escalate yet, try again
+            } finally {
+                historyArray.forEach(element => {
+                    if (!this._includesWallpaper(wallpaperResult, element.source.imageDownloadUrl))
+                        wallpaperResult.push(element);
+                });
             }
 
             // Image blocked, try again
         }
 
-        if (wallpaperResult.length === 0)
-            throw new Error('Only blocked images found.');
-
-        if (wallpaperResult.length < count)
-            this._logger.warn('Found some blocked images after multiple retries. Returning less images than requested.');
+        if (wallpaperResult.length < count) {
+            this._logger.warn('Returning less images than requested.');
+            throw wallpaperResult;
+        }
 
         return wallpaperResult;
     }

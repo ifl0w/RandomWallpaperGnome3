@@ -62,12 +62,16 @@ class WallhavenAdapter extends BaseAdapter {
         const response_body_bytes = await this._bowl.send_and_receive(message);
 
         const wallhavenResponse = JSON.parse(ByteArray.toString(response_body_bytes)) as unknown;
-        if (!this._isWallhavenResponse(wallhavenResponse))
-            throw new Error('Unexpected response');
+        if (!this._isWallhavenResponse(wallhavenResponse)) {
+            this._logger.error('Unexpected response');
+            throw wallpaperResult;
+        }
 
         const response = wallhavenResponse.data;
-        if (!response || response.length === 0)
-            throw new Error('Empty response');
+        if (!response || response.length === 0) {
+            this._logger.error('Empty response');
+            throw wallpaperResult;
+        }
 
         for (let i = 0; i < response.length && wallpaperResult.length < count; i++) {
             const entry = response[i];
@@ -89,11 +93,10 @@ class WallhavenAdapter extends BaseAdapter {
                 wallpaperResult.push(historyEntry);
         }
 
-        if (wallpaperResult.length === 0)
-            throw new Error('Only blocked images found.');
-
-        if (wallpaperResult.length < count)
-            this._logger.warn('Found some blocked images after multiple retries. Returning less images than requested.');
+        if (wallpaperResult.length < count) {
+            this._logger.warn('Returning less images than requested.');
+            throw wallpaperResult;
+        }
 
         return wallpaperResult;
     }
