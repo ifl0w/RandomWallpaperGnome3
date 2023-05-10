@@ -56,8 +56,10 @@ class RedditAdapter extends BaseAdapter {
         const response_body_bytes = await this._bowl.send_and_receive(message);
 
         const response_body = JSON.parse(ByteArray.toString(response_body_bytes)) as unknown;
-        if (!this._isRedditResponse(response_body))
-            throw new Error('Unexpected response');
+        if (!this._isRedditResponse(response_body)) {
+            this._logger.error('Unexpected response');
+            throw wallpaperResult;
+        }
 
         const filteredSubmissions = response_body.data.children.filter(child => {
             if (child.data.post_hint !== 'image')
@@ -79,8 +81,10 @@ class RedditAdapter extends BaseAdapter {
             return true;
         });
 
-        if (filteredSubmissions.length === 0)
-            throw new Error('No suitable submissions found!');
+        if (filteredSubmissions.length === 0) {
+            this._logger.error('No suitable submissions found!');
+            throw wallpaperResult;
+        }
 
         for (let i = 0; i < filteredSubmissions.length && wallpaperResult.length < count; i++) {
             const random = Utils.getRandomNumber(filteredSubmissions.length);
@@ -98,11 +102,10 @@ class RedditAdapter extends BaseAdapter {
                 wallpaperResult.push(historyEntry);
         }
 
-        if (wallpaperResult.length === 0)
-            throw new Error('Only blocked images found.');
-
-        if (wallpaperResult.length < count)
-            this._logger.warn('Found some blocked images after multiple retries. Returning less images than requested.');
+        if (wallpaperResult.length < count) {
+            this._logger.warn('Returning less images than requested.');
+            throw wallpaperResult;
+        }
 
         return wallpaperResult;
     }
