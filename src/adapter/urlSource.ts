@@ -21,8 +21,10 @@ class UrlSourceAdapter extends BaseAdapter {
         const domainUrl = this._settings.getString('domain');
         const postUrl = this._settings.getString('domain');
 
-        if (imageDownloadUrl === '')
-            throw new Error('Missing download url');
+        if (imageDownloadUrl === '') {
+            this._logger.error('Missing download url');
+            throw new Array(0);
+        }
 
         if (authorName === '')
             authorName = null;

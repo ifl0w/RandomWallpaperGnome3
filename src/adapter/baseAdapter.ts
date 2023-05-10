@@ -37,6 +37,7 @@ abstract class BaseAdapter {
      * Retrieves a new url for an image and crafts a new HistoryEntry.
      *
      * @param {number} count Number of requested wallpaper
+     * @throws {HistoryEntry[]} Array of crafted historyEntries, can be empty
      */
     // eslint-disable-next-line no-unused-vars
     abstract requestRandomImage (count: number): Promise<HistoryEntry[]>;

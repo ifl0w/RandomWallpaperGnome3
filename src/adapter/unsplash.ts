@@ -30,7 +30,7 @@ class UnsplashAdapter extends BaseAdapter {
         });
     }
 
-    private async _getHistoryEntry(): Promise<HistoryEntry | null> {
+    private async _getHistoryEntry(): Promise<HistoryEntry> {
         this._readOptionsFromSettings();
         const optionsString = this._generateOptionsString();
 
@@ -57,7 +57,7 @@ class UnsplashAdapter extends BaseAdapter {
 
         if (this._isImageBlocked(Utils.fileName(imageLinkUrl))) {
             // Abort and try again
-            return null;
+            throw new Error('Image blocked');
         }
 
         const historyEntry = new HistoryEntry(null, this._sourceName, imageLinkUrl);
@@ -76,7 +76,7 @@ class UnsplashAdapter extends BaseAdapter {
                 // eslint-disable-next-line no-await-in-loop
                 const historyEntry = await this._getHistoryEntry();
 
-                if (historyEntry && !this._includesWallpaper(wallpaperResult, historyEntry.source.imageDownloadUrl))
+                if (!this._includesWallpaper(wallpaperResult, historyEntry.source.imageDownloadUrl))
                     wallpaperResult.push(historyEntry);
             } catch (error) {
                 this._logger.warn('Failed getting image.');
@@ -87,11 +87,10 @@ class UnsplashAdapter extends BaseAdapter {
             // Image blocked, try again
         }
 
-        if (wallpaperResult.length === 0)
-            throw new Error('Only blocked images found.');
-
-        if (wallpaperResult.length < count)
-            this._logger.warn('Found some blocked images after multiple retries. Returning less images than requested.');
+        if (wallpaperResult.length < count) {
+            this._logger.warn('Returning less images than requested.');
+            throw wallpaperResult;
+        }
 
         return wallpaperResult;
     }
