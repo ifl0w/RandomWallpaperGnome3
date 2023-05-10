@@ -14,7 +14,7 @@ class UrlSourceAdapter extends BaseAdapter {
         });
     }
 
-    requestRandomImage(unusedCount: number) {
+    requestRandomImage(unusedCount: number): Promise<HistoryEntry[]> {
         const imageDownloadUrl = this._settings.getString('image-url');
         let authorName: string | null = this._settings.getString('author-name');
         const authorUrl = this._settings.getString('author-url');

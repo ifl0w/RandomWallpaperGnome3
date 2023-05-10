@@ -24,7 +24,7 @@ class GenericJsonAdapter extends BaseAdapter {
         });
     }
 
-    private async _getHistoryEntry(count: number) {
+    private async _getHistoryEntry(count: number): Promise<HistoryEntry[]> {
         const wallpaperResult: HistoryEntry[] = [];
 
         let url = this._settings.getString('request-url');
@@ -113,7 +113,7 @@ class GenericJsonAdapter extends BaseAdapter {
         return wallpaperResult;
     }
 
-    async requestRandomImage(count: number) {
+    async requestRandomImage(count: number): Promise<HistoryEntry[]> {
         const wallpaperResult: HistoryEntry[] = [];
 
         for (let i = 0; i < MAX_SERVICE_RETRIES + count && wallpaperResult.length < count; i++) {

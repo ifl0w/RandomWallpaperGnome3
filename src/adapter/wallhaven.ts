@@ -49,7 +49,7 @@ class WallhavenAdapter extends BaseAdapter {
         });
     }
 
-    async requestRandomImage(count: number) {
+    async requestRandomImage(count: number): Promise<HistoryEntry[]> {
         const wallpaperResult: HistoryEntry[] = [];
 
         this._readOptionsFromSettings();
@@ -101,7 +101,7 @@ class WallhavenAdapter extends BaseAdapter {
         return wallpaperResult;
     }
 
-    private _generateOptionsString<T extends QueryOptions>(options: T) {
+    private _generateOptionsString<T extends QueryOptions>(options: T): string {
         let optionsString = '';
 
         for (const key in options) {
@@ -127,7 +127,7 @@ class WallhavenAdapter extends BaseAdapter {
         return false;
     }
 
-    private _readOptionsFromSettings() {
+    private _readOptionsFromSettings(): void {
         const keywords = this._settings.getString('keyword').split(',');
         if (keywords.length > 0) {
             const randomKeyword = keywords[Utils.getRandomNumber(keywords.length)];
