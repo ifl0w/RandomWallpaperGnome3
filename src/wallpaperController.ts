@@ -468,10 +468,19 @@ class WallpaperController {
             const randomImagePromises = imageAdapters.map(element => {
                 return element.adapter.requestRandomImage(element.imageCount);
             });
-            const newWallpapers = await Promise.all(randomImagePromises);
+            const newWallpapers = await Promise.allSettled(randomImagePromises);
 
-            const fetchPromises = newWallpapers.flatMap((array, index) => {
+            const fetchPromises = newWallpapers.flatMap((object, index) => {
                 const fetchPromiseArray: Promise<HistoryModule.HistoryEntry>[] = [];
+                let array: HistoryModule.HistoryEntry[] = [];
+
+                // rejected promises
+                if ('reason' in object && Array.isArray(object.reason) && object.reason.length > 0 && object.reason[0] instanceof HistoryModule.HistoryEntry)
+                    array = object.reason as HistoryModule.HistoryEntry[];
+
+                // fulfilled promises
+                if ('value' in object)
+                    array = object.value;
 
                 for (const element of array) {
                     element.adapter = {
@@ -486,13 +495,33 @@ class WallpaperController {
                 return fetchPromiseArray;
             });
 
-            // wait for all fetching images
-            const newImageEntries = await Promise.all(fetchPromises);
-            this._logger.info(`Requested ${newImageEntries.length} new images.`);
+            if (fetchPromises.length < 1)
+                throw new Error('Unable to request new images.');
 
+            // wait for all fetching images
+            this._logger.info(`Requesting ${fetchPromises.length} new images.`);
+            const newImageEntriesPromiseResults = await Promise.allSettled(fetchPromises);
+
+            const newImageEntries = newImageEntriesPromiseResults.map(element => {
+                if (element.status !== 'fulfilled' && !('value' in element))
+                    return null;
+
+                return element.value;
+            }).filter(element => {
+                return element instanceof HistoryModule.HistoryEntry;
+            }) as HistoryModule.HistoryEntry[];
+
+            this._logger.debug(`Fetched ${newImageEntries.length} new images.`);
             const newWallpaperPaths = newImageEntries.map(element => {
                 return element.path;
             });
+
+            if (newWallpaperPaths.length < 1)
+                throw new Error('Unable to fetch new images.');
+
+            if (newWallpaperPaths.length < monitorCount)
+                this._logger.warn('Unable to fill all displays with new images.');
+
             const usedWallpaperPaths = this._fillDisplaysFromHistory(newWallpaperPaths, monitorCount);
 
             if (changeType === 3) {
@@ -514,6 +543,8 @@ class WallpaperController {
             this._historyController.insert(newImageEntries.reverse());
 
             this._runPostCommands();
+        } catch (error) {
+            this._logger.error(error);
         } finally {
             this._stopLoadingHooks.forEach(element => element());
         }

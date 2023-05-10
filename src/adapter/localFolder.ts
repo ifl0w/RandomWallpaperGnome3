@@ -28,7 +28,8 @@ class LocalFolderAdapter extends BaseAdapter {
             const wallpaperResult: HistoryEntry[] = [];
 
             if (files.length < 1) {
-                reject(new Error('No files found'));
+                this._logger.error('No files found');
+                reject(wallpaperResult);
                 return;
             }
             this._logger.debug(`Found ${files.length} possible wallpaper in "${this._settings.getString('folder')}"`);
@@ -48,13 +49,11 @@ class LocalFolderAdapter extends BaseAdapter {
                     wallpaperResult.push(historyEntry);
             }
 
-            if (wallpaperResult.length === 0) {
-                reject(new Error('Only blocked images found'));
+            if (wallpaperResult.length < count) {
+                this._logger.warn('Returning less images than requested.');
+                reject(wallpaperResult);
                 return;
             }
-
-            if (wallpaperResult.length < count)
-                this._logger.warn('Found some blocked images after multiple retries. Returning less images than requested.');
 
             resolve(wallpaperResult);
         });
