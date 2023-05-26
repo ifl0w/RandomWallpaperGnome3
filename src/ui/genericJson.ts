@@ -1,8 +1,9 @@
+import * as Adw from '@gi-types/adw1';
 import * as Gio from 'gi://Gio';
 import * as GLib from 'gi://GLib';
 import * as GObject from 'gi://GObject';
 
-import * as Adw from '@gi/gtk4/adw/adw';
+import * as AdwEntryRow from '@gi/gtk4/adw/adwEntryRow';
 import * as ExtensionUtils from '@gi/misc/extensionUtils';
 
 import * as Settings from './../settings.js';
@@ -25,15 +26,15 @@ const GenericJsonSettingsGroup = GObject.registerClass({
     ],
 }, class GenericJsonSettingsGroup extends Adw.PreferencesGroup {
     // InternalChildren
-    private _author_name_path!: Adw.EntryRow;
-    private _author_url_path!: Adw.EntryRow;
-    private _author_url_prefix!: Adw.EntryRow;
-    private _domain!: Adw.EntryRow;
-    private _image_path!: Adw.EntryRow;
-    private _image_prefix!: Adw.EntryRow;
-    private _post_path!: Adw.EntryRow;
-    private _post_prefix!: Adw.EntryRow;
-    private _request_url!: Adw.EntryRow;
+    private _author_name_path!: AdwEntryRow.EntryRow;
+    private _author_url_path!: AdwEntryRow.EntryRow;
+    private _author_url_prefix!: AdwEntryRow.EntryRow;
+    private _domain!: AdwEntryRow.EntryRow;
+    private _image_path!: AdwEntryRow.EntryRow;
+    private _image_prefix!: AdwEntryRow.EntryRow;
+    private _post_path!: AdwEntryRow.EntryRow;
+    private _post_prefix!: AdwEntryRow.EntryRow;
+    private _request_url!: AdwEntryRow.EntryRow;
 
     private _settings;
 

@@ -1,7 +1,8 @@
+import * as Adw from '@gi-types/adw1';
 import * as Gio from 'gi://Gio';
 import * as Gtk from 'gi://Gtk';
 
-import * as Adw from '@gi/gtk4/adw/adw';
+import * as AdwEntryRow from '@gi/gtk4/adw/adwEntryRow';
 import * as ExtensionUtils from '@gi/misc/extensionUtils';
 
 import type * as SettingsNamespace from './settings.js';
@@ -213,7 +214,7 @@ class RandomWallpaperSettings {
     }
 
     private _bindHistorySection(window: Adw.PreferencesWindow): void {
-        const entryRow = this._builder.get_object<Adw.EntryRow>('row_favorites_folder');
+        const entryRow = this._builder.get_object<AdwEntryRow.EntryRow>('row_favorites_folder');
         entryRow.text = this._settings.getString('favorites-folder');
 
         this._settings.bind('history-length',
