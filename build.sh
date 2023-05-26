@@ -56,7 +56,8 @@ compile_js() {
         sed -i -E "s#import \* as (.*) from 'gi://.*';#const \1 = imports.gi.\1;#g" "$file"
 
         # Libadwaita seems somehow missing from gi://
-        sed -i -E "s#import \* as Adw from '@gi/gtk4/adw/adw';#const Adw = imports.gi.Adw;#g" "$file"
+        sed -i -E "s#import \* as Adw from '@gi-types/adw1';#const Adw = imports.gi.Adw;#g" "$file"
+        sed -i -E "s#import \* as AdwEntryRow from '@gi/gtk4/adw/adwEntryRow';##g" "$file"
 
         # Special module naming
         sed -i -E "s#import \* as ByteArray from '@gi-types/gjs-environment/legacyModules/byteArray';#const ByteArray = imports.byteArray;#g" "$file"

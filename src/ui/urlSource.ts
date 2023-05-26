@@ -1,8 +1,9 @@
+import * as Adw from '@gi-types/adw1';
 import * as Gio from 'gi://Gio';
 import * as GLib from 'gi://GLib';
 import * as GObject from 'gi://GObject';
 
-import * as Adw from '@gi/gtk4/adw/adw';
+import * as AdwEntryRow from '@gi/gtk4/adw/adwEntryRow';
 import * as ExtensionUtils from '@gi/misc/extensionUtils';
 
 import * as Settings from './../settings.js';
@@ -21,11 +22,11 @@ const UrlSourceSettingsGroup = GObject.registerClass({
     ],
 }, class UrlSourceSettingsGroup extends Adw.PreferencesGroup {
     // InternalChildren
-    private _author_name!: Adw.EntryRow;
-    private _author_url!: Adw.EntryRow;
-    private _domain!: Adw.EntryRow;
-    private _image_url!: Adw.EntryRow;
-    private _post_url!: Adw.EntryRow;
+    private _author_name!: AdwEntryRow.EntryRow;
+    private _author_url!: AdwEntryRow.EntryRow;
+    private _domain!: AdwEntryRow.EntryRow;
+    private _image_url!: AdwEntryRow.EntryRow;
+    private _post_url!: AdwEntryRow.EntryRow;
 
     private _settings;
 

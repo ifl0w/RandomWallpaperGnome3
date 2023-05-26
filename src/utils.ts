@@ -1,9 +1,8 @@
+import * as Adw from '@gi-types/adw1';
 import * as Gdk from 'gi://Gdk';
 import * as Gio from 'gi://Gio';
 import * as GLib from 'gi://GLib';
 import * as Gtk from 'gi://Gtk';
-
-import * as Adw from '@gi/gtk4/adw/adw';
 
 import {Settings} from './settings.js';
 
