@@ -1,9 +1,10 @@
+import * as Adw from '@gi-types/adw1';
 import * as Gio from 'gi://Gio';
 import * as GLib from 'gi://GLib';
 import * as GObject from 'gi://GObject';
 import * as Gtk from 'gi://Gtk';
 
-import * as Adw from '@gi/gtk4/adw/adw';
+import * as AdwEntryRow from '@gi/gtk4/adw/adwEntryRow';
 import * as ExtensionUtils from '@gi/misc/extensionUtils';
 
 import * as Settings from './../settings.js';
@@ -28,7 +29,7 @@ const RedditSettingsGroup = GObject.registerClass({
     private _image_ratio2!: Gtk.Adjustment;
     private _min_height!: Gtk.Adjustment;
     private _min_width!: Gtk.Adjustment;
-    private _subreddits!: Adw.EntryRow;
+    private _subreddits!: AdwEntryRow.EntryRow;
 
     private _settings;
 
