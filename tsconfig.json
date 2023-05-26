@@ -25,6 +25,7 @@
             "gjs-environment",
             "base-types",
             "gtk4-types",
+            "adw1",
         ],
 
     },
