@@ -53,9 +53,15 @@ class RedditAdapter extends BaseAdapter {
         const url = encodeURI(`https://www.reddit.com/r/${subreddits}.json`);
         const message = this._bowl.newGetMessage(url);
 
-        const response_body_bytes = await this._bowl.send_and_receive(message);
+        let response_body;
+        try {
+            const response_body_bytes = await this._bowl.send_and_receive(message);
+            response_body = JSON.parse(ByteArray.toString(response_body_bytes)) as unknown;
+        } catch (error) {
+            this._logger.error(error);
+            throw wallpaperResult;
+        }
 
-        const response_body = JSON.parse(ByteArray.toString(response_body_bytes)) as unknown;
         if (!this._isRedditResponse(response_body)) {
             this._logger.error('Unexpected response');
             throw wallpaperResult;
