@@ -59,9 +59,16 @@ class WallhavenAdapter extends BaseAdapter {
         const message = this._bowl.newGetMessage(url);
 
         this._logger.debug(`Search URL: ${url}`);
-        const response_body_bytes = await this._bowl.send_and_receive(message);
 
-        const wallhavenResponse = JSON.parse(ByteArray.toString(response_body_bytes)) as unknown;
+        let wallhavenResponse;
+        try {
+            const response_body_bytes = await this._bowl.send_and_receive(message);
+            wallhavenResponse = JSON.parse(ByteArray.toString(response_body_bytes)) as unknown;
+        } catch (error) {
+            this._logger.error(error);
+            throw wallpaperResult;
+        }
+
         if (!this._isWallhavenResponse(wallhavenResponse)) {
             this._logger.error('Unexpected response');
             throw wallpaperResult;
