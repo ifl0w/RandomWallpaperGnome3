@@ -1,3 +1,5 @@
+import * as GLib from 'gi://GLib';
+
 import type * as LoggerNamespace from './logger.js';
 import type * as AFTimer from './timer.js';
 import type * as WallpaperControllerNamespace from './wallpaperController.js';
@@ -23,22 +25,39 @@ class Extension {
     private _timer: AFTimer.AFTimer | null = null;
 
     enable(): void {
+        // Workaround crash when initializing the gnome shell with this extension active while being on X11
+        // https://gitlab.gnome.org/GNOME/gnome-shell/-/issues/6691
+        // TODO: Remove once that issue is fixed.
+        const crashWorkaround = new Promise<void>(resolve => {
+            GLib.timeout_add(GLib.PRIORITY_HIGH, 100, () => {
+                resolve();
+                return GLib.SOURCE_REMOVE;
+            });
+        });
+
         // Dynamically load own modules. This allows us to use proper ES6 Modules
-        this._importModules().then(() => {
-            if (!Logger || !Timer || !WallpaperController || !RandomWallpaperMenu)
-                throw new Error('Error importing module');
+        crashWorkaround.then(() => {
+            this._importModules().then(() => {
+                if (!Logger || !Timer || !WallpaperController || !RandomWallpaperMenu)
+                    throw new Error('Error importing module');
 
-            this._logger = new Logger.Logger('RWG3', 'Main');
-            this._timer = Timer.AFTimer.getTimer();
-            this._wallpaperController = new WallpaperController.WallpaperController();
-            this._panelMenu = new RandomWallpaperMenu.RandomWallpaperMenu(this._wallpaperController);
+                this._logger = new Logger.Logger('RWG3', 'Main');
+                this._timer = Timer.AFTimer.getTimer();
+                this._wallpaperController = new WallpaperController.WallpaperController();
+                this._panelMenu = new RandomWallpaperMenu.RandomWallpaperMenu(this._wallpaperController);
 
-            this._logger.info('Enable extension.');
-            this._panelMenu.init();
+                this._logger.info('Enable extension.');
+                this._panelMenu.init();
+            }).catch(error => {
+                if (this._logger)
+                    this._logger.error(error);
+                else if (error instanceof Error)
+                    logError(error);
+                else
+                    logError(new Error('Unknown error'));
+            });
         }).catch(error => {
-            if (this._logger)
-                this._logger.error(error);
-            else if (error instanceof Error)
+            if (error instanceof Error)
                 logError(error);
             else
                 logError(new Error('Unknown error'));
