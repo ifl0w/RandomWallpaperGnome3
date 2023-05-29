@@ -416,6 +416,12 @@
             <description>The URL to fetch.</description>
         </key>
 
+        <key type='b' name='different-images'>
+            <default>false</default>
+            <summary>Different images</summary>
+            <description>Yields different images on consecutive requests in a short amount of time.</description>
+        </key>
+
         <key type='s' name='domain'>
             <default>""</default>
             <summary>Domain</summary>

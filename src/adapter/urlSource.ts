@@ -14,7 +14,13 @@ class UrlSourceAdapter extends BaseAdapter {
         });
     }
 
-    requestRandomImage(unusedCount: number): Promise<HistoryEntry[]> {
+    requestRandomImage(count: number): Promise<HistoryEntry[]> {
+        const wallpaperResult: HistoryEntry[] = [];
+
+        let requestedEntries = 1;
+        if (this._settings.getBoolean('different-images'))
+            requestedEntries = count;
+
         const imageDownloadUrl = this._settings.getString('image-url');
         let authorName: string | null = this._settings.getString('author-name');
         const authorUrl = this._settings.getString('author-url');
@@ -23,25 +29,32 @@ class UrlSourceAdapter extends BaseAdapter {
 
         if (imageDownloadUrl === '') {
             this._logger.error('Missing download url');
-            throw new Array(0);
+            throw wallpaperResult;
         }
 
         if (authorName === '')
             authorName = null;
 
-        const historyEntry = new HistoryEntry(authorName, this._sourceName, imageDownloadUrl);
+        for (let i = 0; i < requestedEntries; i++) {
+            const historyEntry = new HistoryEntry(authorName, this._sourceName, imageDownloadUrl);
 
-        if (authorUrl !== '')
-            historyEntry.source.authorUrl = authorUrl;
+            if (authorUrl !== '')
+                historyEntry.source.authorUrl = authorUrl;
 
-        if (postUrl !== '')
-            historyEntry.source.imageLinkUrl = postUrl;
+            if (postUrl !== '')
+                historyEntry.source.imageLinkUrl = postUrl;
 
+            if (domainUrl !== '')
+                historyEntry.source.sourceUrl = domainUrl;
 
-        if (domainUrl !== '')
-            historyEntry.source.sourceUrl = domainUrl;
+            // overwrite historyEntry.id because the name will be the same and the timestamp might be too.
+            // historyEntry.name can't be null here because we created the entry with the constructor.
+            historyEntry.id = `${historyEntry.timestamp}_${i}_${historyEntry.name!}`;
 
-        return Promise.resolve([historyEntry]);
+            wallpaperResult.push(historyEntry);
+        }
+
+        return Promise.resolve(wallpaperResult);
     }
 }
 
