@@ -36,13 +36,15 @@ class GenericJsonAdapter extends BaseAdapter {
             throw wallpaperResult;
         }
 
-        const response_body_bytes = await this._bowl.send_and_receive(message);
-        if (!response_body_bytes) {
-            this._logger.error('Error fetching response.');
+        let response_body;
+        try {
+            const response_body_bytes = await this._bowl.send_and_receive(message);
+            response_body = JSON.parse(ByteArray.toString(response_body_bytes)) as unknown;
+        } catch (error) {
+            this._logger.error(error);
             throw wallpaperResult;
         }
 
-        const response_body: unknown = JSON.parse(ByteArray.toString(response_body_bytes));
         const imageJSONPath = this._settings.getString('image-path');
         const postJSONPath = this._settings.getString('post-path');
         const domainUrl = this._settings.getString('domain');
