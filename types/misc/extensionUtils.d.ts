@@ -1,7 +1,7 @@
 // https://github.com/yilozt/rounded-window-corners/blob/main/%40imports/misc/extensionUtils.d.ts
 // GPL3
 
-import * as Gio from '@gi-types/gio2';
+import Gio from 'gi://Gio';
 
 /**
  * getCurrentExtension:

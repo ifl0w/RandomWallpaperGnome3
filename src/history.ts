@@ -1,4 +1,4 @@
-import * as Gio from 'gi://Gio';
+import Gio from 'gi://Gio';
 
 import * as Utils from './utils.js';
 

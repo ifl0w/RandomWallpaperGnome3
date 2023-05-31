@@ -1,4 +1,4 @@
-import * as GLib from 'gi://GLib';
+import GLib from 'gi://GLib';
 
 import {Logger} from './logger.js';
 import {Settings} from './settings.js';

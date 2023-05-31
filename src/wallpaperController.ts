@@ -1,5 +1,5 @@
-import * as Gio from 'gi://Gio';
-import * as GLib from 'gi://GLib';
+import Gio from 'gi://Gio';
+import GLib from 'gi://GLib';
 
 import * as ExtensionUtils from '@gi/misc/extensionUtils';
 
