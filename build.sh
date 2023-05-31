@@ -52,9 +52,6 @@ compile_js() {
     # rewrite imports to gjs own module system
     shopt -s globstar nullglob
     for file in "$DESTDIR"/**/*.js; do
-        # I don't know why these aren't available, they should?
-        sed -i -E "s#import \* as (.*) from 'gi://.*';#const \1 = imports.gi.\1;#g" "$file"
-
         # Libadwaita seems somehow missing from gi://
         sed -i -E "s#import \* as Adw from '@gi-types/adw1';#const Adw = imports.gi.Adw;#g" "$file"
         sed -i -E "s#import \* as AdwEntryRow from '@gi/gtk4/adw/adwEntryRow';##g" "$file"
@@ -72,9 +69,19 @@ compile_js() {
         sed -i -E "s#import \* as (.*) from '@gi-types/.*';#const \1 = imports.gi.\1;#g" "$file"
     done
 
-    # extension.js and prefs.js can't be modules (yet) while dynamically loaded by GJS
+    # extension.js and prefs.js can't be modules (yet) while dynamically loaded by GJS…
+    # https://gjs.guide/extensions/overview/imports-and-modules.html#imports-and-modules
+    # …and TypeScript can't compile specific files to "not a module" in overall module mode.
     # https://github.com/microsoft/TypeScript/issues/41567
     sed -i -E "s#export \{\};##g" "$DESTDIR/extension.js"
+
+    # Work around standard imports not available in files loaded by the shell, those can't be modules (yet)
+    # > Note that as of GNOME 44, neither GNOME Shell nor Extensions support ESModules, and must use GJS's custom import scheme.
+    # https://gjs.guide/extensions/overview/imports-and-modules.html#imports-and-modules
+    # https://gjs-docs.gnome.org/gjs/esmodules.md
+    # > JS ERROR: Extension randomwallpaper@iflow.space: SyntaxError: import declarations may only appear at top level of a module
+    sed -i -E "s#import (.*) from 'gi://.*';#const \1 = imports.gi.\1;#g" "$DESTDIR/extension.js"
+    sed -i -E "s#import (.*) from 'gi://.*';#const \1 = imports.gi.\1;#g" "$DESTDIR/prefs.js"
 }
 
 # TODO: Drop compiled schemas when only targeting Gnome 44+

@@ -1,4 +1,4 @@
-import * as GLib from 'gi://GLib';
+import GLib from 'gi://GLib';
 
 import type * as LoggerNamespace from './logger.js';
 import type * as AFTimer from './timer.js';
