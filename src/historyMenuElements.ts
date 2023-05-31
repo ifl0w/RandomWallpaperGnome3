@@ -1,8 +1,8 @@
-import * as GdkPixbuf from 'gi://GdkPixbuf';
-import * as Gio from 'gi://Gio';
-import * as GLib from 'gi://GLib';
-import * as GObject from 'gi://GObject';
-import * as Gtk from 'gi://Gtk';
+import GdkPixbuf from 'gi://GdkPixbuf';
+import Gio from 'gi://Gio';
+import GLib from 'gi://GLib';
+import GObject from 'gi://GObject';
+import Gtk from 'gi://Gtk';
 
 import * as Clutter from '@gi-types/clutter';
 import * as Cogl from '@gi-types/cogl';

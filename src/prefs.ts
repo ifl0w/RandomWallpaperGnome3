@@ -1,6 +1,6 @@
 import * as Adw from '@gi-types/adw1';
-import * as Gio from 'gi://Gio';
-import * as Gtk from 'gi://Gtk';
+import Gio from 'gi://Gio';
+import Gtk from 'gi://Gtk';
 
 import * as AdwEntryRow from '@gi/gtk4/adw/adwEntryRow';
 import * as ExtensionUtils from '@gi/misc/extensionUtils';

@@ -3,8 +3,8 @@
 // TODO: Remove this file and links to it once the original source updates to a recent Adw version.
 
 import * as Adw from '@gi-types/adw1';
-import * as Gtk from '@gi-types/gtk4';
-import * as GObject from '@gi-types/gobject2';
+import Gtk from 'gi://Gtk';
+import GObject from 'gi://GObject';
 
 export module EntryRow {
     export interface ConstructorProperties extends Adw.PreferencesRow.ConstructorProperties {

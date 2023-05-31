@@ -4,8 +4,8 @@
  * libSoup is accessed through the SoupBowl wrapper to support libSoup3 and libSoup2.4 simultaneously in the extension
  * runtime and in the preferences window.
  */
-import * as GLib from 'gi://GLib';
-import * as Soup from 'gi://Soup';
+import GLib from 'gi://GLib';
+import Soup from 'gi://Soup';
 
 import {Logger} from './logger.js';
 
