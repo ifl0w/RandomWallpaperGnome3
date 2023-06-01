@@ -1,10 +1,9 @@
-import * as Adw from '@gi-types/adw1';
+import Adw from 'gi://Adw';
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 import GObject from 'gi://GObject';
 import Gtk from 'gi://Gtk';
 
-import * as AdwEntryRow from '@gi/gtk4/adw/adwEntryRow';
 import * as ExtensionUtils from '@gi/misc/extensionUtils';
 
 import * as Settings from './../settings.js';
@@ -21,7 +20,7 @@ const LocalFolderSettingsGroup = GObject.registerClass({
 }, class LocalFolderSettingsGroup extends Adw.PreferencesGroup {
     // InternalChildren
     private _folder!: Gtk.Button;
-    private _folder_row!: AdwEntryRow.EntryRow;
+    private _folder_row!: Adw.EntryRow;
 
     private _saveDialog: Gtk.FileChooserNative | undefined;
     private _settings;
