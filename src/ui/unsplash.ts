@@ -1,10 +1,9 @@
-import * as Adw from '@gi-types/adw1';
+import Adw from 'gi://Adw';
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 import GObject from 'gi://GObject';
 import Gtk from 'gi://Gtk';
 
-import * as AdwEntryRow from '@gi/gtk4/adw/adwEntryRow';
 import * as ExtensionUtils from '@gi/misc/extensionUtils';
 
 import * as Settings from './../settings.js';
@@ -28,11 +27,11 @@ const UnsplashSettingsGroup = GObject.registerClass({
 
     // InternalChildren
     private _constraint_type!: Adw.ComboRow;
-    private _constraint_value!: AdwEntryRow.EntryRow;
+    private _constraint_value!: Adw.EntryRow;
     private _featured_only!: Gtk.Switch;
     private _image_height!: Gtk.Adjustment;
     private _image_width!: Gtk.Adjustment;
-    private _keyword!: AdwEntryRow.EntryRow;
+    private _keyword!: Adw.EntryRow;
 
     private _settings;
 
