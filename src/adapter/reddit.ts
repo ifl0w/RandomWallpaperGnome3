@@ -1,5 +1,3 @@
-import * as ByteArray from '@gi-types/gjs-environment/legacyModules/byteArray';
-
 import * as SettingsModule from './../settings.js';
 import * as Utils from './../utils.js';
 
@@ -56,7 +54,7 @@ class RedditAdapter extends BaseAdapter {
         let response_body;
         try {
             const response_body_bytes = await this._bowl.send_and_receive(message);
-            response_body = JSON.parse(ByteArray.toString(response_body_bytes)) as unknown;
+            response_body = JSON.parse(new TextDecoder().decode(response_body_bytes)) as unknown;
         } catch (error) {
             this._logger.error(error);
             throw wallpaperResult;
