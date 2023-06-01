@@ -1,4 +1,10 @@
-import GLib from 'gi://GLib';
+// Use legacy style importing to work around standard imports not available in files loaded by the shell, those can't be modules (yet)
+// > Note that as of GNOME 44, neither GNOME Shell nor Extensions support ESModules, and must use GJS custom import scheme.
+// https://gjs.guide/extensions/overview/imports-and-modules.html#imports-and-modules
+// https://gjs-docs.gnome.org/gjs/esmodules.md
+// > JS ERROR: Extension randomwallpaper@iflow.space: SyntaxError: import declarations may only appear at top level of a module
+// For correct typing use: 'InstanceType<typeof Adw.ActionRow>'
+const GLib = imports.gi.GLib;
 
 import type * as LoggerNamespace from './logger.js';
 import type * as AFTimer from './timer.js';

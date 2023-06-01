@@ -7,7 +7,9 @@ import GObject from 'gi://GObject';
 import Gtk from 'gi://Gtk';
 import St from 'gi://St';
 
-import * as PopupMenu from '@gi/ui/popupMenu';
+// Legacy importing style for shell internal bindings not available in standard import format
+// For correct typing use: 'InstanceType<typeof Adw.ActionRow>'
+const PopupMenu = imports.ui.popupMenu;
 
 import * as HistoryModule from './history.js';
 import * as Settings from './settings.js';

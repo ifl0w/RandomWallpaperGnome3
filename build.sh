@@ -49,29 +49,12 @@ compile_js() {
     # TypeScript to JavaScript, config in tsconfig.json
     npx --silent tsc
 
-    # rewrite shell imports to gjs legacy module system
-    shopt -s globstar nullglob
-    for file in "$DESTDIR"/**/*.js; do
-        # Special cases for extension internal imports, shell
-        sed -i -E "s#import \* as ExtensionUtils from '@gi/misc/extensionUtils';#const ExtensionUtils = imports.misc.extensionUtils;#g" "$file"
-        sed -i -E "s#import \* as PopupMenu from '@gi/ui/popupMenu';#const PopupMenu = imports.ui.popupMenu;#g" "$file"
-        sed -i -E "s#import \* as PanelMenu from '@gi/ui/panelMenu';#const PanelMenu = imports.ui.panelMenu;#g" "$file"
-        sed -i -E "s#import \* as Main from '@gi/ui/main';#const Main = imports.ui.main;#g" "$file"
-    done
-
     # extension.js and prefs.js can't be modules (yet) while dynamically loaded by GJS…
     # https://gjs.guide/extensions/overview/imports-and-modules.html#imports-and-modules
     # …and TypeScript can't compile specific files to "not a module" in overall module mode.
     # https://github.com/microsoft/TypeScript/issues/41567
     sed -i -E "s#export \{\};##g" "$DESTDIR/extension.js"
-
-    # Work around standard imports not available in files loaded by the shell, those can't be modules (yet)
-    # > Note that as of GNOME 44, neither GNOME Shell nor Extensions support ESModules, and must use GJS's custom import scheme.
-    # https://gjs.guide/extensions/overview/imports-and-modules.html#imports-and-modules
-    # https://gjs-docs.gnome.org/gjs/esmodules.md
-    # > JS ERROR: Extension randomwallpaper@iflow.space: SyntaxError: import declarations may only appear at top level of a module
-    sed -i -E "s#import (.*) from 'gi://.*';#const \1 = imports.gi.\1;#g" "$DESTDIR/extension.js"
-    sed -i -E "s#import (.*) from 'gi://.*';#const \1 = imports.gi.\1;#g" "$DESTDIR/prefs.js"
+    sed -i -E "s#export \{\};##g" "$DESTDIR/prefs.js"
 }
 
 # TODO: Drop compiled schemas when only targeting Gnome 44+

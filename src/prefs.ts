@@ -1,8 +1,13 @@
-import Adw from 'gi://Adw';
-import Gio from 'gi://Gio';
-import Gtk from 'gi://Gtk';
-
-import * as ExtensionUtils from '@gi/misc/extensionUtils';
+// Use legacy style importing to work around standard imports not available in files loaded by the shell, those can't be modules (yet)
+// > Note that as of GNOME 44, neither GNOME Shell nor Extensions support ESModules, and must use GJS custom import scheme.
+// https://gjs.guide/extensions/overview/imports-and-modules.html#imports-and-modules
+// https://gjs-docs.gnome.org/gjs/esmodules.md
+// > JS ERROR: Extension randomwallpaper@iflow.space: SyntaxError: import declarations may only appear at top level of a module
+// For correct typing use: 'InstanceType<typeof Adw.ActionRow>'
+const Adw = imports.gi.Adw;
+const Gio = imports.gi.Gio;
+const Gtk = imports.gi.Gtk;
+const ExtensionUtils = imports.misc.extensionUtils;
 
 import type * as SettingsNamespace from './settings.js';
 import type * as UtilsNamespace from './utils.js';
@@ -36,7 +41,7 @@ function init(): void {
  * @param {Adw.PreferencesWindow} window Window the extension should fill
  */
 // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
-function fillPreferencesWindow(window: Adw.PreferencesWindow): void {
+function fillPreferencesWindow(window: InstanceType<typeof Adw.PreferencesWindow>): void {
     window.set_default_size(600, 720);
     // temporary fill window to prevent error message until modules are loaded
     const tmpPage = new Adw.PreferencesPage();
@@ -60,9 +65,9 @@ class RandomWallpaperSettings {
 
     private _sources: string[] = [];
     private _builder = new Gtk.Builder();
-    private _saveDialog: Gtk.FileChooserNative | undefined;
+    private _saveDialog: InstanceType<typeof Gtk.FileChooserNative> | undefined;
 
-    constructor(window: Adw.PreferencesWindow, tmpPage: Adw.PreferencesPage) {
+    constructor(window: InstanceType<typeof Adw.PreferencesWindow>, tmpPage: InstanceType<typeof Adw.PreferencesPage>) {
         // Dynamically load own modules. This allows us to use proper ES6 Modules
         this._importModules().then(() => {
             window.remove(tmpPage);
@@ -129,11 +134,11 @@ class RandomWallpaperSettings {
 
             this._sources.forEach(id => {
                 const sourceRow = new SourceRow(undefined, id);
-                this._builder.get_object<Adw.PreferencesGroup>('sources_list').add(sourceRow);
+                this._builder.get_object<InstanceType<typeof Adw.PreferencesGroup>>('sources_list').add(sourceRow);
 
                 sourceRow.button_delete.connect('clicked', () => {
                     sourceRow.clearConfig();
-                    this._builder.get_object<Adw.PreferencesGroup>('sources_list').remove(sourceRow);
+                    this._builder.get_object<InstanceType<typeof Adw.PreferencesGroup>>('sources_list').remove(sourceRow);
                     Utils.removeItemOnce(this._sources, id);
                     this._saveSources();
                 });
@@ -141,7 +146,7 @@ class RandomWallpaperSettings {
 
             import('./manager/wallpaperManager.js').then(module => {
                 if (module.getWallpaperManager()?.isAvailable())
-                    this._builder.get_object<Adw.ActionRow>('multiple_displays_row').set_sensitive(true);
+                    this._builder.get_object<InstanceType<typeof Adw.ActionRow>>('multiple_displays_row').set_sensitive(true);
             }).catch(error => {
                 this._logger.error(error);
             });
@@ -177,8 +182,8 @@ class RandomWallpaperSettings {
     }
 
     private _bindButtons(): void {
-        const newWallpaperButton: Adw.ActionRow = this._builder.get_object('request_new_wallpaper');
-        const newWallpaperButtonLabel = newWallpaperButton.get_child() as Gtk.Label | null;
+        const newWallpaperButton: InstanceType<typeof Adw.ActionRow> = this._builder.get_object('request_new_wallpaper');
+        const newWallpaperButtonLabel = newWallpaperButton.get_child() as InstanceType<typeof Gtk.Label> | null;
         const origNewWallpaperText = newWallpaperButtonLabel?.get_label() ?? 'Request New Wallpaper';
         newWallpaperButton.connect('activated', () => {
             newWallpaperButtonLabel?.set_label('Loading ...');
@@ -196,7 +201,7 @@ class RandomWallpaperSettings {
             this._backendConnection.setBoolean('request-new-wallpaper', true);
         });
 
-        const sourceRowList = this._builder.get_object<Adw.PreferencesGroup>('sources_list');
+        const sourceRowList = this._builder.get_object<InstanceType<typeof Adw.PreferencesGroup>>('sources_list');
         this._builder.get_object('button_new_source').connect('clicked', () => {
             const sourceRow = new SourceRow();
             sourceRowList.add(sourceRow);
@@ -212,8 +217,8 @@ class RandomWallpaperSettings {
         });
     }
 
-    private _bindHistorySection(window: Adw.PreferencesWindow): void {
-        const entryRow = this._builder.get_object<Adw.EntryRow>('row_favorites_folder');
+    private _bindHistorySection(window: InstanceType<typeof Adw.PreferencesWindow>): void {
+        const entryRow = this._builder.get_object<InstanceType<typeof Adw.EntryRow>>('row_favorites_folder');
         entryRow.text = this._settings.getString('favorites-folder');
 
         this._settings.bind('history-length',

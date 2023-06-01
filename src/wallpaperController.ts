@@ -1,7 +1,8 @@
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 
-import * as ExtensionUtils from '@gi/misc/extensionUtils';
+// Legacy importing style for shell internal bindings not available in standard import format
+const ExtensionUtils = imports.misc.extensionUtils;
 
 import * as HistoryModule from './history.js';
 import * as SettingsModule from './settings.js';
