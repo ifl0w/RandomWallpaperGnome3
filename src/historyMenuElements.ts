@@ -241,9 +241,6 @@ const HistoryElement = GObject.registerClass({
         // @ts-expect-error
         // eslint-disable-next-line @typescript-eslint/await-thenable
         const [success, message]: [boolean, string] = await targetInfoFile.replace_contents_bytes_async(
-            // FIXME: Don't know from where to import
-            // @ts-expect-error
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call
             new TextEncoder().encode(JSON.stringify(this.historyEntry.source, null, '\t')),
             null,
             false,
