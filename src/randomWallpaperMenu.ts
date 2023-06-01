@@ -1,10 +1,12 @@
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 
-import * as Main from '@gi/ui/main';
-import * as PanelMenu from '@gi/ui/panelMenu';
-import * as PopupMenu from '@gi/ui/popupMenu';
-import * as ExtensionUtils from '@gi/misc/extensionUtils';
+// Legacy importing style for shell internal bindings not available in standard import format
+// For correct typing use: 'InstanceType<typeof Adw.ActionRow>'
+const ExtensionUtils = imports.misc.extensionUtils;
+const Main = imports.ui.main;
+const PanelMenu = imports.ui.panelMenu;
+const PopupMenu = imports.ui.popupMenu;
 
 import * as CustomElements from './historyMenuElements.js';
 import * as Settings from './settings.js';

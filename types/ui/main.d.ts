@@ -1,9 +1,13 @@
-import St from 'gi://St';
+/* eslint-disable */
 
-import * as PanelMenu from '@gi/ui/panelMenu';
+declare module 'main' {
+    import St from 'gi://St';
 
-declare class Panel extends St.Widget {
-    addToStatusArea(role: string, indicator: PanelMenu.Button, position?: number, box?: unknown): PanelMenu.Button
+    import * as PanelMenu from 'panelMenu';
+
+    export class Panel extends St.Widget {
+        addToStatusArea(role: string, indicator: PanelMenu.Button, position?: number, box?: unknown): PanelMenu.Button
+    }
+
+    export const panel: Panel;
 }
-
-export const panel: Panel;

@@ -18,9 +18,6 @@
             // https://gjs-docs.gnome.org/gjs/encoding.md
             // > The functions in this module are available globally, without import.
         ],
-        "paths": {
-            "@gi/*": ["../types/*"],
-        },
         "typeRoots": [
             "./node_modules/@gi-types",
             "./types",
@@ -32,6 +29,8 @@
             "adw1",
             "gtk4/adw", // locally expose 'gi://Adw' and extend with EntryRow
             "mappings", // missing mappings 'from @gi-types' to 'gi://'
+            "ui", // shell gi imports in legacy import style
+            "misc", // shell gi imports in legacy import style
         ],
 
     },
