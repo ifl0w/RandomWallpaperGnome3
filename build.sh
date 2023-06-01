@@ -52,9 +52,6 @@ compile_js() {
     # rewrite shell imports to gjs legacy module system
     shopt -s globstar nullglob
     for file in "$DESTDIR"/**/*.js; do
-        # Special module naming
-        sed -i -E "s#import \* as ByteArray from '@gi-types/gjs-environment/legacyModules/byteArray';#const ByteArray = imports.byteArray;#g" "$file"
-
         # Special cases for extension internal imports, shell
         sed -i -E "s#import \* as ExtensionUtils from '@gi/misc/extensionUtils';#const ExtensionUtils = imports.misc.extensionUtils;#g" "$file"
         sed -i -E "s#import \* as PopupMenu from '@gi/ui/popupMenu';#const PopupMenu = imports.ui.popupMenu;#g" "$file"

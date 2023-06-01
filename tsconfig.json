@@ -13,7 +13,10 @@
         "moduleResolution": "node",
         "skipLibCheck": true,
         "lib": [
-            "ES2021"
+            "ES2021",
+            "DOM", // FIXME: This is here for TextDecoder which should be defined by global GJS
+            // https://gjs-docs.gnome.org/gjs/encoding.md
+            // > The functions in this module are available globally, without import.
         ],
         "paths": {
             "@gi/*": ["../types/*"],
