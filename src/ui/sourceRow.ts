@@ -1,10 +1,9 @@
-import * as Adw from '@gi-types/adw1';
+import Adw from 'gi://Adw';
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 import GObject from 'gi://GObject';
 import Gtk from 'gi://Gtk';
 
-import * as AdwEntryRow from '@gi/gtk4/adw/adwEntryRow';
 import * as ExtensionUtils from '@gi/misc/extensionUtils';
 
 import * as Settings from './../settings.js';
@@ -45,7 +44,7 @@ const SourceRow = GObject.registerClass({
     private _blocked_images_list!: Adw.ExpanderRow;
     private _combo!: Adw.ComboRow;
     private _settings_container!: Adw.Clamp;
-    private _source_name!: AdwEntryRow.EntryRow;
+    private _source_name!: Adw.EntryRow;
 
     private _settings;
     private _logger = new Logger('RWG3', 'SourceRow');

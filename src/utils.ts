@@ -1,4 +1,4 @@
-import * as Adw from '@gi-types/adw1';
+import Adw from 'gi://Adw';
 import Gdk from 'gi://Gdk';
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
