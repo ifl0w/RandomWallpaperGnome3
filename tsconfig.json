@@ -20,12 +20,14 @@
         },
         "typeRoots": [
             "./node_modules/@gi-types",
+            "./types",
         ],
         "types": [
             "gjs-environment",
             "base-types",
             "gtk4-types",
             "adw1",
+            "gtk4/adw", // locally expose 'gi://Adw' and extend with EntryRow
         ],
 
     },

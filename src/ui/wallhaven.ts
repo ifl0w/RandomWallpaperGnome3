@@ -1,11 +1,10 @@
-import * as Adw from '@gi-types/adw1';
+import Adw from 'gi://Adw';
 import Gdk from 'gi://Gdk';
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 import GObject from 'gi://GObject';
 import Gtk from 'gi://Gtk';
 
-import * as AdwEntryRow from '@gi/gtk4/adw/adwEntryRow';
 import * as ExtensionUtils from '@gi/misc/extensionUtils';
 
 import * as Settings from './../settings.js';
@@ -45,15 +44,15 @@ const WallhavenSettingsGroup = GObject.registerClass({
     private _allow_nsfw!: Gtk.Switch;
     private _allow_sfw!: Gtk.Switch;
     private _allow_sketchy!: Gtk.Switch;
-    private _api_key!: AdwEntryRow.EntryRow;
-    private _aspect_ratios!: AdwEntryRow.EntryRow;
+    private _api_key!: Adw.EntryRow;
+    private _aspect_ratios!: Adw.EntryRow;
     private _button_color_undo!: Gtk.Button;
     private _button_color!: Gtk.Button;
     private _category_anime!: Gtk.Switch;
     private _category_general!: Gtk.Switch;
     private _category_people!: Gtk.Switch;
-    private _keyword!: AdwEntryRow.EntryRow;
-    private _minimal_resolution!: AdwEntryRow.EntryRow;
+    private _keyword!: Adw.EntryRow;
+    private _minimal_resolution!: Adw.EntryRow;
     private _row_color!: Adw.ActionRow;
 
     private _colorDialog: Gtk.ColorChooserDialog | undefined;

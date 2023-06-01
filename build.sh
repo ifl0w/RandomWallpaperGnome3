@@ -49,13 +49,9 @@ compile_js() {
     # TypeScript to JavaScript, config in tsconfig.json
     npx --silent tsc
 
-    # rewrite imports to gjs own module system
+    # rewrite shell imports to gjs legacy module system
     shopt -s globstar nullglob
     for file in "$DESTDIR"/**/*.js; do
-        # Libadwaita seems somehow missing from gi://
-        sed -i -E "s#import \* as Adw from '@gi-types/adw1';#const Adw = imports.gi.Adw;#g" "$file"
-        sed -i -E "s#import \* as AdwEntryRow from '@gi/gtk4/adw/adwEntryRow';##g" "$file"
-
         # Special module naming
         sed -i -E "s#import \* as ByteArray from '@gi-types/gjs-environment/legacyModules/byteArray';#const ByteArray = imports.byteArray;#g" "$file"
 
