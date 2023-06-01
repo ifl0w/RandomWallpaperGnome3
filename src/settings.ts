@@ -1,7 +1,8 @@
 import Gio from 'gi://Gio';
 import GObject from 'gi://GObject';
 
-import * as ExtensionUtils from '@gi/misc/extensionUtils';
+// Legacy importing style for shell internal bindings not available in standard import format
+const ExtensionUtils = imports.misc.extensionUtils;
 
 const Self = ExtensionUtils.getCurrentExtension();
 

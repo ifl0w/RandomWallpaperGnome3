@@ -4,7 +4,8 @@ import GLib from 'gi://GLib';
 import GObject from 'gi://GObject';
 import Gtk from 'gi://Gtk';
 
-import * as ExtensionUtils from '@gi/misc/extensionUtils';
+// Legacy importing style for shell internal bindings not available in standard import format
+const ExtensionUtils = imports.misc.extensionUtils;
 
 import * as Settings from './../settings.js';
 import * as Utils from './../utils.js';
