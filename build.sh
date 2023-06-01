@@ -60,9 +60,6 @@ compile_js() {
         sed -i -E "s#import \* as PopupMenu from '@gi/ui/popupMenu';#const PopupMenu = imports.ui.popupMenu;#g" "$file"
         sed -i -E "s#import \* as PanelMenu from '@gi/ui/panelMenu';#const PanelMenu = imports.ui.panelMenu;#g" "$file"
         sed -i -E "s#import \* as Main from '@gi/ui/main';#const Main = imports.ui.main;#g" "$file"
-
-        # all remaining
-        sed -i -E "s#import \* as (.*) from '@gi-types/.*';#const \1 = imports.gi.\1;#g" "$file"
     done
 
     # extension.js and prefs.js can't be modules (yet) while dynamically loaded by GJS…

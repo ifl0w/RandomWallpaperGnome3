@@ -2,8 +2,8 @@
 
 // https://gitlab.gnome.org/GNOME/gnome-shell/-/blob/main/js/ui/popupMenu.js
 
-import * as Clutter from '@gi-types/clutter';
-import * as St from '@gi-types/st';
+import Clutter from 'gi://Clutter';
+import St from 'gi://St';
 
 
 // https://gitlab.gnome.org/GNOME/gnome-shell/-/blob/main/js/misc/signals.js

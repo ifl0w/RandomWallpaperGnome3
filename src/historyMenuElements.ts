@@ -1,12 +1,11 @@
+import Clutter from 'gi://Clutter';
+import Cogl from 'gi://Cogl';
 import GdkPixbuf from 'gi://GdkPixbuf';
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 import GObject from 'gi://GObject';
 import Gtk from 'gi://Gtk';
-
-import * as Clutter from '@gi-types/clutter';
-import * as Cogl from '@gi-types/cogl';
-import * as St from '@gi-types/st';
+import St from 'gi://St';
 
 import * as PopupMenu from '@gi/ui/popupMenu';
 

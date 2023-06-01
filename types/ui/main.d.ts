@@ -1,4 +1,5 @@
-import * as St from '@gi-types/st';
+import St from 'gi://St';
+
 import * as PanelMenu from '@gi/ui/panelMenu';
 
 declare class Panel extends St.Widget {
