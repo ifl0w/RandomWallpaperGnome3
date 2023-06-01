@@ -28,6 +28,7 @@
             "gtk4-types",
             "adw1",
             "gtk4/adw", // locally expose 'gi://Adw' and extend with EntryRow
+            "mappings", // missing mappings 'from @gi-types' to 'gi://'
         ],
 
     },

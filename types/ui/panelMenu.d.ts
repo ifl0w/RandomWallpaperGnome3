@@ -1,7 +1,8 @@
 /* eslint-disable */
 
+import St from 'gi://St';
+
 import {PopupMenu} from '@gi/ui/popupMenu';
-import * as St from '@gi-types/st';
 
 declare class ButtonBox extends St.Widget{}
 
