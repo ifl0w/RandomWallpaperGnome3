@@ -23,7 +23,16 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt -q update
-          sudo apt -q install --no-install-recommends npm blueprint-compiler libglib2.0-0 bash gnome-shell libgtk-4-bin libgtk-4-common libgtk-4-dev libadwaita-1-dev gir1.2-adw-1 gir1.2-gtk-4.0 zstd
+          sudo apt -q install --no-install-recommends npm libglib2.0-0 bash gnome-shell libgtk-4-bin libgtk-4-common libgtk-4-dev libadwaita-1-dev gir1.2-adw-1 gir1.2-gtk-4.0 zstd
+      # TODO: Remove the next step once "Jammy" (22.04) receives version 0.8+ and add to the install list above
+      # https://launchpad.net/ubuntu/+source/blueprint-compiler
+      - name: Build recent blueprint-compiler
+        run: |
+          sudo apt -q install --no-install-recommends meson ninja-build
+          git clone https://gitlab.gnome.org/jwestman/blueprint-compiler.git
+          cd blueprint-compiler
+          meson _build
+          sudo ninja -C _build install
       - name: Check out repository code
         uses: actions/checkout@v3
       - name: Ubuntu specific workarounds
