@@ -775,19 +775,6 @@ class WallpaperController {
         if (typeof fn === 'function')
             this._stopLoadingHooks.push(fn);
     }
-
-    /**
-     * asd
-     *
-     * @param {string} msg asd
-     * @param {string} callback ads
-     */
-    private _bailOutWithCallback(msg: string, callback?: () => void): void {
-        this._logger.error(msg);
-
-        if (callback)
-            callback();
-    }
 }
 
 export {WallpaperController};
