@@ -3,7 +3,16 @@ import * as SettingsModule from './../settings.js';
 import {BaseAdapter} from './../adapter/baseAdapter.js';
 import {HistoryEntry} from './../history.js';
 
+/**
+ * Adapter for using a single static URL as an image source.
+ */
 class UrlSourceAdapter extends BaseAdapter {
+    /**
+     * Create a new static url adapter.
+     *
+     * @param {string} id Unique ID
+     * @param {string} name Custom name of this adapter
+     */
     constructor(id: string, name: string) {
         super({
             defaultName: 'Static URL',
@@ -14,6 +23,15 @@ class UrlSourceAdapter extends BaseAdapter {
         });
     }
 
+    /**
+     * Retrieves new URLs for images and crafts new HistoryEntries.
+     *
+     * Can internally query the request URL multiple times because only one image will be reported back.
+     *
+     * @param {number} count Number of requested wallpaper
+     * @returns {HistoryEntry[]} Array of crafted HistoryEntries
+     * @throws {HistoryEntry[]} Array of crafted historyEntries, can be empty
+     */
     requestRandomImage(count: number): Promise<HistoryEntry[]> {
         const wallpaperResult: HistoryEntry[] = [];
 

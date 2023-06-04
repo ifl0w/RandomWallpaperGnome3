@@ -1,20 +1,26 @@
+import GLib from 'gi://GLib';
+import Soup from 'gi://Soup';
+
+import {Logger} from './logger.js';
+
 /**
  * A compatibility and convenience wrapper around the Soup API.
  *
  * libSoup is accessed through the SoupBowl wrapper to support libSoup3 and libSoup2.4 simultaneously in the extension
  * runtime and in the preferences window.
  */
-import GLib from 'gi://GLib';
-import Soup from 'gi://Soup';
-
-import {Logger} from './logger.js';
-
 class SoupBowl {
     MessageFlags = Soup.MessageFlags;
 
     private _logger = new Logger('RWG3', 'BaseAdapter');
     private _session = new Soup.Session();
 
+    /**
+     * Send a request with Soup.
+     *
+     * @param {Soup.Message} soupMessage Message to send
+     * @returns {Promise<Uint8Array>} Raw byte answer
+     */
     send_and_receive(soupMessage: Soup.Message): Promise<Uint8Array> {
         if (Soup.get_major_version() === 2)
             return this._send_and_receive_soup24(soupMessage);
@@ -24,11 +30,23 @@ class SoupBowl {
             throw new Error('Unknown libsoup version');
     }
 
+    /**
+     * Craft a new GET request.
+     *
+     * @param {string} uri Request address
+     * @returns {Soup.Message} Crafted message
+     */
     newGetMessage(uri: string): Soup.Message {
         return Soup.Message.new('GET', uri);
     }
 
     // Possibly wrong version here causing ignores to type checks
+    /**
+     * Send a request using Soup 2.4
+     *
+     * @param {Soup.Message} soupMessage Request message
+     * @returns {Promise<Uint8Array>} Raw byte answer
+     */
     private _send_and_receive_soup24(soupMessage: Soup.Message): Promise<Uint8Array> {
         return new Promise((resolve, reject) => {
             // @ts-ignore
@@ -45,6 +63,12 @@ class SoupBowl {
     }
 
     // Possibly wrong version here causing ignores to type checks
+    /**
+     * Send a request using Soup 3.0
+     *
+     * @param {Soup.Message} soupMessage Request message
+     * @returns {Promise<Uint8Array>} Raw byte answer
+     */
     private _send_and_receive_soup30(soupMessage: Soup.Message): Promise<Uint8Array> {
         return new Promise((resolve, reject) => {
             // @ts-ignore

@@ -20,8 +20,10 @@ enum SourceType {
 /* eslint-enable */
 
 /**
+ * Get the string representation of an enum SourceType.
  *
  * @param {SourceType} value The enum value to request
+ * @returns {string} Name of the corresponding source type
  */
 function getSourceTypeName(value: SourceType): string {
     switch (value) {
@@ -95,6 +97,7 @@ function execCheck(argv: string[], cancellable?: Gio.Cancellable | null): Promis
  * Retrieves the file name part of an URI
  *
  * @param {string} uri URI to scan
+ * @returns {string} Filename part
  */
 function fileName(uri: string): string {
     while (_isURIEncoded(uri))
@@ -108,6 +111,7 @@ function fileName(uri: string): string {
 }
 
 /**
+ * Takes a GSettings schema and key to an enum and fills a combo row with it.
  *
  * @param {Adw.ComboRow} comboRow ComboRow to fill and connect
  * @param {Settings} settings Settings schema to scan values for
@@ -133,9 +137,13 @@ function fillComboRowFromEnum(comboRow: Adw.ComboRow, settings: Settings, key: s
 
 // https://stackoverflow.com/a/32859917
 /**
+ * Compare two strings and return the first char they differentiate.
+ *
+ * Begins counting on 0 and returns -1 if the strings are identical.
  *
  * @param {string} str1 String to compare
  * @param {string} str2 String to compare
+ * @returns {number} First different char or -1
  */
 function findFirstDifference(str1: string, str2: string): number {
     let i = 0;
@@ -147,7 +155,9 @@ function findFirstDifference(str1: string, str2: string): number {
 }
 
 /**
+ * Get the amount of currently connected displays.
  *
+ * @returns {number} Connected display count
  */
 function getMonitorCount(): number {
     // Gdk 4.8+
@@ -173,8 +183,10 @@ function getMonitorCount(): number {
 }
 
 /**
+ * Get a random number between 0 and a given value.
  *
  * @param {number} size Maximum
+ * @returns {number} Random number between 0 and $size
  */
 function getRandomNumber(size: number): number {
     // https://stackoverflow.com/a/5915122
@@ -182,8 +194,10 @@ function getRandomNumber(size: number): number {
 }
 
 /**
+ * Check if a string is an URI.
  *
  * @param {string} uri The URI to check
+ * @returns {boolean} Whether the given string is an URI
  */
 function _isURIEncoded(uri: string): boolean {
     uri = uri || '';
@@ -193,9 +207,11 @@ function _isURIEncoded(uri: string): boolean {
 
 // https://stackoverflow.com/a/5767357
 /**
+ * Remove the first matching item of an array.
  *
  * @param {Array<T>} array Array of items
  * @param {T} value Item to remove
+ * @returns {Array<T>} Array with first encountered item removed
  */
 function removeItemOnce<T>(array: T[], value: T): T[] {
     const index = array.indexOf(value);

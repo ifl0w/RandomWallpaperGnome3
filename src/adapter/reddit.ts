@@ -28,7 +28,16 @@ interface RedditSubmission {
     }
 }
 
+/**
+ * Adapter for Reddit image sources.
+ */
 class RedditAdapter extends BaseAdapter {
+    /**
+     * Create a new Reddit adapter.
+     *
+     * @param {string} id Unique ID
+     * @param {string} name Custom name of this adapter
+     */
     constructor(id: string, name: string) {
         super({
             defaultName: 'Reddit',
@@ -39,10 +48,23 @@ class RedditAdapter extends BaseAdapter {
         });
     }
 
+    /**
+     * Replace an HTML &amp with an actual & symbol.
+     *
+     * @param {string} string String to replace in
+     * @returns {string} String with replaced symbols
+     */
     private _ampDecode(string: string): string {
         return string.replace(/&amp;/g, '&');
     }
 
+    /**
+     * Retrieves new URLs for images and crafts new HistoryEntries.
+     *
+     * @param {number} count Number of requested wallpaper
+     * @returns {HistoryEntry[]} Array of crafted HistoryEntries
+     * @throws {HistoryEntry[]} Array of crafted historyEntries, can be empty
+     */
     async requestRandomImage(count: number): Promise<HistoryEntry[]> {
         const wallpaperResult: HistoryEntry[] = [];
         const subreddits = this._settings.getString('subreddits').split(',').map(s => s.trim()).join('+');
@@ -114,6 +136,14 @@ class RedditAdapter extends BaseAdapter {
         return wallpaperResult;
     }
 
+    /**
+     * Check if the response is expected to be a response by Reddit.
+     *
+     * Primarily in use for typescript typing.
+     *
+     * @param {unknown} object Unknown object to narrow down
+     * @returns {boolean} Wether the response is from Reddit
+     */
     private _isRedditResponse(object: unknown): object is RedditResponse {
         if (typeof object === 'object' &&
             object &&

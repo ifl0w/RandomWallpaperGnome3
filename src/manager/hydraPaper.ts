@@ -7,11 +7,19 @@ import {Logger} from '../logger.js';
 import {WallpaperManager} from './wallpaperManager.js';
 import {Settings} from '../settings.js';
 
+/**
+ * Wrapper for HydraPaper using it as a manager.
+ */
 class HydraPaper implements WallpaperManager {
     private _command: string[] | null = null;
     private _cancellable: Gio.Cancellable | null = null;
     private _logger = new Logger('RWG3', 'HydraPaper');
 
+    /**
+     * Checks if Superpaper is available in the $PATH.
+     *
+     * @returns {boolean} Whether Superpaper is found
+     */
     isAvailable(): boolean {
         if (this._command !== null)
             return true;
@@ -31,6 +39,9 @@ class HydraPaper implements WallpaperManager {
         return this._command !== null;
     }
 
+    /**
+     * Forcefully stop a previously started HydraPaper process.
+     */
     cancelRunning(): void {
         if (this._cancellable === null)
             return;
@@ -43,11 +54,13 @@ class HydraPaper implements WallpaperManager {
     /**
      * Run HydraPaper in CLI mode.
      *
-     * HydraPaper will combine all images in wallpaperArray into a single image and save
-     * it into the users cache folder.
-     * Afterward HydraPaper will set the mode to 'spanned' and the 'picture-uri' or 'picture-uri-dark'.
+     * HydraPaper:
+     * - Saves merged images in the cache folder.
+     * - Sets picture-option to spanned
+     * - Sets picture-uri or picture-uri-dark depending on $darkmode
+     * - Needs matching image path count and display count
      *
-     * @param {string[]} wallpaperArray Array of image paths
+     * @param {string[]} wallpaperArray Array of image paths, should match the display count
      * @param {boolean} darkmode Use darkmode, gives different image in cache path
      */
     private async _run(wallpaperArray: string[], darkmode: boolean = false): Promise<void> {
@@ -76,6 +89,19 @@ class HydraPaper implements WallpaperManager {
         this._cancellable = null;
     }
 
+    /**
+     * Set the wallpapers for a given mode.
+     *
+     * Modes:
+     * - 0: Background
+     * - 1: Lock screen
+     * - 2: Background and lock screen
+     *
+     * @param {string[]} wallpaperPaths Array of paths to the desired wallpapers, should match the display count
+     * @param {number} mode Enum indicating what images to change
+     * @param {Settings} backgroundSettings Settings object containing the background settings
+     * @param {Settings} screensaverSettings Settings object containing the screensaver/lockscreen settings
+     */
     async setWallpaper(wallpaperPaths: string[], mode: number, backgroundSettings?: Settings, screensaverSettings?: Settings): Promise<void> {
         if ((mode === 0 || mode === 2) && backgroundSettings) {
             await this._run(wallpaperPaths);
