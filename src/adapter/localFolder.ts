@@ -10,7 +10,16 @@ import {HistoryEntry} from './../history.js';
 // https://gjs.guide/guides/gjs/asynchronous-programming.html#promisify-helper
 Gio._promisify(Gio.File.prototype, 'copy_async', 'copy_finish');
 
+/**
+ * Adapter for fetching from the local filesystem.
+ */
 class LocalFolderAdapter extends BaseAdapter {
+    /**
+     * Create a new local folder adapter.
+     *
+     * @param {string} id Unique ID
+     * @param {string} name Custom name of this adapter
+     */
     constructor(id: string, name: string) {
         super({
             defaultName: 'Local Folder',
@@ -21,6 +30,13 @@ class LocalFolderAdapter extends BaseAdapter {
         });
     }
 
+    /**
+     * Retrieves new URLs for images and crafts new HistoryEntries.
+     *
+     * @param {number} count Number of requested wallpaper
+     * @returns {HistoryEntry[]} Array of crafted HistoryEntries
+     * @throws {HistoryEntry[]} Array of crafted historyEntries, can be empty
+     */
     requestRandomImage(count: number): Promise<HistoryEntry[]> {
         return new Promise((resolve, reject) => {
             const folder = Gio.File.new_for_path(this._settings.getString('folder'));
@@ -59,6 +75,12 @@ class LocalFolderAdapter extends BaseAdapter {
         });
     }
 
+    /**
+     * Copies a file from the filesystem to the destination folder.
+     *
+     * @param {HistoryEntry} historyEntry The historyEntry to fetch
+     * @returns {Promise<HistoryEntry>} unaltered HistoryEntry
+     */
     async fetchFile(historyEntry: HistoryEntry): Promise<HistoryEntry> {
         const sourceFile = Gio.File.new_for_uri(historyEntry.source.imageDownloadUrl);
         const targetFile = Gio.File.new_for_path(historyEntry.path);
@@ -74,6 +96,12 @@ class LocalFolderAdapter extends BaseAdapter {
     }
 
     // https://gjs.guide/guides/gio/file-operations.html#recursively-deleting-a-directory
+    /**
+     * Walk recursively through a folder and retrieve a list of all images.
+     *
+     * @param {Gio.File} directory Directory to scan
+     * @returns {Gio.File[]} List of images
+     */
     private _listDirectory(directory: Gio.File): Gio.File[] {
         const iterator = directory.enumerate_children('standard::*', Gio.FileQueryInfoFlags.NONE, null);
 

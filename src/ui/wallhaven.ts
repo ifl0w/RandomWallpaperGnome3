@@ -59,6 +59,14 @@ const WallhavenSettingsGroup = GObject.registerClass({
     private _colorDialog: Gtk.ColorChooserDialog | undefined;
     private _settings;
 
+    /**
+     * Craft a new adapter using an unique ID.
+     *
+     * Previously saved settings will be used if the adapter and ID match.
+     *
+     * @param {Partial<Adw.PreferencesGroup.ConstructorProperties> | undefined} params Properties for Adw.PreferencesGroup or undefined
+     * @param {string} id Unique ID
+     */
     constructor(params: Partial<Adw.PreferencesGroup.ConstructorProperties> | undefined, id: string) {
         super(params);
 
@@ -154,6 +162,9 @@ const WallhavenSettingsGroup = GObject.registerClass({
         });
     }
 
+    /**
+     * Clear all config options associated to this specific adapter.
+     */
     clearConfig(): void {
         this._settings.resetSchema();
     }

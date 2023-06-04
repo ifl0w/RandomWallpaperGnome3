@@ -36,6 +36,14 @@ const UnsplashSettingsGroup = GObject.registerClass({
 
     private _settings;
 
+    /**
+     * Craft a new adapter using an unique ID.
+     *
+     * Previously saved settings will be used if the adapter and ID match.
+     *
+     * @param {Partial<Adw.PreferencesGroup.ConstructorProperties> | undefined} params Properties for Adw.PreferencesGroup or undefined
+     * @param {string} id Unique ID
+     */
     constructor(params: Partial<Adw.PreferencesGroup.ConstructorProperties> | undefined, id: string) {
         super(params);
 
@@ -93,6 +101,13 @@ const UnsplashSettingsGroup = GObject.registerClass({
         });
     }
 
+    /**
+     * Switch element sensitivity based on a selected combo row entry.
+     *
+     * @param {Adw.ComboRow} comboRow ComboRow with selected entry
+     * @param {boolean} enable Wether to make the element sensitive
+     * @param {Gtk.Widget} targetElement The element to target the sensitivity setting
+     */
     private _unsplashUnconstrained(comboRow: Adw.ComboRow, enable: boolean, targetElement: Gtk.Widget): void {
         if (comboRow.selected === 0)
             targetElement.set_sensitive(enable);
@@ -100,6 +115,9 @@ const UnsplashSettingsGroup = GObject.registerClass({
             targetElement.set_sensitive(!enable);
     }
 
+    /**
+     * Clear all config options associated to this specific adapter.
+     */
     clearConfig(): void {
         this._settings.resetSchema();
     }

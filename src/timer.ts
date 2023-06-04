@@ -16,6 +16,11 @@ class AFTimer {
     private _minutes = 30;
     private _paused = false;
 
+    /**
+     * Get the timer singleton.
+     *
+     * @returns {AFTimer} Timer object
+     */
     static getTimer(): AFTimer {
         if (!this._afTimerInstance)
             this._afTimerInstance = new AFTimer();
@@ -23,6 +28,9 @@ class AFTimer {
         return this._afTimerInstance;
     }
 
+    /**
+     * Remove the timer singleton.
+     */
     static destroy(): void {
         if (this._afTimerInstance)
             this._afTimerInstance.cleanup();
@@ -50,10 +58,20 @@ class AFTimer {
         void this.start();
     }
 
+    /**
+     * Check if the timer is currently set as activated.
+     *
+     * @returns {boolean} Wether the timer is activated
+     */
     isActive(): boolean {
         return this._settings.getBoolean('auto-fetch');
     }
 
+    /**
+     * Check if the timer is currently paused.
+     *
+     * @returns {boolean} Wether the timer is paused
+     */
     isPaused(): boolean {
         return this._paused;
     }
@@ -71,12 +89,24 @@ class AFTimer {
         this.cleanup();
     }
 
+    /**
+     * Get the minutes until the timer activates.
+     *
+     * @returns {number} Minutes to activation
+     */
     remainingMinutes(): number {
         const minutesElapsed = this._minutesElapsed();
         const remainder = minutesElapsed % this._minutes;
         return Math.max(this._minutes - remainder, 0);
     }
 
+    /**
+     * Register a function which gets called on timer activation.
+     *
+     * Overwrites previously registered function.
+     *
+     * @param {() => Promise<void>} callback Function to call
+     */
     registerCallback(callback: () => Promise<void>): void {
         this._timeoutEndCallback = callback;
     }
@@ -166,13 +196,17 @@ class AFTimer {
     }
 
     /**
-     * Sets the last activation time to [now]. This doesn't affect already running timer
-     * and will be ignored if the timer is paused.
+     * Sets the last activation time to [now]. This doesn't affect an already running timer.
      */
     private _reset(): void {
         this._settings.setInt64('timer-last-trigger', new Date().getTime());
     }
 
+    /**
+     * Get the elapsed minutes since the last timer activation.
+     *
+     * @returns {number} Elapsed time in minutes
+     */
     private _minutesElapsed(): number {
         const now = Date.now();
         const last: number = this._settings.getInt64('timer-last-trigger');
@@ -184,6 +218,11 @@ class AFTimer {
         return Math.floor(elapsed / (60 * 1000));
     }
 
+    /**
+     * Checks if the configured timer interval has surpassed since the last timer activation.
+     *
+     * @returns {boolean} Whether the interval was surpassed
+     */
     private _surpassedInterval(): boolean {
         const now = Date.now();
         const last = this._settings.getInt64('timer-last-trigger');

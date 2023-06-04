@@ -7,6 +7,9 @@ import {HistoryEntry} from './../history.js';
 /** How many times the service should be queried at maximum. */
 const MAX_SERVICE_RETRIES = 5;
 
+/**
+ * Adapter for image sources using Unsplash.
+ */
 class UnsplashAdapter extends BaseAdapter {
     private _sourceUrl = 'https://source.unsplash.com';
 
@@ -20,6 +23,12 @@ class UnsplashAdapter extends BaseAdapter {
         'constraintValue': '',
     };
 
+    /**
+     * Create a new Unsplash adapter.
+     *
+     * @param {string} id Unique ID
+     * @param {string} name Custom name of this adapter
+     */
     constructor(id: string | null, name: string | null) {
         super({
             defaultName: 'Unsplash',
@@ -30,6 +39,12 @@ class UnsplashAdapter extends BaseAdapter {
         });
     }
 
+    /**
+     * Retrieves a new URL for an image and crafts new HistoryEntry.
+     *
+     * @returns {HistoryEntry} Crafted HistoryEntry
+     * @throws {Error} Error with description
+     */
     private async _getHistoryEntry(): Promise<HistoryEntry> {
         this._readOptionsFromSettings();
         const optionsString = this._generateOptionsString();
@@ -67,6 +82,15 @@ class UnsplashAdapter extends BaseAdapter {
         return historyEntry;
     }
 
+    /**
+     * Retrieves new URLs for images and crafts new HistoryEntries.
+     *
+     * Can internally query the request URL multiple times because only one image will be reported back.
+     *
+     * @param {number} count Number of requested wallpaper
+     * @returns {HistoryEntry[]} Array of crafted HistoryEntries
+     * @throws {HistoryEntry[]} Array of crafted historyEntries, can be empty
+     */
     async requestRandomImage(count: number): Promise<HistoryEntry[]> {
         const wallpaperResult: HistoryEntry[] = [];
 
@@ -95,6 +119,13 @@ class UnsplashAdapter extends BaseAdapter {
         return wallpaperResult;
     }
 
+    /**
+     * Create an option string based on user settings.
+     *
+     * Does not refresh settings itself.
+     *
+     * @returns {string} Options string
+     */
     private _generateOptionsString(): string {
         const options = this._options;
         let optionsString = '';
@@ -128,6 +159,9 @@ class UnsplashAdapter extends BaseAdapter {
         return optionsString;
     }
 
+    /**
+     * Freshly read the user settings options.
+     */
     private _readOptionsFromSettings(): void {
         this._options.w = this._settings.getInt('image-width');
         this._options.h = this._settings.getInt('image-height');
