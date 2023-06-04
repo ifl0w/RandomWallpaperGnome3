@@ -13,6 +13,7 @@ import type * as SettingsNamespace from './settings.js';
 import type * as UtilsNamespace from './utils.js';
 import type * as LoggerNamespace from './logger.js';
 import type * as SourceRowNamespace from './ui/sourceRow.js';
+import type {ExtensionMeta} from 'ExtensionMeta';
 
 let Settings: typeof SettingsNamespace;
 let Utils: typeof UtilsNamespace;
@@ -25,7 +26,7 @@ const Self = ExtensionUtils.getCurrentExtension();
  *
  */
 // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
-function init(): void {
+function init(unusedMeta: ExtensionMeta): void {
     // Convenience.initTranslations();
 }
 
