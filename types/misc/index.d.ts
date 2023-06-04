@@ -113,3 +113,35 @@ declare interface GjsMiscImports {
 declare interface GjsImports {
     misc: GjsMiscImports;
 }
+
+declare module 'ExtensionMeta' {
+    import type {File} from 'gi://Gio';
+
+    /**
+     * An object describing the extension and various properties available for extensions to use.
+     *
+     * Some properties may only be available in some versions of GNOME Shell, while others may not be meant for extension authors to use. All properties should be considered read-only.
+     */
+    export class ExtensionMeta {
+        /** the metadata.json file, parsed as JSON */
+        readonly metadata: unknown;
+        /** the extension UUID */
+        readonly uuid: string;
+        /** the extension type; `1` for system, `2` for user */
+        readonly type: number;
+        /** the extension directory */
+        readonly dir: File;
+        /** the extension directory path */
+        readonly path: string;
+        /** an error message or an empty string if no error */
+        readonly error: string;
+        /** whether the extension has a preferences dialog */
+        readonly hasPrefs: boolean;
+        /** whether the extension has a pending update */
+        readonly hasUpdate: boolean;
+        /** whether the extension can be enabled/disabled */
+        readonly canChange: boolean;
+        /** a list of supported session modes */
+        readonly sessionModes: string[];
+    }
+}
