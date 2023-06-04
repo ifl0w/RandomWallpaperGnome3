@@ -119,21 +119,6 @@ abstract class BaseAdapter {
 
         return false;
     }
-
-    // eslint-disable-next-line no-unused-vars
-    /**
-     * asd
-     *
-     * @param {string} err asd
-     * @param {string} callback asd
-     */
-    protected _error(err: string, callback?: (element: null, error: { error: string }) => void): void {
-        const error = {error: err};
-        this._logger.error(JSON.stringify(error));
-
-        if (callback)
-            callback(null, error);
-    }
 }
 
 export {BaseAdapter};
