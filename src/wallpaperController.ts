@@ -33,6 +33,9 @@ interface RandomAdapterResult {
             imageCount: number
         }
 
+/**
+ * The main wallpaper handler.
+ */
 class WallpaperController {
     wallpaperLocation: string;
     prohibitNewWallpaper = false;
@@ -52,6 +55,12 @@ class WallpaperController {
     /** functions will be called when loading a new wallpaper stopped. */
     private _stopLoadingHooks: (() => void)[] = [];
 
+    /**
+     * Create a new controller.
+     *
+     * Should only exists once to avoid weird shenanigans because the extension background
+     * and preferences page existing in two different contexts.
+     */
     constructor() {
         let xdg_cache_home = GLib.getenv('XDG_CACHE_HOME');
         if (!xdg_cache_home) {
@@ -127,6 +136,9 @@ class WallpaperController {
         }
     }
 
+    /**
+     * Empty the history. (Background settings observer edition)
+     */
     private _clearHistory(): void {
         if (this._backendConnection.getBoolean('clear-history')) {
             this.update();
@@ -135,6 +147,9 @@ class WallpaperController {
         }
     }
 
+    /**
+     * Open the internal wallpaper cache folder. (Background settings observer edition)
+     */
     private _openFolder(): void {
         if (this._backendConnection.getBoolean('open-folder')) {
             const uri = GLib.filename_to_uri(this.wallpaperLocation, '');
@@ -143,6 +158,9 @@ class WallpaperController {
         }
     }
 
+    /**
+     * Pause or resume the timer. (Background settings observer edition)
+     */
     private _pauseTimer(): void {
         if (this._backendConnection.getBoolean('pause-timer')) {
             this._timer.pause();
@@ -163,6 +181,9 @@ class WallpaperController {
         }
     }
 
+    /**
+     * Get a fresh wallpaper. (Background settings observer edition)
+     */
     private async _requestNewWallpaper(): Promise<void> {
         if (this._backendConnection.getBoolean('request-new-wallpaper')) {
             this.update();
@@ -175,10 +196,18 @@ class WallpaperController {
         }
     }
 
+    /**
+     * Update the history.
+     *
+     * Loads from settings.
+     */
     private _updateHistory(): void {
         this._historyController.load();
     }
 
+    /**
+     * Update settings related to the auto fetching.
+     */
     private _updateAutoFetching(): void {
         let duration = 0;
         duration += this._settings.getInt('minutes');
@@ -186,7 +215,6 @@ class WallpaperController {
         this._autoFetch.duration = duration;
         this._autoFetch.active = this._settings.getBoolean('auto-fetch');
 
-        // only start timer if not in context of preferences window
         if (this._autoFetch.active) {
             this._timer.registerCallback(() => {
                 return this.fetchNewWallpaper();
@@ -201,10 +229,14 @@ class WallpaperController {
     }
 
     /**
-     randomly returns an enabled and configured SourceAdapter
-     returns a default UnsplashAdapter in case of failure
+     * Get an array of random adapter needed to fill the display $count.
      *
-     * @param {number} count The amount of adapter requested
+     * A single adapter can be assigned for multiple images so you may get less than $count adapter back.
+     *
+     * Returns a default UnsplashAdapter in case of failure.
+     *
+     * @param {number} count The amount of wallpaper requested
+     * @returns {RandomAdapterResult[]} Array of info objects how many images are needed for each adapter
      */
     private _getRandomAdapter(count: number): RandomAdapterResult[] {
         const sourceIDs = this._getRandomSource(count);
@@ -221,9 +253,11 @@ class WallpaperController {
         }
 
         /**
+         * Check if we've chosen the same adapter type before.
          *
          * @param {RandomAdapterResult[]} array Array of already chosen adapter
          * @param {number} type Type of the source
+         * @returns {RandomAdapterResult | null} Found adapter or null
          */
         function _arrayIncludes(array: RandomAdapterResult[], type: number): RandomAdapterResult | null {
             for (const element of array) {
@@ -294,9 +328,12 @@ class WallpaperController {
     }
 
     /**
+     * Gets randomly $count amount of enabled sources.
+     *
+     * The same source can appear multiple times in the resulting array.
      *
      * @param {number} count Amount of requested source IDs
-     * @returns Array of source IDs or ['-1'] in case of failure
+     * @returns {string[]} Array of source IDs or ['-1'] in case of failure
      */
     private _getRandomSource(count: number): string[] {
         const sourceResult: string[] = [];
@@ -384,7 +421,9 @@ class WallpaperController {
         }
     }
 
-    // Run general post command
+    /**
+     * Run a configured post command.
+     */
     private _runPostCommands(): void {
         const backgroundSettings = new SettingsModule.Settings('org.gnome.desktop.background');
         const commandString = this._settings.getString('general-post-command');
@@ -403,6 +442,13 @@ class WallpaperController {
         }
     }
 
+    /**
+     * Fill an array with images from the history until $count.
+     *
+     * @param {string[]} wallpaperArray Array of wallpaper paths
+     * @param {number | undefined} requestCount Amount of wallpaper paths $wallpaperArray should contain, defaults to the value reported by _getCurrentDisplayCount()
+     * @returns {string[]} Array of wallpaper paths matching the length of $count
+     */
     private _fillDisplaysFromHistory(wallpaperArray: string[], requestCount?: number): string[] {
         const count = requestCount ?? this._getCurrentDisplayCount();
         const newWallpaperArray: string[] = [...wallpaperArray];
@@ -423,6 +469,11 @@ class WallpaperController {
         return newWallpaperArray.slice(0, count);
     }
 
+    /**
+     * Set an existing history entry as wallpaper.
+     *
+     * @param {string} historyId Unique ID
+     */
     async setWallpaper(historyId: string): Promise<void> {
         const historyElement = this._historyController.get(historyId);
 
@@ -449,6 +500,9 @@ class WallpaperController {
         // TODO: Error handling history id not found.
     }
 
+    /**
+     * Fetch fresh wallpaper.
+     */
     async fetchNewWallpaper(): Promise<void> {
         this._startLoadingHooks.forEach(element => element());
 
@@ -552,6 +606,16 @@ class WallpaperController {
     }
 
     // TODO: Change to original historyElement if more variable get exposed
+    /**
+     * Get a command array from a string.
+     *
+     * Fills variables if found:
+     * - %wallpaper_path%
+     *
+     * @param {string} commandString String to parse an array from
+     * @param {string} historyElementPath Wallpaper path to fill into the variable
+     * @returns {string[] | null} Command array or null
+     */
     private _getCommandArray(commandString: string, historyElementPath: string): string[] | null {
         let string = commandString;
         if (string === '')
@@ -582,8 +646,10 @@ class WallpaperController {
     /**
      * Get the current number of displays.
      *
-     * This also takes the user setting and HydraPaper availability into account
+     * This also takes the user setting and wallpaper manager availability into account
      * and lies accordingly by reporting only 1 display.
+     *
+     * @returns {number} Amount of currently activated displays or 1
      */
     private _getCurrentDisplayCount(): number {
         if (!this._settings.getBoolean('multiple-displays'))
@@ -595,6 +661,15 @@ class WallpaperController {
         return Utils.getMonitorCount();
     }
 
+    /**
+     * Set a background after a $delay
+     *
+     * Prohibits quick wallpaper changing by blocking additional change requests
+     * within a timeout.
+     *
+     * @param {string[] | undefined} paths Array of wallpaper paths
+     * @param {number | undefined} delay Delay, defaults to 200ms
+     */
     private _backgroundTimeout(paths?: string[], delay?: number): void {
         if (this._timeout || !paths)
             return;
@@ -621,52 +696,92 @@ class WallpaperController {
         });
     }
 
+    /**
+     * Preview an image in the history.
+     *
+     * @param {string} historyId Unique ID
+     * @param {number} delay Delay, defaults to 200ms
+     */
     previewWallpaper(historyId: string, delay?: number): void {
         if (!this._settings.getBoolean('disable-hover-preview')) {
             this._previewId = historyId;
             this._resetWallpaper = false;
 
             // Do not fill other displays here.
-            // This is so HydraPaper will not overwrite the current merged background path
-            // with the preview image.
-            // We could move the image to a safe place with caveats:
-            // * temporarily (seems expensive for a simple preview)
-            // TODO: verify: * permanently (would break HydraPaperDaemon)
+            // Merging images can take a long time and hurt the quick preview purpose.
+            // Therefor only an array with a single wallpaper path here:
             const newWallpaperPaths = [this.wallpaperLocation + this._previewId];
 
             this._backgroundTimeout(newWallpaperPaths, delay);
         }
     }
 
+    /**
+     * Set the wallpaper to an URI.
+     *
+     * @param {string} uri Wallpaper URI
+     */
     resetWallpaper(uri: string): void {
         if (!this._settings.getBoolean('disable-hover-preview')) {
             this._resetWallpaper = true;
+            // FIXME: With an already running timeout this reset request will be ignored
             this._backgroundTimeout([GLib.filename_from_uri(uri)[0]]);
         }
     }
 
+    /**
+     * Get the HistoryController.
+     *
+     * @returns {HistoryModule.HistoryController} The history controller
+     */
     getHistoryController(): HistoryModule.HistoryController {
         return this._historyController;
     }
 
+    /**
+     * Empty the history.
+     */
     deleteHistory(): void {
         this._historyController.clear();
     }
 
+    /**
+     * Update the history.
+     */
     update(): void {
         this._updateHistory();
     }
 
+    /**
+     * Register a function which gets called on wallpaper fetching.
+     *
+     * Can take multiple hooks.
+     *
+     * @param {() => void} fn Function to call
+     */
     registerStartLoadingHook(fn: () => void): void {
         if (typeof fn === 'function')
             this._startLoadingHooks.push(fn);
     }
 
+    /**
+     * Register a function which gets called when done wallpaper fetching.
+     *
+     * Can take multiple hooks.
+     *
+     * @param {() => void} fn Function to call
+     */
     registerStopLoadingHook(fn: () => void): void {
         if (typeof fn === 'function')
             this._stopLoadingHooks.push(fn);
     }
 
+    /**
+     * asd
+     *
+     * @param {string} msg asd
+     * @param {string} callback ads
+     */
     private _bailOutWithCallback(msg: string, callback?: () => void): void {
         this._logger.error(msg);
 

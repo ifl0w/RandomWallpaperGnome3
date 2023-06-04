@@ -23,7 +23,9 @@ let SourceRow: typeof SourceRowNamespace.SourceRow;
 const Self = ExtensionUtils.getCurrentExtension();
 
 /**
+ * Like `extension.js` this is used for any one-time setup like translations.
  *
+ * @param {ExtensionMeta} unusedMeta - An extension meta object, https://gjs.guide/extensions/overview/anatomy.html#extension-meta-object
  */
 // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
 function init(unusedMeta: ExtensionMeta): void {
@@ -38,8 +40,13 @@ function init(unusedMeta: ExtensionMeta): void {
 // https://gjs.guide/extensions/development/preferences.html#preferences-window
 // Gnome 42+
 /**
+ * This function is called when the preferences window is first created to fill
+ * the `Adw.PreferencesWindow`.
  *
- * @param {Adw.PreferencesWindow} window Window the extension should fill
+ * This function will only be called by GNOME 42 and later. If this function is
+ * present, `buildPrefsWidget()` will NOT be called.
+ *
+ * @param {Adw.PreferencesWindow} window - The preferences window
  */
 // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
 function fillPreferencesWindow(window: InstanceType<typeof Adw.PreferencesWindow>): void {
@@ -51,14 +58,9 @@ function fillPreferencesWindow(window: InstanceType<typeof Adw.PreferencesWindow
     new RandomWallpaperSettings(window, tmpPage);
 }
 
-// 40 < Gnome < 42
-// function buildPrefsWidget() {
-// let window = new Adw.PreferencesWindow();
-// new RandomWallpaperSettings(window);
-// return window;
-// }
-
-/* UI Setup */
+/**
+ * Main settings class for everything related to the settings window.
+ */
 class RandomWallpaperSettings {
     private _logger!: LoggerNamespace.Logger;
     private _settings!: SettingsNamespace.Settings;
@@ -68,6 +70,14 @@ class RandomWallpaperSettings {
     private _builder = new Gtk.Builder();
     private _saveDialog: InstanceType<typeof Gtk.FileChooserNative> | undefined;
 
+    /**
+     * Create a new ui settings class.
+     *
+     * Replaces the placeholder $tmpPage once the modules are loaded and the real pages are available.
+     *
+     * @param {Adw.PreferencesWindow} window Window to fill with settings
+     * @param {Adw.PreferencesPage} tmpPage Placeholder settings page to replace
+     */
     constructor(window: InstanceType<typeof Adw.PreferencesWindow>, tmpPage: InstanceType<typeof Adw.PreferencesPage>) {
         // Dynamically load own modules. This allows us to use proper ES6 Modules
         this._importModules().then(() => {
@@ -160,15 +170,16 @@ class RandomWallpaperSettings {
     }
 
     /**
-     * Import modules ES6 style instead the built-in gjs style.
-     * Allows proper async/await in imported modules.
+     * Import helper function.
+     *
+     * Loads all required modules async.
+     * This allows to omit the legacy GJS style imports (`const asd = imports.gi.asd`)
+     * and use proper modules for subsequent files.
+     *
+     * When the shell allows proper modules for loaded files (extension.js and prefs.js)
+     * this function can be removed and replaced by normal import statements.
      */
     private async _importModules(): Promise<void> {
-        // All imports as dynamic loads to work around the fact this module won't be in a topmost
-        // context inside the gnome shell and can't use import statements (yet).
-        // PopOS' tiling extension and RoundedCorners Extension work around the above limitation by
-        // manually rewriting the exported javascript file. We also have to do this but
-        // not for our own modules.
         const loggerPromise = import('./logger.js');
         const utilsPromise = import('./utils.js');
         const sourceRowPromise = import('./ui/sourceRow.js');
@@ -182,6 +193,9 @@ class RandomWallpaperSettings {
         Settings = moduleSettings;
     }
 
+    /**
+     * Bind button clicks to logic.
+     */
     private _bindButtons(): void {
         const newWallpaperButton: InstanceType<typeof Adw.ActionRow> = this._builder.get_object('request_new_wallpaper');
         const newWallpaperButtonLabel = newWallpaperButton.get_child() as InstanceType<typeof Gtk.Label> | null;
@@ -218,6 +232,11 @@ class RandomWallpaperSettings {
         });
     }
 
+    /**
+     * Bind button clicks related to the history.
+     *
+     * @param {Adw.PreferencesWindow} window Preferences window
+     */
     private _bindHistorySection(window: InstanceType<typeof Adw.PreferencesWindow>): void {
         const entryRow = this._builder.get_object<InstanceType<typeof Adw.EntryRow>>('row_favorites_folder');
         entryRow.text = this._settings.getString('favorites-folder');
@@ -293,6 +312,9 @@ class RandomWallpaperSettings {
         });
     }
 
+    /**
+     * Save all configured sources to the settings.
+     */
     private _saveSources(): void {
         this._settings.setStrv('sources', this._sources);
     }

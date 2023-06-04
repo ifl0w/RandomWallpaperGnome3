@@ -6,6 +6,7 @@ env:
 extends:
   - 'eslint:recommended'
   - 'plugin:@typescript-eslint/recommended-requiring-type-checking'
+  - 'plugin:jsdoc/recommended-typescript-error'
 parser: "@typescript-eslint/parser"
 plugins:
   - jsdoc
@@ -73,7 +74,13 @@ rules:
   jsdoc/check-tag-names: error
   jsdoc/check-types: error
   jsdoc/implements-on-classes: error
-  jsdoc/require-jsdoc: error
+  jsdoc/no-types: off
+  jsdoc/require-description: error
+  jsdoc/require-jsdoc:
+    - error
+    - require:
+        ClassDeclaration: true
+        MethodDefinition: true
   jsdoc/require-param: error
   jsdoc/require-param-description: error
   jsdoc/require-param-name: error
@@ -122,7 +129,8 @@ rules:
     - error
     - allow:
       - '!!'
-  no-invalid-this: error
+  no-invalid-this: off
+  "@typescript-eslint/no-invalid-this": "error"
   no-iterator: error
   no-label-var: error
   no-lonely-if: error

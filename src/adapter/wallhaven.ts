@@ -25,6 +25,9 @@ interface WallhavenSearchResponse {
     }[]
 }
 
+/**
+ * Adapter for Wallhaven image sources.
+ */
 class WallhavenAdapter extends BaseAdapter {
     private _options: QueryOptions = {
         q: '',
@@ -37,6 +40,12 @@ class WallhavenAdapter extends BaseAdapter {
         colors: '',
     };
 
+    /**
+     * Create a new wallhaven adapter.
+     *
+     * @param {string} id Unique ID
+     * @param {string} name Custom name of this adapter
+     */
     constructor(id: string, name: string) {
         super({
             id,
@@ -47,6 +56,13 @@ class WallhavenAdapter extends BaseAdapter {
         });
     }
 
+    /**
+     * Retrieves new URLs for images and crafts new HistoryEntries.
+     *
+     * @param {number} count Number of requested wallpaper
+     * @returns {HistoryEntry[]} Array of crafted HistoryEntries
+     * @throws {HistoryEntry[]} Array of crafted historyEntries, can be empty
+     */
     async requestRandomImage(count: number): Promise<HistoryEntry[]> {
         const wallpaperResult: HistoryEntry[] = [];
 
@@ -106,6 +122,14 @@ class WallhavenAdapter extends BaseAdapter {
         return wallpaperResult;
     }
 
+    /**
+     * Create an option string based on user settings.
+     *
+     * Does not refresh settings itself.
+     *
+     * @param {QueryOptions} options Options to check
+     * @returns {string} Options string
+     */
     private _generateOptionsString<T extends QueryOptions>(options: T): string {
         let optionsString = '';
 
@@ -121,6 +145,14 @@ class WallhavenAdapter extends BaseAdapter {
         return optionsString;
     }
 
+    /**
+     * Check if the response is expected to be a response by Wallhaven.
+     *
+     * Primarily in use for typescript typing.
+     *
+     * @param {unknown} object Unknown object to narrow down
+     * @returns {boolean} Wether the response is from Reddit
+     */
     private _isWallhavenResponse(object: unknown): object is WallhavenSearchResponse {
         if (typeof object === 'object' &&
             object &&
@@ -132,6 +164,9 @@ class WallhavenAdapter extends BaseAdapter {
         return false;
     }
 
+    /**
+     * Freshly read the user settings options.
+     */
     private _readOptionsFromSettings(): void {
         const keywords = this._settings.getString('keyword').split(',');
         if (keywords.length > 0) {

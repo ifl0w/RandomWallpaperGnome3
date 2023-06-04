@@ -7,11 +7,19 @@ import {Logger} from './../logger.js';
 import {Settings} from './../settings.js';
 import {WallpaperManager} from './wallpaperManager.js';
 
+/**
+ * Wrapper for Superpaper using it as a manager.
+ */
 class Superpaper implements WallpaperManager {
     private _command: string[] | null = null;
     private _cancellable: Gio.Cancellable | null = null;
     private _logger = new Logger('RWG3', 'Superpaper');
 
+    /**
+     * Checks if Superpaper is available in the $PATH.
+     *
+     * @returns {boolean} Whether Superpaper is found
+     */
     isAvailable(): boolean {
         if (this._command !== null)
             return true;
@@ -25,6 +33,9 @@ class Superpaper implements WallpaperManager {
         return false;
     }
 
+    /**
+     * Forcefully stop a previously started Superpaper process.
+     */
     cancelRunning(): void {
         if (!this._cancellable)
             return;
@@ -34,6 +45,19 @@ class Superpaper implements WallpaperManager {
         this._cancellable = null;
     }
 
+    /**
+     * Set the wallpapers for a given mode.
+     *
+     * Modes:
+     * - 0: Background
+     * - 1: Lock screen
+     * - 2: Background and lock screen
+     *
+     * @param {string[]} wallpaperPaths Array of paths to the desired wallpapers, should match the display count
+     * @param {number} mode Enum indicating what images to change
+     * @param {Settings} backgroundSettings Settings object containing the background settings
+     * @param {Settings} screensaverSettings Settings object containing the screensaver/lockscreen settings
+     */
     async setWallpaper(wallpaperPaths: string[], mode: number, backgroundSettings: Settings, screensaverSettings: Settings): Promise<void> {
         if ((mode === 0 || mode === 2) && backgroundSettings)
             await this._run(wallpaperPaths);
@@ -60,10 +84,17 @@ class Superpaper implements WallpaperManager {
     }
 
     // https://github.com/hhannine/superpaper/blob/master/docs/cli-usage.md
-    // * Saves merged images alternating in "$XDG_CACHE_HOME/superpaper/temp/cli-{a,b}.png"
-    // * Sets picture-option to spanned
-    // * Sets both picture-uri options
-    // * Can use only single images
+    /**
+     * Run Superpaper in CLI mode.
+     *
+     * Superpaper:
+     * - Saves merged images alternating in "$XDG_CACHE_HOME/superpaper/temp/cli-{a,b}.png"
+     * - Sets picture-option to spanned
+     * - Sets both picture-uri options, light and dark
+     * - Can use only single images
+     *
+     * @param {string[]} wallpaperArray Array of paths to the desired wallpapers, should match the display count, can be a single image
+     */
     private async _run(wallpaperArray: string[]): Promise<void> {
         // Cancel already running processes before starting new ones
         this.cancelRunning();

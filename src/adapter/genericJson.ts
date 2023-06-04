@@ -7,11 +7,22 @@ import {HistoryEntry} from './../history.js';
 
 /** How many times the service should be queried at maximum. */
 const MAX_SERVICE_RETRIES = 5;
-/** How many times we should try to get a new image from an array.
- *  No new request are being made. */
+/**
+ * How many times we should try to get a new image from an array.
+ * No new request are being made.
+ */
 const MAX_ARRAY_RETRIES = 5;
 
+/**
+ * Adapter for generic JSON image sources.
+ */
 class GenericJsonAdapter extends BaseAdapter {
+    /**
+     * Create a new generic json adapter.
+     *
+     * @param {string} id Unique ID
+     * @param {string} name Custom name of this adapter
+     */
     constructor(id: string, name: string) {
         super({
             defaultName: 'Generic JSON Source',
@@ -22,6 +33,13 @@ class GenericJsonAdapter extends BaseAdapter {
         });
     }
 
+    /**
+     * Retrieves new URLs for images and crafts new HistoryEntries.
+     *
+     * @param {number} count Number of requested wallpaper
+     * @returns {HistoryEntry[]} Array of crafted HistoryEntries
+     * @throws {HistoryEntry[]} Array of crafted historyEntries, can be empty
+     */
     private async _getHistoryEntry(count: number): Promise<HistoryEntry[]> {
         const wallpaperResult: HistoryEntry[] = [];
 
@@ -113,6 +131,15 @@ class GenericJsonAdapter extends BaseAdapter {
         return wallpaperResult;
     }
 
+    /**
+     * Retrieves new URLs for images and crafts new HistoryEntries.
+     *
+     * Can internally query the request URL multiple times because it's unknown how many images will be reported back.
+     *
+     * @param {number} count Number of requested wallpaper
+     * @returns {HistoryEntry[]} Array of crafted HistoryEntries
+     * @throws {HistoryEntry[]} Array of crafted historyEntries, can be empty
+     */
     async requestRandomImage(count: number): Promise<HistoryEntry[]> {
         const wallpaperResult: HistoryEntry[] = [];
 
