@@ -33,6 +33,14 @@ const UrlSourceSettingsGroup = GObject.registerClass({
 
     private _settings;
 
+    /**
+     * Craft a new adapter using an unique ID.
+     *
+     * Previously saved settings will be used if the adapter and ID match.
+     *
+     * @param {Partial<Adw.PreferencesGroup.ConstructorProperties> | undefined} params Properties for Adw.PreferencesGroup or undefined
+     * @param {string} id Unique ID
+     */
     constructor(params: Partial<Adw.PreferencesGroup.ConstructorProperties> | undefined, id: string) {
         super(params);
 
@@ -65,6 +73,9 @@ const UrlSourceSettingsGroup = GObject.registerClass({
             Gio.SettingsBindFlags.DEFAULT);
     }
 
+    /**
+     * Clear all config options associated to this specific adapter.
+     */
     clearConfig(): void {
         this._settings.resetSchema();
     }

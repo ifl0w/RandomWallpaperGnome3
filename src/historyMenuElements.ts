@@ -38,7 +38,14 @@ const HistoryElement = GObject.registerClass({
     historyId: string;
     historyEntry: HistoryModule.HistoryEntry;
 
-    constructor(params: object | undefined, historyEntry: HistoryModule.HistoryEntry, index: number) {
+    /**
+     * Create a new menu element for a HistoryEntry.
+     *
+     * @param {object | undefined} unusedParams Unused params object from the PopupMenu.PopupSubMenuMenuItem
+     * @param {HistoryModule.HistoryEntry} historyEntry HistoryEntry this menu element serves
+     * @param {number} index Place in history
+     */
+    constructor(unusedParams: object | undefined, historyEntry: HistoryModule.HistoryEntry, index: number) {
         super('', false);
 
         this.historyEntry = historyEntry;
@@ -196,6 +203,14 @@ const HistoryElement = GObject.registerClass({
         });
     }
 
+    /**
+     * Add an image to the blocking list.
+     *
+     * Uses the filename for distinction.
+     *
+     * @param {HistoryModule.HistoryEntry} entry Entry to block
+     */
+    // FIXME: entry is unnecessary
     private _addToBlocklist(entry: HistoryModule.HistoryEntry): void {
         if (!entry.adapter?.id || entry.adapter.id === '-1' || !entry.name) {
             this._logger.error('Image entry is missing information');
@@ -213,6 +228,9 @@ const HistoryElement = GObject.registerClass({
         generalSettings.setStrv('blocked-images', blockedFilenames);
     }
 
+    /**
+     * Save the image to the favorites folder.
+     */
     private async _saveImage(): Promise<void> {
         if (!this.historyEntry.path || !this.historyEntry.name)
             throw new Error('Image entry is missing information');
@@ -253,6 +271,11 @@ const HistoryElement = GObject.registerClass({
             throw new Error(`Failed writing file contents: ${message}`);
     }
 
+    /**
+     * Prefix the menu label with a number.
+     *
+     * @param {number} index Number to prefix
+     */
     setIndex(index: number): void {
         this._prefixLabel.set_text(`${String(index)}.`);
     }
@@ -261,6 +284,12 @@ const HistoryElement = GObject.registerClass({
 const CurrentImageElement = GObject.registerClass({
     GTypeName: 'CurrentImageElement',
 }, class CurrentImageElement extends HistoryElement {
+    /**
+     * Create a new image element for the currently active wallpaper.
+     *
+     * @param {object | undefined} params Option object of PopupMenu.PopupSubMenuMenuItem
+     * @param {HistoryModule.HistoryEntry} historyEntry History entry this menu is for
+     */
     constructor(params: object | undefined, historyEntry: HistoryModule.HistoryEntry) {
         super(params, historyEntry, 0);
 
@@ -270,7 +299,7 @@ const CurrentImageElement = GObject.registerClass({
 });
 
 /**
- * Element for the New Wallpaper button and the remaining time for the auto fetch
+ * Element for the "New Wallpaper" button and the remaining time for the auto fetch
  * feature.
  * The remaining time will only be displayed if the af-feature is activated.
  */
@@ -281,6 +310,11 @@ class NewWallpaperElement extends PopupMenu.PopupBaseMenuItem {
     private _timer = Timer.getTimer();
     private _remainingLabel;
 
+    /**
+     * Create a button for fetching new wallpaper
+     *
+     * @param {object | undefined} params Options object of PopupMenu.PopupBaseMenuItem
+     */
     constructor(params: object | undefined) {
         super(params);
 
@@ -302,6 +336,9 @@ class NewWallpaperElement extends PopupMenu.PopupBaseMenuItem {
         this.actor.add_child(container);
     }
 
+    /**
+     * Checks the AF-setting and shows/hides the remaining minutes section.
+     */
     show(): void {
         if (this._timer.isActive()) {
             const remainingMinutes = this._timer.remainingMinutes();
@@ -326,9 +363,15 @@ class NewWallpaperElement extends PopupMenu.PopupBaseMenuItem {
     }
 });
 
+/**
+ * The status element in the Gnome Shell top panel bar.
+ */
 class StatusElement {
     icon;
 
+    /**
+     * Create a new menu status element.
+     */
     constructor() {
         this.icon = new St.Icon({
             icon_name: 'preferences-desktop-wallpaper-symbolic',
@@ -336,6 +379,9 @@ class StatusElement {
         });
     }
 
+    /**
+     * Pulsate the icon opacity as a loading animation.
+     */
     startLoading(): void {
         // FIXME: Don't know where this is defined
         // @ts-expect-error
@@ -349,12 +395,18 @@ class StatusElement {
         });
     }
 
+    /**
+     * Stop pulsating the icon opacity.
+     */
     stopLoading(): void {
         this.icon.remove_all_transitions();
         this.icon.opacity = 255;
     }
 }
 
+/**
+ * The history section holding multiple history elements.
+ */
 class HistorySection extends PopupMenu.PopupMenuSection {
     /**
      * Cache HistoryElements for performance of long histories.
@@ -362,6 +414,9 @@ class HistorySection extends PopupMenu.PopupMenuSection {
     private _historySectionCache = new Map<string, InstanceType<typeof HistoryElement>>();
     private _historyCache: HistoryModule.HistoryEntry[] = [];
 
+    /**
+     * Create a new history section.
+     */
     constructor() {
         super();
 
@@ -373,6 +428,14 @@ class HistorySection extends PopupMenu.PopupMenuSection {
         this.actor.add_actor(this.box);
     }
 
+    /**
+     * Clear and rebuild the history element list using cached elements where possible.
+     *
+     * @param {HistoryModule.HistoryEntry[]} history History list to rebuild from.
+     * @param {(HistoryElement) => void} onEnter Function to call on menu element key-focus-in
+     * @param {(HistoryElement) => void} onLeave Function to call on menu element key-focus-out
+     * @param {(HistoryElement) => void} onSelect Function to call on menu element enter-event
+     */
     updateList(
         history: HistoryModule.HistoryEntry[],
         onEnter: (actor: InstanceType<typeof HistoryElement>) => void,
@@ -412,6 +475,11 @@ class HistorySection extends PopupMenu.PopupMenuSection {
         this._historyCache = history;
     }
 
+    /**
+     * Cleanup the cache for entries not in $existingIDs.
+     *
+     * @param {string[]} existingIDs List with IDs that exists in the history
+     */
     private _cleanupHistoryCache(existingIDs: string[]): void {
         const destroyIDs = Array.from(this._historySectionCache.keys()).filter(i => existingIDs.indexOf(i) === -1);
 
@@ -421,6 +489,9 @@ class HistorySection extends PopupMenu.PopupMenuSection {
         });
     }
 
+    /**
+     * Clear and remove all history elements.
+     */
     clear(): void {
         this._cleanupHistoryCache([]);
         this.removeAll();

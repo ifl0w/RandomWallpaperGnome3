@@ -23,6 +23,9 @@ interface AdapterInfo {
     type: number | null;
 }
 
+/**
+ * Defines an image with core properties.
+ */
 class HistoryEntry {
     timestamp = new Date().getTime();
     /** Unique identifier, concat of timestamp and name */
@@ -36,6 +39,15 @@ class HistoryEntry {
         type: null,
     };
 
+    /**
+     * Create a new HistoryEntry.
+     *
+     * The name, id, and path will be prefilled.
+     *
+     * @param {string | null} author Author of the image or null
+     * @param {string | null} source The image source or null
+     * @param {string} url The request URL of the image
+     */
     constructor(author: string | null, source: string | null, url: string) {
         this.source = {
             author,
@@ -53,18 +65,35 @@ class HistoryEntry {
     }
 }
 
+/**
+ * Controls the history and related code parts.
+ */
 class HistoryController {
     history: HistoryEntry[] = [];
     size = 10;
 
     private _settings = new Settings();
 
+    /**
+     * Create a new HistoryController.
+     *
+     * Loads an existing history from the settings schema.
+     *
+     * @param {string} wallpaperLocation Root save location for new HistoryEntries.
+     */
     constructor(wallpaperLocation: string) {
         _wallpaperLocation = wallpaperLocation;
 
         this.load();
     }
 
+    /**
+     * Insert images at the beginning of the history.
+     *
+     * Throws old images out of the stack and saves to the schema.
+     *
+     * @param {HistoryEntry[]} historyElements Array of elements to insert
+     */
     insert(historyElements: HistoryEntry[]): void {
         for (const historyElement of historyElements)
             this.history.unshift(historyElement);
@@ -77,6 +106,7 @@ class HistoryController {
      * Set the given id to to the first history element (the current one)
      *
      * @param {string} id ID of the historyEntry
+     * @returns {boolean} Whether the sorting was successful
      */
     promoteToActive(id: string): boolean {
         const element = this.get(id);
@@ -94,9 +124,10 @@ class HistoryController {
     }
 
     /**
-     * Returns the corresponding HistoryEntry or null
+     * Get a specific HistoryEntry by ID.
      *
-     * @param {string} id ID of the historyEntry
+     * @param {string} id ID of the HistoryEntry
+     * @returns {HistoryEntry | null} The corresponding HistoryEntry or null
      */
     get(id: string): HistoryEntry | null {
         for (const elem of this.history) {
@@ -109,11 +140,19 @@ class HistoryController {
 
     /**
      * Get the current history element.
+     *
+     * @returns {HistoryEntry} Current first entry
      */
     getCurrentEntry(): HistoryEntry {
         return this.history[0];
     }
 
+    /**
+     * Get a HistoryEntry by its file path.
+     *
+     * @param {string} path Path to search for
+     * @returns {HistoryEntry | null} The corresponding HistoryEntry or null
+     */
     getEntryByPath(path: string): HistoryEntry | null {
         for (const element of this.history) {
             if (element.path === path)
@@ -125,6 +164,8 @@ class HistoryController {
 
     /**
      * Get a random HistoryEntry.
+     *
+     * @returns {HistoryEntry} Random entry
      */
     getRandom(): HistoryEntry {
         return this.history[Utils.getRandomNumber(this.history.length)];
@@ -159,6 +200,8 @@ class HistoryController {
 
     /**
      * Clear the history and delete all photos except the current one.
+     *
+     * @returns {boolean} Whether the deletion was successful
      */
     clear(): boolean {
         const firstHistoryElement = this.history[0];
@@ -203,6 +246,12 @@ class HistoryController {
         }
     }
 
+    /**
+     * Check if an object is a HistoryEntry.
+     *
+     * @param {unknown} object Object to check
+     * @returns {boolean} Whether the object is a HistoryEntry
+     */
     private _isHistoryEntry(object: unknown): object is HistoryEntry {
         if (typeof object === 'object' &&
             object &&

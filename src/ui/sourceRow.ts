@@ -52,6 +52,15 @@ const SourceRow = GObject.registerClass({
 
     id = String(Date.now());
 
+    /**
+     * Craft a new source row using an unique ID.
+     *
+     * Default unique ID is Date.now()
+     * Previously saved settings will be used if the ID matches.
+     *
+     * @param {Partial<Adw.ExpanderRow.ConstructorProperties> | undefined} params Properties for Adw.ExpanderRow or undefined
+     * @param {string | null} id Unique ID or null
+     */
     constructor(params: Partial<Adw.ExpanderRow.ConstructorProperties> | undefined, id?: string | null) {
         super(params);
 
@@ -116,13 +125,24 @@ const SourceRow = GObject.registerClass({
         });
     }
 
+    /**
+     * Fill this source row with adapter settings.
+     *
+     * @param {number} type Enum of the adapter to use
+     */
     private _fillRow(type: number): void {
         const targetWidget = this._getSettingsGroup(type);
         if (targetWidget !== null)
             this._settings_container.set_child(targetWidget);
     }
 
-    private _getSettingsGroup(type = 0): GObject.RegisteredPrototype<InstanceType<typeof UnsplashSettingsGroup>, { [key: string]: GObject.ParamSpec<unknown>; }, unknown[]>
+    /**
+     * Get a new adapter based on an enum source type.
+     *
+     * @param {Utils.SourceType} type Enum of the adapter to get
+     * @returns {object | null} Newly crafted adapter or null
+     */
+    private _getSettingsGroup(type: Utils.SourceType = Utils.SourceType.UNSPLASH): GObject.RegisteredPrototype<InstanceType<typeof UnsplashSettingsGroup>, { [key: string]: GObject.ParamSpec<unknown>; }, unknown[]>
      | GObject.RegisteredPrototype<InstanceType<typeof WallhavenSettingsGroup>, { [key: string]: GObject.ParamSpec<unknown>; }, unknown[]>
      | GObject.RegisteredPrototype<InstanceType<typeof RedditSettingsGroup>, { [key: string]: GObject.ParamSpec<unknown>; }, unknown[]>
      | GObject.RegisteredPrototype<InstanceType<typeof GenericJsonSettingsGroup>, { [key: string]: GObject.ParamSpec<unknown>; }, unknown[]>
@@ -157,6 +177,11 @@ const SourceRow = GObject.registerClass({
         return targetWidget;
     }
 
+    /**
+     * Remove an image name from the blocked image list.
+     *
+     * @param {string} filename Image name to remove
+     */
     private _removeBlockedImage(filename: string): void {
         let blockedImages = this._settings.getStrv('blocked-images');
         if (!blockedImages.includes(filename))

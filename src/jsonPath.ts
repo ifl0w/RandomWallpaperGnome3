@@ -8,6 +8,7 @@ import * as Utils from './utils.js';
  *
  * @param {unknown} inputObject A JSON object
  * @param {string} inputString JSONPath to follow, see wiki for syntax
+ * @returns {[unknown, string]} Tuple with an object of unknown type and a chosen JSONPath string
  */
 function getTarget(inputObject: unknown, inputString: string): [object: unknown, chosenPath: string] {
     if (!inputObject)
@@ -63,6 +64,7 @@ function getTarget(inputObject: unknown, inputString: string): [object: unknown,
  *
  * @param {object} inputObject JSON object
  * @param {string} keyString Name of the key in the object
+ * @returns {unknown | null} Found object member or null
  */
 function _getObjectMember(inputObject: object, keyString: string): unknown | null {
     if (keyString === '$')
@@ -80,6 +82,7 @@ function _getObjectMember(inputObject: object, keyString: string): unknown | nul
  * Returns the value of a random key of a given array.
  *
  * @param {Array<T>} array Array with values
+ * @returns {[T, number]} Tuple with an array member and index of that member
  */
 function _randomElement<T>(array: Array<T>): [T, number] {
     const randomNumber = Utils.getRandomNumber(array.length);
@@ -94,6 +97,7 @@ function _randomElement<T>(array: Array<T>): [T, number] {
  *
  * @param {string} randomPath Path containing '@random' to resolve
  * @param {string} resolvedPath Path with resolved '@random'
+ * @returns {string} Input string with replaced '@random'
  */
 function replaceRandomInPath(randomPath: string, resolvedPath: string): string {
     if (!randomPath.includes('@random'))
