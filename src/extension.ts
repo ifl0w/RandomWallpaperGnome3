@@ -10,6 +10,7 @@ import type * as LoggerNamespace from './logger.js';
 import type * as AFTimer from './timer.js';
 import type * as WallpaperControllerNamespace from './wallpaperController.js';
 import type * as RandomWallpaperMenuNamespace from './randomWallpaperMenu.js';
+import type {ExtensionMeta} from 'ExtensionMeta';
 
 let Logger: typeof LoggerNamespace | null = null;
 let Timer: typeof AFTimer | null = null;
@@ -20,7 +21,7 @@ let RandomWallpaperMenu: typeof RandomWallpaperMenuNamespace | null = null;
  *
  */
 // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
-function init(): Extension {
+function init(unusedMeta: ExtensionMeta): Extension {
     return new Extension();
 }
 
