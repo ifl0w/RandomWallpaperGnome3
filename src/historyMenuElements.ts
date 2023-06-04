@@ -159,7 +159,7 @@ const HistoryElement = GObject.registerClass({
         if (this.historyEntry.adapter?.type !== Utils.SourceType.STATIC_URL) {
             const blockImage = new PopupMenu.PopupMenuItem('Add To Blocklist');
             blockImage.connect('activate', () => {
-                this._addToBlocklist(this.historyEntry);
+                this._addToBlocklist();
             });
             this.menu.addMenuItem(blockImage);
         }
@@ -207,24 +207,21 @@ const HistoryElement = GObject.registerClass({
      * Add an image to the blocking list.
      *
      * Uses the filename for distinction.
-     *
-     * @param {HistoryModule.HistoryEntry} entry Entry to block
      */
-    // FIXME: entry is unnecessary
-    private _addToBlocklist(entry: HistoryModule.HistoryEntry): void {
-        if (!entry.adapter?.id || entry.adapter.id === '-1' || !entry.name) {
+    private _addToBlocklist(): void {
+        if (!this.historyEntry.adapter?.id || this.historyEntry.adapter.id === '-1' || !this.historyEntry.name) {
             this._logger.error('Image entry is missing information');
             return;
         }
 
-        const path = `${Settings.RWG_SETTINGS_SCHEMA_PATH}/sources/general/${entry.adapter.id}/`;
+        const path = `${Settings.RWG_SETTINGS_SCHEMA_PATH}/sources/general/${this.historyEntry.adapter.id}/`;
         const generalSettings = new Settings.Settings(Settings.RWG_SETTINGS_SCHEMA_SOURCES_GENERAL, path);
         const blockedFilenames = generalSettings.getStrv('blocked-images');
 
-        if (blockedFilenames.includes(entry.name))
+        if (blockedFilenames.includes(this.historyEntry.name))
             return;
 
-        blockedFilenames.push(entry.name);
+        blockedFilenames.push(this.historyEntry.name);
         generalSettings.setStrv('blocked-images', blockedFilenames);
     }
 
