@@ -114,10 +114,10 @@ class RandomWallpaperMenu {
             // Make sure no other preview or reset event overwrites our setWallpaper!
             this._wallpaperController.prohibitNewWallpaper = true;
             this._wallpaperController.fetchNewWallpaper().then(() => {
-                this._wallpaperController.prohibitNewWallpaper = false;
             }).catch(error => {
-                this._wallpaperController.prohibitNewWallpaper = false;
                 this._logger.error(error);
+            }).finally(() => {
+                this._wallpaperController.prohibitNewWallpaper = false;
             });
         });
 
