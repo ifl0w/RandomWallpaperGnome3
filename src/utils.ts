@@ -193,6 +193,22 @@ function getRandomNumber(size: number): number {
     return Math.floor(Math.random() * size);
 }
 
+// https://stackoverflow.com/a/12646864
+/**
+ * Shuffle all entries in an array into random order.
+ *
+ * @param {T[]} array Array to shuffle
+ * @returns {T[]} Shuffled array
+ */
+function shuffleArray<T>(array: T[]): T[] {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = getRandomNumber(i + 1);
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+
+    return array;
+}
+
 /**
  * Check if a string is an URI.
  *
@@ -264,5 +280,6 @@ export {
     getMonitorCount,
     getRandomNumber,
     removeItemOnce,
-    setPictureUriOfSettingsObject
+    setPictureUriOfSettingsObject,
+    shuffleArray
 };
