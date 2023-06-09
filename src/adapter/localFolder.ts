@@ -50,19 +50,16 @@ class LocalFolderAdapter extends BaseAdapter {
             }
             this._logger.debug(`Found ${files.length} possible wallpaper in "${this._settings.getString('folder')}"`);
 
-            for (let i = 0; i < 20 && wallpaperResult.length < count; i++) {
-                const randomFile = files[Utils.getRandomNumber(files.length)];
-                const randomFilePath = randomFile.get_uri();
-                const randomFileName = randomFile.get_basename();
+            const shuffledFiles = Utils.shuffleArray(files);
 
-                if (!randomFileName || this._isImageBlocked(randomFileName))
-                    continue;
+            for (let i = 0; i < count && i < shuffledFiles.length; i++) {
+                const randomFile = shuffledFiles[i];
+                const randomFilePath = randomFile.get_uri();
 
                 const historyEntry = new HistoryEntry(null, this._sourceName, randomFilePath);
                 historyEntry.source.sourceUrl = randomFilePath;
 
-                if (!this._includesWallpaper(wallpaperResult, historyEntry.source.imageDownloadUrl))
-                    wallpaperResult.push(historyEntry);
+                wallpaperResult.push(historyEntry);
             }
 
             if (wallpaperResult.length < count) {
@@ -99,6 +96,8 @@ class LocalFolderAdapter extends BaseAdapter {
     /**
      * Walk recursively through a folder and retrieve a list of all images.
      *
+     * This already checks for blocked filenames and omits them from the returned list.
+     *
      * @param {Gio.File} directory Directory to scan
      * @returns {Gio.File[]} List of images
      */
@@ -125,7 +124,8 @@ class LocalFolderAdapter extends BaseAdapter {
             }
 
             const contentType = info.get_content_type();
-            if (contentType?.startsWith('image/'))
+            const filename = child.get_basename();
+            if (contentType?.startsWith('image/') && filename && !this._isImageBlocked(filename))
                 files.push(child);
         }
 
