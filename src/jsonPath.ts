@@ -43,13 +43,13 @@ function getTarget(inputObject: unknown, inputString: string): [object: unknown,
         if (!targetObject || !Array.isArray(targetObject))
             return [null, ''];
 
+        // add special keywords here
         switch (indexString) {
         case '@random': {
             const [chosenElement, chosenNumber] = _randomElement<unknown>(targetObject);
             const [object, path] = getTarget(chosenElement, inputStringTail);
             return [object, inputString.slice(0, inputString.length - inputStringTail.length).replace('@random', String(chosenNumber)) + path];
         }
-        // add special keywords here
         default: {
             // expecting integer
             const [object, path] = getTarget(targetObject[parseInt(indexString)], inputStringTail);
