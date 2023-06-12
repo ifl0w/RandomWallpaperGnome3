@@ -22,6 +22,7 @@ import {Logger} from './logger.js';
 Gio._promisify(Gio.File.prototype, 'copy_async', 'copy_finish');
 Gio._promisify(Gio.File.prototype, 'replace_contents_bytes_async', 'replace_contents_finish');
 
+// GJS style class extending
 const HistoryElement = GObject.registerClass({
     GTypeName: 'HistoryElement',
 }, class HistoryElement extends PopupMenu.PopupSubMenuMenuItem {
