@@ -98,10 +98,12 @@ rules:
   linebreak-style:
     - error
     - unix
-  lines-between-class-members:
-    - error
-    - always
-    - exceptAfterSingleLine: true
+  # Each class member has a forced doc which is a block comment.
+  # Block comment spacing is forced too, disabling this rule.
+  # lines-between-class-members:
+  #   - error
+  #   - always
+  #   - exceptAfterSingleLine: true
   max-nested-callbacks: error
   max-statements-per-line: error
   new-parens: error
@@ -260,29 +262,38 @@ rules:
   padding-line-between-statements:
     - error
     - blankLine: always
-      prev: function
-      next: function
-    - blankLine: always
       prev: class
       next: function
     - blankLine: always
       prev: function
-      next: class
-    - blankLine: always
-      prev: class
       next: class
     - blankLine: always
       prev: import
       next: function
+    - blankLine: always
+      prev: import
+      next: var
+    - blankLine: always
+      prev: import
+      next: let
+    - blankLine: always
+      prev: import
+      next: const
+    - blankLine: always
+      prev: const
+      next: import
+    - blankLine: always
+      prev: const
+      next: let
+    - blankLine: always
+      prev: let
+      next: const
     - blankLine: always
       prev: const
       next: function
     - blankLine: always
       prev: let
       next: function
-    - blankLine: always
-      prev: import
-      next: class
     - blankLine: always
       prev: class
       next: export
@@ -294,16 +305,42 @@ rules:
       next: return
     - blankLine: always
       prev: '*'
-      next: block-like
-    - blankLine: always
-      prev: block-like
-      next: '*'
-    - blankLine: always
-      prev: '*'
       next: if
     - blankLine: always
       prev: if
       next: '*'
+    - blankLine: always
+      prev: '*'
+      next: try
+    - blankLine: always
+      prev: try
+      next: '*'
+    - blankLine: always
+      prev: '*'
+      next: switch
+    - blankLine: always
+      prev: switch
+      next: '*'
+    - blankLine: always
+      prev: '*'
+      next: while
+    - blankLine: always
+      prev: while
+      next: '*'
+    - blankLine: always
+      prev: '*'
+      next: do
+    - blankLine: always
+      prev: '*'
+      next: for
+    - blankLine: always
+      prev: for
+      next: '*'
+  lines-around-comment:
+    - error
+    - allowClassStart: true
+      allowBlockStart: true
+      beforeLineComment: true
 settings:
   jsdoc:
     mode: typescript
