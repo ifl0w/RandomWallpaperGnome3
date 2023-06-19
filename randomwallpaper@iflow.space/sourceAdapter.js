@@ -298,6 +298,8 @@ var RedditAdapter = class extends BaseAdapter {
 
 		const url = encodeURI('https://www.reddit.com/r/' + subreddits + '.json');
 		let message = this.bowl.Soup.Message.new('GET', url);
+		// set User-Agent to appear more like a standard browser
+		message.request_headers.append('User-Agent', 'Mozilla/5.0');
 		if (message === null) {
 			this._error("Could not create request.", callback);
 			return;
