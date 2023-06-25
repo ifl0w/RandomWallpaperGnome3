@@ -98,14 +98,22 @@ class WallpaperController {
         this._settings.observe('hours', () => this._updateAutoFetching());
 
         this._updateHistory();
-        this._updateAutoFetching();
 
-        // load a new wallpaper on startup
-        if (this._settings.getBoolean('fetch-on-startup')) {
-            this.fetchNewWallpaper().catch(error => {
-                this._logger.error(error);
-            });
-        }
+        // Fetching and merging wallpaper can be quite heavy on load so try doing this only when idle
+        GLib.idle_add(GLib.PRIORITY_DEFAULT_IDLE, () => {
+            // This may start the timer which might load a new wallpaper on interval surpassed
+            this._updateAutoFetching();
+
+            // FIXME: try skipping this if the timer is enabled and already fetched because of a surpassed interval when calling _updateAutoFetching above
+            // load a new wallpaper on startup
+            if (this._settings.getBoolean('fetch-on-startup')) {
+                this.fetchNewWallpaper().catch(error => {
+                    this._logger.error(error);
+                });
+            }
+
+            return GLib.SOURCE_REMOVE;
+        });
 
         // Initialize favorites folder
         // TODO: There's probably a better place for this
