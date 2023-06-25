@@ -204,9 +204,9 @@ class HistoryController {
     /**
      * Clear the history and delete all photos except the current one.
      *
-     * @returns {boolean} Whether the deletion was successful
+     * This function clears the cache folder, ignoring if the image appears in the history or not.
      */
-    clear(): boolean {
+    clear(): void {
         const firstHistoryElement = this.history[0];
 
         if (firstHistoryElement)
@@ -232,7 +232,6 @@ class HistoryController {
         } while (fileInfo);
 
         this.save();
-        return true;
     }
 
     /**
