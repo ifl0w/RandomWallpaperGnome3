@@ -128,8 +128,10 @@ class AFTimer {
      * If the trigger time was surpassed the callback gets started
      * directly and the next trigger is scheduled at the
      * next correct time frame repeatedly.
+     *
+     * @param {boolean | undefined} forceTrigger Force calling the timeoutEndCallback on initial call
      */
-    async start(): Promise<void> {
+    async start(forceTrigger: boolean = false): Promise<void> {
         if (this._paused)
             return;
 
@@ -141,10 +143,11 @@ class AFTimer {
 
         const millisecondsRemaining = this.remainingMinutes() * 60 * 1000;
 
-        // set new wallpaper if the interval was surpassed and set the timestamp to when it should have been updated
-        if (this._surpassedInterval()) {
+        // set new wallpaper if the interval was surpassed…
+        const intervalSurpassed = this._surpassedInterval();
+        if (forceTrigger || intervalSurpassed) {
             if (this._timeoutEndCallback) {
-                this._logger.debug('Timer surpassed, running callback now');
+                this._logger.debug('Running callback now');
 
                 try {
                     await this._timeoutEndCallback();
@@ -152,7 +155,10 @@ class AFTimer {
                     this._logger.error(error);
                 }
             }
+        }
 
+        // …and set the timestamp to when it should have been updated
+        if (intervalSurpassed) {
             const millisecondsOverdue = (this._minutes * 60 * 1000) - millisecondsRemaining;
             this._settings.setInt64('timer-last-trigger', Date.now() - millisecondsOverdue);
         }
@@ -160,18 +166,14 @@ class AFTimer {
         // actual timer function
         this._logger.debug(`Starting timer, will run callback in ${millisecondsRemaining}ms`);
         this._timeout = GLib.timeout_add(GLib.PRIORITY_DEFAULT, millisecondsRemaining, () => {
-            if (this._timeoutEndCallback) {
-                this._timeoutEndCallback().then(() => {
-                    this._reset();
-                    this.start().catch(error => {
-                        this._logger.error(error);
-                    });
-                }).catch(error => {
-                    this._logger.error(error);
-                }).finally(() => {
-                    return GLib.SOURCE_REMOVE;
-                });
-            }
+            // Reset time immediately to avoid shifting the timer
+            this._reset();
+
+            // Call this function again and forcefully skip the surpassed timer check so it will run the timeoutEndCallback
+            this.start(true).catch(error => {
+                this._logger.error(error);
+            });
+
             return GLib.SOURCE_REMOVE;
         });
     }
