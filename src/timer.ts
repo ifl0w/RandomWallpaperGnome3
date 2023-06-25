@@ -47,7 +47,7 @@ class AFTimer {
      * next correct time frame repeatedly.
      */
     continue(): void {
-        if (!this.isActive())
+        if (!this.isEnabled())
             return;
 
         this._logger.debug('Continuing timer');
@@ -59,11 +59,11 @@ class AFTimer {
     }
 
     /**
-     * Check if the timer is currently set as activated.
+     * Check if the timer is currently set as enabled.
      *
-     * @returns {boolean} Wether the timer is activated
+     * @returns {boolean} Wether the timer is enabled
      */
-    isActive(): boolean {
+    isEnabled(): boolean {
         return this._settings.getBoolean('auto-fetch');
     }
 
@@ -211,7 +211,7 @@ class AFTimer {
      */
     private _minutesElapsed(): number {
         const now = Date.now();
-        const last: number = this._settings.getInt64('timer-last-trigger');
+        const last = this._settings.getInt64('timer-last-trigger');
 
         if (last === 0)
             return 0;
