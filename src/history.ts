@@ -1,7 +1,9 @@
 import Gio from 'gi://Gio';
+import GLib from 'gi://GLib';
 
 import * as Utils from './utils.js';
 
+import {Logger} from './logger.js';
 import {Settings} from './settings.js';
 
 // Gets filled by the HistoryController which is constructed at extension startup
@@ -72,6 +74,7 @@ class HistoryController {
     history: HistoryEntry[] = [];
     size = 10;
 
+    private _logger = new Logger('RWG3', 'HistoryController');
     private _settings = new Settings();
 
     /**
@@ -224,7 +227,7 @@ class HistoryController {
             // ignore hidden files and first element
             if (id[0] !== '.' && id !== firstHistoryElement.id) {
                 const deleteFile = Gio.file_new_for_path(_wallpaperLocation + id);
-                deleteFile.delete(null);
+                this._deleteFile(deleteFile);
             }
         } while (fileInfo);
 
@@ -239,10 +242,37 @@ class HistoryController {
         this.size = this._settings.getInt('history-length');
         while (this.history.length > this.size) {
             const path = this.history.pop()?.path;
-            if (path) {
-                const deleteFile = Gio.file_new_for_path(path);
-                deleteFile.delete(null);
+            if (!path)
+                continue;
+
+            const file = Gio.file_new_for_path(path);
+            this._deleteFile(file);
+        }
+    }
+
+    /**
+     * Helper function to delete files.
+     *
+     * Has some special treatments factored in to ignore file not found issues
+     * when the parent path is available.
+     *
+     * @param {Gio.FilePrototype} file The file to delete
+     * @throws On any other error than Gio.IOErrorEnum.NOT_FOUND
+     */
+    private _deleteFile(file: Gio.FilePrototype): void {
+        try {
+            file.delete(null);
+        } catch (error) {
+            /**
+             * Ignore deletion errors when the file doesn't exist but the parent path is accessible.
+             * This tries to avoid invalid states later on because we would have thrown here and therefore skip saving.
+             */
+            if (file.get_parent()?.query_exists(null) && error instanceof GLib.Error && error.matches(Gio.IOErrorEnum, Gio.IOErrorEnum.NOT_FOUND)) {
+                this._logger.warn(`Ignoring Gio.IOErrorEnum.NOT_FOUND: ${file.get_path() ?? 'undefined'}`);
+                return;
             }
+
+            throw error;
         }
     }
 
