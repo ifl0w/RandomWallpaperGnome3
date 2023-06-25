@@ -338,7 +338,7 @@ class NewWallpaperElement extends PopupMenu.PopupBaseMenuItem {
      * Checks the AF-setting and shows/hides the remaining minutes section.
      */
     show(): void {
-        if (this._timer.isActive()) {
+        if (this._timer.isEnabled()) {
             const remainingMinutes = this._timer.remainingMinutes();
             const minutes = remainingMinutes % 60;
             const hours = Math.floor(remainingMinutes / 60);
