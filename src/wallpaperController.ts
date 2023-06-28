@@ -104,9 +104,8 @@ class WallpaperController {
             // This may start the timer which might load a new wallpaper on interval surpassed
             this._updateAutoFetching();
 
-            // FIXME: try skipping this if the timer is enabled and already fetched because of a surpassed interval when calling _updateAutoFetching above
-            // load a new wallpaper on startup
-            if (this._settings.getBoolean('fetch-on-startup')) {
+            // load a new wallpaper on startup, but don't when the timer already fetched one because of a surpassed timer interval
+            if (this._settings.getBoolean('fetch-on-startup') && (!this._timer.isEnabled() || this._timer.minutesElapsed() > 1)) {
                 this.fetchNewWallpaper().catch(error => {
                     this._logger.error(error);
                 });
