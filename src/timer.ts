@@ -95,7 +95,7 @@ class AFTimer {
      * @returns {number} Minutes to activation
      */
     remainingMinutes(): number {
-        const minutesElapsed = this._minutesElapsed();
+        const minutesElapsed = this.minutesElapsed();
         const remainder = minutesElapsed % this._minutes;
         return Math.max(this._minutes - remainder, 0);
     }
@@ -209,7 +209,7 @@ class AFTimer {
      *
      * @returns {number} Elapsed time in minutes
      */
-    private _minutesElapsed(): number {
+    minutesElapsed(): number {
         const now = Date.now();
         const last = this._settings.getInt64('timer-last-trigger');
 
