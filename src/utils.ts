@@ -5,6 +5,10 @@ import GLib from 'gi://GLib';
 import Gtk from 'gi://Gtk';
 
 import {Settings} from './settings.js';
+import {DefaultWallpaperManager} from './manager/defaultWallpaperManager.js';
+import {HydraPaper} from './manager/hydraPaper.js';
+import {Superpaper} from './manager/superPaper.js';
+import type {WallpaperManager} from './manager/wallpaperManager.js';
 
 // Generated code produces a no-shadow rule error:
 // 'SourceType' is already declared in the upper scope on line 7 column 5  no-shadow
@@ -270,9 +274,47 @@ function setPictureUriOfSettingsObject(settings: Settings, uri: string): void {
         setProp(property);
 }
 
+/**
+ * Get a wallpaper manager.
+ *
+ * Checks for HydraPaper first and then for Superpaper. Falls back to the default manager.
+ *
+ * @returns {WallpaperManager} Wallpaper manager, falls back to the default manager
+ */
+// This function is here instead of wallpaperManager.js to work around looping import errors
+function getWallpaperManager(): WallpaperManager {
+    const hydraPaper = new HydraPaper();
+    if (hydraPaper.isAvailable())
+        return hydraPaper;
+
+    const superpaper = new Superpaper();
+    if (superpaper.isAvailable())
+        return superpaper;
+
+    return new DefaultWallpaperManager();
+}
+
+/**
+ * Check if a filename matches a merged wallpaper name.
+ *
+ * Merged wallpaper need special handling as these are single images
+ * but span across all displays.
+ *
+ * @param {string} filename Naming to check
+ * @returns {boolean} Wether the image is a merged wallpaper
+ */
+// This function is here instead of wallpaperManager.js to work around looping import errors
+function isImageMerged(filename: string): boolean {
+    return DefaultWallpaperManager.isImageMerged(filename) ||
+        HydraPaper.isImageMerged(filename) ||
+        Superpaper.isImageMerged(filename);
+}
+
 export {
     SourceType,
     getSourceTypeName,
+    getWallpaperManager,
+    isImageMerged,
     execCheck,
     fileName,
     fillComboRowFromEnum,

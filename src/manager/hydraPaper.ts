@@ -1,55 +1,50 @@
 import * as Utils from '../utils.js';
 
+import {ExternalWallpaperManager} from './externalWallpaperManager.js';
 import {Logger} from '../logger.js';
-import {WallpaperManager} from './wallpaperManager.js';
 import {Settings} from '../settings.js';
 
 /**
  * Wrapper for HydraPaper using it as a manager.
  */
-class HydraPaper extends WallpaperManager {
-    readonly _possibleCommands = ['hydrapaper', 'org.gabmus.hydrapaper'];
-    _logger = new Logger('RWG3', 'HydraPaper');
+class HydraPaper extends ExternalWallpaperManager {
+    protected readonly _possibleCommands = ['hydrapaper', 'org.gabmus.hydrapaper'];
+    protected _logger = new Logger('RWG3', 'HydraPaper');
 
     /**
-     * Set the wallpapers for a given mode.
+     * Sets the background image in light and dark mode.
      *
-     * Modes:
-     * - 0: Background
-     * - 1: Lock screen
-     * - 2: Background and lock screen
-     *
-     * @param {string[]} wallpaperPaths Array of paths to the desired wallpapers, should match the display count
-     * @param {number} mode Enum indicating what images to change
-     * @param {Settings} backgroundSettings Settings object containing the background settings
-     * @param {Settings} screensaverSettings Settings object containing the screensaver/lockscreen settings
+     * @param {string[]} wallpaperPaths Array of strings to image files
+     * @param {Settings} backgroundSettings Settings object holding the desktop background picture-uri
      */
-    async setWallpaper(wallpaperPaths: string[], mode: number, backgroundSettings?: Settings, screensaverSettings?: Settings): Promise<void> {
-        if ((mode === 0 || mode === 2) && backgroundSettings) {
-            await this._createCommandAndRun(wallpaperPaths);
+    protected async _setBackground(wallpaperPaths: string[], backgroundSettings: Settings): Promise<void> {
+        await this._createCommandAndRun(wallpaperPaths);
 
-            // Manually set key for darkmode because that's way faster
-            backgroundSettings.setString('picture-uri-dark', backgroundSettings.getString('picture-uri'));
-        }
+        // Manually set key for darkmode because that's way faster than merging two times the same images
+        Utils.setPictureUriOfSettingsObject(backgroundSettings, backgroundSettings.getString('picture-uri'));
+    }
 
-        if (mode === 1 && backgroundSettings && screensaverSettings) {
-            // Remember keys, HydraPaper will change these
-            const tmpBackground = backgroundSettings.getString('picture-uri-dark');
-            const tmpMode = backgroundSettings.getString('picture-options');
+    /**
+     * Sets the lock screen image in light and dark mode.
+     *
+     * @param {string[]} wallpaperPaths Array of strings to image files
+     * @param {Settings} backgroundSettings Settings object holding the desktop background picture-uri
+     * @param {Settings} screensaverSettings Settings object holding the screensaver picture-uri
+     */
+    protected async _setLockScreen(wallpaperPaths: string[], backgroundSettings: Settings, screensaverSettings: Settings): Promise<void> {
+        // Remember keys, HydraPaper will change these
+        const tmpBackground = backgroundSettings.getString('picture-uri-dark');
+        const tmpMode = backgroundSettings.getString('picture-options');
 
-            // Force HydraPaper to target a different resulting image by using darkmode
-            await this._createCommandAndRun(wallpaperPaths, true);
+        // Force HydraPaper to target a different resulting image by using darkmode
+        await this._createCommandAndRun(wallpaperPaths, true);
 
-            screensaverSettings.setString('picture-options', 'spanned');
-            Utils.setPictureUriOfSettingsObject(screensaverSettings, backgroundSettings.getString('picture-uri-dark'));
+        screensaverSettings.setString('picture-options', 'spanned');
+        Utils.setPictureUriOfSettingsObject(screensaverSettings, backgroundSettings.getString('picture-uri-dark'));
 
-            // HydraPaper possibly changed these, change them back
-            backgroundSettings.setString('picture-uri-dark', tmpBackground);
-            backgroundSettings.setString('picture-options', tmpMode);
-        }
-
-        if (mode === 2 && screensaverSettings && backgroundSettings)
-            Utils.setPictureUriOfSettingsObject(screensaverSettings, backgroundSettings.getString('picture-uri'));
+        // HydraPaper possibly changed these, change them back
+        backgroundSettings.setString('picture-uri-dark', tmpBackground);
+        backgroundSettings.setString('picture-options', tmpMode);
     }
 
     /**
@@ -75,6 +70,28 @@ class HydraPaper extends WallpaperManager {
         command = command.concat(wallpaperArray);
 
         await this._runExternal(command);
+    }
+
+    /**
+     * Check if a filename matches a merged wallpaper name.
+     *
+     * Merged wallpaper need special handling as these are single images
+     * but span across all displays.
+     *
+     * @param {string} filename Naming to check
+     * @returns {boolean} Wether the image is a merged wallpaper
+     */
+    static isImageMerged(filename: string): boolean {
+        const mergedWallpaperNames = [
+            'merged_wallpaper',
+        ];
+
+        for (const name of mergedWallpaperNames) {
+            if (filename.includes(name))
+                return true;
+        }
+
+        return false;
     }
 }
 

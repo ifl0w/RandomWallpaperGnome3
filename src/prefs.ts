@@ -155,8 +155,9 @@ class RandomWallpaperSettings {
                 });
             });
 
-            import('./manager/wallpaperManager.js').then(module => {
-                if (module.getWallpaperManager()?.isAvailable())
+            import('./utils.js').then(module => {
+                const manager = module.getWallpaperManager();
+                if (manager.canHandleMultipleImages)
                     this._builder.get_object<InstanceType<typeof Adw.ActionRow>>('multiple_displays_row').set_sensitive(true);
             }).catch(error => {
                 this._logger.error(error);
