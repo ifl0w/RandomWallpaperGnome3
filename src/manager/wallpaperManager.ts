@@ -47,4 +47,32 @@ function getWallpaperManager(): WallpaperManager | null {
     return null;
 }
 
-export {WallpaperManager, getWallpaperManager};
+/**
+ * Check if a filename matches a merged wallpaper name.
+ *
+ * @param {string} filename Naming to check
+ * @returns {boolean} Wether the image is a merged wallpaper
+ */
+// Check these outside of the class in case the user switched the manager
+function isImageMerged(filename: string): boolean {
+    const mergedWallpaperNames = [
+        // HydraPaper
+        'merged_wallpaper',
+        // Superpaper
+        'cli-a',
+        'cli-b',
+    ];
+
+    for (const name of mergedWallpaperNames) {
+        if (filename.includes(name))
+            return true;
+    }
+
+    return false;
+}
+
+export {
+    WallpaperManager,
+    getWallpaperManager,
+    isImageMerged
+};
