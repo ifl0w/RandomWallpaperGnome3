@@ -1,6 +1,3 @@
-import Gio from 'gi://Gio';
-import GLib from 'gi://GLib';
-
 import * as Utils from '../utils.js';
 
 import {Logger} from '../logger.js';
@@ -10,84 +7,9 @@ import {Settings} from '../settings.js';
 /**
  * Wrapper for HydraPaper using it as a manager.
  */
-class HydraPaper implements WallpaperManager {
-    private _command: string[] | null = null;
-    private _cancellable: Gio.Cancellable | null = null;
-    private _logger = new Logger('RWG3', 'HydraPaper');
-
-    /**
-     * Checks if Superpaper is available in the $PATH.
-     *
-     * @returns {boolean} Whether Superpaper is found
-     */
-    isAvailable(): boolean {
-        if (this._command !== null)
-            return true;
-
-        const normalPath = GLib.find_program_in_path('hydrapaper');
-        if (normalPath) {
-            this._command = [normalPath];
-            return true;
-        }
-
-        const flatpakPath = GLib.find_program_in_path('org.gabmus.hydrapaper');
-        if (flatpakPath) {
-            this._command = [flatpakPath];
-            return true;
-        }
-
-        return this._command !== null;
-    }
-
-    /**
-     * Forcefully stop a previously started HydraPaper process.
-     */
-    cancelRunning(): void {
-        if (this._cancellable === null)
-            return;
-
-        this._logger.debug('Stopping running HydraPaper process.');
-        this._cancellable.cancel();
-        this._cancellable = null;
-    }
-
-    /**
-     * Run HydraPaper in CLI mode.
-     *
-     * HydraPaper:
-     * - Saves merged images in the cache folder.
-     * - Sets picture-option to spanned
-     * - Sets picture-uri or picture-uri-dark depending on $darkmode
-     * - Needs matching image path count and display count
-     *
-     * @param {string[]} wallpaperArray Array of image paths, should match the display count
-     * @param {boolean} darkmode Use darkmode, gives different image in cache path
-     */
-    private async _run(wallpaperArray: string[], darkmode: boolean = false): Promise<void> {
-        // Cancel already running processes before starting new ones
-        this.cancelRunning();
-
-        // TODO: Proper error handling
-        if (this._command === null)
-            return;
-
-        // Needs a copy here
-        let command = [...this._command];
-
-        if (darkmode)
-            command.push('--darkmode');
-
-        command.push('--cli');
-        command = command.concat(wallpaperArray);
-
-        this._cancellable = new Gio.Cancellable();
-
-        // hydrapaper [--darkmode] --cli PATH PATH PATH
-        this._logger.debug(`Running command: ${command.toString()}`);
-        await Utils.execCheck(command, this._cancellable);
-
-        this._cancellable = null;
-    }
+class HydraPaper extends WallpaperManager {
+    readonly _possibleCommands = ['hydrapaper', 'org.gabmus.hydrapaper'];
+    _logger = new Logger('RWG3', 'HydraPaper');
 
     /**
      * Set the wallpapers for a given mode.
@@ -104,7 +26,7 @@ class HydraPaper implements WallpaperManager {
      */
     async setWallpaper(wallpaperPaths: string[], mode: number, backgroundSettings?: Settings, screensaverSettings?: Settings): Promise<void> {
         if ((mode === 0 || mode === 2) && backgroundSettings) {
-            await this._run(wallpaperPaths);
+            await this._createCommandAndRun(wallpaperPaths);
 
             // Manually set key for darkmode because that's way faster
             backgroundSettings.setString('picture-uri-dark', backgroundSettings.getString('picture-uri'));
@@ -116,7 +38,7 @@ class HydraPaper implements WallpaperManager {
             const tmpMode = backgroundSettings.getString('picture-options');
 
             // Force HydraPaper to target a different resulting image by using darkmode
-            await this._run(wallpaperPaths, true);
+            await this._createCommandAndRun(wallpaperPaths, true);
 
             screensaverSettings.setString('picture-options', 'spanned');
             Utils.setPictureUriOfSettingsObject(screensaverSettings, backgroundSettings.getString('picture-uri-dark'));
@@ -128,6 +50,31 @@ class HydraPaper implements WallpaperManager {
 
         if (mode === 2 && screensaverSettings && backgroundSettings)
             Utils.setPictureUriOfSettingsObject(screensaverSettings, backgroundSettings.getString('picture-uri'));
+    }
+
+    /**
+     * Run HydraPaper in CLI mode.
+     *
+     * HydraPaper:
+     * - Saves merged images in the cache folder.
+     * - Sets `picture-option` to `spanned`
+     * - Sets `picture-uri` or `picture-uri-dark` depending on {@link darkmode}
+     * - Needs matching image path count and display count
+     *
+     * @param {string[]} wallpaperArray Array of image paths, should match the display count
+     * @param {boolean} darkmode Use darkmode, gives different image in cache path
+     */
+    private async _createCommandAndRun(wallpaperArray: string[], darkmode: boolean = false): Promise<void> {
+        let command = [];
+
+        if (darkmode)
+            command.push('--darkmode');
+
+        // hydrapaper [--darkmode] --cli PATH PATH PATH
+        command.push('--cli');
+        command = command.concat(wallpaperArray);
+
+        await this._runExternal(command);
     }
 }
 
