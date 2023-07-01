@@ -9,8 +9,8 @@ import * as SettingsModule from './settings.js';
 import * as Utils from './utils.js';
 
 import {AFTimer as Timer} from './timer.js';
-import {getWallpaperManager, isImageMerged} from './manager/wallpaperManager.js';
 import {Logger} from './logger.js';
+import {Mode} from './manager/wallpaperManager.js';
 
 // SourceAdapter
 import {BaseAdapter} from './adapter/baseAdapter.js';
@@ -45,7 +45,7 @@ class WallpaperController {
     private _settings = new SettingsModule.Settings();
     private _timer = Timer.getTimer();
     private _historyController: HistoryModule.HistoryController;
-    private _wallpaperManager = getWallpaperManager();
+    private _wallpaperManager = Utils.getWallpaperManager();
     private _autoFetch = {active: false, duration: 30};
     private _previewId: string | undefined;
     private _resetWallpaper = false;
@@ -96,6 +96,13 @@ class WallpaperController {
         this._settings.observe('auto-fetch', () => this._updateAutoFetching());
         this._settings.observe('minutes', () => this._updateAutoFetching());
         this._settings.observe('hours', () => this._updateAutoFetching());
+
+        /**
+         * When the user installs a manager we won't notice that it's available.
+         * The preference window however checks on startup for availability and will allow this setting
+         * to change. Let's listen for that change and update our manager accordingly.
+         */
+        this._settings.observe('multiple-displays', () => this._updateWallpaperManager());
 
         this._updateHistory();
 
@@ -236,6 +243,13 @@ class WallpaperController {
     }
 
     /**
+     * Update the wallpaper manager on settings change.
+     */
+    private _updateWallpaperManager(): void {
+        this._wallpaperManager = Utils.getWallpaperManager();
+    }
+
+    /**
      * Get an array of random adapter needed to fill the display $count.
      *
      * A single adapter can be assigned for multiple images so you may get less than $count adapter back.
@@ -369,60 +383,22 @@ class WallpaperController {
     /**
      * Sets the wallpaper and the lock screen when enabled to the given path.
      *
-     * Types:
+     * Modes:
      * 0: Background
      * 1: Lock screen
      * 2: Background and lock screen
      *
      * @param {string[]} wallpaperPaths Array of paths to the image
-     * @param {number} type Types to change
+     * @param {Mode} mode Types to change
      */
-    private async _setBackground(wallpaperPaths: string[], type: number = 0): Promise<void> {
+    private async _setBackground(wallpaperPaths: string[], mode: Mode = Mode.BACKGROUND): Promise<void> {
         const backgroundSettings = new SettingsModule.Settings('org.gnome.desktop.background');
         const screensaverSettings = new SettingsModule.Settings('org.gnome.desktop.screensaver');
 
         if (wallpaperPaths.length < 1)
             throw new Error('Empty wallpaper array');
 
-        const wallpaperUri = `file://${wallpaperPaths[0]}`;
-
-        if (wallpaperPaths.length > 1 && this._wallpaperManager) {
-            await this._wallpaperManager.setWallpaper(wallpaperPaths, type, backgroundSettings, screensaverSettings);
-            return;
-        }
-
-        if (type === 0 || type === 2) {
-            if (isImageMerged(wallpaperUri))
-                // merged wallpapers need mode "spanned"
-                backgroundSettings.setString('picture-options', 'spanned');
-            else
-                // single wallpapers need mode "zoom"
-                backgroundSettings.setString('picture-options', 'zoom');
-
-            Utils.setPictureUriOfSettingsObject(backgroundSettings, wallpaperUri);
-        }
-
-        if (type === 1) {
-            if (isImageMerged(wallpaperUri))
-                // merged wallpapers need mode "spanned"
-                screensaverSettings.setString('picture-options', 'spanned');
-            else
-                // single wallpapers need mode "zoom"
-                screensaverSettings.setString('picture-options', 'zoom');
-
-            Utils.setPictureUriOfSettingsObject(screensaverSettings, wallpaperUri);
-        }
-
-        if (type === 2) {
-            if (isImageMerged(wallpaperUri))
-                // merged wallpapers need mode "spanned"
-                screensaverSettings.setString('picture-options', 'spanned');
-            else
-                // single wallpapers need mode "zoom"
-                screensaverSettings.setString('picture-options', 'zoom');
-
-            Utils.setPictureUriOfSettingsObject(screensaverSettings, backgroundSettings.getString('picture-uri'));
-        }
+        await this._wallpaperManager.setWallpaper(wallpaperPaths, mode, backgroundSettings, screensaverSettings);
     }
 
     /**
@@ -487,8 +463,8 @@ class WallpaperController {
 
             // ignore changeType === 3 because that doesn't make sense
             // when requesting a specific history entry
-            if (changeType > 2)
-                await this._setBackground(usedWallpaperPaths, 2);
+            if (changeType > Mode.BACKGROUND_AND_LOCKSCREEN)
+                await this._setBackground(usedWallpaperPaths, Mode.BACKGROUND_AND_LOCKSCREEN);
             else
                 await this._setBackground(usedWallpaperPaths, changeType);
 
@@ -583,11 +559,11 @@ class WallpaperController {
 
             const usedWallpaperPaths = this._fillDisplaysFromHistory(newWallpaperPaths, monitorCount);
 
-            if (changeType === 3) {
+            if (changeType === Mode.BACKGROUND_AND_LOCKSCREEN_INDEPENDENT) {
                 // Half the images for the background
-                await this._setBackground(usedWallpaperPaths.slice(0, monitorCount / 2), 0);
+                await this._setBackground(usedWallpaperPaths.slice(0, monitorCount / 2), Mode.BACKGROUND);
                 // Half the images for the lock screen
-                await this._setBackground(usedWallpaperPaths.slice(monitorCount / 2), 1);
+                await this._setBackground(usedWallpaperPaths.slice(monitorCount / 2), Mode.LOCKSCREEN);
             } else {
                 await this._setBackground(usedWallpaperPaths, changeType);
             }
@@ -659,7 +635,7 @@ class WallpaperController {
         if (!this._settings.getBoolean('multiple-displays'))
             return 1;
 
-        if (!this._wallpaperManager?.isAvailable())
+        if (!this._wallpaperManager.canHandleMultipleImages)
             return 1;
 
         return Utils.getMonitorCount();
@@ -686,12 +662,12 @@ class WallpaperController {
             // Only change the background - the lock screen wouldn't be visible anyway
             // because this function is only used for hover preview
             if (this._resetWallpaper) {
-                this._setBackground(paths, 0).catch(error => {
+                this._setBackground(paths, Mode.BACKGROUND).catch(error => {
                     this._logger.error(error);
                 });
                 this._resetWallpaper = false;
             } else if (this._previewId !== undefined) {
-                this._setBackground(paths, 0).catch(error => {
+                this._setBackground(paths, Mode.BACKGROUND).catch(error => {
                     this._logger.error(error);
                 });
             }
