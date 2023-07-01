@@ -9,7 +9,7 @@ import * as SettingsModule from './settings.js';
 import * as Utils from './utils.js';
 
 import {AFTimer as Timer} from './timer.js';
-import {getWallpaperManager} from './manager/wallpaperManager.js';
+import {getWallpaperManager, isImageMerged} from './manager/wallpaperManager.js';
 import {Logger} from './logger.js';
 
 // SourceAdapter
@@ -392,32 +392,29 @@ class WallpaperController {
         }
 
         if (type === 0 || type === 2) {
-            // FIXME: These are currently hardcoded for the few available wallpaperManager
-            if (wallpaperUri.includes('merged_wallpaper') || wallpaperUri.includes('cli-a') || wallpaperUri.includes('cli-b'))
-            // merged wallpapers need mode "spanned"
+            if (isImageMerged(wallpaperUri))
+                // merged wallpapers need mode "spanned"
                 backgroundSettings.setString('picture-options', 'spanned');
             else
-            // single wallpapers need mode "zoom"
+                // single wallpapers need mode "zoom"
                 backgroundSettings.setString('picture-options', 'zoom');
 
             Utils.setPictureUriOfSettingsObject(backgroundSettings, wallpaperUri);
         }
 
         if (type === 1) {
-            // FIXME: These are currently hardcoded for the few available wallpaperManager
-            if (wallpaperUri.includes('merged_wallpaper') || wallpaperUri.includes('cli-a') || wallpaperUri.includes('cli-b'))
-            // merged wallpapers need mode "spanned"
+            if (isImageMerged(wallpaperUri))
+                // merged wallpapers need mode "spanned"
                 screensaverSettings.setString('picture-options', 'spanned');
             else
-            // single wallpapers need mode "zoom"
+                // single wallpapers need mode "zoom"
                 screensaverSettings.setString('picture-options', 'zoom');
 
             Utils.setPictureUriOfSettingsObject(screensaverSettings, wallpaperUri);
         }
 
         if (type === 2) {
-            // FIXME: These are currently hardcoded for the few available wallpaperManager
-            if (wallpaperUri.includes('merged_wallpaper') || wallpaperUri.includes('cli-a') || wallpaperUri.includes('cli-b'))
+            if (isImageMerged(wallpaperUri))
                 // merged wallpapers need mode "spanned"
                 screensaverSettings.setString('picture-options', 'spanned');
             else
