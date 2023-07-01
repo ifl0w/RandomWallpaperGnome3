@@ -1,4 +1,9 @@
+import Gio from 'gi://Gio';
+import GLib from 'gi://GLib';
+
+import {Logger} from 'logger.js';
 import type {Settings} from './../settings.js';
+import * as Utils from '../utils.js';
 
 import {HydraPaper} from './hydraPaper.js';
 import {Superpaper} from './superPaper.js';
@@ -9,8 +14,66 @@ import {Superpaper} from './superPaper.js';
  * Currently this is only used when in multiple monitor mode.
  */
 abstract class WallpaperManager {
-    abstract isAvailable(): boolean;
-    abstract cancelRunning(): void;
+    private _cancellable: Gio.Cancellable | null = null;
+    protected static _command: string[] | null = null;
+    protected abstract readonly _possibleCommands: string[];
+    protected abstract _logger: Logger;
+
+    /**
+     * Forcefully stop a previously started manager process.
+     */
+    private _cancelRunning(): void {
+        if (this._cancellable === null)
+            return;
+
+        this._logger.debug('Stopping manager process.');
+        this._cancellable.cancel();
+        this._cancellable = null;
+    }
+
+    /**
+     * Checks if the current manager is available in the `$PATH`.
+     *
+     * @returns {boolean} Whether the manager is found
+     */
+    isAvailable(): boolean {
+        if (WallpaperManager._command !== null)
+            return true;
+
+        for (const command of this._possibleCommands) {
+            const path = GLib.find_program_in_path(command);
+
+            if (path) {
+                WallpaperManager._command = [path];
+                break;
+            }
+        }
+
+        return WallpaperManager._command !== null;
+    }
+
+    /**
+     * Wrapper around calling the program command together with arguments.
+     *
+     * @param {string[]} commandArguments Arguments to append
+     */
+    protected async _runExternal(commandArguments: string[]): Promise<void> {
+        // Cancel already running processes before starting new ones
+        this._cancelRunning();
+
+        if (!WallpaperManager._command || WallpaperManager._command.length < 1)
+            throw new Error('Command empty!');
+
+        // Needs a copy here
+        const command = WallpaperManager._command.concat(commandArguments);
+
+        this._cancellable = new Gio.Cancellable();
+
+        this._logger.debug(`Running command: ${command.toString()}`);
+        await Utils.execCheck(command, this._cancellable);
+
+        this._cancellable = null;
+    }
 
     /**
      * Set the wallpapers for a given mode.
