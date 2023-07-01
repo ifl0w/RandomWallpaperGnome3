@@ -219,7 +219,7 @@ rules:
   # prefer-destructuring: error
   prefer-numeric-literals: error
   prefer-promise-reject-errors: error
-  prefer-rest-params: error
+  prefer-rest-params: off # Generated code triggered this, turn off for now
   prefer-spread: error
   prefer-template: error
   quotes:
