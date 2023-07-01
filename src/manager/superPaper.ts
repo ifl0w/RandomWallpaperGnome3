@@ -1,6 +1,3 @@
-import Gio from 'gi://Gio';
-import GLib from 'gi://GLib';
-
 import * as Utils from '../utils.js';
 
 import {Logger} from './../logger.js';
@@ -10,40 +7,9 @@ import {WallpaperManager} from './wallpaperManager.js';
 /**
  * Wrapper for Superpaper using it as a manager.
  */
-class Superpaper implements WallpaperManager {
-    private _command: string[] | null = null;
-    private _cancellable: Gio.Cancellable | null = null;
-    private _logger = new Logger('RWG3', 'Superpaper');
-
-    /**
-     * Checks if Superpaper is available in the $PATH.
-     *
-     * @returns {boolean} Whether Superpaper is found
-     */
-    isAvailable(): boolean {
-        if (this._command !== null)
-            return true;
-
-        const path = GLib.find_program_in_path('superpaper');
-        if (path) {
-            this._command = [path];
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * Forcefully stop a previously started Superpaper process.
-     */
-    cancelRunning(): void {
-        if (!this._cancellable)
-            return;
-
-        this._logger.debug('Stopping running HydraPaper process.');
-        this._cancellable.cancel();
-        this._cancellable = null;
-    }
+class Superpaper extends WallpaperManager {
+    readonly _possibleCommands = ['superpaper'];
+    _logger = new Logger('RWG3', 'Superpaper');
 
     /**
      * Set the wallpapers for a given mode.
@@ -60,7 +26,7 @@ class Superpaper implements WallpaperManager {
      */
     async setWallpaper(wallpaperPaths: string[], mode: number, backgroundSettings: Settings, screensaverSettings: Settings): Promise<void> {
         if ((mode === 0 || mode === 2) && backgroundSettings)
-            await this._run(wallpaperPaths);
+            await this._createCommandAndRun(wallpaperPaths);
 
         if (mode === 1 && backgroundSettings && screensaverSettings) {
             // Remember keys, Superpaper will change these
@@ -68,7 +34,7 @@ class Superpaper implements WallpaperManager {
             const tmpBackgroundDark = backgroundSettings.getString('picture-uri-dark');
             const tmpMode = backgroundSettings.getString('picture-options');
 
-            await this._run(wallpaperPaths);
+            await this._createCommandAndRun(wallpaperPaths);
 
             screensaverSettings.setString('picture-options', 'spanned');
             Utils.setPictureUriOfSettingsObject(screensaverSettings, backgroundSettings.getString('picture-uri-dark'));
@@ -88,33 +54,21 @@ class Superpaper implements WallpaperManager {
      * Run Superpaper in CLI mode.
      *
      * Superpaper:
-     * - Saves merged images alternating in "$XDG_CACHE_HOME/superpaper/temp/cli-{a,b}.png"
-     * - Sets picture-option to spanned
-     * - Sets both picture-uri options, light and dark
+     * - Saves merged images alternating in `$XDG_CACHE_HOME/superpaper/temp/cli-{a,b}.png`
+     * - Sets `picture-option` to `spanned`
+     * - Always sets both `picture-uri` and `picture-uri-dark` options
      * - Can use only single images
      *
      * @param {string[]} wallpaperArray Array of paths to the desired wallpapers, should match the display count, can be a single image
      */
-    private async _run(wallpaperArray: string[]): Promise<void> {
-        // Cancel already running processes before starting new ones
-        this.cancelRunning();
-
-        if (!this._command)
-            return;
-
-        // Needs a copy here
-        let command = [...this._command];
+    private async _createCommandAndRun(wallpaperArray: string[]): Promise<void> {
+        let command = [];
 
         // cspell:disable-next-line
         command.push('--setimages');
         command = command.concat(wallpaperArray);
 
-        this._cancellable = new Gio.Cancellable();
-
-        this._logger.debug(`Running command: ${command.toString()}`);
-        await Utils.execCheck(command, this._cancellable);
-
-        this._cancellable = null;
+        await this._runExternal(command);
     }
 }
 
