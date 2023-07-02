@@ -1,13 +1,14 @@
 import Adw from 'gi://Adw';
-import Gdk from 'gi://Gdk';
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 import Gtk from 'gi://Gtk';
+import type Meta from 'gi://Meta';
 
-import {Settings} from './settings.js';
 import {DefaultWallpaperManager} from './manager/defaultWallpaperManager.js';
 import {HydraPaper} from './manager/hydraPaper.js';
+import {Logger} from './logger.js';
 import {Superpaper} from './manager/superPaper.js';
+import {Settings} from './settings.js';
 import type {WallpaperManager} from './manager/wallpaperManager.js';
 
 // Generated code produces a no-shadow rule error:
@@ -164,26 +165,17 @@ function findFirstDifference(str1: string, str2: string): number {
  * @returns {number} Connected display count
  */
 function getMonitorCount(): number {
-    // Gdk 4.8+
-    // Gdk.DisplayManager.get()
-    // displayManager.get_default_display()
-    // display.get_monitors()
-    // monitors.get_n_items() <- Monitor count, number
-
-    // let defaultDisplay = Gdk.Display.get_default(); // default "seat" which can have multiple monitors
-    // let monitorList = defaultDisplay.get_monitors(); // Gio.ListModel containing all "Gdk.Monitor"
-    // return monitorList.get_n_items();
-
-    // Gdk < 4.8
-    const defaultDisplay = Gdk.Display.get_default();
-
-    if (!defaultDisplay)
-        return 1;
-
-    // FIXME: wrong version in definition
+    // FIXME: Figure out where the 'global' thing can be imported from
     // @ts-expect-error
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-    return defaultDisplay.get_n_monitors() as number;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    const currentDisplay = global?.display as Meta.Display;
+    const count = currentDisplay?.get_n_monitors();
+
+    if (count)
+        return count;
+
+    new Logger('RWG3', 'Utils').warn('Unable to get monitor count!');
+    return 1;
 }
 
 /**
