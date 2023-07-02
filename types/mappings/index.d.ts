@@ -7,6 +7,10 @@ declare module 'gi://Cogl' {
     export * from '@gi-types/cogl';
 }
 
+declare module 'gi://Meta' {
+    export * from '@gi-types/meta';
+}
+
 declare module 'gi://St' {
     export * from '@gi-types/st';
 }
