@@ -7,16 +7,21 @@ import {BaseAdapter} from './../adapter/baseAdapter.js';
 import {HistoryEntry} from './../history.js';
 
 interface QueryOptions {
-    q: string,
-    purity: string,
-    sorting: string,
-    categories: string,
-    // resolutions: string[],
-    colors: string,
+    /**
+     * Filter AI generated images.
+     *
+     * - 0 = Include them in search results
+     * - 1 = Don't include them in search results
+     */
+    ai_art_filter: string,
+
     atleast: string,
+    categories: string,
+    colors: string,
+    purity: string,
+    q: string,
     ratios: string[],
-    // order: string,
-    // topRange: string,
+    sorting: string,
 }
 
 interface WallhavenSearchResponse {
@@ -31,6 +36,7 @@ interface WallhavenSearchResponse {
  */
 class WallhavenAdapter extends BaseAdapter {
     private _options: QueryOptions = {
+        ai_art_filter: '1',
         q: '',
         purity: '110', // SFW, sketchy
         sorting: 'random',
@@ -224,6 +230,8 @@ class WallhavenAdapter extends BaseAdapter {
         purity.push(Number(this._settings.getBoolean('allow-sketchy')));
         purity.push(Number(this._settings.getBoolean('allow-nsfw')));
         this._options.purity = purity.join('');
+
+        this._options.ai_art_filter = this._settings.getBoolean('ai-art') ? '0' : '1';
 
         this._options.colors = this._settings.getString('color');
     }
