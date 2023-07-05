@@ -293,7 +293,7 @@ function getWallpaperManager(): WallpaperManager {
  * but span across all displays.
  *
  * @param {string} filename Naming to check
- * @returns {boolean} Wether the image is a merged wallpaper
+ * @returns {boolean} Whether the image is a merged wallpaper
  */
 // This function is here instead of wallpaperManager.js to work around looping import errors
 function isImageMerged(filename: string): boolean {
