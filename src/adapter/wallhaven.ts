@@ -184,7 +184,7 @@ class WallhavenAdapter extends BaseAdapter {
      * Primarily in use for typescript typing.
      *
      * @param {unknown} object Unknown object to narrow down
-     * @returns {boolean} Wether the response is from Reddit
+     * @returns {boolean} Whether the response is from Reddit
      */
     private _isWallhavenResponse(object: unknown): object is WallhavenSearchResponse {
         if (typeof object === 'object' &&
