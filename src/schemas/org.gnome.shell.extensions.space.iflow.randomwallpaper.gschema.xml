@@ -253,7 +253,7 @@
         <key type='s' name='api-key'>
             <default>""</default>
             <summary>Api key</summary>
-            <description>The wallheven api key.</description>
+            <description>The Wallhaven API key.</description>
         </key>
 
         <key type='b' name='category-anime'>
