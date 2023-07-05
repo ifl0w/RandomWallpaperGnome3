@@ -232,6 +232,12 @@
 
     <schema id='org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.wallhaven'>
 
+        <key type='b' name='ai-art'>
+            <default>false</default>
+            <summary>AI Art</summary>
+            <description>Whether AI generated images should be included.</description>
+        </key>
+
         <key type='b' name='allow-nsfw'>
             <default>false</default>
             <summary>NSFW</summary>

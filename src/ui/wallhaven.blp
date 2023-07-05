@@ -68,6 +68,14 @@ template $WallhavenSettingsGroup : Adw.PreferencesGroup {
                 }
             }
         }
+
+        Adw.ActionRow {
+            title: _("Allow AI generated images");
+
+            Switch ai_art {
+                valign: center;
+            }
+        }
     }
 
     Adw.PreferencesGroup {

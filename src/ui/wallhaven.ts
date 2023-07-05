@@ -16,6 +16,7 @@ const WallhavenSettingsGroup = GObject.registerClass({
     GTypeName: 'WallhavenSettingsGroup',
     Template: GLib.filename_to_uri(`${Self.path}/ui/wallhaven.ui`, null),
     InternalChildren: [
+        'ai_art',
         'allow_nsfw',
         'allow_sfw',
         'allow_sketchy',
@@ -42,6 +43,7 @@ const WallhavenSettingsGroup = GObject.registerClass({
     ];
 
     // InternalChildren
+    private _ai_art!: Gtk.Switch;
     private _allow_nsfw!: Gtk.Switch;
     private _allow_sfw!: Gtk.Switch;
     private _allow_sketchy!: Gtk.Switch;
@@ -73,6 +75,10 @@ const WallhavenSettingsGroup = GObject.registerClass({
         const path = `${Settings.RWG_SETTINGS_SCHEMA_PATH}/sources/wallhaven/${id}/`;
         this._settings = new Settings.Settings(Settings.RWG_SETTINGS_SCHEMA_SOURCES_WALLHAVEN, path);
 
+        this._settings.bind('ai-art',
+            this._ai_art,
+            'active',
+            Gio.SettingsBindFlags.DEFAULT);
         this._settings.bind('allow-nsfw',
             this._allow_nsfw,
             'active',
