@@ -92,7 +92,7 @@ abstract class BaseAdapter {
      *
      * @param {HistoryEntry[]} array Array to search in
      * @param {string} uri URI to search for
-     * @returns {boolean} Wether the array contains an item with $uri
+     * @returns {boolean} Whether the array contains an item with $uri
      */
     protected _includesWallpaper(array: HistoryEntry[], uri: string): boolean {
         for (const element of array) {

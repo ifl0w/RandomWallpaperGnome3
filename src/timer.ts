@@ -61,7 +61,7 @@ class AFTimer {
     /**
      * Check if the timer is currently set as enabled.
      *
-     * @returns {boolean} Wether the timer is enabled
+     * @returns {boolean} Whether the timer is enabled
      */
     isEnabled(): boolean {
         return this._settings.getBoolean('auto-fetch');
@@ -70,7 +70,7 @@ class AFTimer {
     /**
      * Check if the timer is currently paused.
      *
-     * @returns {boolean} Wether the timer is paused
+     * @returns {boolean} Whether the timer is paused
      */
     isPaused(): boolean {
         return this._paused;

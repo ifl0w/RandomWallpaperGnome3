@@ -235,7 +235,7 @@
         <key type='b' name='allow-nsfw'>
             <default>false</default>
             <summary>NSFW</summary>
-            <description>Weather not safe images are allowed.</description>
+            <description>Whether not safe images are allowed.</description>
         </key>
 
         <key type='b' name='allow-sfw'>
@@ -265,7 +265,7 @@
         <key type='b' name='category-general'>
             <default>true</default>
             <summary>Category General</summary>
-            <description>Weather the general category should be searched.</description>
+            <description>Whether the general category should be searched.</description>
         </key>
 
         <key type='b' name='category-people'>

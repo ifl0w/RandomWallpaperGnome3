@@ -105,7 +105,7 @@ const UnsplashSettingsGroup = GObject.registerClass({
      * Switch element sensitivity based on a selected combo row entry.
      *
      * @param {Adw.ComboRow} comboRow ComboRow with selected entry
-     * @param {boolean} enable Wether to make the element sensitive
+     * @param {boolean} enable Whether to make the element sensitive
      * @param {Gtk.Widget} targetElement The element to target the sensitivity setting
      */
     private _unsplashUnconstrained(comboRow: Adw.ComboRow, enable: boolean, targetElement: Gtk.Widget): void {
