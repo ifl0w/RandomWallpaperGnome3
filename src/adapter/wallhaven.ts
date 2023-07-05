@@ -1,3 +1,5 @@
+import Gio from 'gi://Gio';
+
 import * as SettingsModule from './../settings.js';
 import * as Utils from './../utils.js';
 
@@ -6,7 +8,6 @@ import {HistoryEntry} from './../history.js';
 
 interface QueryOptions {
     q: string,
-    apikey: string,
     purity: string,
     sorting: string,
     categories: string,
@@ -31,7 +32,6 @@ interface WallhavenSearchResponse {
 class WallhavenAdapter extends BaseAdapter {
     private _options: QueryOptions = {
         q: '',
-        apikey: '',
         purity: '110', // SFW, sketchy
         sorting: 'random',
         categories: '111', // General, Anime, People
@@ -72,6 +72,10 @@ class WallhavenAdapter extends BaseAdapter {
         const url = `https://wallhaven.cc/api/v1/search?${encodeURI(optionsString)}`;
         const message = this._bowl.newGetMessage(url);
 
+        const apiKey = this._settings.getString('api-key');
+        if (apiKey !== '')
+            message.requestHeaders.append('X-API-Key', apiKey);
+
         this._logger.debug(`Search URL: ${url}`);
 
         let wallhavenResponse;
@@ -97,14 +101,10 @@ class WallhavenAdapter extends BaseAdapter {
         for (let i = 0; i < response.length && wallpaperResult.length < count; i++) {
             const entry = response[i];
             const siteURL = entry.url;
-            let downloadURL = entry.path;
+            const downloadURL = entry.path;
 
             if (this._isImageBlocked(Utils.fileName(downloadURL)))
                 continue;
-
-            const apiKey = this._options['apikey'];
-            if (apiKey !== '')
-                downloadURL += `?apikey=${apiKey}`;
 
             const historyEntry = new HistoryEntry(null, this._sourceName, downloadURL);
             historyEntry.source.sourceUrl = 'https://wallhaven.cc/';
@@ -120,6 +120,39 @@ class WallhavenAdapter extends BaseAdapter {
         }
 
         return wallpaperResult;
+    }
+
+    /**
+     * Fetches an image according to a given HistoryEntry.
+     *
+     * This implementation requests the image in HistoryEntry.source.imageDownloadUrl
+     * using Soup and saves it to HistoryEntry.path while setting the X-API-Key header.
+     *
+     * @param {HistoryEntry} historyEntry The historyEntry to fetch
+     * @returns {Promise<HistoryEntry>} unaltered HistoryEntry
+     */
+    async fetchFile(historyEntry: HistoryEntry): Promise<HistoryEntry> {
+        const file = Gio.file_new_for_path(historyEntry.path);
+        const fstream = file.replace(null, false, Gio.FileCreateFlags.NONE, null);
+
+        // craft new message from details
+        const request = this._bowl.newGetMessage(historyEntry.source.imageDownloadUrl);
+
+        const apiKey = this._settings.getString('api-key');
+        if (apiKey !== '')
+            request.requestHeaders.append('X-API-Key', apiKey);
+
+        // start the download
+        const response_data_bytes = await this._bowl.send_and_receive(request);
+        if (!response_data_bytes) {
+            fstream.close(null);
+            throw new Error('Not a valid image response');
+        }
+
+        fstream.write(response_data_bytes, null);
+        fstream.close(null);
+
+        return historyEntry;
     }
 
     /**
@@ -173,7 +206,6 @@ class WallhavenAdapter extends BaseAdapter {
             const randomKeyword = keywords[Utils.getRandomNumber(keywords.length)];
             this._options.q = randomKeyword.trim();
         }
-        this._options.apikey = this._settings.getString('api-key');
 
         this._options.atleast = this._settings.getString('minimal-resolution');
         this._options.ratios = this._settings.getString('aspect-ratios').split(',');
