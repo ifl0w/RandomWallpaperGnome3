@@ -142,7 +142,7 @@ class RedditAdapter extends BaseAdapter {
      * Primarily in use for typescript typing.
      *
      * @param {unknown} object Unknown object to narrow down
-     * @returns {boolean} Wether the response is from Reddit
+     * @returns {boolean} Whether the response is from Reddit
      */
     private _isRedditResponse(object: unknown): object is RedditResponse {
         if (typeof object === 'object' &&

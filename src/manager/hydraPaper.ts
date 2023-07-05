@@ -79,7 +79,7 @@ class HydraPaper extends ExternalWallpaperManager {
      * but span across all displays.
      *
      * @param {string} filename Naming to check
-     * @returns {boolean} Wether the image is a merged wallpaper
+     * @returns {boolean} Whether the image is a merged wallpaper
      */
     static isImageMerged(filename: string): boolean {
         const mergedWallpaperNames = [

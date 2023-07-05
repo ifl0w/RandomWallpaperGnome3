@@ -93,7 +93,7 @@ class DefaultWallpaperManager extends WallpaperManager {
      * but span across all displays.
      *
      * @param {string} _filename Unused naming to check
-     * @returns {boolean} Wether the image is a merged wallpaper
+     * @returns {boolean} Whether the image is a merged wallpaper
      */
     static isImageMerged(_filename: string): boolean {
         // This manager can't create merged wallpaper
