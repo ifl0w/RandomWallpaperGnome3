@@ -2,7 +2,6 @@ import * as Utils from '../utils.js';
 
 import {ExternalWallpaperManager} from './externalWallpaperManager.js';
 import {Logger} from './../logger.js';
-import {Settings} from './../settings.js';
 
 /**
  * Wrapper for Superpaper using it as a manager.
@@ -15,10 +14,9 @@ class Superpaper extends ExternalWallpaperManager {
      * Sets the background image in light and dark mode.
      *
      * @param {string[]} wallpaperPaths Array of strings to image files
-     * @param {Settings} _backgroundSettings Unused settings object
      */
     // We don't need the settings object because Superpaper already set both picture-uri on it's own.
-    protected async _setBackground(wallpaperPaths: string[], _backgroundSettings: Settings): Promise<void> {
+    protected async _setBackground(wallpaperPaths: string[]): Promise<void> {
         await this._createCommandAndRun(wallpaperPaths);
     }
 
@@ -26,24 +24,22 @@ class Superpaper extends ExternalWallpaperManager {
      * Sets the lock screen image in light and dark mode.
      *
      * @param {string[]} wallpaperPaths Array of strings to image files
-     * @param {Settings} backgroundSettings Settings object holding the desktop background picture-uri
-     * @param {Settings} screensaverSettings Settings object holding the screensaver picture-uri
      */
-    protected async _setLockScreen(wallpaperPaths: string[], backgroundSettings: Settings, screensaverSettings: Settings): Promise<void> {
+    protected async _setLockScreen(wallpaperPaths: string[]): Promise<void> {
         // Remember keys, Superpaper will change these
-        const tmpBackground = backgroundSettings.getString('picture-uri');
-        const tmpBackgroundDark = backgroundSettings.getString('picture-uri-dark');
-        const tmpMode = backgroundSettings.getString('picture-options');
+        const tmpBackground = this._backgroundSettings.getString('picture-uri');
+        const tmpBackgroundDark = this._backgroundSettings.getString('picture-uri-dark');
+        const tmpMode = this._backgroundSettings.getString('picture-options');
 
         await this._createCommandAndRun(wallpaperPaths);
 
-        screensaverSettings.setString('picture-options', 'spanned');
-        Utils.setPictureUriOfSettingsObject(screensaverSettings, backgroundSettings.getString('picture-uri-dark'));
+        this._screensaverSettings.setString('picture-options', 'spanned');
+        Utils.setPictureUriOfSettingsObject(this._screensaverSettings, this._backgroundSettings.getString('picture-uri-dark'));
 
         // Superpaper possibly changed these, change them back
-        backgroundSettings.setString('picture-uri', tmpBackground);
-        backgroundSettings.setString('picture-uri-dark', tmpBackgroundDark);
-        backgroundSettings.setString('picture-options', tmpMode);
+        this._backgroundSettings.setString('picture-uri', tmpBackground);
+        this._backgroundSettings.setString('picture-uri-dark', tmpBackgroundDark);
+        this._backgroundSettings.setString('picture-options', tmpMode);
     }
 
     // https://github.com/hhannine/superpaper/blob/master/docs/cli-usage.md
