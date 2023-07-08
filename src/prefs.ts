@@ -97,8 +97,23 @@ class RandomWallpaperSettings {
             this._builder.add_from_file(`${Self.path}/ui/pageGeneral.ui`);
             this._builder.add_from_file(`${Self.path}/ui/pageSources.ui`);
 
-            Utils.fillComboRowFromEnum(this._builder.get_object('combo_background_type'), this._settings, 'change-type');
-            Utils.fillComboRowFromEnum(this._builder.get_object('log_level'), this._settings, 'log-level');
+            import('./manager/wallpaperManager.js').then(module => {
+                const comboBackgroundType = this._builder.get_object<InstanceType<typeof Adw.ComboRow>>('combo_background_type');
+                comboBackgroundType.model = Gtk.StringList.new(module.getModeNameList());
+                comboBackgroundType.selected = this._settings.getInt('change-type');
+                comboBackgroundType.connect('notify::selected', (_comboBackgroundType: InstanceType<typeof Adw.ComboRow>) => {
+                    this._settings.setInt('change-type', _comboBackgroundType.selected);
+                });
+            }).catch(error => {
+                this._logger.error(error);
+            });
+
+            const comboLogLevel = this._builder.get_object<InstanceType<typeof Adw.ComboRow>>('log_level');
+            Utils.fillComboRowFromEnum(comboLogLevel, this._settings);
+            comboLogLevel.selected = this._settings.getInt('log-level');
+            comboLogLevel.connect('notify::selected', (_comboLogLevel: InstanceType<typeof Adw.ComboRow>) => {
+                this._settings.setInt('log-level', _comboLogLevel.selected);
+            });
 
             this._settings.bind('minutes',
                 this._builder.get_object('duration_minutes'),
