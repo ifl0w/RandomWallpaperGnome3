@@ -2,13 +2,16 @@
 
 import {Settings} from './settings.js';
 
-const enum LogLevel {
+// Generated code produces a no-shadow rule error
+/* eslint-disable */
+enum LogLevel {
     SILENT,
     ERROR,
     WARNING,
     INFO,
     DEBUG,
 }
+/* eslint-enable */
 type LogLevelStrings = keyof typeof LogLevel;
 
 /**
@@ -57,7 +60,7 @@ class Logger {
      * @returns {LogLevel} Log level
      */
     private _selectedLogLevel(): LogLevel {
-        return this._settings.getEnum('log-level');
+        return this._settings.getInt('log-level') as LogLevel;
     }
 
     /**
@@ -109,4 +112,56 @@ class Logger {
     }
 }
 
-export {Logger};
+/**
+ * Retrieve the human readable enum name.
+ *
+ * @param {LogLevel} level The mode to name
+ * @returns {string} Name
+ */
+function _getLogLevelName(level: LogLevel): string {
+    let name: string;
+
+    switch (level) {
+    case LogLevel.SILENT:
+        name = 'Silent';
+        break;
+    case LogLevel.ERROR:
+        name = 'Error';
+        break;
+    case LogLevel.WARNING:
+        name = 'Warning';
+        break;
+    case LogLevel.INFO:
+        name = 'Info';
+        break;
+    case LogLevel.DEBUG:
+        name = 'Debug';
+        break;
+
+    default:
+        name = 'LogLevel name not found';
+        break;
+    }
+
+    return name;
+}
+
+/**
+ * Get a list of human readable enum entries.
+ *
+ * @returns {string[]} Array with key names
+ */
+function getLogLevelNameList(): string[] {
+    const list: string[] = [];
+
+    const values = Object.values(LogLevel).filter(v => !isNaN(Number(v)));
+    for (const i of values)
+        list.push(_getLogLevelName(i as LogLevel));
+
+    return list;
+}
+
+export {
+    Logger,
+    getLogLevelNameList
+};
