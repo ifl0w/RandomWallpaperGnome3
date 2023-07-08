@@ -1,14 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist gettext-domain='gnome-shell-extensions'>
 
-    <enum id='org.gnome.shell.extensions.space.iflow.randomwallpaper.log-levels'>
-        <value value='0' nick='Silent' />
-        <value value='1' nick='Error' />
-        <value value='2' nick='Warning' />
-        <value value='3' nick='Info' />
-        <value value='4' nick='Debug' />
-    </enum>
-
     <schema path="/org/gnome/shell/extensions/space-iflow-randomwallpaper/"
         id='org.gnome.shell.extensions.space.iflow.randomwallpaper'>
 
@@ -63,8 +55,8 @@
             <description>Allows to choose what backgrounds will be changed.</description>
         </key>
 
-        <key name='log-level' enum='org.gnome.shell.extensions.space.iflow.randomwallpaper.log-levels'>
-            <default>"Warning"</default>
+        <key type='i' name='log-level'>
+            <default>2</default>
             <summary>Tier of logs</summary>
             <description>Choose what minimal tier of logs should appear in the journal.</description>
         </key>
