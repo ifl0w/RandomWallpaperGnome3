@@ -458,10 +458,10 @@ class WallpaperController {
         const historyElement = this._historyController.get(historyId);
 
         if (historyElement?.id && historyElement.path && this._historyController.promoteToActive(historyElement.id)) {
-            const changeType = this._settings.getEnum('change-type');
+            const changeType = this._settings.getInt('change-type') as Mode;
             const usedWallpaperPaths = this._fillDisplaysFromHistory([historyElement.path]);
 
-            // ignore changeType === 3 because that doesn't make sense
+            // ignore changeType === Mode.BACKGROUND_AND_LOCKSCREEN_INDEPENDENT because that doesn't make sense
             // when requesting a specific history entry
             if (changeType > Mode.BACKGROUND_AND_LOCKSCREEN)
                 await this._setBackground(usedWallpaperPaths, Mode.BACKGROUND_AND_LOCKSCREEN);
@@ -487,15 +487,11 @@ class WallpaperController {
         this._startLoadingHooks.forEach(element => element());
 
         try {
-            // <value value='0' nick='Background' />
-            // <value value='1' nick='Lock Screen' />
-            // <value value='2' nick='Background and Lock Screen' />
-            // <value value='3' nick='Background and Lock Screen independently' />
-            const changeType = this._settings.getEnum('change-type');
+            const changeType = this._settings.getInt('change-type') as Mode;
             let monitorCount = this._getCurrentDisplayCount();
 
             // Request double the amount of displays if we need background and lock screen
-            if (changeType === 3)
+            if (changeType === Mode.BACKGROUND_AND_LOCKSCREEN_INDEPENDENT)
                 monitorCount *= 2;
 
             const imageAdapters = this._getRandomAdapter(monitorCount);

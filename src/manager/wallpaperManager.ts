@@ -1,12 +1,20 @@
 import {Logger} from '../logger.js';
 import type {Settings} from './../settings.js';
 
-const enum Mode {
+// Generated code produces a no-shadow rule error
+/* eslint-disable */
+enum Mode {
+    /** Only change the desktop background */
     BACKGROUND,
+    /** Only change the lock screen background */
     LOCKSCREEN,
+    /** Change the desktop and lock screen background to the same image. */
+    // This allows for optimizations when processing images.
     BACKGROUND_AND_LOCKSCREEN,
+    /** Change each - the desktop and lock screen background - to different images. */
     BACKGROUND_AND_LOCKSCREEN_INDEPENDENT,
 }
+/* eslint-enable */
 
 /**
  * Wallpaper manager is a base class for manager to implement.
@@ -44,7 +52,54 @@ abstract class WallpaperManager {
     protected abstract _setLockScreen(wallpaperPaths: string[], backgroundSettings: Settings, screensaverSettings: Settings): Promise<void>;
 }
 
+/**
+ * Retrieve the human readable enum name.
+ *
+ * @param {Mode} mode The mode to name
+ * @returns {string} Name
+ */
+function _getModeName(mode: Mode): string {
+    let name: string;
+
+    switch (mode) {
+    case Mode.BACKGROUND:
+        name = 'Background';
+        break;
+    case Mode.LOCKSCREEN:
+        name = 'Lockscreen';
+        break;
+    case Mode.BACKGROUND_AND_LOCKSCREEN:
+        name = 'Background and lockscreen';
+        break;
+    case Mode.BACKGROUND_AND_LOCKSCREEN_INDEPENDENT:
+        name = 'Background and lockscreen independently';
+        break;
+
+    default:
+        name = 'Mode name not found';
+        break;
+    }
+
+    return name;
+}
+
+/**
+ * Get a list of human readable enum entries.
+ *
+ * @returns {string[]} Array with key names
+ */
+function getModeNameList(): string[] {
+    const list: string[] = [];
+
+    const values = Object.values(Mode).filter(v => !isNaN(Number(v)));
+    for (const i of values)
+        list.push(_getModeName(i as Mode));
+
+    return list;
+}
+
 export {
     WallpaperManager,
-    Mode
+    Mode,
+    getModeNameList
 };
