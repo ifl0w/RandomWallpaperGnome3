@@ -52,7 +52,7 @@ abstract class ExternalWallpaperManager extends WallpaperManager {
         this._cancelRunning();
 
         // Fallback to default manager, all currently supported external manager don't support setting single images
-        if (wallpaperPaths.length === 1) {
+        if (wallpaperPaths.length === 1 || (mode === Mode.BACKGROUND_AND_LOCKSCREEN_INDEPENDENT && wallpaperPaths.length === 2)) {
             const promises = [];
 
             if (mode === Mode.BACKGROUND || mode === Mode.BACKGROUND_AND_LOCKSCREEN)
@@ -60,6 +60,16 @@ abstract class ExternalWallpaperManager extends WallpaperManager {
 
             if (mode === Mode.LOCKSCREEN || mode === Mode.BACKGROUND_AND_LOCKSCREEN)
                 promises.push(DefaultWallpaperManager.setSingleLockScreen(`file://${wallpaperPaths[0]}`, this._backgroundSettings, this._screensaverSettings));
+
+            if (mode === Mode.BACKGROUND_AND_LOCKSCREEN_INDEPENDENT) {
+                if (wallpaperPaths.length < 2)
+                    throw new Error('Not enough wallpaper');
+
+                // Half the images for the background
+                promises.push(DefaultWallpaperManager.setSingleBackground(`file://${wallpaperPaths[0]}`, this._backgroundSettings));
+                // Half the images for the lock screen
+                promises.push(DefaultWallpaperManager.setSingleLockScreen(`file://${wallpaperPaths[1]}`, this._backgroundSettings, this._screensaverSettings));
+            }
 
             await Promise.allSettled(promises);
             return;
@@ -79,6 +89,11 @@ abstract class ExternalWallpaperManager extends WallpaperManager {
 
         if (mode === Mode.BACKGROUND_AND_LOCKSCREEN)
             await this._setLockScreenAfterBackground(wallpaperPaths);
+
+        if (mode === Mode.BACKGROUND_AND_LOCKSCREEN_INDEPENDENT) {
+            await this._setBackground(wallpaperPaths.slice(0, wallpaperPaths.length / 2));
+            await this._setLockScreen(wallpaperPaths.slice(wallpaperPaths.length / 2));
+        }
     }
 
     /**

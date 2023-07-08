@@ -534,14 +534,7 @@ class WallpaperController {
 
             const usedWallpaperPaths = this._fillDisplaysFromHistory(newWallpaperPaths, monitorCount);
 
-            if (changeType === Mode.BACKGROUND_AND_LOCKSCREEN_INDEPENDENT) {
-                // Half the images for the background
-                await this._wallpaperManager.setWallpaper(usedWallpaperPaths.slice(0, monitorCount / 2), Mode.BACKGROUND);
-                // Half the images for the lock screen
-                await this._wallpaperManager.setWallpaper(usedWallpaperPaths.slice(monitorCount / 2), Mode.LOCKSCREEN);
-            } else {
-                await this._wallpaperManager.setWallpaper(usedWallpaperPaths, changeType);
-            }
+            await this._wallpaperManager.setWallpaper(usedWallpaperPaths, changeType);
 
             usedWallpaperPaths.reverse().forEach(path => {
                 const id = this._historyController.getEntryByPath(path)?.id;
