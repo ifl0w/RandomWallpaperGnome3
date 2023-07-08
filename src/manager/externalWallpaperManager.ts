@@ -5,16 +5,17 @@ import * as Utils from '../utils.js';
 
 import {DefaultWallpaperManager} from './defaultWallpaperManager.js';
 import {Mode, WallpaperManager} from './wallpaperManager.js';
-import type {Settings} from '../settings.js';
 
 /**
  * Abstract base class for external manager to implement.
  */
 abstract class ExternalWallpaperManager extends WallpaperManager {
-    private _cancellable: Gio.Cancellable | null = null;
+    public canHandleMultipleImages = true;
+
     protected static _command: string[] | null = null;
     protected abstract readonly _possibleCommands: string[];
-    canHandleMultipleImages = true;
+
+    private _cancellable: Gio.Cancellable | null = null;
 
     /**
      * Checks if the current manager is available in the `$PATH`.
@@ -40,17 +41,13 @@ abstract class ExternalWallpaperManager extends WallpaperManager {
     /**
      * Set the wallpapers for a given mode.
      *
-     * Modes:
-     * - 0: Background
-     * - 1: Lock screen
-     * - 2: Background and lock screen
-     *
      * @param {string[]} wallpaperPaths Array of paths to the desired wallpapers, should match the display count
      * @param {Mode} mode Enum indicating what images to change
-     * @param {Settings} backgroundSettings Settings object containing the background settings
-     * @param {Settings} screensaverSettings Settings object containing the screensaver/lockscreen settings
      */
-    async setWallpaper(wallpaperPaths: string[], mode: Mode, backgroundSettings: Settings, screensaverSettings: Settings): Promise<void> {
+    async setWallpaper(wallpaperPaths: string[], mode: Mode): Promise<void> {
+        if (wallpaperPaths.length < 1)
+            throw new Error('Empty wallpaper array');
+
         // Cancel already running processes before setting new images
         this._cancelRunning();
 
@@ -59,10 +56,10 @@ abstract class ExternalWallpaperManager extends WallpaperManager {
             const promises = [];
 
             if (mode === Mode.BACKGROUND || mode === Mode.BACKGROUND_AND_LOCKSCREEN)
-                promises.push(DefaultWallpaperManager.setSingleBackground(`file://${wallpaperPaths[0]}`, backgroundSettings));
+                promises.push(DefaultWallpaperManager.setSingleBackground(`file://${wallpaperPaths[0]}`, this._backgroundSettings));
 
             if (mode === Mode.LOCKSCREEN || mode === Mode.BACKGROUND_AND_LOCKSCREEN)
-                promises.push(DefaultWallpaperManager.setSingleLockScreen(`file://${wallpaperPaths[0]}`, backgroundSettings, screensaverSettings));
+                promises.push(DefaultWallpaperManager.setSingleLockScreen(`file://${wallpaperPaths[0]}`, this._backgroundSettings, this._screensaverSettings));
 
             await Promise.allSettled(promises);
             return;
@@ -75,13 +72,13 @@ abstract class ExternalWallpaperManager extends WallpaperManager {
          */
 
         if (mode === Mode.BACKGROUND || mode === Mode.BACKGROUND_AND_LOCKSCREEN)
-            await this._setBackground(wallpaperPaths, backgroundSettings);
+            await this._setBackground(wallpaperPaths);
 
         if (mode === Mode.LOCKSCREEN)
-            await this._setLockScreen(wallpaperPaths, backgroundSettings, screensaverSettings);
+            await this._setLockScreen(wallpaperPaths);
 
         if (mode === Mode.BACKGROUND_AND_LOCKSCREEN)
-            await this._setLockScreenAfterBackground(wallpaperPaths, backgroundSettings, screensaverSettings);
+            await this._setLockScreenAfterBackground(wallpaperPaths);
     }
 
     /**
@@ -125,12 +122,10 @@ abstract class ExternalWallpaperManager extends WallpaperManager {
      * This function exists to save compute time on identical background and lock screen images.
      *
      * @param {string[]} _wallpaperPaths Unused array of strings to image files
-     * @param {Settings} backgroundSettings Settings object holding the desktop background picture-uri
-     * @param {Settings} screensaverSettings Settings object holding the screensaver picture-uri
      * @returns {Promise<void>} Only resolves
      */
-    protected _setLockScreenAfterBackground(_wallpaperPaths: string[], backgroundSettings: Settings, screensaverSettings: Settings): Promise<void> {
-        Utils.setPictureUriOfSettingsObject(screensaverSettings, backgroundSettings.getString('picture-uri'));
+    protected _setLockScreenAfterBackground(_wallpaperPaths: string[]): Promise<void> {
+        Utils.setPictureUriOfSettingsObject(this._screensaverSettings, this._backgroundSettings.getString('picture-uri'));
         return Promise.resolve();
     }
 }

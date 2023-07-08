@@ -381,27 +381,6 @@ class WallpaperController {
     }
 
     /**
-     * Sets the wallpaper and the lock screen when enabled to the given path.
-     *
-     * Modes:
-     * 0: Background
-     * 1: Lock screen
-     * 2: Background and lock screen
-     *
-     * @param {string[]} wallpaperPaths Array of paths to the image
-     * @param {Mode} mode Types to change
-     */
-    private async _setBackground(wallpaperPaths: string[], mode: Mode = Mode.BACKGROUND): Promise<void> {
-        const backgroundSettings = new SettingsModule.Settings('org.gnome.desktop.background');
-        const screensaverSettings = new SettingsModule.Settings('org.gnome.desktop.screensaver');
-
-        if (wallpaperPaths.length < 1)
-            throw new Error('Empty wallpaper array');
-
-        await this._wallpaperManager.setWallpaper(wallpaperPaths, mode, backgroundSettings, screensaverSettings);
-    }
-
-    /**
      * Run a configured post command.
      */
     private _runPostCommands(): void {
@@ -464,9 +443,9 @@ class WallpaperController {
             // ignore changeType === Mode.BACKGROUND_AND_LOCKSCREEN_INDEPENDENT because that doesn't make sense
             // when requesting a specific history entry
             if (changeType > Mode.BACKGROUND_AND_LOCKSCREEN)
-                await this._setBackground(usedWallpaperPaths, Mode.BACKGROUND_AND_LOCKSCREEN);
+                await this._wallpaperManager.setWallpaper(usedWallpaperPaths, Mode.BACKGROUND_AND_LOCKSCREEN);
             else
-                await this._setBackground(usedWallpaperPaths, changeType);
+                await this._wallpaperManager.setWallpaper(usedWallpaperPaths, changeType);
 
             this._runPostCommands();
             usedWallpaperPaths.reverse().forEach(path => {
@@ -557,11 +536,11 @@ class WallpaperController {
 
             if (changeType === Mode.BACKGROUND_AND_LOCKSCREEN_INDEPENDENT) {
                 // Half the images for the background
-                await this._setBackground(usedWallpaperPaths.slice(0, monitorCount / 2), Mode.BACKGROUND);
+                await this._wallpaperManager.setWallpaper(usedWallpaperPaths.slice(0, monitorCount / 2), Mode.BACKGROUND);
                 // Half the images for the lock screen
-                await this._setBackground(usedWallpaperPaths.slice(monitorCount / 2), Mode.LOCKSCREEN);
+                await this._wallpaperManager.setWallpaper(usedWallpaperPaths.slice(monitorCount / 2), Mode.LOCKSCREEN);
             } else {
-                await this._setBackground(usedWallpaperPaths, changeType);
+                await this._wallpaperManager.setWallpaper(usedWallpaperPaths, changeType);
             }
 
             usedWallpaperPaths.reverse().forEach(path => {
@@ -658,12 +637,12 @@ class WallpaperController {
             // Only change the background - the lock screen wouldn't be visible anyway
             // because this function is only used for hover preview
             if (this._resetWallpaper) {
-                this._setBackground(paths, Mode.BACKGROUND).catch(error => {
+                this._wallpaperManager.setWallpaper(paths).catch(error => {
                     this._logger.error(error);
                 });
                 this._resetWallpaper = false;
             } else if (this._previewId !== undefined) {
-                this._setBackground(paths, Mode.BACKGROUND).catch(error => {
+                this._wallpaperManager.setWallpaper(paths).catch(error => {
                     this._logger.error(error);
                 });
             }
