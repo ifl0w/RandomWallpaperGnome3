@@ -1,5 +1,5 @@
 import {Logger} from '../logger.js';
-import type {Settings} from './../settings.js';
+import {Settings} from './../settings.js';
 
 // Generated code produces a no-shadow rule error
 /* eslint-disable */
@@ -20,36 +20,34 @@ enum Mode {
  * Wallpaper manager is a base class for manager to implement.
  */
 abstract class WallpaperManager {
+    public canHandleMultipleImages = false;
+
     protected abstract _logger: Logger;
-    canHandleMultipleImages = false;
+    protected _backgroundSettings = new Settings('org.gnome.desktop.background');
+    protected _screensaverSettings = new Settings('org.gnome.desktop.screensaver');
 
     /**
      * Set the wallpapers for a given mode.
      *
-     * Modes:
-     * - 0: Background
-     * - 1: Lock screen
-     * - 2: Background and lock screen
-     *
      * @param {string[]} wallpaperPaths Array of paths to the desired wallpapers, should match the display count
      * @param {Mode} mode Enum indicating what images to change
-     * @param {Settings} backgroundSettings Settings object containing the background settings
-     * @param {Settings} screensaverSettings Settings object containing the screensaver/lockscreen settings
      */
-    async setWallpaper(wallpaperPaths: string[], mode: Mode, backgroundSettings: Settings, screensaverSettings: Settings): Promise<void> {
-        const promises = [];
+    async setWallpaper(wallpaperPaths: string[], mode: Mode = Mode.BACKGROUND): Promise<void> {
+        if (wallpaperPaths.length < 1)
+            throw new Error('Empty wallpaper array');
 
+        const promises = [];
         if (mode === Mode.BACKGROUND || mode === Mode.BACKGROUND_AND_LOCKSCREEN)
-            promises.push(this._setBackground(wallpaperPaths, backgroundSettings));
+            promises.push(this._setBackground(wallpaperPaths));
 
         if (mode === Mode.LOCKSCREEN || mode === Mode.BACKGROUND_AND_LOCKSCREEN)
-            promises.push(this._setLockScreen(wallpaperPaths, backgroundSettings, screensaverSettings));
+            promises.push(this._setLockScreen(wallpaperPaths));
 
         await Promise.allSettled(promises);
     }
 
-    protected abstract _setBackground(wallpaperPaths: string[], backgroundSettings: Settings): Promise<void>;
-    protected abstract _setLockScreen(wallpaperPaths: string[], backgroundSettings: Settings, screensaverSettings: Settings): Promise<void>;
+    protected abstract _setBackground(wallpaperPaths: string[]): Promise<void>;
+    protected abstract _setLockScreen(wallpaperPaths: string[]): Promise<void>;
 }
 
 /**
