@@ -16,15 +16,14 @@ class DefaultWallpaperManager extends WallpaperManager {
      * Sets the background image in light and dark mode.
      *
      * @param {string[]} wallpaperPaths Array of strings to image files, expects a single image only.
-     * @param {Settings} backgroundSettings Settings object holding the desktop background picture-uri
      * @returns {Promise<void>} Only resolves
      */
-    protected async _setBackground(wallpaperPaths: string[], backgroundSettings: Settings): Promise<void> {
+    protected async _setBackground(wallpaperPaths: string[]): Promise<void> {
         // The default manager can't handle multiple displays
         if (wallpaperPaths.length > 1)
             this._logger.warn('Single handling manager called with multiple images!');
 
-        await DefaultWallpaperManager.setSingleBackground(`file://${wallpaperPaths[0]}`, backgroundSettings);
+        await DefaultWallpaperManager.setSingleBackground(`file://${wallpaperPaths[0]}`, this._backgroundSettings);
 
         return Promise.resolve();
     }
@@ -33,16 +32,14 @@ class DefaultWallpaperManager extends WallpaperManager {
      * Sets the lock screen image in light and dark mode.
      *
      * @param {string[]} wallpaperPaths Array of strings to image files, expects a single image only.
-     * @param {Settings} _backgroundSettings Unused settings object
-     * @param {Settings} screensaverSettings Settings object holding the screensaver picture-uri
      * @returns {Promise<void>} Only resolves
      */
-    protected async _setLockScreen(wallpaperPaths: string[], _backgroundSettings: Settings, screensaverSettings: Settings): Promise<void> {
+    protected async _setLockScreen(wallpaperPaths: string[]): Promise<void> {
         // The default manager can't handle multiple displays
         if (wallpaperPaths.length > 1)
             this._logger.warn('Single handling manager called with multiple images!');
 
-        await DefaultWallpaperManager.setSingleLockScreen(`file://${wallpaperPaths[0]}`, _backgroundSettings, screensaverSettings);
+        await DefaultWallpaperManager.setSingleLockScreen(`file://${wallpaperPaths[0]}`, this._backgroundSettings, this._screensaverSettings);
 
         return Promise.resolve();
     }
