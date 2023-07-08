@@ -43,6 +43,16 @@ abstract class WallpaperManager {
         if (mode === Mode.LOCKSCREEN || mode === Mode.BACKGROUND_AND_LOCKSCREEN)
             promises.push(this._setLockScreen(wallpaperPaths));
 
+        if (mode === Mode.BACKGROUND_AND_LOCKSCREEN_INDEPENDENT) {
+            if (wallpaperPaths.length < 2)
+                throw new Error('Not enough wallpaper');
+
+            // Half the images for the background
+            promises.push(this._setBackground(wallpaperPaths.slice(0, wallpaperPaths.length / 2)));
+            // Half the images for the lock screen
+            promises.push(this._setLockScreen(wallpaperPaths.slice(wallpaperPaths.length / 2)));
+        }
+
         await Promise.allSettled(promises);
     }
 
