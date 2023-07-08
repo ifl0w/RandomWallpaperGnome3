@@ -1,7 +1,5 @@
-import Adw from 'gi://Adw';
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
-import Gtk from 'gi://Gtk';
 import type Meta from 'gi://Meta';
 
 import {DefaultWallpaperManager} from './manager/defaultWallpaperManager.js';
@@ -9,7 +7,7 @@ import {HydraPaper} from './manager/hydraPaper.js';
 import {Logger} from './logger.js';
 import {Superpaper} from './manager/superPaper.js';
 import {Settings} from './settings.js';
-import type {WallpaperManager} from './manager/wallpaperManager.js';
+import {type WallpaperManager} from './manager/wallpaperManager.js';
 
 // Generated code produces a no-shadow rule error:
 // 'SourceType' is already declared in the upper scope on line 7 column 5  no-shadow
@@ -113,31 +111,6 @@ function fileName(uri: string): string {
         base = base.substring(0, base.indexOf('?'));
 
     return base;
-}
-
-/**
- * Takes a GSettings schema and key to an enum and fills a combo row with it.
- *
- * @param {Adw.ComboRow} comboRow ComboRow to fill and connect
- * @param {Settings} settings Settings schema to scan values for
- * @param {string} key Key where to find values in the settings schema
- */
-function fillComboRowFromEnum(comboRow: Adw.ComboRow, settings: Settings, key: string): void {
-    // Fill combo from settings enum
-    const availableTypes = settings.getSchema().get_key(key).get_range(); // GLib.Variant (sv)
-    // (sv) = Tuple(%G_VARIANT_TYPE_STRING, %G_VARIANT_TYPE_VARIANT)
-    // s should be 'enum'
-    // v should be an array enumerating the possible values. Each item in the array is a possible valid value and no other values are valid.
-    // v is 'as'
-    const availableTypesNames = availableTypes.get_child_value(1).get_variant().get_strv();
-
-    const stringList = Gtk.StringList.new(availableTypesNames);
-    comboRow.model = stringList;
-    comboRow.selected = settings.getEnum(key);
-
-    comboRow.connect('notify::selected', (_comboRow: Adw.ComboRow) => {
-        settings.setEnum(key, _comboRow.selected);
-    });
 }
 
 // https://stackoverflow.com/a/32859917
@@ -309,7 +282,6 @@ export {
     isImageMerged,
     execCheck,
     fileName,
-    fillComboRowFromEnum,
     findFirstDifference,
     getMonitorCount,
     getRandomNumber,

@@ -20,6 +20,7 @@ import * as Utils from './utils.js';
 
 import {Logger} from './logger.js';
 import {WallpaperController} from './wallpaperController.js';
+import {Mode} from './manager/wallpaperManager.js';
 
 const Self = ExtensionUtils.getCurrentExtension();
 
@@ -276,7 +277,7 @@ class RandomWallpaperMenu {
             this._wallpaperController.setWallpaper(actor.historyEntry.id).then(() => {
                 this._wallpaperController.prohibitNewWallpaper = false;
 
-                if (this._settings.getEnum('change-type') === 1 && this._savedBackgroundUri) {
+                if (this._settings.getInt('change-type') as Mode === Mode.LOCKSCREEN && this._savedBackgroundUri) {
                     // Reset background after previewing the lock screen options
                     this._wallpaperController.resetWallpaper(this._savedBackgroundUri);
                 } else {
