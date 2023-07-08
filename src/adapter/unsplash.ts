@@ -7,6 +7,16 @@ import {HistoryEntry} from './../history.js';
 /** How many times the service should be queried at maximum. */
 const MAX_SERVICE_RETRIES = 5;
 
+// Generated code produces a no-shadow rule error
+/* eslint-disable */
+enum ConstraintType {
+    UNCONSTRAINED,
+    USER,
+    USERS_LIKES,
+    COLLECTION_ID,
+}
+/* eslint-enable */
+
 /**
  * Adapter for image sources using Unsplash.
  */
@@ -166,7 +176,7 @@ class UnsplashAdapter extends BaseAdapter {
         this._options.w = this._settings.getInt('image-width');
         this._options.h = this._settings.getInt('image-height');
 
-        this._options.constraintType = this._settings.getEnum('constraint-type');
+        this._options.constraintType = this._settings.getInt('constraint-type');
         this._options.constraintValue = this._settings.getString('constraint-value');
 
         const keywords = this._settings.getString('keyword').split(',');
@@ -179,4 +189,54 @@ class UnsplashAdapter extends BaseAdapter {
     }
 }
 
-export {UnsplashAdapter};
+/**
+ * Retrieve the human readable enum name.
+ *
+ * @param {ConstraintType} type The type to name
+ * @returns {string} Name
+ */
+function _getConstraintTypeName(type: ConstraintType): string {
+    let name: string;
+
+    switch (type) {
+    case ConstraintType.UNCONSTRAINED:
+        name = 'Unconstrained';
+        break;
+    case ConstraintType.USER:
+        name = 'User';
+        break;
+    case ConstraintType.USERS_LIKES:
+        name = 'User\'s Likes';
+        break;
+    case ConstraintType.COLLECTION_ID:
+        name = 'Collection ID';
+        break;
+
+    default:
+        name = 'Constraint type name not found';
+        break;
+    }
+
+    return name;
+}
+
+/**
+ * Get a list of human readable enum entries.
+ *
+ * @returns {string[]} Array with key names
+ */
+function getConstraintTypeNameList(): string[] {
+    const list: string[] = [];
+
+    const values = Object.values(ConstraintType).filter(v => !isNaN(Number(v)));
+    for (const i of values)
+        list.push(_getConstraintTypeName(i as ConstraintType));
+
+    return list;
+}
+
+export {
+    UnsplashAdapter,
+    ConstraintType,
+    getConstraintTypeNameList
+};
