@@ -108,6 +108,9 @@ class Extension {
         if (Timer)
             Timer.AFTimer.destroy();
 
+        if (this._wallpaperController)
+            this._wallpaperController.cleanup();
+
         this._timer = null;
         this._logger = null;
         this._panelMenu = null;
