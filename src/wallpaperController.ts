@@ -54,6 +54,8 @@ class WallpaperController {
     private _startLoadingHooks: (() => void)[] = [];
     /** functions will be called when loading a new wallpaper stopped. */
     private _stopLoadingHooks: (() => void)[] = [];
+    private _observedValues: number[] = [];
+    private _observedBackgroundValues: number[] = [];
 
     /**
      * Create a new controller.
@@ -85,24 +87,24 @@ class WallpaperController {
         this._backendConnection.setBoolean('request-new-wallpaper', false);
 
         // Track value changes
-        this._backendConnection.observe('clear-history', () => this._clearHistory());
-        this._backendConnection.observe('open-folder', () => this._openFolder());
-        this._backendConnection.observe('pause-timer', () => this._pauseTimer());
-        this._backendConnection.observe('request-new-wallpaper', () => this._requestNewWallpaper().catch(error => {
+        this._observedBackgroundValues.push(this._backendConnection.observe('clear-history', () => this._clearHistory()));
+        this._observedBackgroundValues.push(this._backendConnection.observe('open-folder', () => this._openFolder()));
+        this._observedBackgroundValues.push(this._backendConnection.observe('pause-timer', () => this._pauseTimer()));
+        this._observedBackgroundValues.push(this._backendConnection.observe('request-new-wallpaper', () => this._requestNewWallpaper().catch(error => {
             this._logger.error(error);
-        }));
+        })));
 
-        this._settings.observe('history-length', () => this._updateHistory());
-        this._settings.observe('auto-fetch', () => this._updateAutoFetching());
-        this._settings.observe('minutes', () => this._updateAutoFetching());
-        this._settings.observe('hours', () => this._updateAutoFetching());
+        this._observedValues.push(this._settings.observe('history-length', () => this._updateHistory()));
+        this._observedValues.push(this._settings.observe('auto-fetch', () => this._updateAutoFetching()));
+        this._observedValues.push(this._settings.observe('minutes', () => this._updateAutoFetching()));
+        this._observedValues.push(this._settings.observe('hours', () => this._updateAutoFetching()));
 
         /**
          * When the user installs a manager we won't notice that it's available.
          * The preference window however checks on startup for availability and will allow this setting
          * to change. Let's listen for that change and update our manager accordingly.
          */
-        this._settings.observe('multiple-displays', () => this._updateWallpaperManager());
+        this._observedValues.push(this._settings.observe('multiple-displays', () => this._updateWallpaperManager()));
 
         this._updateHistory();
 
@@ -148,6 +150,19 @@ class WallpaperController {
             if (favoritesFolderPath)
                 this._settings.setString('favorites-folder', favoritesFolderPath);
         }
+    }
+
+    /**
+     * Clean up extension remnants.
+     */
+    cleanup(): void {
+        for (const observedValue of this._observedValues)
+            this._settings.disconnect(observedValue);
+        this._observedValues = [];
+
+        for (const observedValue of this._observedBackgroundValues)
+            this._backendConnection.disconnect(observedValue);
+        this._observedBackgroundValues = [];
     }
 
     /**
