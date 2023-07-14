@@ -32,9 +32,10 @@ class RandomWallpaperMenu {
     private _backendConnection = new Settings.Settings(Settings.RWG_SETTINGS_SCHEMA_BACKEND_CONNECTION);
     private _savedBackgroundUri: string | null = null;
     private _settings = new Settings.Settings();
+    private _observedValues: number[] = [];
+    private _observedBackgroundValues: number[] = [];
 
     private _currentBackgroundSection;
-    private _hidePanelIconHandler;
     private _historySection;
     private _panelMenu;
     private _wallpaperController;
@@ -52,7 +53,7 @@ class RandomWallpaperMenu {
         // PanelMenu Icon
         const statusIcon = new CustomElements.StatusElement();
         this._panelMenu.add_child(statusIcon.icon);
-        this._hidePanelIconHandler = this._settings.observe('hide-panel-icon', this.updatePanelMenuVisibility.bind(this));
+        this._observedValues.push(this._settings.observe('hide-panel-icon', this.updatePanelMenuVisibility.bind(this)));
 
         // new wallpaper button
         const newWallpaperItem = new CustomElements.NewWallpaperElement({});
@@ -83,13 +84,13 @@ class RandomWallpaperMenu {
             this._backendConnection.setBoolean('pause-timer', state);
         });
 
-        this._settings.observe('auto-fetch', () => {
+        this._observedValues.push(this._settings.observe('auto-fetch', () => {
             pauseTimerItem.sensitive = this._settings.getBoolean('auto-fetch');
-        });
+        }));
 
-        this._backendConnection.observe('pause-timer', () => {
+        this._observedBackgroundValues.push(this._backendConnection.observe('pause-timer', () => {
             pauseTimerItem.setToggleState(this._backendConnection.getBoolean('pause-timer'));
-        });
+        }));
 
         this._panelMenu.menu.addMenuItem(pauseTimerItem);
 
@@ -176,7 +177,7 @@ class RandomWallpaperMenu {
         //         this._wallpaperController.resetWallpaper(this._savedBackgroundUri);
         // });
 
-        this._settings.observe('history', this.setHistoryList.bind(this));
+        this._observedValues.push(this._settings.observe('history', this.setHistoryList.bind(this)));
     }
 
     /**
@@ -198,8 +199,13 @@ class RandomWallpaperMenu {
         this._panelMenu.destroy();
 
         // remove all signal handlers
-        if (this._hidePanelIconHandler !== null)
-            this._settings.disconnect(this._hidePanelIconHandler);
+        for (const observedValue of this._observedValues)
+            this._settings.disconnect(observedValue);
+        this._observedValues = [];
+
+        for (const observedValue of this._observedBackgroundValues)
+            this._backendConnection.disconnect(observedValue);
+        this._observedBackgroundValues = [];
     }
 
     /**
