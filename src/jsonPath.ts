@@ -66,7 +66,7 @@ function getTarget(inputObject: unknown, inputString: string): [object: unknown,
  * @param {string} keyString Name of the key in the object
  * @returns {unknown | null} Found object member or null
  */
-function _getObjectMember(inputObject: object, keyString: string): unknown | null {
+function _getObjectMember(inputObject: object, keyString: string): unknown {
     if (keyString === '$')
         return inputObject;
 

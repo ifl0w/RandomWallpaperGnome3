@@ -162,10 +162,10 @@ class Settings {
      * Watch a setting for changes.
      *
      * @param {string} key Settings key to watch for changes
-     * @param {(...args: any[]) => any} callback Function to call on value changes
+     * @param {(...args: unknown[]) => unknown} callback Function to call on value changes
      * @returns {number} Handler ID, use for disconnect
      */
-    observe(key: string, callback: (...args: any[]) => any): number {
+    observe(key: string, callback: (...args: unknown[]) => unknown): number {
         return this._settings.connect(`changed::${key}`, callback);
     }
 

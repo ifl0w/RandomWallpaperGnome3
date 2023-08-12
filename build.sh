@@ -80,6 +80,8 @@ format_js() {
         sed -i -E "s#@typescript-eslint/no-unsafe-argument##g" "$file"
         sed -i -E "s#@typescript-eslint/no-unsafe-member-access##g" "$file"
         sed -i -E "s#@typescript-eslint/no-unsafe-call##g" "$file"
+        sed -i -E "s#@typescript-eslint/ban-ts-comment##g" "$file"
+        sed -i -E "s#@typescript-eslint/no-unsafe-enum-comparison##g" "$file"
     done
 
     # Format js using the official gjs stylesheet and a few manual quirks

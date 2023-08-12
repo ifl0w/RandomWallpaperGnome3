@@ -152,6 +152,8 @@ const WallhavenSettingsGroup = GObject.registerClass({
             this._colorDialog.add_palette(Gtk.Orientation.HORIZONTAL, 10, WallhavenSettingsGroup._colorPalette);
 
             this._colorDialog.connect('response', (dialog, response_id) => {
+                // FIXME: ESLint complains about this comparison somehow?
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
                 if (response_id === Gtk.ResponseType.OK) {
                     // result is a Gdk.RGBA which uses float
                     const rgba = dialog.get_rgba();
