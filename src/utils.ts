@@ -139,7 +139,7 @@ function findFirstDifference(str1: string, str2: string): number {
  */
 function getMonitorCount(): number {
     // FIXME: Figure out where the 'global' thing can be imported from
-    // @ts-expect-error
+    // @ts-expect-error Figure out where the 'global' thing can be imported from
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     const currentDisplay = global?.display as Meta.Display;
     const count = currentDisplay?.get_n_monitors();
