@@ -60,6 +60,8 @@ const LocalFolderSettingsGroup = GObject.registerClass({
             });
 
             this._saveDialog.connect('response', (_dialog, response_id) => {
+                // FIXME: ESLint complains about this comparison somehow?
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
                 if (response_id === Gtk.ResponseType.ACCEPT) {
                     const chosenPath = _dialog.get_file()?.get_path();
 

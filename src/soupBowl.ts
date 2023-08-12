@@ -49,6 +49,7 @@ class SoupBowl {
      */
     private _send_and_receive_soup24(soupMessage: Soup.Message): Promise<Uint8Array> {
         return new Promise((resolve, reject) => {
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
             this._session.queue_message(soupMessage, (session, msg) => {
                 if (!msg.response_body) {
@@ -71,9 +72,11 @@ class SoupBowl {
      */
     private _send_and_receive_soup30(soupMessage: Soup.Message): Promise<Uint8Array> {
         return new Promise((resolve, reject) => {
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
             // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             this._session.send_and_read_async(soupMessage, 0, null, (session: Soup.Session, message: Soup.Message) => {
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                 // @ts-ignore
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-call
                 const res_data = session.send_and_read_finish(message) as GLib.Bytes | null;

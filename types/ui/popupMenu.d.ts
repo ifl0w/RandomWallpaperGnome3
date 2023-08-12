@@ -14,7 +14,7 @@ declare module 'popupMenu' {
         disconnectObject(args: unknown): unknown;
 
         // don't know where these are:
-        connect(key: string, callback: (actor: typeof this, state: unknown[]) => void): void;
+        connect(key: string, callback: (actor: typeof this, ...args: unknown[]) => unknown): void;
     }
 
     export class PopupMenuBase extends EventEmitter {

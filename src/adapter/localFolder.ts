@@ -83,8 +83,7 @@ class LocalFolderAdapter extends BaseAdapter {
         const targetFile = Gio.File.new_for_path(historyEntry.path);
 
         // https://gjs.guide/guides/gio/file-operations.html#copying-and-moving-files
-        // This function was rewritten by Gio._promisify
-        // @ts-expect-error
+        // @ts-expect-error This function was rewritten by Gio._promisify
         // eslint-disable-next-line @typescript-eslint/await-thenable
         if (!await sourceFile.copy_async(targetFile, Gio.FileCopyFlags.NONE, GLib.PRIORITY_DEFAULT, null, null))
             throw new Error('Failed copying image.');
