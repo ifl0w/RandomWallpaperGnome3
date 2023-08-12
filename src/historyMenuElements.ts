@@ -168,8 +168,8 @@ const HistoryElement = GObject.registerClass({
         /*
             Load the image on first opening of the sub menu instead of during creation of the history list.
          */
-        this.menu.connect('open-state-changed', (_, open: boolean | unknown) => {
-            if (open) {
+        this.menu.connect('open-state-changed', (_, open) => {
+            if (typeof open === 'boolean' && open) {
                 if (this._previewActor !== null)
                     return;
 
@@ -248,15 +248,13 @@ const HistoryElement = GObject.registerClass({
                 throw error;
         }
 
-        // This function was rewritten by Gio._promisify
-        // @ts-expect-error
+        // @ts-expect-error This function was rewritten by Gio._promisify
         // eslint-disable-next-line @typescript-eslint/await-thenable
         if (!await sourceFile.copy_async(targetFile, Gio.FileCopyFlags.NONE, GLib.PRIORITY_DEFAULT, null, null))
             throw new Error('Failed copying image.');
 
         // https://gjs.guide/guides/gio/file-operations.html#writing-file-contents
-        // This function was rewritten by Gio._promisify
-        // @ts-expect-error
+        // @ts-expect-error This function was rewritten by Gio._promisify
         // eslint-disable-next-line @typescript-eslint/await-thenable
         const [success, message]: [boolean, string] = await targetInfoFile.replace_contents_bytes_async(
             new TextEncoder().encode(JSON.stringify(this.historyEntry.source, null, '\t')),
@@ -382,7 +380,7 @@ class StatusElement {
      */
     startLoading(): void {
         // FIXME: Don't know where this is defined
-        // @ts-expect-error
+        // @ts-expect-error Don't know where this is defined
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
         this.icon.ease({
             opacity: 20,
