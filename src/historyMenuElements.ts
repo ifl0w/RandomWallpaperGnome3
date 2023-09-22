@@ -6,9 +6,7 @@ import GLib from 'gi://GLib';
 import GObject from 'gi://GObject';
 import St from 'gi://St';
 
-// Legacy importing style for shell internal bindings not available in standard import format
-// For correct typing use: 'InstanceType<typeof Adw.ActionRow>'
-const PopupMenu = imports.ui.popupMenu;
+import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 
 import * as HistoryModule from './history.js';
 import * as Settings from './settings.js';

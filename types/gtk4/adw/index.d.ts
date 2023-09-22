@@ -98,9 +98,3 @@ declare module 'gi://Adw' {
         vfunc_set_selection_bounds(start_pos: number, end_pos: number): void;
     }
 }
-
-// extend gi imports interface with adw
-// https://github.com/gi-ts/environment#importsgi
-declare interface GjsGiImports {
-    Adw: typeof import('gi://Adw');
-}

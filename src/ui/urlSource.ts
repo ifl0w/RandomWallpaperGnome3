@@ -4,16 +4,11 @@ import GLib from 'gi://GLib';
 import GObject from 'gi://GObject';
 import Gtk from 'gi://Gtk';
 
-// Legacy importing style for shell internal bindings not available in standard import format
-const ExtensionUtils = imports.misc.extensionUtils;
-
 import * as Settings from './../settings.js';
-
-const Self = ExtensionUtils.getCurrentExtension();
 
 const UrlSourceSettingsGroup = GObject.registerClass({
     GTypeName: 'UrlSourceSettingsGroup',
-    Template: GLib.filename_to_uri(`${Self.path}/ui/urlSource.ui`, null),
+    Template: GLib.uri_resolve_relative(import.meta.url, './urlSource.ui', GLib.UriFlags.NONE),
     InternalChildren: [
         'author_name',
         'author_url',

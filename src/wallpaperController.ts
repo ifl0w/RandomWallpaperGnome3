@@ -1,8 +1,7 @@
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 
-// Legacy importing style for shell internal bindings not available in standard import format
-const ExtensionUtils = imports.misc.extensionUtils;
+import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
 
 import * as HistoryModule from './history.js';
 import * as SettingsModule from './settings.js';
@@ -21,8 +20,6 @@ import {RedditAdapter} from './adapter/reddit.js';
 import {UnsplashAdapter} from './adapter/unsplash.js';
 import {UrlSourceAdapter} from './adapter/urlSource.js';
 import {WallhavenAdapter} from './adapter/wallhaven.js';
-
-const Self = ExtensionUtils.getCurrentExtension();
 
 // https://gjs.guide/guides/gjs/asynchronous-programming.html#promisify-helper
 Gio._promisify(Gio.File.prototype, 'move_async', 'move_finish');
@@ -74,7 +71,13 @@ class WallpaperController {
                 xdg_cache_home = '/tmp';
         }
 
-        this.wallpaperLocation = `${xdg_cache_home}/${Self.metadata['uuid']}/wallpapers/`;
+        const extensionObject = Extension.lookupByURL(import.meta.url);
+        if (!extensionObject) {
+            Logger.error('Own extension object not found!', this);
+            throw new Error('Own extension object not found!');
+        }
+
+        this.wallpaperLocation = `${xdg_cache_home}/${extensionObject.metadata['uuid']}/wallpapers/`;
         const mode = 0o0755;
         GLib.mkdir_with_parents(this.wallpaperLocation, mode);
 
@@ -144,7 +147,7 @@ class WallpaperController {
                 favoritesFolder = Gio.File.new_for_path(directoryPictures);
             }
 
-            favoritesFolder = favoritesFolder.get_child(Self.metadata['uuid']);
+            favoritesFolder = favoritesFolder.get_child(extensionObject.metadata['uuid']);
 
             const favoritesFolderPath = favoritesFolder.get_path();
             if (favoritesFolderPath)

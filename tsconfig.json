@@ -29,8 +29,8 @@
             "adw1",
             "gtk4/adw", // locally expose 'gi://Adw' and extend with EntryRow
             "mappings", // missing mappings 'from @gi-types' to 'gi://'
-            "ui", // shell gi imports in legacy import style
-            "misc", // shell gi imports in legacy import style
+            "ui", // shell import types
+            "misc", // extension import types
         ],
 
     },
