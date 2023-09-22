@@ -11,40 +11,30 @@ import * as WallpaperManager from './manager/wallpaperManager.js';
 
 import {Logger} from './logger.js';
 
-/**
- * Like `extension.js` this is used for any one-time setup like translations.
- *
- * @param {ExtensionMeta} unusedMeta - An extension meta object, https://gjs.guide/extensions/overview/anatomy.html#extension-meta-object
- */
-// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
-function init(unusedMeta: ExtensionMeta): void {
-    // Convenience.initTranslations();
-}
-
 // https://gjs.guide/extensions/overview/anatomy.html#prefs-js
 // The code in prefs.js will be executed in a separate Gtk process
 // Here you will not have access to code running in GNOME Shell, but fatal errors or mistakes will be contained within that process.
 // In this process you will be using the Gtk toolkit, not Clutter.
 
-// https://gjs.guide/extensions/development/preferences.html#preferences-window
-// Gnome 42+
 /**
- * This function is called when the preferences window is first created to fill
- * the `Adw.PreferencesWindow`.
- *
- * This function will only be called by GNOME 42 and later. If this function is
- * present, `buildPrefsWidget()` will NOT be called.
- *
- * @param {Adw.PreferencesWindow} window - The preferences window
+ * Initial entry point for the extension settings page
  */
-// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
-function fillPreferencesWindow(window: Adw.PreferencesWindow): void {
-    window.set_default_size(600, 720);
-    // temporary fill window to prevent error message until modules are loaded
-    const tmpPage = new Adw.PreferencesPage();
-    window.add(tmpPage);
+export default class RWG3Settings extends ExtensionPreferences {
+    /**
+     * This function is called when the preferences window is first created to fill
+     * the `Adw.PreferencesWindow`.
+     *
+     * @param {Adw.PreferencesWindow} window - The preferences window
+     */
+    // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+    fillPreferencesWindow(window: Adw.PreferencesWindow): void {
+        window.set_default_size(600, 720);
+        // temporary fill window to prevent error message until modules are loaded
+        const tmpPage = new Adw.PreferencesPage();
+        window.add(tmpPage);
 
-    new RandomWallpaperSettings(window, tmpPage);
+        new RandomWallpaperSettings(window, tmpPage);
+    }
 }
 
 /**
