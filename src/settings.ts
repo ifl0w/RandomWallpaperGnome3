@@ -1,10 +1,7 @@
 import Gio from 'gi://Gio';
 import GObject from 'gi://GObject';
 
-// Legacy importing style for shell internal bindings not available in standard import format
-const ExtensionUtils = imports.misc.extensionUtils;
-
-const Self = ExtensionUtils.getCurrentExtension();
+import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
 
 const RWG_SETTINGS_SCHEMA_BACKEND_CONNECTION = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.backend-connection';
 const RWG_SETTINGS_SCHEMA_SOURCES_GENERAL = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.general';
@@ -33,7 +30,11 @@ class Settings {
      */
     constructor(schemaId?: string, schemaPath?: string) {
         if (schemaPath === undefined) {
-            this._settings = ExtensionUtils.getSettings(schemaId);
+            const extensionObject = Extension.lookupByURL(import.meta.url);
+            if (!extensionObject)
+                throw new Error('Own extension object not found!');
+
+            this._settings = extensionObject.getSettings(schemaId);
         } else {
             // ExtensionUtils.getSettings() doesn't allow specifying a schema path
             // We need the schema path to allow for account style settings (having the
@@ -277,14 +278,18 @@ class Settings {
      * @param {string | undefined} schemaId Schema ID, defaults to the extension settings schema ID
      * @returns {Gio.SettingsSchema} Settings schema object for the given ID
      */
+    // https://gitlab.gnome.org/GNOME/gnome-shell/-/blob/main/js/extensions/sharedInternals.js#L91
     private _getSchema(schemaId?: string): Gio.SettingsSchema {
-        // https://gitlab.gnome.org/GNOME/gnome-shell/-/blob/gnome-43/js/misc/extensionUtils.js#L211
+        const extensionObject = Extension.lookupByURL(import.meta.url);
+        if (!extensionObject)
+            throw new Error('Own extension object not found!');
+
         if (!schemaId)
-            schemaId = Self.metadata['settings-schema'];
+            schemaId = extensionObject.metadata['settings-schema'];
 
         // Expect USER extensions to have a schemas/ subfolder, otherwise assume a
         // SYSTEM extension that has been installed in the same prefix as the shell
-        const schemaDir = Self.dir.get_child('schemas');
+        const schemaDir = extensionObject.dir.get_child('schemas');
         let schemaSource;
         const schemaPath = schemaDir.get_path();
         if (schemaDir.query_exists(null) && schemaPath !== null) {
@@ -295,9 +300,12 @@ class Settings {
             schemaSource = Gio.SettingsSchemaSource.get_default();
         }
 
-        const schemaObj = schemaSource?.lookup(schemaId, true);
+        let schemaObj;
+        if (schemaId)
+            schemaObj = schemaSource?.lookup(schemaId, true);
+
         if (!schemaObj)
-            throw new Error(`Schema ${schemaId} could not be found for extension ${Self.metadata.uuid}. Please check your installation`);
+            throw new Error(`Schema ${schemaId} could not be found for extension ${extensionObject.metadata.uuid}. Please check your installation`);
 
         return schemaObj;
     }

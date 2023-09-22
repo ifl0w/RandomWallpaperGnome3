@@ -4,9 +4,6 @@ import GLib from 'gi://GLib';
 import GObject from 'gi://GObject';
 import Gtk from 'gi://Gtk';
 
-// Legacy importing style for shell internal bindings not available in standard import format
-const ExtensionUtils = imports.misc.extensionUtils;
-
 import * as Settings from './../settings.js';
 import * as Utils from './../utils.js';
 
@@ -19,12 +16,10 @@ import {UnsplashSettingsGroup} from './unsplash.js';
 import {UrlSourceSettingsGroup} from './urlSource.js';
 import {WallhavenSettingsGroup} from './wallhaven.js';
 
-const Self = ExtensionUtils.getCurrentExtension();
-
 // https://gitlab.gnome.org/GNOME/gjs/-/blob/master/examples/gtk4-template.js
 const SourceRow = GObject.registerClass({
     GTypeName: 'SourceRow',
-    Template: GLib.filename_to_uri(`${Self.path}/ui/sourceRow.ui`, null),
+    Template: GLib.uri_resolve_relative(import.meta.url, './sourceRow.ui', GLib.UriFlags.NONE),
     Children: [
         'button_delete',
     ],

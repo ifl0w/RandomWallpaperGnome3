@@ -1,15 +1,16 @@
 /* eslint-disable */
 
-declare module 'main' {
+declare module 'resource:///org/gnome/shell/ui/main.js' {
     import St from 'gi://St';
 
-    import * as PanelMenu from 'panelMenu';
+    import type * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
 
-    export class Panel extends St.Widget {
-        addToStatusArea(role: string, indicator: PanelMenu.Button, position?: number, box?: unknown): PanelMenu.Button
+    // lazy inline declaration to avoid import chain
+    declare class Panel extends St.Widget {
+        addToStatusArea(role: string, indicator: PanelMenu.Button, position?: number, box?: unknown): PanelMenu.Button;
     }
 
     export function notify(title: string, message: string): void;
 
-    export const panel: Panel;
+    export let panel: Panel;
 }

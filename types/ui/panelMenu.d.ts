@@ -1,9 +1,9 @@
 /* eslint-disable */
 
-declare module 'panelMenu' {
+declare module 'resource:///org/gnome/shell/ui/panelMenu.js' {
     import St from 'gi://St';
 
-    import {PopupMenu} from 'popupMenu';
+    import {PopupMenu} from 'resource:///org/gnome/shell/ui/popupMenu.js';
 
     export class ButtonBox extends St.Widget{}
 

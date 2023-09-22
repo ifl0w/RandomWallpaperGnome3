@@ -3,16 +3,11 @@ import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 import GObject from 'gi://GObject';
 
-// Legacy importing style for shell internal bindings not available in standard import format
-const ExtensionUtils = imports.misc.extensionUtils;
-
 import * as Settings from './../settings.js';
-
-const Self = ExtensionUtils.getCurrentExtension();
 
 const GenericJsonSettingsGroup = GObject.registerClass({
     GTypeName: 'GenericJsonSettingsGroup',
-    Template: GLib.filename_to_uri(`${Self.path}/ui/genericJson.ui`, null),
+    Template: GLib.uri_resolve_relative(import.meta.url, './genericJson.ui', GLib.UriFlags.NONE),
     InternalChildren: [
         'author_name_path',
         'author_url_path',
