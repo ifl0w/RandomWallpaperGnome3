@@ -4,16 +4,11 @@ import GLib from 'gi://GLib';
 import GObject from 'gi://GObject';
 import Gtk from 'gi://Gtk';
 
-// Legacy importing style for shell internal bindings not available in standard import format
-const ExtensionUtils = imports.misc.extensionUtils;
-
 import * as Settings from './../settings.js';
-
-const Self = ExtensionUtils.getCurrentExtension();
 
 const RedditSettingsGroup = GObject.registerClass({
     GTypeName: 'RedditSettingsGroup',
-    Template: GLib.filename_to_uri(`${Self.path}/ui/reddit.ui`, null),
+    Template: GLib.uri_resolve_relative(import.meta.url, './reddit.ui', GLib.UriFlags.NONE),
     InternalChildren: [
         'allow_sfw',
         'image_ratio1',

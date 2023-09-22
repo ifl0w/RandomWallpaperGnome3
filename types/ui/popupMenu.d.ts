@@ -1,6 +1,6 @@
 /* eslint-disable */
 
-declare module 'popupMenu' {
+declare module 'resource:///org/gnome/shell/ui/popupMenu.js' {
     // https://gitlab.gnome.org/GNOME/gnome-shell/-/blob/main/js/ui/popupMenu.js
 
     import Clutter from 'gi://Clutter';

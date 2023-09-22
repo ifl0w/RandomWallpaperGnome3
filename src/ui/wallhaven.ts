@@ -5,16 +5,11 @@ import GLib from 'gi://GLib';
 import GObject from 'gi://GObject';
 import Gtk from 'gi://Gtk';
 
-// Legacy importing style for shell internal bindings not available in standard import format
-const ExtensionUtils = imports.misc.extensionUtils;
-
 import * as Settings from './../settings.js';
-
-const Self = ExtensionUtils.getCurrentExtension();
 
 const WallhavenSettingsGroup = GObject.registerClass({
     GTypeName: 'WallhavenSettingsGroup',
-    Template: GLib.filename_to_uri(`${Self.path}/ui/wallhaven.ui`, null),
+    Template: GLib.uri_resolve_relative(import.meta.url, './wallhaven.ui', GLib.UriFlags.NONE),
     InternalChildren: [
         'ai_art',
         'allow_nsfw',

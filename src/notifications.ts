@@ -1,4 +1,4 @@
-const Main = imports.ui.main;
+import {notify} from 'resource:///org/gnome/shell/ui/main.js';
 
 import {HistoryEntry} from './history.js';
 
@@ -14,9 +14,8 @@ class Notification {
     static newWallpaper(historyEntries: HistoryEntry[]): void {
         const infoString = `Source: ${historyEntries.map(h => `${h.source.source ?? 'Unknown Source'}`).join(', ')}`;
         const message = `A new wallpaper was set!\n${infoString}`;
-        Main.notify('New Wallpaper', message);
+        notify('New Wallpaper', message);
     }
 }
 
 export {Notification};
-

@@ -4,15 +4,13 @@
 /* eslint-disable jsdoc/check-tag-names */
 /* eslint-disable jsdoc/valid-types */
 
-import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 
-// Legacy importing style for shell internal bindings not available in standard import format
-// For correct typing use: 'InstanceType<typeof Adw.ActionRow>'
-const ExtensionUtils = imports.misc.extensionUtils;
-const Main = imports.ui.main;
-const PanelMenu = imports.ui.panelMenu;
-const PopupMenu = imports.ui.popupMenu;
+import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
+import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
+
+import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
 
 import * as CustomElements from './historyMenuElements.js';
 import * as Settings from './settings.js';
@@ -21,8 +19,6 @@ import * as Utils from './utils.js';
 import {Logger} from './logger.js';
 import {WallpaperController} from './wallpaperController.js';
 import {Mode} from './manager/wallpaperManager.js';
-
-const Self = ExtensionUtils.getCurrentExtension();
 
 /**
  * PanelMenu for this extension.
@@ -136,18 +132,14 @@ class RandomWallpaperMenu {
         });
 
         openSettings.connect('activate', () => {
-            Gio.DBus.session.call(
-                'org.gnome.Shell.Extensions',
-                '/org/gnome/Shell/Extensions',
-                'org.gnome.Shell.Extensions',
-                'OpenExtensionPrefs',
-                new GLib.Variant('(ssa{sv})', [Self.uuid, '', {}]),
-                null,
-                Gio.DBusCallFlags.NONE,
-                -1,
-                null).catch(error => {
-                Logger.error(error, this);
-            });
+            const extensionObject = Extension.lookupByURL(import.meta.url);
+            if (!extensionObject) {
+                Logger.error('Own extension object not found!', this);
+                throw new Error('Own extension object not found!');
+            }
+
+            if (extensionObject instanceof Extension)
+                extensionObject.openPreferences();
         });
 
         this._panelMenu.menu.connect('open-state-changed', (_, open) => {
