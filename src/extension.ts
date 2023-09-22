@@ -1,11 +1,3 @@
-// Use legacy style importing to work around standard imports not available in files loaded by the shell, those can't be modules (yet)
-// > Note that as of GNOME 44, neither GNOME Shell nor Extensions support ESModules, and must use GJS custom import scheme.
-// https://gjs.guide/extensions/overview/imports-and-modules.html#imports-and-modules
-// https://gjs-docs.gnome.org/gjs/esmodules.md
-// > JS ERROR: Extension randomwallpaper@iflow.space: SyntaxError: import declarations may only appear at top level of a module
-// For correct typing use: 'InstanceType<typeof Adw.ActionRow>'
-const GLib = imports.gi.GLib;
-
 import type * as LoggerNamespace from './logger.js';
 import type * as AFTimer from './timer.js';
 import type * as WallpaperControllerNamespace from './wallpaperController.js';
@@ -50,36 +42,17 @@ class Extension {
      * widgets, connect signals or modify GNOME Shell's behavior.
      */
     enable(): void {
-        // Workaround crash when initializing the gnome shell with this extension active while being on X11
-        // https://gitlab.gnome.org/GNOME/gnome-shell/-/issues/6691
-        // TODO: Remove once that issue is fixed.
-        const crashWorkaround = new Promise<void>(resolve => {
-            GLib.timeout_add(GLib.PRIORITY_HIGH, 100, () => {
-                resolve();
-                return GLib.SOURCE_REMOVE;
-            });
-        });
-
         // Dynamically load own modules. This allows us to use proper ES6 Modules
-        crashWorkaround.then(() => {
-            this._importModules().then(() => {
-                if (!Logger || !Timer || !WallpaperController || !RandomWallpaperMenu)
-                    throw new Error('Error importing module');
+        this._importModules().then(() => {
+            if (!Logger || !Timer || !WallpaperController || !RandomWallpaperMenu)
+                throw new Error('Error importing module');
 
-                this._timer = Timer.AFTimer.getTimer();
-                this._wallpaperController = new WallpaperController.WallpaperController();
-                this._panelMenu = new RandomWallpaperMenu.RandomWallpaperMenu(this._wallpaperController);
+            this._timer = Timer.AFTimer.getTimer();
+            this._wallpaperController = new WallpaperController.WallpaperController();
+            this._panelMenu = new RandomWallpaperMenu.RandomWallpaperMenu(this._wallpaperController);
 
-                Logger.info('Enable extension.', this);
-                this._panelMenu.init();
-            }).catch(error => {
-                if (Logger)
-                    Logger.error(error, this);
-                else if (error instanceof Error)
-                    logError(error);
-                else
-                    logError(new Error('Unknown error'));
-            });
+            Logger.info('Enable extension.', this);
+            this._panelMenu.init();
         }).catch(error => {
             if (error instanceof Error)
                 logError(error);
