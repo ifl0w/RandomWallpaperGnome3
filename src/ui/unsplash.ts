@@ -4,17 +4,12 @@ import GLib from 'gi://GLib';
 import GObject from 'gi://GObject';
 import Gtk from 'gi://Gtk';
 
-// Legacy importing style for shell internal bindings not available in standard import format
-const ExtensionUtils = imports.misc.extensionUtils;
-
 import * as Settings from './../settings.js';
 import {getConstraintTypeNameList} from '../adapter/unsplash.js';
 
-const Self = ExtensionUtils.getCurrentExtension();
-
 const UnsplashSettingsGroup = GObject.registerClass({
     GTypeName: 'UnsplashSettingsGroup',
-    Template: GLib.filename_to_uri(`${Self.path}/ui/unsplash.ui`, null),
+    Template: GLib.uri_resolve_relative(import.meta.url, './unsplash.ui', GLib.UriFlags.NONE),
     InternalChildren: [
         'constraint_type',
         'constraint_value',

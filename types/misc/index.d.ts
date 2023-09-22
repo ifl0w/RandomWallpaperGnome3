@@ -1,138 +1,103 @@
 /* eslint-disable */
 
-declare module 'extensionUtils' {
-    // https://github.com/yilozt/rounded-window-corners/blob/main/%40imports/misc/extensionUtils.d.ts
-    // GPL3
+declare module 'sharedInternals' {
+    // https://gitlab.gnome.org/GNOME/gnome-shell/-/blob/main/js/extensions/sharedInternals.js
+    import type Gio from 'gi://Gio';
 
-    import Gio from 'gi://Gio';
+    export class ExtensionBase {
+        /**
+         * @param {object} metadata - metadata passed in when loading the extension
+        */
+        constructor(metadata: ExtensionMetadata)
 
-    /**
-     * getCurrentExtension:
-     *
-     * @returns {?object} - The current extension, or null if not called from
-     * an extension.
-     */
-    export function getCurrentExtension(): {
-        uuid: string,
-        path: string,
-        dir: Gio.File,
-        metadata: {
+        /** the metadata.json file, parsed as JSON */
+        readonly metadata: {
             'settings-schema': string,
             uuid: string,
-        }
-    };
-    /**
-     * initTranslations:
-     * @param {string=} domain - the gettext domain to use
-     *
-     * Initialize Gettext to load translations from extensionsdir/locale.
-     * If @domain is not provided, it will be taken from metadata['gettext-domain']
-     */
-    export function initTranslations(domain?: string | undefined): void;
-    /**
-     * gettext:
-     * @param {string} str - the string to translate
-     *
-     * Translate @str using the extension's gettext domain
-     *
-     * @returns {string} - the translated string
-     *
-     */
-    export function gettext(str: string): string;
-    /**
-     * ngettext:
-     * @param {string} str - the string to translate
-     * @param {string} strPlural - the plural form of the string
-     * @param {number} n - the quantity for which translation is needed
-     *
-     * Translate @str and choose plural form using the extension's
-     * gettext domain
-     *
-     * @returns {string} - the translated string
-     *
-     */
-    export function ngettext(str: string, strPlural: string, n: number): string;
-    /**
-     * pgettext:
-     * @param {string} context - context to disambiguate @str
-     * @param {string} str - the string to translate
-     *
-     * Translate @str in the context of @context using the extension's
-     * gettext domain
-     *
-     * @returns {string} - the translated string
-     *
-     */
-    export function pgettext(context: string, str: string): string;
-    export function callExtensionGettextFunc(func: any, ...args: any[]): any;
-    /**
-     * getSettings:
-     * @param {string?} schema - the GSettings schema id
-     * @returns {Gio.Settings} - a new settings object for @schema
-     *
-     * Builds and returns a GSettings schema for @schema, using schema files
-     * in extensionsdir/schemas. If @schema is omitted, it is taken from
-     * metadata['settings-schema'].
-     */
-    export function getSettings(schema?: string | undefined): Gio.Settings;
-    /**
-     * openPrefs:
-     *
-     * Open the preference dialog of the current extension
-     */
-    export function openPrefs(): Promise<void>;
-    export function isOutOfDate(extension: any): boolean;
-    export function serializeExtension(extension: any): {};
-    export function deserializeExtension(variant: any): {
-        metadata: {};
-    };
-    export function installImporter(extension: any): void;
-    export const Gettext: any;
-    export const Config: any;
-    export namespace ExtensionType {
-        const SYSTEM: number;
-        const PER_USER: number;
+            // …
+        };
+
+        /** the extension UUID */
+        readonly uuid: string;
+        /** the extension directory */
+        readonly dir: Gio.File;
+        /** the extension directory path */
+        readonly path: string;
+
+        /**
+         * Get a GSettings object for schema, using schema files in
+         * extensionsdir/schemas. If schema is omitted, it is taken
+         * from metadata['settings-schema'].
+         *
+         * @param {string=} schema - the GSettings schema id
+         *
+         * @returns {Gio.Settings}
+         */
+        getSettings(schema?: string | undefined): Gio.Settings;
+
+        /**
+         * Initialize Gettext to load translations from extensionsdir/locale. If
+         * domain is not provided, it will be taken from metadata['gettext-domain']
+         * if provided, or use the UUID
+         *
+         * @param {string=} domain - the gettext domain to use
+         */
+        initTranslations(domain?: string | undefined): void;
+
+        /**
+         * Translate `str` using the extension's gettext domain
+         *
+         * @param {string} str - the string to translate
+         *
+         * @returns {string} the translated string
+         */
+        gettext(str: string): string;
+
+        /**
+         * Translate `str` and choose plural form using the extension's
+         * gettext domain
+         *
+         * @param {string} str - the string to translate
+         * @param {string} strPlural - the plural form of the string
+         * @param {number} n - the quantity for which translation is needed
+         *
+         * @returns {string} the translated string
+         */
+        ngettext(str: string, strPlural: string, n: number): string;
+
+        /**
+         * Translate `str` in the context of `context` using the extension's
+         * gettext domain
+         *
+         * @param {string} context - context to disambiguate `str`
+         * @param {string} str - the string to translate
+         *
+         * @returns {string} the translated string
+         */
+        pgettext(context: string, str: string): string;
+
+        /** lookup the extension object from any module by using the static method */
+        static lookupByUUID(uuid: string): ExtensionBase | null;
+        /** lookup the extension object from any module by using the static method */
+        static lookupByURL(url: string): ExtensionBase | null;
     }
-    export namespace ExtensionState {
-        const ENABLED: number;
-        const DISABLED: number;
-        const ERROR: number;
-        const OUT_OF_DATE: number;
-        const DOWNLOADING: number;
-        const INITIALIZED: number;
-        const UNINSTALLED: number;
-    }
-    export const SERIALIZED_PROPERTIES: string[];
 }
 
-declare interface GjsMiscImports {
-    extensionUtils: typeof import('extensionUtils');
-}
-
-// extend imports interface with misc elements
-declare interface GjsImports {
-    misc: GjsMiscImports;
-}
-
-declare module 'ExtensionMeta' {
-    import type {File} from 'gi://Gio';
+declare module 'resource:///org/gnome/shell/extensions/extension.js' {
+    import {ExtensionBase} from 'sharedInternals';
 
     /**
      * An object describing the extension and various properties available for extensions to use.
      *
      * Some properties may only be available in some versions of GNOME Shell, while others may not be meant for extension authors to use. All properties should be considered read-only.
      */
-    export class ExtensionMeta {
-        /** the metadata.json file, parsed as JSON */
-        readonly metadata: unknown;
-        /** the extension UUID */
-        readonly uuid: string;
+    export class Extension extends ExtensionBase {
+        constructor(metadata: ExtensionMetadata) {
+            super(metadata);
+        }
+
         /** the extension type; `1` for system, `2` for user */
         readonly type: number;
-        /** the extension directory */
-        readonly dir: File;
-        /** the extension directory path */
-        readonly path: string;
         /** an error message or an empty string if no error */
         readonly error: string;
         /** whether the extension has a preferences dialog */
@@ -143,5 +108,41 @@ declare module 'ExtensionMeta' {
         readonly canChange: boolean;
         /** a list of supported session modes */
         readonly sessionModes: string[];
+
+        /**
+         * Open the extension's preferences window
+         */
+        openPreferences(): void;
+    }
+}
+
+declare module 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js' {
+    import type Adw from 'gi://Adw';
+    import type Gtk from 'gi://Gtk';
+
+    import {ExtensionBase} from 'sharedInternals';
+
+    export class ExtensionPreferences extends ExtensionBase {
+        constructor(metadata: ExtensionMetadata) {
+            super(metadata);
+        }
+
+        /**
+         * Fill the preferences window with preferences.
+         *
+         * The default implementation adds the widget
+         * returned by getPreferencesWidget().
+         *
+         * @param {Adw.PreferencesWindow} window - the preferences window
+         */
+        fillPreferencesWindow(window: Adw.PreferencesWindow): void;
+
+        /**
+         * Get the single widget that implements
+         * the extension's preferences.
+         *
+         * @returns {Gtk.Widget}
+         */
+        getPreferencesWidget(): Gtk.Widget;
     }
 }

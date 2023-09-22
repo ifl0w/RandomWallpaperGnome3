@@ -1,26 +1,15 @@
-// Use legacy style importing to work around standard imports not available in files loaded by the shell, those can't be modules (yet)
-// > Note that as of GNOME 44, neither GNOME Shell nor Extensions support ESModules, and must use GJS custom import scheme.
-// https://gjs.guide/extensions/overview/imports-and-modules.html#imports-and-modules
-// https://gjs-docs.gnome.org/gjs/esmodules.md
-// > JS ERROR: Extension randomwallpaper@iflow.space: SyntaxError: import declarations may only appear at top level of a module
-// For correct typing use: 'InstanceType<typeof Adw.ActionRow>'
-const Adw = imports.gi.Adw;
-const Gio = imports.gi.Gio;
-const Gtk = imports.gi.Gtk;
-const ExtensionUtils = imports.misc.extensionUtils;
+import Adw from 'gi://Adw';
+import Gio from 'gi://Gio';
+import Gtk from 'gi://Gtk';
 
-import type * as SettingsNamespace from './settings.js';
-import type * as UtilsNamespace from './utils.js';
-import type * as LoggerNamespace from './logger.js';
-import type * as SourceRowNamespace from './ui/sourceRow.js';
-import type {ExtensionMeta} from 'ExtensionMeta';
+import {ExtensionPreferences} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
-let Settings: typeof SettingsNamespace;
-let Utils: typeof UtilsNamespace;
-let Logger: typeof LoggerNamespace.Logger | null = null;
-let SourceRow: typeof SourceRowNamespace.SourceRow;
+import * as Settings from './settings.js';
+import * as SourceRow from './ui/sourceRow.js';
+import * as Utils from './utils.js';
+import * as WallpaperManager from './manager/wallpaperManager.js';
 
-const Self = ExtensionUtils.getCurrentExtension();
+import {Logger} from './logger.js';
 
 /**
  * Like `extension.js` this is used for any one-time setup like translations.
@@ -49,7 +38,7 @@ function init(unusedMeta: ExtensionMeta): void {
  * @param {Adw.PreferencesWindow} window - The preferences window
  */
 // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
-function fillPreferencesWindow(window: InstanceType<typeof Adw.PreferencesWindow>): void {
+function fillPreferencesWindow(window: Adw.PreferencesWindow): void {
     window.set_default_size(600, 720);
     // temporary fill window to prevent error message until modules are loaded
     const tmpPage = new Adw.PreferencesPage();
@@ -62,12 +51,12 @@ function fillPreferencesWindow(window: InstanceType<typeof Adw.PreferencesWindow
  * Main settings class for everything related to the settings window.
  */
 class RandomWallpaperSettings {
-    private _settings!: SettingsNamespace.Settings;
-    private _backendConnection!: SettingsNamespace.Settings;
+    private _settings = new Settings.Settings();
+    private _backendConnection = new Settings.Settings(Settings.RWG_SETTINGS_SCHEMA_BACKEND_CONNECTION);
 
     private _sources: string[] = [];
     private _builder = new Gtk.Builder();
-    private _saveDialog: InstanceType<typeof Gtk.FileChooserNative> | undefined;
+    private _saveDialog: Gtk.FileChooserNative | undefined;
 
     /**
      * Create a new ui settings class.
@@ -77,152 +66,106 @@ class RandomWallpaperSettings {
      * @param {Adw.PreferencesWindow} window Window to fill with settings
      * @param {Adw.PreferencesPage} tmpPage Placeholder settings page to replace
      */
-    constructor(window: InstanceType<typeof Adw.PreferencesWindow>, tmpPage: InstanceType<typeof Adw.PreferencesPage>) {
-        // Dynamically load own modules. This allows us to use proper ES6 Modules
-        this._importModules().then(() => {
-            window.remove(tmpPage);
+    constructor(window: Adw.PreferencesWindow, tmpPage: Adw.PreferencesPage) {
+        window.remove(tmpPage);
 
-            if (!Logger || !Settings || !Utils || !SourceRow)
-                throw new Error('Error with imports');
+        this._backendConnection.setBoolean('pause-timer', true);
+        this._loadSources();
 
-            this._settings = new Settings.Settings();
-            this._backendConnection = new Settings.Settings(Settings.RWG_SETTINGS_SCHEMA_BACKEND_CONNECTION);
+        const extensionObject = ExtensionPreferences.lookupByURL(import.meta.url);
+        if (!extensionObject) {
+            Logger.error('Own extension object not found!', this);
+            throw new Error('Own extension object not found!');
+        }
 
-            this._backendConnection.setBoolean('pause-timer', true);
-            this._loadSources();
+        // this._builder.set_translation_domain(extensionObject.metadata['gettext-domain']);
+        this._builder.add_from_file(`${extensionObject.path}/ui/pageGeneral.ui`);
+        this._builder.add_from_file(`${extensionObject.path}/ui/pageSources.ui`);
 
-            // this._builder.set_translation_domain(Self.metadata['gettext-domain']);
-            this._builder.add_from_file(`${Self.path}/ui/pageGeneral.ui`);
-            this._builder.add_from_file(`${Self.path}/ui/pageSources.ui`);
+        const comboBackgroundType = this._builder.get_object<Adw.ComboRow>('combo_background_type');
+        comboBackgroundType.model = Gtk.StringList.new(WallpaperManager.getModeNameList());
+        this._settings.bind('change-type',
+            comboBackgroundType,
+            'selected',
+            Gio.SettingsBindFlags.DEFAULT);
 
-            import('./manager/wallpaperManager.js').then(module => {
-                const comboBackgroundType = this._builder.get_object<InstanceType<typeof Adw.ComboRow>>('combo_background_type');
-                comboBackgroundType.model = Gtk.StringList.new(module.getModeNameList());
-                this._settings.bind('change-type',
-                    comboBackgroundType,
-                    'selected',
-                    Gio.SettingsBindFlags.DEFAULT);
-            }).catch(error => {
-                if (Logger)
-                    Logger.error(error);
-                else
-                    logError(error as Error);
-            });
+        const comboLogLevel = this._builder.get_object<Adw.ComboRow>('log_level');
+        comboLogLevel.model = Gtk.StringList.new(Logger.getLogLevelNameList());
+        this._settings.bind('log-level',
+            comboLogLevel,
+            'selected',
+            Gio.SettingsBindFlags.DEFAULT);
 
-            const comboLogLevel = this._builder.get_object<InstanceType<typeof Adw.ComboRow>>('log_level');
-            comboLogLevel.model = Gtk.StringList.new(Logger.getLogLevelNameList());
-            this._settings.bind('log-level',
-                comboLogLevel,
-                'selected',
-                Gio.SettingsBindFlags.DEFAULT);
+        this._settings.bind('minutes',
+            this._builder.get_object('duration_minutes'),
+            'value',
+            Gio.SettingsBindFlags.DEFAULT);
+        this._settings.bind('hours',
+            this._builder.get_object('duration_hours'),
+            'value',
+            Gio.SettingsBindFlags.DEFAULT);
+        this._settings.bind('auto-fetch',
+            this._builder.get_object('af_switch'),
+            'enable-expansion',
+            Gio.SettingsBindFlags.DEFAULT);
+        this._settings.bind('disable-hover-preview',
+            this._builder.get_object('disable_hover_preview'),
+            'active',
+            Gio.SettingsBindFlags.DEFAULT);
+        this._settings.bind('hide-panel-icon',
+            this._builder.get_object('hide_panel_icon'),
+            'active',
+            Gio.SettingsBindFlags.DEFAULT);
+        this._settings.bind('show-notifications',
+            this._builder.get_object('show_notifications'),
+            'active',
+            Gio.SettingsBindFlags.DEFAULT);
+        this._settings.bind('fetch-on-startup',
+            this._builder.get_object('fetch_on_startup'),
+            'active',
+            Gio.SettingsBindFlags.DEFAULT);
+        this._settings.bind('general-post-command',
+            this._builder.get_object('general_post_command'),
+            'text',
+            Gio.SettingsBindFlags.DEFAULT);
+        this._settings.bind('multiple-displays',
+            this._builder.get_object('enable_multiple_displays'),
+            'active',
+            Gio.SettingsBindFlags.DEFAULT);
 
-            this._settings.bind('minutes',
-                this._builder.get_object('duration_minutes'),
-                'value',
-                Gio.SettingsBindFlags.DEFAULT);
-            this._settings.bind('hours',
-                this._builder.get_object('duration_hours'),
-                'value',
-                Gio.SettingsBindFlags.DEFAULT);
-            this._settings.bind('auto-fetch',
-                this._builder.get_object('af_switch'),
-                'enable-expansion',
-                Gio.SettingsBindFlags.DEFAULT);
-            this._settings.bind('disable-hover-preview',
-                this._builder.get_object('disable_hover_preview'),
-                'active',
-                Gio.SettingsBindFlags.DEFAULT);
-            this._settings.bind('hide-panel-icon',
-                this._builder.get_object('hide_panel_icon'),
-                'active',
-                Gio.SettingsBindFlags.DEFAULT);
-            this._settings.bind('show-notifications',
-                this._builder.get_object('show_notifications'),
-                'active',
-                Gio.SettingsBindFlags.DEFAULT);
-            this._settings.bind('fetch-on-startup',
-                this._builder.get_object('fetch_on_startup'),
-                'active',
-                Gio.SettingsBindFlags.DEFAULT);
-            this._settings.bind('general-post-command',
-                this._builder.get_object('general_post_command'),
-                'text',
-                Gio.SettingsBindFlags.DEFAULT);
-            this._settings.bind('multiple-displays',
-                this._builder.get_object('enable_multiple_displays'),
-                'active',
-                Gio.SettingsBindFlags.DEFAULT);
+        this._bindButtons();
+        this._bindHistorySection(window);
 
-            this._bindButtons();
-            this._bindHistorySection(window);
-
-            window.connect('close-request', () => {
-                this._backendConnection.setBoolean('pause-timer', false);
-            });
-
-            window.add(this._builder.get_object('page_general'));
-            window.add(this._builder.get_object('page_sources'));
-
-            this._sources.forEach(id => {
-                const sourceRow = new SourceRow(undefined, id);
-                this._builder.get_object<InstanceType<typeof Adw.PreferencesGroup>>('sources_list').add(sourceRow);
-
-                sourceRow.button_delete.connect('clicked', () => {
-                    sourceRow.clearConfig();
-                    this._builder.get_object<InstanceType<typeof Adw.PreferencesGroup>>('sources_list').remove(sourceRow);
-                    Utils.removeItemOnce(this._sources, id);
-                    this._saveSources();
-                });
-            });
-
-            import('./utils.js').then(module => {
-                const manager = module.getWallpaperManager();
-                if (manager.canHandleMultipleImages)
-                    this._builder.get_object<InstanceType<typeof Adw.ActionRow>>('multiple_displays_row').set_sensitive(true);
-            }).catch(error => {
-                if (Logger)
-                    Logger.error(error);
-                else
-                    logError(error as Error);
-            });
-        }).catch(error => {
-            if (error instanceof Error)
-                logError(error);
-            else
-                logError(new Error('Unknown error'));
+        window.connect('close-request', () => {
+            this._backendConnection.setBoolean('pause-timer', false);
         });
-    }
 
-    /**
-     * Import helper function.
-     *
-     * Loads all required modules async.
-     * This allows to omit the legacy GJS style imports (`const asd = imports.gi.asd`)
-     * and use proper modules for subsequent files.
-     *
-     * When the shell allows proper modules for loaded files (extension.js and prefs.js)
-     * this function can be removed and replaced by normal import statements.
-     */
-    private async _importModules(): Promise<void> {
-        const loggerPromise = import('./logger.js');
-        const utilsPromise = import('./utils.js');
-        const sourceRowPromise = import('./ui/sourceRow.js');
-        const settingsPromise =  import('./settings.js');
+        window.add(this._builder.get_object('page_general'));
+        window.add(this._builder.get_object('page_sources'));
 
-        const [moduleLogger, moduleUtils, moduleSourceRow, moduleSettings] = await Promise.all(
-            [loggerPromise, utilsPromise, sourceRowPromise, settingsPromise]);
-        Logger = moduleLogger.Logger;
-        Utils = moduleUtils;
-        SourceRow = moduleSourceRow.SourceRow;
-        Settings = moduleSettings;
+        this._sources.forEach(id => {
+            const sourceRow = new SourceRow.SourceRow(undefined, id);
+            this._builder.get_object<Adw.PreferencesGroup>('sources_list').add(sourceRow);
+
+            sourceRow.button_delete.connect('clicked', () => {
+                sourceRow.clearConfig();
+                this._builder.get_object<Adw.PreferencesGroup>('sources_list').remove(sourceRow);
+                Utils.removeItemOnce(this._sources, id);
+                this._saveSources();
+            });
+        });
+
+        const manager = Utils.getWallpaperManager();
+        if (manager.canHandleMultipleImages)
+            this._builder.get_object<Adw.ActionRow>('multiple_displays_row').set_sensitive(true);
     }
 
     /**
      * Bind button clicks to logic.
      */
     private _bindButtons(): void {
-        const newWallpaperButton: InstanceType<typeof Adw.ActionRow> = this._builder.get_object('request_new_wallpaper');
-        const newWallpaperButtonLabel = newWallpaperButton.get_child() as InstanceType<typeof Gtk.Label> | null;
+        const newWallpaperButton: Adw.ActionRow = this._builder.get_object('request_new_wallpaper');
+        const newWallpaperButtonLabel = newWallpaperButton.get_child() as Gtk.Label | null;
         const origNewWallpaperText = newWallpaperButtonLabel?.get_label() ?? 'Request New Wallpaper';
         newWallpaperButton.connect('activated', () => {
             newWallpaperButtonLabel?.set_label('Loading ...');
@@ -240,9 +183,9 @@ class RandomWallpaperSettings {
             this._backendConnection.setBoolean('request-new-wallpaper', true);
         });
 
-        const sourceRowList = this._builder.get_object<InstanceType<typeof Adw.PreferencesGroup>>('sources_list');
+        const sourceRowList = this._builder.get_object<Adw.PreferencesGroup>('sources_list');
         this._builder.get_object('button_new_source').connect('clicked', () => {
-            const sourceRow = new SourceRow();
+            const sourceRow = new SourceRow.SourceRow();
             sourceRowList.add(sourceRow);
             this._sources.push(String(sourceRow.id));
             this._saveSources();
@@ -261,8 +204,8 @@ class RandomWallpaperSettings {
      *
      * @param {Adw.PreferencesWindow} window Preferences window
      */
-    private _bindHistorySection(window: InstanceType<typeof Adw.PreferencesWindow>): void {
-        const entryRow = this._builder.get_object<InstanceType<typeof Adw.EntryRow>>('row_favorites_folder');
+    private _bindHistorySection(window: Adw.PreferencesWindow): void {
+        const entryRow = this._builder.get_object<Adw.EntryRow>('row_favorites_folder');
         entryRow.text = this._settings.getString('favorites-folder');
 
         this._settings.bind('history-length',
