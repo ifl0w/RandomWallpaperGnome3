@@ -132,10 +132,10 @@ elif [ "$1" == "build" ]; then
     compile_ui
     compile_js
     compile_schemas
+    copy_static_files
 elif [ "$1" == "format" ]; then
     format_js
 elif [ "$1" == "pack" ]; then
-    copy_static_files
     pack
 elif [ "$1" == "setup_env" ]; then
     setup_environment
