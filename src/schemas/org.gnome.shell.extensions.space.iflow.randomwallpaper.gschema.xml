@@ -73,6 +73,12 @@
             <description>Removes the panel icon from the gnome shell.</description>
         </key>
 
+        <key type='b' name='show-notifications'>
+            <default>false</default>
+            <summary>Show notifications</summary>
+            <description>Whether system notifications should be displayed for additional information.</description>
+        </key>
+
         <key type='as' name='sources'>
             <default>[]</default>
             <summary>Configured Wallpaper Sources</summary>
