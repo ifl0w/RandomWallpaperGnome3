@@ -15,6 +15,7 @@ sleep 3
 
 $SCRIPT_DIR/x11docker/x11docker \
 	--desktop \
+	--network \
 	--init=systemd \
 	--user=RETAIN \
 	--runasuser="journalctl -f &" \
