@@ -136,6 +136,10 @@ class RandomWallpaperSettings {
                 this._builder.get_object('hide_panel_icon'),
                 'active',
                 Gio.SettingsBindFlags.DEFAULT);
+            this._settings.bind('show-notifications',
+                this._builder.get_object('show_notifications'),
+                'active',
+                Gio.SettingsBindFlags.DEFAULT);
             this._settings.bind('fetch-on-startup',
                 this._builder.get_object('fetch_on_startup'),
                 'active',
