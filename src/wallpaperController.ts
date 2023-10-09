@@ -11,6 +11,7 @@ import * as Utils from './utils.js';
 import {AFTimer as Timer} from './timer.js';
 import {Logger} from './logger.js';
 import {Mode} from './manager/wallpaperManager.js';
+import {Notification} from './notifications.js';
 
 // SourceAdapter
 import {BaseAdapter} from './adapter/baseAdapter.js';
@@ -560,6 +561,9 @@ class WallpaperController {
             this._historyController.insert(newImageEntries.reverse());
 
             this._runPostCommands();
+
+            if (this._settings.getBoolean('show-notifications'))
+                Notification.newWallpaper(newImageEntries.reverse());
         } catch (error) {
             Logger.error(error, this);
         } finally {
