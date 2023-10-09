@@ -35,7 +35,7 @@ setup_environment() {
     npm install
 
     # Delete output directory, everything will be rewritten
-    rm -r "$DESTDIR" &>/dev/null || true
+    rm -r "$DESTDIR/*" &>/dev/null || true
 }
 
 compile_ui() {
