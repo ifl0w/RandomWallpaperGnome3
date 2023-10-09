@@ -41,6 +41,15 @@ Adw.PreferencesPage page_general {
         }
 
         Adw.ActionRow {
+            title: _("Show notifications");
+            subtitle: _("System notifications will be displayed to provide information, such as when a new wallpaper is set.");
+
+            Switch show_notifications {
+                valign: center;
+            }
+        }
+
+        Adw.ActionRow {
             title: _("Disable hover preview");
             subtitle: _("Disable the desktop preview of the background while hovering the history items. Try enabling if you encounter crashes or lags of the gnome-shell while using the extension.");
 
