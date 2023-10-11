@@ -52,8 +52,6 @@ compile_js() {
     npx tsc
 }
 
-# TODO: Drop compiled schemas when only targeting Gnome 44+
-# https://gjs.guide/extensions/upgrading/gnome-shell-44.html#gsettings-schema
 compile_schemas() {
     check_command "glib-compile-schemas"
     mkdir -p "$DESTDIR/schemas/"
@@ -122,6 +120,9 @@ if [ $# -eq 0 ]; then
 elif [ "$1" == "check" ]; then
     check_ts
 elif [ "$1" == "build" ]; then
+    compile_ui
+    compile_js
+elif [ "$1" == "build_local" ]; then
     compile_ui
     compile_js
     compile_schemas
