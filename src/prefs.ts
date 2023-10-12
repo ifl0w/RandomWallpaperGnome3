@@ -17,50 +17,26 @@ import {Logger} from './logger.js';
 // In this process you will be using the Gtk toolkit, not Clutter.
 
 /**
- * Initial entry point for the extension settings page
+ * Main settings class for everything related to the settings window.
  */
-export default class RWG3Settings extends ExtensionPreferences {
+class RandomWallpaperSettings extends ExtensionPreferences {
+    private _saveDialog?: Gtk.FileChooserNative;
+
     /**
      * This function is called when the preferences window is first created to fill
      * the `Adw.PreferencesWindow`.
      *
      * @param {Adw.PreferencesWindow} window - The preferences window
      */
-    // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
     fillPreferencesWindow(window: Adw.PreferencesWindow): void {
+        const backendConnection = new Settings.Settings(Settings.RWG_SETTINGS_SCHEMA_BACKEND_CONNECTION);
+        const builder = new Gtk.Builder();
+        const settings = new Settings.Settings();
+        const sources = this._loadSources(settings);
+
         window.set_default_size(600, 720);
-        // temporary fill window to prevent error message until modules are loaded
-        const tmpPage = new Adw.PreferencesPage();
-        window.add(tmpPage);
 
-        new RandomWallpaperSettings(window, tmpPage);
-    }
-}
-
-/**
- * Main settings class for everything related to the settings window.
- */
-class RandomWallpaperSettings {
-    private _settings = new Settings.Settings();
-    private _backendConnection = new Settings.Settings(Settings.RWG_SETTINGS_SCHEMA_BACKEND_CONNECTION);
-
-    private _sources: string[] = [];
-    private _builder = new Gtk.Builder();
-    private _saveDialog: Gtk.FileChooserNative | undefined;
-
-    /**
-     * Create a new ui settings class.
-     *
-     * Replaces the placeholder $tmpPage once the modules are loaded and the real pages are available.
-     *
-     * @param {Adw.PreferencesWindow} window Window to fill with settings
-     * @param {Adw.PreferencesPage} tmpPage Placeholder settings page to replace
-     */
-    constructor(window: Adw.PreferencesWindow, tmpPage: Adw.PreferencesPage) {
-        window.remove(tmpPage);
-
-        this._backendConnection.setBoolean('pause-timer', true);
-        this._loadSources();
+        backendConnection.setBoolean('pause-timer', true);
 
         const extensionObject = ExtensionPreferences.lookupByURL(import.meta.url);
         if (!extensionObject) {
@@ -69,92 +45,97 @@ class RandomWallpaperSettings {
         }
 
         // this._builder.set_translation_domain(extensionObject.metadata['gettext-domain']);
-        this._builder.add_from_file(`${extensionObject.path}/ui/pageGeneral.ui`);
-        this._builder.add_from_file(`${extensionObject.path}/ui/pageSources.ui`);
+        builder.add_from_file(`${extensionObject.path}/ui/pageGeneral.ui`);
+        builder.add_from_file(`${extensionObject.path}/ui/pageSources.ui`);
 
-        const comboBackgroundType = this._builder.get_object<Adw.ComboRow>('combo_background_type');
+        const comboBackgroundType = builder.get_object<Adw.ComboRow>('combo_background_type');
         comboBackgroundType.model = Gtk.StringList.new(WallpaperManager.getModeNameList());
-        this._settings.bind('change-type',
+        settings.bind('change-type',
             comboBackgroundType,
             'selected',
             Gio.SettingsBindFlags.DEFAULT);
 
-        const comboLogLevel = this._builder.get_object<Adw.ComboRow>('log_level');
+        const comboLogLevel = builder.get_object<Adw.ComboRow>('log_level');
         comboLogLevel.model = Gtk.StringList.new(Logger.getLogLevelNameList());
-        this._settings.bind('log-level',
+        settings.bind('log-level',
             comboLogLevel,
             'selected',
             Gio.SettingsBindFlags.DEFAULT);
 
-        this._settings.bind('minutes',
-            this._builder.get_object('duration_minutes'),
+        settings.bind('minutes',
+            builder.get_object('duration_minutes'),
             'value',
             Gio.SettingsBindFlags.DEFAULT);
-        this._settings.bind('hours',
-            this._builder.get_object('duration_hours'),
+        settings.bind('hours',
+            builder.get_object('duration_hours'),
             'value',
             Gio.SettingsBindFlags.DEFAULT);
-        this._settings.bind('auto-fetch',
-            this._builder.get_object('af_switch'),
+        settings.bind('auto-fetch',
+            builder.get_object('af_switch'),
             'enable-expansion',
             Gio.SettingsBindFlags.DEFAULT);
-        this._settings.bind('disable-hover-preview',
-            this._builder.get_object('disable_hover_preview'),
+        settings.bind('disable-hover-preview',
+            builder.get_object('disable_hover_preview'),
             'active',
             Gio.SettingsBindFlags.DEFAULT);
-        this._settings.bind('hide-panel-icon',
-            this._builder.get_object('hide_panel_icon'),
+        settings.bind('hide-panel-icon',
+            builder.get_object('hide_panel_icon'),
             'active',
             Gio.SettingsBindFlags.DEFAULT);
-        this._settings.bind('show-notifications',
-            this._builder.get_object('show_notifications'),
+        settings.bind('show-notifications',
+            builder.get_object('show_notifications'),
             'active',
             Gio.SettingsBindFlags.DEFAULT);
-        this._settings.bind('fetch-on-startup',
-            this._builder.get_object('fetch_on_startup'),
+        settings.bind('fetch-on-startup',
+            builder.get_object('fetch_on_startup'),
             'active',
             Gio.SettingsBindFlags.DEFAULT);
-        this._settings.bind('general-post-command',
-            this._builder.get_object('general_post_command'),
+        settings.bind('general-post-command',
+            builder.get_object('general_post_command'),
             'text',
             Gio.SettingsBindFlags.DEFAULT);
-        this._settings.bind('multiple-displays',
-            this._builder.get_object('enable_multiple_displays'),
+        settings.bind('multiple-displays',
+            builder.get_object('enable_multiple_displays'),
             'active',
             Gio.SettingsBindFlags.DEFAULT);
 
-        this._bindButtons();
-        this._bindHistorySection(window);
+        this._bindButtons(settings, backendConnection, builder, sources);
+        this._bindHistorySection(settings, backendConnection, builder, window);
 
         window.connect('close-request', () => {
-            this._backendConnection.setBoolean('pause-timer', false);
+            backendConnection.setBoolean('pause-timer', false);
         });
 
-        window.add(this._builder.get_object('page_general'));
-        window.add(this._builder.get_object('page_sources'));
+        window.add(builder.get_object('page_general'));
+        window.add(builder.get_object('page_sources'));
 
-        this._sources.forEach(id => {
+        sources.forEach(id => {
             const sourceRow = new SourceRow.SourceRow(undefined, id);
-            this._builder.get_object<Adw.PreferencesGroup>('sources_list').add(sourceRow);
+            builder.get_object<Adw.PreferencesGroup>('sources_list').add(sourceRow);
 
             sourceRow.button_delete.connect('clicked', () => {
                 sourceRow.clearConfig();
-                this._builder.get_object<Adw.PreferencesGroup>('sources_list').remove(sourceRow);
-                Utils.removeItemOnce(this._sources, id);
-                this._saveSources();
+                builder.get_object<Adw.PreferencesGroup>('sources_list').remove(sourceRow);
+                Utils.removeItemOnce(sources, id);
+                this._saveSources(settings, sources);
             });
         });
 
         const manager = Utils.getWallpaperManager();
         if (manager.canHandleMultipleImages)
-            this._builder.get_object<Adw.ActionRow>('multiple_displays_row').set_sensitive(true);
+            builder.get_object<Adw.ActionRow>('multiple_displays_row').set_sensitive(true);
     }
 
     /**
      * Bind button clicks to logic.
+     *
+     * @param {Settings.Settings} settings Settings object holding general settings
+     * @param {Settings.Settings} backendConnection Settings object holding backend settings
+     * @param {Gtk.Builder} builder Gtk builder of the preference window
+     * @param {string[]} sources String array of sources to process
      */
-    private _bindButtons(): void {
-        const newWallpaperButton: Adw.ActionRow = this._builder.get_object('request_new_wallpaper');
+    private _bindButtons(settings: Settings.Settings, backendConnection: Settings.Settings, builder: Gtk.Builder, sources: string[]): void {
+        const newWallpaperButton: Adw.ActionRow = builder.get_object('request_new_wallpaper');
         const newWallpaperButtonLabel = newWallpaperButton.get_child() as Gtk.Label | null;
         const origNewWallpaperText = newWallpaperButtonLabel?.get_label() ?? 'Request New Wallpaper';
         newWallpaperButton.connect('activated', () => {
@@ -162,29 +143,29 @@ class RandomWallpaperSettings {
             newWallpaperButton.set_sensitive(false);
 
             // The backend sets this back to false after fetching the image - listen for that event.
-            const handler = this._backendConnection.observe('request-new-wallpaper', () => {
-                if (!this._backendConnection.getBoolean('request-new-wallpaper')) {
+            const handler = backendConnection.observe('request-new-wallpaper', () => {
+                if (!backendConnection.getBoolean('request-new-wallpaper')) {
                     newWallpaperButtonLabel?.set_label(origNewWallpaperText);
                     newWallpaperButton.set_sensitive(true);
-                    this._backendConnection.disconnect(handler);
+                    backendConnection.disconnect(handler);
                 }
             });
 
-            this._backendConnection.setBoolean('request-new-wallpaper', true);
+            backendConnection.setBoolean('request-new-wallpaper', true);
         });
 
-        const sourceRowList = this._builder.get_object<Adw.PreferencesGroup>('sources_list');
-        this._builder.get_object('button_new_source').connect('clicked', () => {
+        const sourceRowList = builder.get_object<Adw.PreferencesGroup>('sources_list');
+        builder.get_object('button_new_source').connect('clicked', () => {
             const sourceRow = new SourceRow.SourceRow();
             sourceRowList.add(sourceRow);
-            this._sources.push(String(sourceRow.id));
-            this._saveSources();
+            sources.push(String(sourceRow.id));
+            this._saveSources(settings, sources);
 
             sourceRow.button_delete.connect('clicked', () => {
                 sourceRow.clearConfig();
                 sourceRowList.remove(sourceRow);
-                Utils.removeItemOnce(this._sources, sourceRow.id);
-                this._saveSources();
+                Utils.removeItemOnce(sources, sourceRow.id);
+                this._saveSources(settings, sources);
             });
         });
     }
@@ -192,30 +173,33 @@ class RandomWallpaperSettings {
     /**
      * Bind button clicks related to the history.
      *
+     * @param {Settings.Settings} settings Settings object holding general settings
+     * @param {Settings.Settings} backendConnection Settings object holding backend settings
+     * @param {Gtk.Builder} builder Gtk builder of the preference window
      * @param {Adw.PreferencesWindow} window Preferences window
      */
-    private _bindHistorySection(window: Adw.PreferencesWindow): void {
-        const entryRow = this._builder.get_object<Adw.EntryRow>('row_favorites_folder');
-        entryRow.text = this._settings.getString('favorites-folder');
+    private _bindHistorySection(settings: Settings.Settings, backendConnection: Settings.Settings, builder: Gtk.Builder, window: Adw.PreferencesWindow): void {
+        const entryRow = builder.get_object<Adw.EntryRow>('row_favorites_folder');
+        entryRow.text = settings.getString('favorites-folder');
 
-        this._settings.bind('history-length',
-            this._builder.get_object('history_length'),
+        settings.bind('history-length',
+            builder.get_object('history_length'),
             'value',
             Gio.SettingsBindFlags.DEFAULT);
-        this._settings.bind('favorites-folder',
+        settings.bind('favorites-folder',
             entryRow,
             'text',
             Gio.SettingsBindFlags.DEFAULT);
 
-        this._builder.get_object('clear_history').connect('clicked', () => {
-            this._backendConnection.setBoolean('clear-history', true);
+        builder.get_object('clear_history').connect('clicked', () => {
+            backendConnection.setBoolean('clear-history', true);
         });
 
-        this._builder.get_object('open_wallpaper_folder').connect('clicked', () => {
-            this._backendConnection.setBoolean('open-folder', true);
+        builder.get_object('open_wallpaper_folder').connect('clicked', () => {
+            backendConnection.setBoolean('open-folder', true);
         });
 
-        this._builder.get_object('button_favorites_folder').connect('clicked', () => {
+        builder.get_object('button_favorites_folder').connect('clicked', () => {
             // For GTK 4.10+
             // Gtk.FileDialog();
 
@@ -246,9 +230,12 @@ class RandomWallpaperSettings {
 
     /**
      * Load the config from the schema
+     *
+     * @param {Settings.Settings} settings Settings object used for loading
+     * @returns {string[]} Array of strings of loaded sources
      */
-    private _loadSources(): void {
-        this._sources = this._settings.getStrv('sources');
+    private _loadSources(settings: Settings.Settings): string[] {
+        const sources = settings.getStrv('sources');
 
         // this._sources.sort((a, b) => {
         // const path1 = `${Settings.RWG_SETTINGS_SCHEMA_PATH}/sources/general/${a}/`;
@@ -262,19 +249,26 @@ class RandomWallpaperSettings {
         // return nameA.localeCompare(nameB);
         // });
 
-        this._sources.sort((a, b) => {
+        sources.sort((a, b) => {
             const path1 = `${Settings.RWG_SETTINGS_SCHEMA_PATH}/sources/general/${a}/`;
             const settingsGeneral1 = new Settings.Settings(Settings.RWG_SETTINGS_SCHEMA_SOURCES_GENERAL, path1);
             const path2 = `${Settings.RWG_SETTINGS_SCHEMA_PATH}/sources/general/${b}/`;
             const settingsGeneral2 = new Settings.Settings(Settings.RWG_SETTINGS_SCHEMA_SOURCES_GENERAL, path2);
             return settingsGeneral1.getInt('type') - settingsGeneral2.getInt('type');
         });
+
+        return sources;
     }
 
     /**
      * Save all configured sources to the settings.
+     *
+     * @param {Settings.Settings} settings Settings object used for saving
+     * @param {string[]} sources String array of sources to save
      */
-    private _saveSources(): void {
-        this._settings.setStrv('sources', this._sources);
+    private _saveSources(settings: Settings.Settings, sources: string[]): void {
+        settings.setStrv('sources', sources);
     }
 }
+
+export {RandomWallpaperSettings as default};
