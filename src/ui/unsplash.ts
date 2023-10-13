@@ -5,7 +5,16 @@ import GObject from 'gi://GObject';
 import Gtk from 'gi://Gtk';
 
 import * as Settings from './../settings.js';
-import {getConstraintTypeNameList} from '../adapter/unsplash.js';
+
+// Generated code produces a no-shadow rule error
+/* eslint-disable */
+enum ConstraintType {
+    UNCONSTRAINED,
+    USER,
+    USERS_LIKES,
+    COLLECTION_ID,
+}
+/* eslint-enable */
 
 const UnsplashSettingsGroup = GObject.registerClass({
     GTypeName: 'UnsplashSettingsGroup',
@@ -107,5 +116,51 @@ const UnsplashSettingsGroup = GObject.registerClass({
         this._settings.resetSchema();
     }
 });
+
+/**
+ * Retrieve the human readable enum name.
+ *
+ * @param {ConstraintType} type The type to name
+ * @returns {string} Name
+ */
+function _getConstraintTypeName(type: ConstraintType): string {
+    let name: string;
+
+    switch (type) {
+    case ConstraintType.UNCONSTRAINED:
+        name = 'Unconstrained';
+        break;
+    case ConstraintType.USER:
+        name = 'User';
+        break;
+    case ConstraintType.USERS_LIKES:
+        name = 'User\'s Likes';
+        break;
+    case ConstraintType.COLLECTION_ID:
+        name = 'Collection ID';
+        break;
+
+    default:
+        name = 'Constraint type name not found';
+        break;
+    }
+
+    return name;
+}
+
+/**
+ * Get a list of human readable enum entries.
+ *
+ * @returns {string[]} Array with key names
+ */
+function getConstraintTypeNameList(): string[] {
+    const list: string[] = [];
+
+    const values = Object.values(ConstraintType).filter(v => !isNaN(Number(v)));
+    for (const i of values)
+        list.push(_getConstraintTypeName(i as ConstraintType));
+
+    return list;
+}
 
 export {UnsplashSettingsGroup};
