@@ -142,13 +142,13 @@ class UnsplashAdapter extends BaseAdapter {
         let optionsString = '';
 
         switch (options.constraintType) {
-        case 1:
+        case ConstraintType.USER:
             optionsString = `/user/${options.constraintValue}/`;
             break;
-        case 2:
+        case ConstraintType.USERS_LIKES:
             optionsString = `/user/${options.constraintValue}/likes/`;
             break;
-        case 3:
+        case ConstraintType.COLLECTION_ID:
             optionsString = `/collection/${options.constraintValue}/`;
             break;
         default:
@@ -190,54 +190,7 @@ class UnsplashAdapter extends BaseAdapter {
     }
 }
 
-/**
- * Retrieve the human readable enum name.
- *
- * @param {ConstraintType} type The type to name
- * @returns {string} Name
- */
-function _getConstraintTypeName(type: ConstraintType): string {
-    let name: string;
-
-    switch (type) {
-    case ConstraintType.UNCONSTRAINED:
-        name = 'Unconstrained';
-        break;
-    case ConstraintType.USER:
-        name = 'User';
-        break;
-    case ConstraintType.USERS_LIKES:
-        name = 'User\'s Likes';
-        break;
-    case ConstraintType.COLLECTION_ID:
-        name = 'Collection ID';
-        break;
-
-    default:
-        name = 'Constraint type name not found';
-        break;
-    }
-
-    return name;
-}
-
-/**
- * Get a list of human readable enum entries.
- *
- * @returns {string[]} Array with key names
- */
-function getConstraintTypeNameList(): string[] {
-    const list: string[] = [];
-
-    const values = Object.values(ConstraintType).filter(v => !isNaN(Number(v)));
-    for (const i of values)
-        list.push(_getConstraintTypeName(i as ConstraintType));
-
-    return list;
-}
-
 export {
     UnsplashAdapter,
-    ConstraintType,
-    getConstraintTypeNameList
+    ConstraintType
 };
