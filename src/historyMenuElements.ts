@@ -4,7 +4,6 @@ import GdkPixbuf from 'gi://GdkPixbuf';
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 import GObject from 'gi://GObject';
-import Gtk from 'gi://Gtk';
 import St from 'gi://St';
 
 // Legacy importing style for shell internal bindings not available in standard import format
@@ -417,8 +416,8 @@ class HistorySection extends PopupMenu.PopupMenuSection {
         super();
 
         this.actor = new St.ScrollView({
-            hscrollbar_policy: Gtk.PolicyType.NEVER,
-            vscrollbar_policy: Gtk.PolicyType.AUTOMATIC,
+            hscrollbar_policy: St.PolicyType.NEVER,
+            vscrollbar_policy: St.PolicyType.AUTOMATIC,
         });
 
         this.actor.add_actor(this.box);
