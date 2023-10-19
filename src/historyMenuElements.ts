@@ -19,10 +19,19 @@ import {Logger} from './logger.js';
 Gio._promisify(Gio.File.prototype, 'copy_async', 'copy_finish');
 Gio._promisify(Gio.File.prototype, 'replace_contents_bytes_async', 'replace_contents_finish');
 
-// GJS style class extending
-const HistoryElement = GObject.registerClass({
-    GTypeName: 'HistoryElement',
-}, class HistoryElement extends PopupMenu.PopupSubMenuMenuItem {
+// FIXME: Generated static class code produces a no-unused-expressions rule error
+/* eslint-disable no-unused-expressions */
+
+/**
+ * Shell menu item holding information related to a HistoryEntry
+ */
+class HistoryElement extends PopupMenu.PopupSubMenuMenuItem {
+    static [GObject.GTypeName] = 'HistoryElement';
+
+    static {
+        GObject.registerClass(this);
+    }
+
     private _settings = new Settings.Settings();
 
     private _prefixLabel;
@@ -271,11 +280,18 @@ const HistoryElement = GObject.registerClass({
     setIndex(index: number): void {
         this._prefixLabel.set_text(`${String(index)}.`);
     }
-});
+}
 
-const CurrentImageElement = GObject.registerClass({
-    GTypeName: 'CurrentImageElement',
-}, class CurrentImageElement extends HistoryElement {
+/**
+ * Special shell menu element for the current wallpaper HistoryEntry
+ */
+class CurrentImageElement extends HistoryElement {
+    static [GObject.GTypeName] = 'CurrentImageElement';
+
+    static {
+        GObject.registerClass(this);
+    }
+
     /**
      * Create a new image element for the currently active wallpaper.
      *
@@ -288,17 +304,20 @@ const CurrentImageElement = GObject.registerClass({
         if (this._setAsWallpaperItem)
             this._setAsWallpaperItem.destroy();
     }
-});
+}
 
 /**
  * Element for the "New Wallpaper" button and the remaining time for the auto fetch
  * feature.
  * The remaining time will only be displayed if the af-feature is activated.
  */
-const NewWallpaperElement = GObject.registerClass({
-    GTypeName: 'NewWallpaperElement',
-},
 class NewWallpaperElement extends PopupMenu.PopupBaseMenuItem {
+    static [GObject.GTypeName] = 'NewWallpaperElement';
+
+    static {
+        GObject.registerClass(this);
+    }
+
     private _timer = Timer.getTimer();
     private _remainingLabel;
 
@@ -353,7 +372,7 @@ class NewWallpaperElement extends PopupMenu.PopupBaseMenuItem {
             this._remainingLabel.hide();
         }
     }
-});
+}
 
 /**
  * The status element in the Gnome Shell top panel bar.
@@ -403,7 +422,7 @@ class HistorySection extends PopupMenu.PopupMenuSection {
     /**
      * Cache HistoryElements for performance of long histories.
      */
-    private _historySectionCache = new Map<string, InstanceType<typeof HistoryElement>>();
+    private _historySectionCache = new Map<string, HistoryElement>();
     private _historyCache: HistoryModule.HistoryEntry[] = [];
 
     /**
@@ -430,9 +449,9 @@ class HistorySection extends PopupMenu.PopupMenuSection {
      */
     updateList(
         history: HistoryModule.HistoryEntry[],
-        onEnter: (actor: InstanceType<typeof HistoryElement>) => void,
-        onLeave: (actor: InstanceType<typeof HistoryElement>) => void,
-        onSelect: (actor: InstanceType<typeof HistoryElement>) => void
+        onEnter: (actor: HistoryElement) => void,
+        onLeave: (actor: HistoryElement) => void,
+        onSelect: (actor: HistoryElement) => void
     ): void {
         if (this._historyCache.length <= 1)
             this.removeAll(); // remove empty history element

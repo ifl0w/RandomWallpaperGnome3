@@ -5,11 +5,11 @@ import Gtk from 'gi://Gtk';
 import {ExtensionPreferences} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
 import * as Settings from './settings.js';
-import * as SourceRow from './ui/sourceRow.js';
 import * as Utils from './utils.js';
 import * as WallpaperManager from './manager/wallpaperManager.js';
 
 import {Logger} from './logger.js';
+import {SourceRow} from './ui/sourceRow.js';
 
 // https://gjs.guide/extensions/overview/anatomy.html#prefs-js
 // The code in prefs.js will be executed in a separate Gtk process
@@ -116,7 +116,7 @@ class RandomWallpaperSettings extends ExtensionPreferences {
         window.add(builder.get_object('page_sources'));
 
         sources.forEach(id => {
-            const sourceRow = new SourceRow.SourceRow(undefined, id);
+            const sourceRow = new SourceRow(undefined, id);
             builder.get_object<Adw.PreferencesGroup>('sources_list').add(sourceRow);
 
             sourceRow.button_delete.connect('clicked', () => {
@@ -162,7 +162,7 @@ class RandomWallpaperSettings extends ExtensionPreferences {
 
         const sourceRowList = builder.get_object<Adw.PreferencesGroup>('sources_list');
         builder.get_object('button_new_source').connect('clicked', () => {
-            const sourceRow = new SourceRow.SourceRow();
+            const sourceRow = new SourceRow(undefined, null);
             sourceRowList.add(sourceRow);
             sources.push(String(sourceRow.id));
             this._saveSources(settings, sources);

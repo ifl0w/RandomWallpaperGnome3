@@ -16,20 +16,33 @@ import {UnsplashSettingsGroup} from './unsplash.js';
 import {UrlSourceSettingsGroup} from './urlSource.js';
 import {WallhavenSettingsGroup} from './wallhaven.js';
 
-// https://gitlab.gnome.org/GNOME/gjs/-/blob/master/examples/gtk4-template.js
-const SourceRow = GObject.registerClass({
-    GTypeName: 'SourceRow',
-    Template: GLib.uri_resolve_relative(import.meta.url, './sourceRow.ui', GLib.UriFlags.NONE),
-    Children: [
+// FIXME: Generated static class code produces a no-unused-expressions rule error
+/* eslint-disable no-unused-expressions */
+
+/**
+ * Class containing general settings for each adapter source as well as the adapter source
+ */
+class SourceRow extends Adw.ExpanderRow {
+    static [GObject.GTypeName] = 'SourceRow';
+    // @ts-expect-error Gtk.template is not in the type definitions files yet
+    static [Gtk.template] = GLib.uri_resolve_relative(import.meta.url, './sourceRow.ui', GLib.UriFlags.NONE);
+    // @ts-expect-error Gtk.children is not in the type definitions files yet
+    static [Gtk.children] = [
         'button_delete',
-    ],
-    InternalChildren: [
+    ];
+
+    // @ts-expect-error Gtk.internalChildren is not in the type definitions files yet
+    static [Gtk.internalChildren] = [
         'blocked_images_list',
         'combo',
         'settings_container',
         'source_name',
-    ],
-}, class SourceRow extends Adw.ExpanderRow {
+    ];
+
+    static {
+        GObject.registerClass(this);
+    }
+
     // This list is the same across all rows
     static _stringList: Gtk.StringList;
 
@@ -134,15 +147,15 @@ const SourceRow = GObject.registerClass({
      * Get a new adapter based on an enum source type.
      *
      * @param {Utils.SourceType} type Enum of the adapter to get
-     * @returns {object | null} Newly crafted adapter or null
+     * @returns {UnsplashSettingsGroup | WallhavenSettingsGroup | RedditSettingsGroup | GenericJsonSettingsGroup | LocalFolderSettingsGroup | UrlSourceSettingsGroup | null} Newly crafted adapter or null
      */
-    private _getSettingsGroup(type: Utils.SourceType = Utils.SourceType.UNSPLASH): GObject.RegisteredPrototype<InstanceType<typeof UnsplashSettingsGroup>, { [key: string]: GObject.ParamSpec<unknown>; }, unknown[]>
-     | GObject.RegisteredPrototype<InstanceType<typeof WallhavenSettingsGroup>, { [key: string]: GObject.ParamSpec<unknown>; }, unknown[]>
-     | GObject.RegisteredPrototype<InstanceType<typeof RedditSettingsGroup>, { [key: string]: GObject.ParamSpec<unknown>; }, unknown[]>
-     | GObject.RegisteredPrototype<InstanceType<typeof GenericJsonSettingsGroup>, { [key: string]: GObject.ParamSpec<unknown>; }, unknown[]>
-     | GObject.RegisteredPrototype<InstanceType<typeof LocalFolderSettingsGroup>, { [key: string]: GObject.ParamSpec<unknown>; }, unknown[]>
-     | GObject.RegisteredPrototype<InstanceType<typeof UrlSourceSettingsGroup>, { [key: string]: GObject.ParamSpec<unknown>; }, unknown[]>
-     | null {
+    private _getSettingsGroup(type: Utils.SourceType = Utils.SourceType.UNSPLASH): UnsplashSettingsGroup
+        | WallhavenSettingsGroup
+        | RedditSettingsGroup
+        | GenericJsonSettingsGroup
+        | LocalFolderSettingsGroup
+        | UrlSourceSettingsGroup
+        | null {
         let targetWidget = null;
         switch (type) {
         case Utils.SourceType.UNSPLASH:
@@ -198,6 +211,6 @@ const SourceRow = GObject.registerClass({
 
         this._settings.resetSchema();
     }
-});
+}
 
 export {SourceRow};

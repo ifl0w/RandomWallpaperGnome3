@@ -6,18 +6,30 @@ import Gtk from 'gi://Gtk';
 
 import * as Settings from './../settings.js';
 
-const UrlSourceSettingsGroup = GObject.registerClass({
-    GTypeName: 'UrlSourceSettingsGroup',
-    Template: GLib.uri_resolve_relative(import.meta.url, './urlSource.ui', GLib.UriFlags.NONE),
-    InternalChildren: [
+// FIXME: Generated static class code produces a no-unused-expressions rule error
+/* eslint-disable no-unused-expressions */
+
+/**
+ * Subclass containing the preferences group for UrlSource adapter
+ */
+class UrlSourceSettingsGroup extends Adw.PreferencesGroup {
+    static [GObject.GTypeName] = 'UrlSourceSettingsGroup';
+    // @ts-expect-error Gtk.template is not in the type definitions files yet
+    static [Gtk.template] = GLib.uri_resolve_relative(import.meta.url, './urlSource.ui', GLib.UriFlags.NONE);
+    // @ts-expect-error Gtk.internalChildren is not in the type definitions files yet
+    static [Gtk.internalChildren] = [
         'author_name',
         'author_url',
         'different_images',
         'domain',
         'image_url',
         'post_url',
-    ],
-}, class UrlSourceSettingsGroup extends Adw.PreferencesGroup {
+    ];
+
+    static {
+        GObject.registerClass(this);
+    }
+
     // InternalChildren
     private _author_name!: Adw.EntryRow;
     private _author_url!: Adw.EntryRow;
@@ -74,6 +86,6 @@ const UrlSourceSettingsGroup = GObject.registerClass({
     clearConfig(): void {
         this._settings.resetSchema();
     }
-});
+}
 
 export {UrlSourceSettingsGroup};

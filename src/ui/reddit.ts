@@ -6,18 +6,30 @@ import Gtk from 'gi://Gtk';
 
 import * as Settings from './../settings.js';
 
-const RedditSettingsGroup = GObject.registerClass({
-    GTypeName: 'RedditSettingsGroup',
-    Template: GLib.uri_resolve_relative(import.meta.url, './reddit.ui', GLib.UriFlags.NONE),
-    InternalChildren: [
+// FIXME: Generated static class code produces a no-unused-expressions rule error
+/* eslint-disable no-unused-expressions */
+
+/**
+ * Subclass containing the preferences group for Reddit adapter
+ */
+class RedditSettingsGroup extends Adw.PreferencesGroup {
+    static [GObject.GTypeName] = 'RedditSettingsGroup';
+    // @ts-expect-error Gtk.template is not in the type definitions files yet
+    static [Gtk.template] = GLib.uri_resolve_relative(import.meta.url, './reddit.ui', GLib.UriFlags.NONE);
+    // @ts-expect-error Gtk.internalChildren is not in the type definitions files yet
+    static [Gtk.internalChildren] = [
         'allow_sfw',
         'image_ratio1',
         'image_ratio2',
         'min_height',
         'min_width',
         'subreddits',
-    ],
-}, class RedditSettingsGroup extends Adw.PreferencesGroup {
+    ];
+
+    static {
+        GObject.registerClass(this);
+    }
+
     // InternalChildren
     private _allow_sfw!: Gtk.Switch;
     private _image_ratio1!: Gtk.Adjustment;
@@ -74,6 +86,6 @@ const RedditSettingsGroup = GObject.registerClass({
     clearConfig(): void {
         this._settings.resetSchema();
     }
-});
+}
 
 export {RedditSettingsGroup};
