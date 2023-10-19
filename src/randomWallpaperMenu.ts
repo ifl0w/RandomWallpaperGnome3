@@ -242,10 +242,10 @@ class RandomWallpaperMenu {
         /**
          * Function for events that should happen on element leave.
          *
-         * @param {InstanceType<typeof CustomElements.HistoryElement>} unusedActor The activating panel item
+         * @param {CustomElements.HistoryElement} unusedActor The activating panel item
          * @this RandomWallpaperMenu
          */
-        function onLeave(this: RandomWallpaperMenu, unusedActor: InstanceType<typeof CustomElements.HistoryElement>): void {
+        function onLeave(this: RandomWallpaperMenu, unusedActor: CustomElements.HistoryElement): void {
             if (!this._wallpaperController.prohibitNewWallpaper && this._savedBackgroundUri)
                 this._wallpaperController.resetWallpaper(this._savedBackgroundUri);
         }
@@ -253,10 +253,10 @@ class RandomWallpaperMenu {
         /**
          * Function for events that should happen on element enter.
          *
-         * @param {InstanceType<typeof CustomElements.HistoryElement>} actor The activating panel item
+         * @param {CustomElements.HistoryElement} actor The activating panel item
          * @this RandomWallpaperMenu
          */
-        function onEnter(this: RandomWallpaperMenu, actor: InstanceType<typeof CustomElements.HistoryElement>): void {
+        function onEnter(this: RandomWallpaperMenu, actor: CustomElements.HistoryElement): void {
             if (!this._wallpaperController.prohibitNewWallpaper)
                 this._wallpaperController.previewWallpaper(actor.historyEntry.id);
         }
@@ -264,10 +264,10 @@ class RandomWallpaperMenu {
         /**
          * Function for events that should happen on element select.
          *
-         * @param {InstanceType<typeof CustomElements.HistoryElement>} actor The activating panel item
+         * @param {CustomElements.HistoryElement} actor The activating panel item
          * @this RandomWallpaperMenu
          */
-        function onSelect(this: RandomWallpaperMenu, actor: InstanceType<typeof CustomElements.HistoryElement>): void {
+        function onSelect(this: RandomWallpaperMenu, actor: CustomElements.HistoryElement): void {
             // Make sure no other preview or reset event overwrites our setWallpaper!
             this._wallpaperController.prohibitNewWallpaper = true;
 

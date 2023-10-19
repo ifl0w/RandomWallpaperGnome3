@@ -16,20 +16,25 @@ enum ConstraintType {
 }
 /* eslint-enable */
 
-const UnsplashSettingsGroup = GObject.registerClass({
-    GTypeName: 'UnsplashSettingsGroup',
-    Template: GLib.uri_resolve_relative(import.meta.url, './unsplash.ui', GLib.UriFlags.NONE),
-    InternalChildren: [
+// FIXME: Generated static class code produces a no-unused-expressions rule error
+/* eslint-disable no-unused-expressions */
+
+/**
+ * Subclass containing the preferences group for Unsplash adapter
+ */
+class UnsplashSettingsGroup extends Adw.PreferencesGroup {
+    static [GObject.GTypeName] = 'UnsplashSettingsGroup';
+    // @ts-expect-error Gtk.template is not in the type definitions files yet
+    static [Gtk.template] = GLib.uri_resolve_relative(import.meta.url, './unsplash.ui', GLib.UriFlags.NONE);
+    // @ts-expect-error Gtk.internalChildren is not in the type definitions files yet
+    static [Gtk.internalChildren] = [
         'constraint_type',
         'constraint_value',
         'featured_only',
         'image_height',
         'image_width',
         'keyword',
-    ],
-}, class UnsplashSettingsGroup extends Adw.PreferencesGroup {
-    // This list is the same across all rows
-    static _stringList: Gtk.StringList;
+    ];
 
     // InternalChildren
     private _constraint_type!: Adw.ComboRow;
@@ -38,6 +43,13 @@ const UnsplashSettingsGroup = GObject.registerClass({
     private _image_height!: Gtk.Adjustment;
     private _image_width!: Gtk.Adjustment;
     private _keyword!: Adw.EntryRow;
+
+    static {
+        GObject.registerClass(this);
+    }
+
+    // This list is the same across all rows
+    static _stringList: Gtk.StringList;
 
     private _settings;
 
@@ -115,7 +127,7 @@ const UnsplashSettingsGroup = GObject.registerClass({
     clearConfig(): void {
         this._settings.resetSchema();
     }
-});
+}
 
 /**
  * Retrieve the human readable enum name.

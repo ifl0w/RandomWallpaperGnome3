@@ -6,14 +6,26 @@ import Gtk from 'gi://Gtk';
 
 import * as Settings from './../settings.js';
 
-const LocalFolderSettingsGroup = GObject.registerClass({
-    GTypeName: 'LocalFolderSettingsGroup',
-    Template: GLib.uri_resolve_relative(import.meta.url, './localFolder.ui', GLib.UriFlags.NONE),
-    InternalChildren: [
+// FIXME: Generated static class code produces a no-unused-expressions rule error
+/* eslint-disable no-unused-expressions */
+
+/**
+ * Subclass containing the preferences group for LocalFolder adapter
+ */
+class LocalFolderSettingsGroup extends Adw.PreferencesGroup {
+    static [GObject.GTypeName] = 'LocalFolderSettingsGroup';
+    // @ts-expect-error Gtk.template is not in the type definitions files yet
+    static [Gtk.template] = GLib.uri_resolve_relative(import.meta.url, './localFolder.ui', GLib.UriFlags.NONE);
+    // @ts-expect-error Gtk.internalChildren is not in the type definitions files yet
+    static [Gtk.internalChildren] = [
         'folder',
         'folder_row',
-    ],
-}, class LocalFolderSettingsGroup extends Adw.PreferencesGroup {
+    ];
+
+    static {
+        GObject.registerClass(this);
+    }
+
     // InternalChildren
     private _folder!: Gtk.Button;
     private _folder_row!: Adw.EntryRow;
@@ -76,6 +88,6 @@ const LocalFolderSettingsGroup = GObject.registerClass({
     clearConfig(): void {
         this._settings.resetSchema();
     }
-});
+}
 
 export {LocalFolderSettingsGroup};

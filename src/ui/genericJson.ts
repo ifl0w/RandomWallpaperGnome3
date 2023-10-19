@@ -2,13 +2,22 @@ import Adw from 'gi://Adw';
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 import GObject from 'gi://GObject';
+import Gtk from 'gi://Gtk';
 
 import * as Settings from './../settings.js';
 
-const GenericJsonSettingsGroup = GObject.registerClass({
-    GTypeName: 'GenericJsonSettingsGroup',
-    Template: GLib.uri_resolve_relative(import.meta.url, './genericJson.ui', GLib.UriFlags.NONE),
-    InternalChildren: [
+// FIXME: Generated static class code produces a no-unused-expressions rule error
+/* eslint-disable no-unused-expressions */
+
+/**
+ * Subclass containing the preferences group for GenericJson adapter
+ */
+class GenericJsonSettingsGroup extends Adw.PreferencesGroup {
+    static [GObject.GTypeName] = 'GenericJsonSettingsGroup';
+    // @ts-expect-error Gtk.template is not in the type definitions files yet
+    static [Gtk.template] = GLib.uri_resolve_relative(import.meta.url, './genericJson.ui', GLib.UriFlags.NONE);
+    // @ts-expect-error Gtk.internalChildren is not in the type definitions files yet
+    static [Gtk.internalChildren] = [
         'author_name_path',
         'author_url_path',
         'author_url_prefix',
@@ -18,8 +27,12 @@ const GenericJsonSettingsGroup = GObject.registerClass({
         'post_path',
         'post_prefix',
         'request_url',
-    ],
-}, class GenericJsonSettingsGroup extends Adw.PreferencesGroup {
+    ];
+
+    static {
+        GObject.registerClass(this);
+    }
+
     // InternalChildren
     private _author_name_path!: Adw.EntryRow;
     private _author_url_path!: Adw.EntryRow;
@@ -91,6 +104,6 @@ const GenericJsonSettingsGroup = GObject.registerClass({
     clearConfig(): void {
         this._settings.resetSchema();
     }
-});
+}
 
 export {GenericJsonSettingsGroup};
