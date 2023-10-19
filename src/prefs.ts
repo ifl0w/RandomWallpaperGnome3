@@ -116,7 +116,7 @@ class RandomWallpaperSettings extends ExtensionPreferences {
         window.add(builder.get_object('page_sources'));
 
         sources.forEach(id => {
-            const sourceRow = new SourceRow(undefined, id);
+            const sourceRow = new SourceRow(id);
             builder.get_object<Adw.PreferencesGroup>('sources_list').add(sourceRow);
 
             sourceRow.button_delete.connect('clicked', () => {
@@ -162,7 +162,7 @@ class RandomWallpaperSettings extends ExtensionPreferences {
 
         const sourceRowList = builder.get_object<Adw.PreferencesGroup>('sources_list');
         builder.get_object('button_new_source').connect('clicked', () => {
-            const sourceRow = new SourceRow(undefined, null);
+            const sourceRow = new SourceRow(null);
             sourceRowList.add(sourceRow);
             sources.push(String(sourceRow.id));
             this._saveSources(settings, sources);
