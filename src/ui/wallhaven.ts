@@ -7,10 +7,18 @@ import Gtk from 'gi://Gtk';
 
 import * as Settings from './../settings.js';
 
-const WallhavenSettingsGroup = GObject.registerClass({
-    GTypeName: 'WallhavenSettingsGroup',
-    Template: GLib.uri_resolve_relative(import.meta.url, './wallhaven.ui', GLib.UriFlags.NONE),
-    InternalChildren: [
+// FIXME: Generated static class code produces a no-unused-expressions rule error
+/* eslint-disable no-unused-expressions */
+
+/**
+ * Subclass containing the preferences group for Wallhaven adapter
+ */
+class WallhavenSettingsGroup extends Adw.PreferencesGroup {
+    static [GObject.GTypeName] = 'WallhavenSettingsGroup';
+    // @ts-expect-error Gtk.template is not in the type definitions files yet
+    static [Gtk.template] = GLib.uri_resolve_relative(import.meta.url, './wallhaven.ui', GLib.UriFlags.NONE);
+    // @ts-expect-error Gtk.internalChildren is not in the type definitions files yet
+    static [Gtk.internalChildren] = [
         'ai_art',
         'allow_nsfw',
         'allow_sfw',
@@ -25,8 +33,12 @@ const WallhavenSettingsGroup = GObject.registerClass({
         'keyword',
         'minimal_resolution',
         'row_color',
-    ],
-}, class WallhavenSettingsGroup extends Adw.PreferencesGroup {
+    ];
+
+    static {
+        GObject.registerClass(this);
+    }
+
     private static _colorPalette: Gdk.RGBA[];
     private static _availableColors: string[] = [
         '#660000', '#990000', '#cc0000', '#cc3333', '#ea4c88',
@@ -171,6 +183,6 @@ const WallhavenSettingsGroup = GObject.registerClass({
     clearConfig(): void {
         this._settings.resetSchema();
     }
-});
+}
 
 export {WallhavenSettingsGroup};
