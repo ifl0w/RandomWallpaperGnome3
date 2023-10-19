@@ -47,11 +47,10 @@ class HistoryElement extends PopupMenu.PopupSubMenuMenuItem {
     /**
      * Create a new menu element for a HistoryEntry.
      *
-     * @param {object | undefined} unusedParams Unused params object from the PopupMenu.PopupSubMenuMenuItem
      * @param {HistoryModule.HistoryEntry} historyEntry HistoryEntry this menu element serves
      * @param {number} index Place in history
      */
-    constructor(unusedParams: object | undefined, historyEntry: HistoryModule.HistoryEntry, index: number) {
+    constructor(historyEntry: HistoryModule.HistoryEntry, index: number) {
         super('', false);
 
         this.historyEntry = historyEntry;
@@ -295,11 +294,10 @@ class CurrentImageElement extends HistoryElement {
     /**
      * Create a new image element for the currently active wallpaper.
      *
-     * @param {object | undefined} params Option object of PopupMenu.PopupSubMenuMenuItem
      * @param {HistoryModule.HistoryEntry} historyEntry History entry this menu is for
      */
-    constructor(params: object | undefined, historyEntry: HistoryModule.HistoryEntry) {
-        super(params, historyEntry, 0);
+    constructor(historyEntry: HistoryModule.HistoryEntry) {
+        super(historyEntry, 0);
 
         if (this._setAsWallpaperItem)
             this._setAsWallpaperItem.destroy();
@@ -323,11 +321,9 @@ class NewWallpaperElement extends PopupMenu.PopupBaseMenuItem {
 
     /**
      * Create a button for fetching new wallpaper
-     *
-     * @param {object | undefined} params Options object of PopupMenu.PopupBaseMenuItem
      */
-    constructor(params: object | undefined) {
-        super(params);
+    constructor() {
+        super(undefined);
 
         const container = new St.BoxLayout({
             vertical: true,
@@ -466,7 +462,7 @@ class HistorySection extends PopupMenu.PopupMenuSection {
 
             let cachedHistoryElement = this._historySectionCache.get(historyID);
             if (!cachedHistoryElement) {
-                cachedHistoryElement = new HistoryElement(undefined, history[i], i);
+                cachedHistoryElement = new HistoryElement(history[i], i);
                 cachedHistoryElement.actor.connect('key-focus-in', onEnter);
                 cachedHistoryElement.actor.connect('key-focus-out', onLeave);
                 cachedHistoryElement.actor.connect('enter-event', onEnter);

@@ -51,11 +51,10 @@ class GenericJsonSettingsGroup extends Adw.PreferencesGroup {
      *
      * Previously saved settings will be used if the adapter and ID match.
      *
-     * @param {Partial<Adw.PreferencesGroup.ConstructorProperties> | undefined} params Properties for Adw.PreferencesGroup or undefined
      * @param {string} id Unique ID
      */
-    constructor(params: Partial<Adw.PreferencesGroup.ConstructorProperties> | undefined, id: string) {
-        super(params);
+    constructor(id: string) {
+        super(undefined);
 
         const path = `${Settings.RWG_SETTINGS_SCHEMA_PATH}/sources/genericJSON/${id}/`;
         this._settings = new Settings.Settings(Settings.RWG_SETTINGS_SCHEMA_SOURCES_GENERIC_JSON, path);

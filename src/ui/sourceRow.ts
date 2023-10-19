@@ -65,11 +65,10 @@ class SourceRow extends Adw.ExpanderRow {
      * Default unique ID is Date.now()
      * Previously saved settings will be used if the ID matches.
      *
-     * @param {Partial<Adw.ExpanderRow.ConstructorProperties> | undefined} params Properties for Adw.ExpanderRow or undefined
      * @param {string | null} id Unique ID or null
      */
-    constructor(params: Partial<Adw.ExpanderRow.ConstructorProperties> | undefined, id?: string | null) {
-        super(params);
+    constructor(id?: string | null) {
+        super(undefined);
 
         if (id)
             this.id = id;
@@ -159,22 +158,22 @@ class SourceRow extends Adw.ExpanderRow {
         let targetWidget = null;
         switch (type) {
         case Utils.SourceType.UNSPLASH:
-            targetWidget = new UnsplashSettingsGroup(undefined, this.id);
+            targetWidget = new UnsplashSettingsGroup(this.id);
             break;
         case Utils.SourceType.WALLHAVEN:
-            targetWidget = new WallhavenSettingsGroup(undefined, this.id);
+            targetWidget = new WallhavenSettingsGroup(this.id);
             break;
         case Utils.SourceType.REDDIT:
-            targetWidget = new RedditSettingsGroup(undefined, this.id);
+            targetWidget = new RedditSettingsGroup(this.id);
             break;
         case Utils.SourceType.GENERIC_JSON:
-            targetWidget = new GenericJsonSettingsGroup(undefined, this.id);
+            targetWidget = new GenericJsonSettingsGroup(this.id);
             break;
         case Utils.SourceType.LOCAL_FOLDER:
-            targetWidget = new LocalFolderSettingsGroup(undefined, this.id);
+            targetWidget = new LocalFolderSettingsGroup(this.id);
             break;
         case Utils.SourceType.STATIC_URL:
-            targetWidget = new UrlSourceSettingsGroup(undefined, this.id);
+            targetWidget = new UrlSourceSettingsGroup(this.id);
             break;
         default:
             targetWidget = null;
