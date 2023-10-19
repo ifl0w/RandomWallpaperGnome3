@@ -51,7 +51,7 @@ class RandomWallpaperMenu {
         this._observedValues.push(this._settings.observe('hide-panel-icon', this.updatePanelMenuVisibility.bind(this)));
 
         // new wallpaper button
-        const newWallpaperItem = new CustomElements.NewWallpaperElement({});
+        const newWallpaperItem = new CustomElements.NewWallpaperElement();
         this._panelMenu.menu.addMenuItem(newWallpaperItem);
 
         this._panelMenu.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
@@ -219,7 +219,7 @@ class RandomWallpaperMenu {
         const history = historyController.history;
 
         if (history.length > 0) {
-            const currentImage = new CustomElements.CurrentImageElement(undefined, history[0]);
+            const currentImage = new CustomElements.CurrentImageElement(history[0]);
             this._currentBackgroundSection.addMenuItem(currentImage);
         }
     }
