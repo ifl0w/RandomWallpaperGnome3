@@ -1,7 +1,7 @@
 import Gio from 'gi://Gio';
 import GObject from 'gi://GObject';
 
-import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
+import {ExtensionBase} from 'sharedInternals';
 
 const RWG_SETTINGS_SCHEMA_BACKEND_CONNECTION = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.backend-connection';
 const RWG_SETTINGS_SCHEMA_SOURCES_GENERAL = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.general';
@@ -18,22 +18,27 @@ const RWG_SETTINGS_SCHEMA_PATH = '/org/gnome/shell/extensions/space-iflow-random
  * Wrapper around gnome settings.
  */
 class Settings {
+    public static extensionContext?: typeof ExtensionBase;
     private _settings: Gio.Settings;
 
     /**
      * Create a new settings object.
      *
      * Will default to the general extension settings.
+     * Set the static extension context before first use!
      *
      * @param {string | undefined} schemaId Schema ID or undefined, defaults to the extension schema ID
      * @param {string | undefined} schemaPath Schema path or undefined
      */
     constructor(schemaId?: string, schemaPath?: string) {
-        if (schemaPath === undefined) {
-            const extensionObject = Extension.lookupByURL(import.meta.url);
-            if (!extensionObject)
-                throw new Error('Own extension object not found!');
+        if (!Settings.extensionContext)
+            throw new Error('Settings module used before context was set!');
 
+        const extensionObject = Settings.extensionContext.lookupByURL(import.meta.url);
+        if (!extensionObject)
+            throw new Error('Own extension object not found!');
+
+        if (schemaPath === undefined) {
             this._settings = extensionObject.getSettings(schemaId);
         } else {
             // ExtensionUtils.getSettings() doesn't allow specifying a schema path
@@ -41,7 +46,7 @@ class Settings {
             // same settings schema id for multiple similar but distinctive settings objects).
             // So we have to rebuild the original getSettings() function to get the raw
             // schema object and build the Gio.Settings on our own with the schema path.
-            const schemaObj = this._getSchema(schemaId);
+            const schemaObj = this._getSchema(extensionObject, schemaId);
 
             this._settings = new Gio.Settings({settings_schema: schemaObj, path: schemaPath});
         }
@@ -275,15 +280,12 @@ class Settings {
     /**
      * Helper function to get the extension settings schema object.
      *
+     * @param {ExtensionBase} extensionObject Extension object holding metadata in relation to the current context
      * @param {string | undefined} schemaId Schema ID, defaults to the extension settings schema ID
      * @returns {Gio.SettingsSchema} Settings schema object for the given ID
      */
     // https://gitlab.gnome.org/GNOME/gnome-shell/-/blob/main/js/extensions/sharedInternals.js#L91
-    private _getSchema(schemaId?: string): Gio.SettingsSchema {
-        const extensionObject = Extension.lookupByURL(import.meta.url);
-        if (!extensionObject)
-            throw new Error('Own extension object not found!');
-
+    private _getSchema(extensionObject: ExtensionBase, schemaId?: string): Gio.SettingsSchema {
         if (!schemaId)
             schemaId = extensionObject.metadata['settings-schema'];
 
