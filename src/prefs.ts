@@ -29,10 +29,13 @@ class RandomWallpaperSettings extends ExtensionPreferences {
      * @param {Adw.PreferencesWindow} window - The preferences window
      */
     fillPreferencesWindow(window: Adw.PreferencesWindow): void {
+        // Set statics for the current extension context (preferences window)
         Settings.Settings.extensionContext = ExtensionPreferences;
+        const settings = new Settings.Settings();
+        Logger.SETTINGS = settings;
+
         const backendConnection = new Settings.Settings(Settings.RWG_SETTINGS_SCHEMA_BACKEND_CONNECTION);
         const builder = new Gtk.Builder();
-        const settings = new Settings.Settings();
         const sources = this._loadSources(settings);
 
         window.set_default_size(600, 720);
@@ -106,6 +109,7 @@ class RandomWallpaperSettings extends ExtensionPreferences {
         window.connect('close-request', () => {
             backendConnection.setBoolean('pause-timer', false);
             Settings.Settings.extensionContext = undefined;
+            Logger.destroy();
         });
 
         window.add(builder.get_object('page_general'));
