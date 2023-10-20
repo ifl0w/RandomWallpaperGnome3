@@ -5,6 +5,7 @@ import * as WallpaperController from './wallpaperController.js';
 import * as RandomWallpaperMenu from './randomWallpaperMenu.js';
 
 import {Logger} from './logger.js';
+import {Settings} from './settings.js';
 
 /**
  * Own extension class object. Entry point for Gnome Shell hooks.
@@ -24,6 +25,7 @@ class RandomWallpaperExtension extends Extension {
      * widgets, connect signals or modify GNOME Shell's behavior.
      */
     enable(): void {
+        Settings.extensionContext = Extension;
         this._timer = AFTimer.AFTimer.getTimer();
         this._wallpaperController = new WallpaperController.WallpaperController();
         this._panelMenu = new RandomWallpaperMenu.RandomWallpaperMenu(this._wallpaperController);
@@ -58,6 +60,7 @@ class RandomWallpaperExtension extends Extension {
 
         // Destruction of log helper is the last step
         Logger.destroy();
+        Settings.extensionContext = undefined;
     }
 }
 
