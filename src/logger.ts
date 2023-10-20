@@ -19,7 +19,7 @@ const LOG_PREFIX = 'RandomWallpaper';
  * A convenience logger class.
  */
 class Logger {
-    private static _SETTINGS: Settings | null = null;
+    public static SETTINGS: Settings | null = null;
 
     /**
      * Helper function to safely log to the console.
@@ -53,14 +53,18 @@ class Logger {
     /**
      * Get the log level selected by the user.
      *
+     * Requires the static SETTINGS member to be set first.
+     * Falls back to LogLevel.WARNING if settings object is not set.
+     *
      * @returns {LogLevel} Log level
      */
     private static _selectedLogLevel(): LogLevel {
-        // lazy initialization of the settings object
-        if (Logger._SETTINGS === null)
-            Logger._SETTINGS = new Settings();
+        if (Logger.SETTINGS === null) {
+            this._log(LogLevel.ERROR, 'Extension context not set before first use!', Logger);
+            return LogLevel.WARNING;
+        }
 
-        return Logger._SETTINGS.getInt('log-level');
+        return Logger.SETTINGS.getInt('log-level');
     }
 
     /**
@@ -123,7 +127,7 @@ class Logger {
      */
     static destroy(): void {
         // clear reference to settings object
-        Logger._SETTINGS = null;
+        Logger.SETTINGS = null;
     }
 }
 
