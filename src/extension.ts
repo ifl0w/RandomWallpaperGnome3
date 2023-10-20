@@ -25,7 +25,10 @@ class RandomWallpaperExtension extends Extension {
      * widgets, connect signals or modify GNOME Shell's behavior.
      */
     enable(): void {
+        // Set statics for the current extension context (shell background)
         Settings.extensionContext = Extension;
+        Logger.SETTINGS = new Settings();
+
         this._timer = AFTimer.AFTimer.getTimer();
         this._wallpaperController = new WallpaperController.WallpaperController();
         this._panelMenu = new RandomWallpaperMenu.RandomWallpaperMenu(this._wallpaperController);
