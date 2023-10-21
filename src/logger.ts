@@ -42,12 +42,12 @@ class Logger {
             sourceName = ` >> ${sourceInstance.constructor.name}`;
 
         // This logs messages with GLib.LogLevelFlags.LEVEL_MESSAGE
-        log(`${LOG_PREFIX} [${LogLevel[level]}]${sourceName} :: ${errorMessage}`);
+        console.log(`${LOG_PREFIX} [${LogLevel[level]}]${sourceName} :: ${errorMessage}`);
 
         // Log stack trace if available
         if (message instanceof Error && message.stack)
             // This logs messages with GLib.LogLevelFlags.LEVEL_WARNING
-            logError(message);
+            console.warn(message);
     }
 
     /**
