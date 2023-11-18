@@ -16,7 +16,7 @@ class HydraPaper extends ExternalWallpaperManager {
     protected async _setBackground(wallpaperPaths: string[]): Promise<void> {
         await this._createCommandAndRun(wallpaperPaths);
 
-        // Manually set key for darkmode because that's way faster than merging two times the same images
+        // Manually set key for darkmode because HydraPaper might be in a version below 3.3.2 which only sets light mode
         Utils.setPictureUriOfSettingsObject(this._backgroundSettings, this._backgroundSettings.getString('picture-uri'));
     }
 
@@ -27,17 +27,18 @@ class HydraPaper extends ExternalWallpaperManager {
      */
     protected async _setLockScreen(wallpaperPaths: string[]): Promise<void> {
         // Remember keys, HydraPaper will change these
-        const tmpBackground = this._backgroundSettings.getString('picture-uri-dark');
+        const tmpBackground = this._backgroundSettings.getString('picture-uri');
+        const tmpBackgroundDark = this._backgroundSettings.getString('picture-uri-dark');
         const tmpMode = this._backgroundSettings.getString('picture-options');
 
-        // Force HydraPaper to target a different resulting image by using darkmode
-        await this._createCommandAndRun(wallpaperPaths, true);
+        await this._createCommandAndRun(wallpaperPaths);
 
         this._screensaverSettings.setString('picture-options', 'spanned');
         Utils.setPictureUriOfSettingsObject(this._screensaverSettings, this._backgroundSettings.getString('picture-uri-dark'));
 
         // HydraPaper possibly changed these, change them back
-        this._backgroundSettings.setString('picture-uri-dark', tmpBackground);
+        this._backgroundSettings.setString('picture-uri', tmpBackground);
+        this._backgroundSettings.setString('picture-uri-dark', tmpBackgroundDark);
         this._backgroundSettings.setString('picture-options', tmpMode);
     }
 
@@ -47,19 +48,15 @@ class HydraPaper extends ExternalWallpaperManager {
      * HydraPaper:
      * - Saves merged images in the cache folder.
      * - Sets `picture-option` to `spanned`
-     * - Sets `picture-uri` or `picture-uri-dark` depending on {@link darkmode}
+     * - Sets `picture-uri` and `picture-uri-dark`, versions before 3.3.2 only set 'picture-uri'
      * - Needs matching image path count and display count
      *
      * @param {string[]} wallpaperArray Array of image paths, should match the display count
-     * @param {boolean} darkmode Use darkmode, gives different image in cache path
      */
-    private async _createCommandAndRun(wallpaperArray: string[], darkmode: boolean = false): Promise<void> {
+    private async _createCommandAndRun(wallpaperArray: string[]): Promise<void> {
         let command = [];
 
-        if (darkmode)
-            command.push('--darkmode');
-
-        // hydrapaper [--darkmode] --cli PATH PATH PATH
+        // hydrapaper --cli PATH PATH PATH
         command.push('--cli');
         command = command.concat(wallpaperArray);
 
