@@ -1,0 +1,45 @@
+{
+    "compilerOptions": {
+        "experimentalDecorators": true,
+        "target": "ES2020",
+        "module": "es2020",
+        "sourceMap": false,
+        "strict": true,
+        "pretty": true,
+        "removeComments": false,
+        "baseUrl": "./src",
+        "allowSyntheticDefaultImports": true,
+        "outDir": "./randomwallpaper@iflow.space",
+        "moduleResolution": "node",
+        "skipLibCheck": true,
+        "lib": [
+            "ES2021",
+            "DOM", // FIXME: This is here for TextDecoder which should be defined by global GJS
+            // https://gjs-docs.gnome.org/gjs/encoding.md
+            // > The functions in this module are available globally, without import.
+        ],
+        "typeRoots": [
+            "./node_modules/@gi-types",
+            "./types",
+        ],
+        "types": [
+            "gjs-environment",
+            "base-types",
+            "gtk4-types",
+            "adw1",
+            "gtk4/adw", // locally expose 'gi://Adw' and extend with EntryRow
+            "mappings", // missing mappings 'from @gi-types' to 'gi://'
+            "ui", // shell import types
+            "misc", // extension import types
+        ],
+
+    },
+    "include": [
+        "src/**/*.ts",
+        "randomwallpaper@iflow.space/**/*.js"
+    ],
+    "exclude": [
+        "./node_modules/**",
+        "./types/**"
+    ],
+}

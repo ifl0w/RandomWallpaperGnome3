@@ -1,0 +1,55 @@
+name: Build and create ZIP
+run-name: Generate javascript, ui and schema to publish
+on: [push, pull_request]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install dependencies
+        run: |
+          sudo apt -q update
+          sudo apt -q install --no-install-recommends npm
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Setup environment
+        run: |
+          ${{github.workspace}}/build.sh setup_env
+      - name: Check TypeScript
+        run: |
+          ${{github.workspace}}/build.sh check
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install dependencies
+        run: |
+          sudo apt -q update
+          sudo apt -q install --no-install-recommends npm libglib2.0-0 bash gnome-shell libgtk-4-bin libgtk-4-common libgtk-4-dev libadwaita-1-dev gir1.2-adw-1 gir1.2-gtk-4.0 zstd
+      # TODO: Remove the next step once "Jammy" (22.04) receives version 0.8+ and add to the install list above
+      # https://launchpad.net/ubuntu/+source/blueprint-compiler
+      - name: Build recent blueprint-compiler
+        run: |
+          sudo apt -q install --no-install-recommends meson ninja-build
+          git clone https://gitlab.gnome.org/jwestman/blueprint-compiler.git
+          cd blueprint-compiler
+          meson _build
+          sudo ninja -C _build install
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      # TODO: Remove the next step once "Jammy" (22.04) receives version 1.2+
+      # https://launchpad.net/ubuntu/+source/libadwaita-1
+      - name: Update to recent libadwaita
+        run: |
+          mkdir libadwaita
+          cd libadwaita || exit 1
+          wget https://launchpad.net/ubuntu/+source/libadwaita-1/1.2.0-1ubuntu2/+build/24480571/+files/gir1.2-adw-1_1.2.0-1ubuntu2_amd64.deb
+          wget https://launchpad.net/ubuntu/+source/libadwaita-1/1.2.0-1ubuntu2/+build/24480571/+files/libadwaita-1-0_1.2.0-1ubuntu2_amd64.deb
+          wget https://launchpad.net/ubuntu/+source/libadwaita-1/1.2.0-1ubuntu2/+build/24480571/+files/libadwaita-1-dev_1.2.0-1ubuntu2_amd64.deb
+          sudo dpkg --recursive --install .
+      - run: ${{github.workspace}}/build.sh setup_env
+      - run: ${{github.workspace}}/build.sh build
+      - run: ${{github.workspace}}/build.sh format
+      - run: ${{github.workspace}}/build.sh copy_static
+      - uses: actions/upload-artifact@v3
+        with:
+          name: randomwallpaper@iflow.space.shell-extension.zip
+          path: ${{github.workspace}}/randomwallpaper@iflow.space

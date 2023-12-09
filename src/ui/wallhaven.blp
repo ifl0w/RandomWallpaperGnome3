@@ -1,0 +1,138 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $WallhavenSettingsGroup : Adw.PreferencesGroup {
+    // title: _("Source Settings");
+
+    Adw.PreferencesGroup {
+        title: _("General");
+
+        Adw.EntryRow keyword {
+            title: _("Keywords - Comma seperated");
+            input-purpose: free_form;
+        }
+
+        Adw.PasswordEntryRow api_key {
+            title: _("API key");
+            input-purpose: password;
+
+            LinkButton {
+                valign: center;
+                uri: "https://wallhaven.cc/settings/account";
+
+                Adw.ButtonContent {
+                    icon-name: "globe-symbolic";
+                }
+
+                styles [
+                    "flat",
+                ]
+            }
+        }
+
+        Adw.EntryRow minimal_resolution {
+            title: _("Minimal resolution: 1920x1080");
+            input-purpose: free_form;
+            text: "";
+        }
+
+        Adw.EntryRow aspect_ratios {
+            title: _("Allowed aspect ratios: 16x9,16x10");
+            input-purpose: free_form;
+            text: "";
+        }
+
+        Adw.ActionRow row_color {
+            title: _("Search by color");
+            subtitle: "";
+
+            Box {
+                Button button_color_undo {
+                    valign: center;
+
+                    styles [
+                        "flat",
+                    ]
+
+                    Adw.ButtonContent {
+                        icon-name: "edit-undo-symbolic";
+                    }
+                }
+
+                Button button_color {
+                    valign: center;
+
+                    Adw.ButtonContent {
+                        icon-name: "color-select-symbolic";
+                    }
+                }
+            }
+        }
+
+        Adw.ActionRow {
+            title: _("Allow AI generated images");
+
+            Switch ai_art {
+                valign: center;
+            }
+        }
+    }
+
+    Adw.PreferencesGroup {
+        title: _("Allowed content ratings");
+
+        Adw.ActionRow {
+            title: "SFW";
+            subtitle: _("Safe for work");
+
+            Switch allow_sfw {
+                valign: center;
+            }
+        }
+
+        Adw.ActionRow {
+            title: "Sketchy";
+
+            Switch allow_sketchy {
+                valign: center;
+            }
+        }
+
+        Adw.ActionRow {
+            title: "NSFW";
+            subtitle: _("Not safe for work");
+
+            Switch allow_nsfw {
+                valign: center;
+            }
+        }
+    }
+
+    Adw.PreferencesGroup {
+        title: _("Categories");
+
+        Adw.ActionRow {
+            title: "General";
+
+            Switch category_general {
+                valign: center;
+            }
+        }
+
+        Adw.ActionRow {
+            title: "Anime";
+
+            Switch category_anime {
+                valign: center;
+            }
+        }
+
+        Adw.ActionRow {
+            title: "People";
+
+            Switch category_people {
+                valign: center;
+            }
+        }
+    }
+}

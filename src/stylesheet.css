@@ -1,0 +1,22 @@
+.rwg-new-label {
+    font-size: 130%;
+}
+
+.rwg-recent-label {
+    font-size: 90%;
+}
+
+.rwg-history-index {
+    text-align: left;
+    padding-top: .4em;
+    margin-right: .2em;
+    font-size: 120%;
+}
+
+.rwg-history-date {
+    font-size: 100%;
+}
+
+.rwg-history-time {
+    font-size: 80%;
+}

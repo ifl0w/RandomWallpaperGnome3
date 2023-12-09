@@ -1,0 +1,14 @@
+{
+  "devDependencies": {
+    "@gi-types/adw1": "^1.1.1",
+    "@gi-types/base-types": "^1.0.0",
+    "@gi-types/gjs-environment": "^1.1.0",
+    "@gi-types/gtk4-types": "^1.0.0",
+    "@gi-types/shell": "^0.1.6",
+    "@typescript-eslint/eslint-plugin": "^6.3.0",
+    "@typescript-eslint/parser": "^6.3.0",
+    "eslint": "^8.47.0",
+    "eslint-plugin-jsdoc": "^46.4.6",
+    "typescript": "^5.1.6"
+  }
+}
