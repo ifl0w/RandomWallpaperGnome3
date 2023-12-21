@@ -52,14 +52,14 @@ class RandomWallpaperSettings extends ExtensionPreferences {
         builder.add_from_file(`${extensionObject.path}/ui/pageGeneral.ui`);
         builder.add_from_file(`${extensionObject.path}/ui/pageSources.ui`);
 
-        const comboBackgroundType = builder.get_object<Adw.ComboRow>('combo_background_type');
+        const comboBackgroundType = this._getAs<Adw.ComboRow>(builder, 'combo_background_type');
         comboBackgroundType.model = Gtk.StringList.new(WallpaperManager.getModeNameList());
         settings.bind('change-type',
             comboBackgroundType,
             'selected',
             Gio.SettingsBindFlags.DEFAULT);
 
-        const comboLogLevel = builder.get_object<Adw.ComboRow>('log_level');
+        const comboLogLevel = this._getAs<Adw.ComboRow>(builder, 'log_level');
         comboLogLevel.model = Gtk.StringList.new(Logger.getLogLevelNameList());
         settings.bind('log-level',
             comboLogLevel,
@@ -67,39 +67,39 @@ class RandomWallpaperSettings extends ExtensionPreferences {
             Gio.SettingsBindFlags.DEFAULT);
 
         settings.bind('minutes',
-            builder.get_object('duration_minutes'),
+            this._getAs(builder, 'duration_minutes'),
             'value',
             Gio.SettingsBindFlags.DEFAULT);
         settings.bind('hours',
-            builder.get_object('duration_hours'),
+            this._getAs(builder, 'duration_hours'),
             'value',
             Gio.SettingsBindFlags.DEFAULT);
         settings.bind('auto-fetch',
-            builder.get_object('af_switch'),
+            this._getAs(builder, 'af_switch'),
             'enable-expansion',
             Gio.SettingsBindFlags.DEFAULT);
         settings.bind('disable-hover-preview',
-            builder.get_object('disable_hover_preview'),
+            this._getAs(builder, 'disable_hover_preview'),
             'active',
             Gio.SettingsBindFlags.DEFAULT);
         settings.bind('hide-panel-icon',
-            builder.get_object('hide_panel_icon'),
+            this._getAs(builder, 'hide_panel_icon'),
             'active',
             Gio.SettingsBindFlags.DEFAULT);
         settings.bind('show-notifications',
-            builder.get_object('show_notifications'),
+            this._getAs(builder, 'show_notifications'),
             'active',
             Gio.SettingsBindFlags.DEFAULT);
         settings.bind('fetch-on-startup',
-            builder.get_object('fetch_on_startup'),
+            this._getAs(builder, 'fetch_on_startup'),
             'active',
             Gio.SettingsBindFlags.DEFAULT);
         settings.bind('general-post-command',
-            builder.get_object('general_post_command'),
+            this._getAs(builder, 'general_post_command'),
             'text',
             Gio.SettingsBindFlags.DEFAULT);
         settings.bind('multiple-displays',
-            builder.get_object('enable_multiple_displays'),
+            this._getAs(builder, 'enable_multiple_displays'),
             'active',
             Gio.SettingsBindFlags.DEFAULT);
 
@@ -112,16 +112,16 @@ class RandomWallpaperSettings extends ExtensionPreferences {
             Logger.destroy();
         });
 
-        window.add(builder.get_object('page_general'));
-        window.add(builder.get_object('page_sources'));
+        window.add(this._getAs<Adw.PreferencesPage>(builder, 'page_general'));
+        window.add(this._getAs<Adw.PreferencesPage>(builder, 'page_sources'));
 
         sources.forEach(id => {
             const sourceRow = new SourceRow(id);
-            builder.get_object<Adw.PreferencesGroup>('sources_list').add(sourceRow);
+            this._getAs<Adw.PreferencesGroup>(builder, 'sources_list').add(sourceRow);
 
             sourceRow.button_delete.connect('clicked', () => {
                 sourceRow.clearConfig();
-                builder.get_object<Adw.PreferencesGroup>('sources_list').remove(sourceRow);
+                this._getAs<Adw.PreferencesGroup>(builder, 'sources_list').remove(sourceRow);
                 Utils.removeItemOnce(sources, id);
                 this._saveSources(settings, sources);
             });
@@ -129,7 +129,7 @@ class RandomWallpaperSettings extends ExtensionPreferences {
 
         const manager = Utils.getWallpaperManager();
         if (manager.canHandleMultipleImages)
-            builder.get_object<Adw.ActionRow>('multiple_displays_row').set_sensitive(true);
+            this._getAs<Adw.ActionRow>(builder, 'multiple_displays_row').set_sensitive(true);
     }
 
     /**
@@ -141,7 +141,7 @@ class RandomWallpaperSettings extends ExtensionPreferences {
      * @param {string[]} sources String array of sources to process
      */
     private _bindButtons(settings: Settings.Settings, backendConnection: Settings.Settings, builder: Gtk.Builder, sources: string[]): void {
-        const newWallpaperButton: Adw.ActionRow = builder.get_object('request_new_wallpaper');
+        const newWallpaperButton = this._getAs<Adw.ActionRow>(builder, 'request_new_wallpaper');
         const newWallpaperButtonLabel = newWallpaperButton.get_child() as Gtk.Label | null;
         const origNewWallpaperText = newWallpaperButtonLabel?.get_label() ?? 'Request New Wallpaper';
         newWallpaperButton.connect('activated', () => {
@@ -160,8 +160,8 @@ class RandomWallpaperSettings extends ExtensionPreferences {
             backendConnection.setBoolean('request-new-wallpaper', true);
         });
 
-        const sourceRowList = builder.get_object<Adw.PreferencesGroup>('sources_list');
-        builder.get_object('button_new_source').connect('clicked', () => {
+        const sourceRowList = this._getAs<Adw.PreferencesGroup>(builder, 'sources_list');
+        builder.get_object('button_new_source')?.connect('clicked', () => {
             const sourceRow = new SourceRow(null);
             sourceRowList.add(sourceRow);
             sources.push(String(sourceRow.id));
@@ -185,11 +185,11 @@ class RandomWallpaperSettings extends ExtensionPreferences {
      * @param {Adw.PreferencesWindow} window Preferences window
      */
     private _bindHistorySection(settings: Settings.Settings, backendConnection: Settings.Settings, builder: Gtk.Builder, window: Adw.PreferencesWindow): void {
-        const entryRow = builder.get_object<Adw.EntryRow>('row_favorites_folder');
+        const entryRow = this._getAs<Adw.EntryRow>(builder, 'row_favorites_folder');
         entryRow.text = settings.getString('favorites-folder');
 
         settings.bind('history-length',
-            builder.get_object('history_length'),
+            this._getAs(builder, 'history_length'),
             'value',
             Gio.SettingsBindFlags.DEFAULT);
         settings.bind('favorites-folder',
@@ -197,15 +197,15 @@ class RandomWallpaperSettings extends ExtensionPreferences {
             'text',
             Gio.SettingsBindFlags.DEFAULT);
 
-        builder.get_object('clear_history').connect('clicked', () => {
+        builder.get_object('clear_history')?.connect('clicked', () => {
             backendConnection.setBoolean('clear-history', true);
         });
 
-        builder.get_object('open_wallpaper_folder').connect('clicked', () => {
+        builder.get_object('open_wallpaper_folder')?.connect('clicked', () => {
             backendConnection.setBoolean('open-folder', true);
         });
 
-        builder.get_object('button_favorites_folder').connect('clicked', () => {
+        builder.get_object('button_favorites_folder')?.connect('clicked', () => {
             // For GTK 4.10+
             // Gtk.FileDialog();
 
@@ -219,9 +219,7 @@ class RandomWallpaperSettings extends ExtensionPreferences {
                 modal: true,
             });
 
-            this._saveDialog.connect('response', (dialog, response_id) => {
-                // FIXME: ESLint complains about this comparison somehow?
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
+            this._saveDialog.connect('response', (dialog: Gtk.FileChooserNative, response_id: number) => {
                 if (response_id === Gtk.ResponseType.ACCEPT) {
                     const text = dialog.get_file()?.get_path();
                     if (text)
@@ -274,6 +272,21 @@ class RandomWallpaperSettings extends ExtensionPreferences {
      */
     private _saveSources(settings: Settings.Settings, sources: string[]): void {
         settings.setStrv('sources', sources);
+    }
+
+    /**
+     * Gets a named object from a Gtk.Builder, ensures it is not null, and returns it with the requested type
+     *
+     * @param {Gtk.Builder} builder Builder to get object from
+     * @param {string} key Name of the object to get
+     * @returns The object with the provided type
+     */
+    private _getAs<U>(builder: Gtk.Builder, key: string): U {
+        const obj = builder.get_object(key);
+        if (obj === undefined || obj === null)
+            throw new Error(`Could not get object with key ${key} from builder`);
+
+        return obj as U;
     }
 }
 

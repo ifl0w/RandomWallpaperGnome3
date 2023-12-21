@@ -123,7 +123,7 @@ class Settings {
      * @returns {string} The saved value
      */
     getString(key: string): string {
-        return this._settings.get_string(key);
+        return this._settings.get_string(key) ?? '';
     }
 
     /**

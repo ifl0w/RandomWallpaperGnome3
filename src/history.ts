@@ -254,10 +254,10 @@ class HistoryController {
      * Has some special treatments factored in to ignore file not found issues
      * when the parent path is available.
      *
-     * @param {Gio.FilePrototype} file The file to delete
+     * @param {Gio.File} file The file to delete
      * @throws On any other error than Gio.IOErrorEnum.NOT_FOUND
      */
-    private _deleteFile(file: Gio.FilePrototype): void {
+    private _deleteFile(file: Gio.File): void {
         try {
             file.delete(null);
         } catch (error) {
@@ -265,7 +265,7 @@ class HistoryController {
              * Ignore deletion errors when the file doesn't exist but the parent path is accessible.
              * This tries to avoid invalid states later on because we would have thrown here and therefore skip saving.
              */
-            if (file.get_parent()?.query_exists(null) && error instanceof GLib.Error && error.matches(Gio.IOErrorEnum, Gio.IOErrorEnum.NOT_FOUND)) {
+            if (file.get_parent()?.query_exists(null) && error instanceof GLib.Error && error.matches(Gio.io_error_quark(), Gio.IOErrorEnum.NOT_FOUND)) {
                 Logger.warn(`Ignoring Gio.IOErrorEnum.NOT_FOUND: ${file.get_path() ?? 'undefined'}`, this);
                 return;
             }

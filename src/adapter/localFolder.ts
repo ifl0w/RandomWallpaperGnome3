@@ -53,14 +53,20 @@ class LocalFolderAdapter extends BaseAdapter {
 
             const shuffledFiles = Utils.shuffleArray(files);
 
-            for (let i = 0; i < count && i < shuffledFiles.length; i++) {
+            for (let i = 0; i < shuffledFiles.length; i++) {
                 const randomFile = shuffledFiles[i];
                 const randomFilePath = randomFile.get_uri();
 
-                const historyEntry = new HistoryEntry(null, this._sourceName, randomFilePath);
-                historyEntry.source.sourceUrl = randomFilePath;
+                if (randomFilePath) {
+                    const historyEntry = new HistoryEntry(null, this._sourceName, randomFilePath);
+                    historyEntry.source.sourceUrl = randomFilePath;
 
-                wallpaperResult.push(historyEntry);
+                    wallpaperResult.push(historyEntry);
+                    if (wallpaperResult.length >= count)
+                        break;
+                } else {
+                    Logger.error('Failed to get URI from file.');
+                }
             }
 
             if (wallpaperResult.length < count) {
@@ -84,8 +90,6 @@ class LocalFolderAdapter extends BaseAdapter {
         const targetFile = Gio.File.new_for_path(historyEntry.path);
 
         // https://gjs.guide/guides/gio/file-operations.html#copying-and-moving-files
-        // @ts-expect-error This function was rewritten by Gio._promisify
-        // eslint-disable-next-line @typescript-eslint/await-thenable
         if (!await sourceFile.copy_async(targetFile, Gio.FileCopyFlags.NONE, GLib.PRIORITY_DEFAULT, null, null))
             throw new Error('Failed copying image.');
 

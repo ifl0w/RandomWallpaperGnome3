@@ -126,9 +126,13 @@ class RandomWallpaperMenu {
         // Open Wallpaper Folder
         openFolder.connect('activate', () => {
             const uri = GLib.filename_to_uri(this._wallpaperController.wallpaperLocation, '');
-            Utils.execCheck(['xdg-open', uri]).catch(error => {
-                Logger.error(error, this);
-            });
+            if (uri) {
+                Utils.execCheck(['xdg-open', uri]).catch(error => {
+                    Logger.error(error, this);
+                });
+            } else {
+                Logger.error(`Failed to get URI for set wallpaper location ${this._wallpaperController.wallpaperLocation}`);
+            }
         });
 
         openSettings.connect('activate', () => {

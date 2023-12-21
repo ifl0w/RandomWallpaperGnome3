@@ -1,6 +1,8 @@
 import GLib from 'gi://GLib';
 import Soup from 'gi://Soup';
 
+import {Logger} from './logger.js';
+
 /**
  * A compatibility and convenience wrapper around the Soup API.
  *
@@ -40,7 +42,6 @@ class SoupBowl {
         return message;
     }
 
-    // Possibly wrong version here causing ignores to type checks
     /**
      * Send a request using Soup 2.4
      *
@@ -49,9 +50,10 @@ class SoupBowl {
      */
     private _send_and_receive_soup24(soupMessage: Soup.Message): Promise<Uint8Array> {
         return new Promise((resolve, reject) => {
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            /* eslint-disable */
+            // Incompatible version of Soup types. Ignoring type checks.
             // @ts-ignore
-            this._session.queue_message(soupMessage, (session, msg) => {
+            this._session.queue_message(soupMessage, (_, msg) => {
                 if (!msg.response_body) {
                     reject(new Error('Message has no response body'));
                     return;
@@ -60,10 +62,10 @@ class SoupBowl {
                 const response_body_bytes = msg.response_body.flatten().get_data();
                 resolve(response_body_bytes);
             });
+            /* eslint-enable */
         });
     }
 
-    // Possibly wrong version here causing ignores to type checks
     /**
      * Send a request using Soup 3.0
      *
@@ -72,25 +74,13 @@ class SoupBowl {
      */
     private _send_and_receive_soup30(soupMessage: Soup.Message): Promise<Uint8Array> {
         return new Promise((resolve, reject) => {
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-            this._session.send_and_read_async(soupMessage, 0, null, (session: Soup.Session, message: Soup.Message) => {
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-ignore
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-                const res_data = session.send_and_read_finish(message) as GLib.Bytes | null;
-                if (!res_data) {
-                    reject(new Error('Message has no response body'));
-                    return;
-                }
-
-                const response_body_bytes = res_data.get_data();
-
-                if (response_body_bytes)
-                    resolve(response_body_bytes);
+            this._session.send_and_read_async(soupMessage, 1, null).then((bytes: GLib.Bytes) => {
+                if (bytes)
+                    resolve(bytes.toArray());
                 else
                     reject(new Error('Empty response'));
+            }).catch(error => {
+                Logger.error(error, this);
             });
         });
     }
