@@ -79,7 +79,7 @@ class RedditAdapter extends BaseAdapter {
             const response_body_bytes = await this._bowl.send_and_receive(message);
             response_body = JSON.parse(new TextDecoder().decode(response_body_bytes)) as unknown;
         } catch (error) {
-            Logger.error(error, this);
+            Logger.error(`Could not parse response for ${url}!\n${String(error)}`, this);
             throw wallpaperResult;
         }
 

@@ -246,21 +246,17 @@ class HistoryElement extends PopupMenu.PopupSubMenuMenuItem {
             if (!targetFolder.make_directory_with_parents(null))
                 throw new Error('Could not create directories.');
         } catch (error) {
-            if (error instanceof GLib.Error && error.matches(Gio.IOErrorEnum, Gio.IOErrorEnum.EXISTS)) // noop
+            if (error instanceof GLib.Error && error.matches(Gio.io_error_quark(), Gio.IOErrorEnum.EXISTS)) // noop
                 Logger.debug('Folder already exists.', this);
             else // escalate
                 throw error;
         }
 
-        // @ts-expect-error This function was rewritten by Gio._promisify
-        // eslint-disable-next-line @typescript-eslint/await-thenable
         if (!await sourceFile.copy_async(targetFile, Gio.FileCopyFlags.NONE, GLib.PRIORITY_DEFAULT, null, null))
             throw new Error('Failed copying image.');
 
         // https://gjs.guide/guides/gio/file-operations.html#writing-file-contents
-        // @ts-expect-error This function was rewritten by Gio._promisify
-        // eslint-disable-next-line @typescript-eslint/await-thenable
-        const [success, message]: [boolean, string] = await targetInfoFile.replace_contents_bytes_async(
+        const [success, message]: [boolean, string | null] = targetInfoFile.replace_contents(
             new TextEncoder().encode(JSON.stringify(this.historyEntry.source, null, '\t')),
             null,
             false,
