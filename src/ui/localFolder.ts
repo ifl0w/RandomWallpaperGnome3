@@ -65,9 +65,7 @@ class LocalFolderSettingsGroup extends Adw.PreferencesGroup {
                 modal: true,
             });
 
-            this._saveDialog.connect('response', (_dialog, response_id) => {
-                // FIXME: ESLint complains about this comparison somehow?
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
+            this._saveDialog.connect('response', (_dialog: Gtk.FileChooserNative, response_id: Gtk.ResponseType) => {
                 if (response_id === Gtk.ResponseType.ACCEPT) {
                     const chosenPath = _dialog.get_file()?.get_path();
 
