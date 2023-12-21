@@ -78,11 +78,7 @@ function execCheck(argv: string[], cancellable?: Gio.Cancellable | null): Promis
             try {
                 if (!_proc.wait_check_finish(res)) {
                     const status = _proc.get_exit_status();
-
-                    throw new Gio.IOErrorEnum({
-                        code: Gio.io_error_from_errno(status).code,
-                        message: GLib.strerror(status),
-                    });
+                    throw GLib.Error.new_literal(Gio.io_error_quark(), Gio.io_error_from_errno(status), GLib.strerror(status));
                 }
 
                 resolve();

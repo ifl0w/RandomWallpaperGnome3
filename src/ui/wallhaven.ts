@@ -157,14 +157,12 @@ class WallhavenSettingsGroup extends Adw.PreferencesGroup {
             }
             this._colorDialog.add_palette(Gtk.Orientation.HORIZONTAL, 10, WallhavenSettingsGroup._colorPalette);
 
-            this._colorDialog.connect('response', (dialog, response_id) => {
-                // FIXME: ESLint complains about this comparison somehow?
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
+            this._colorDialog.connect('response', (dialog: Gtk.ColorChooserDialog, response_id: Gtk.ResponseType) => {
                 if (response_id === Gtk.ResponseType.OK) {
                     // result is a Gdk.RGBA which uses float
                     const rgba = dialog.get_rgba();
                     // convert to rgba so it's useful
-                    const rgbaString = rgba.to_string(); // rgb(0,0,0)
+                    const rgbaString = rgba.to_string() ?? 'rgb(0,0,0)';
                     const rgbaArray = rgbaString.replace('rgb(', '').replace(')', '').split(',');
                     const hexString = `${parseInt(rgbaArray[0]).toString(16).padStart(2, '0')}${parseInt(rgbaArray[1]).toString(16).padStart(2, '0')}${parseInt(rgbaArray[2]).toString(16).padStart(2, '0')}`;
                     this._row_color.subtitle = hexString;
