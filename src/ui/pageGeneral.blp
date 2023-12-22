@@ -186,8 +186,8 @@ Adw.PreferencesPage page_general {
         }
 
         Adw.ActionRow {
-            title: _("Fetch on startup (experimental)");
-            subtitle: _("Fetch a new wallpaper during the startup of the extension. Rebooting your system, and enabling the extension will trigger a new wallpaper request.\n<b>WARNING: Do not enable this feature if you observe crashes when requesting new wallpapers! This could render your system unstable as crashes could repeatedly happen on startup! In the case, you encounter such a problem, you will have to disable the extension or the feature manually from the commandline for your user.</b>");
+            title: _("Fetch on startup");
+            subtitle: _("Fetch a new wallpaper during the startup of the extension (i.e., after login, or when enabling the extension).\n<b>IMPORTANT: Do not enable this feature if you observe crashes when requesting new wallpapers because your system could crash on startup! In case you run into this issue, you might have to disable the extension or this feature from the commandline.</b>");
 
             Switch fetch_on_startup {
                 valign: center;
