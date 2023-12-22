@@ -103,7 +103,7 @@ class RandomWallpaperSettings extends ExtensionPreferences {
             'active',
             Gio.SettingsBindFlags.DEFAULT);
 
-        this._bindButtons(settings, backendConnection, builder, sources);
+        this._bindButtons(settings, backendConnection, builder, sources, window);
         this._bindHistorySection(settings, backendConnection, builder, window);
 
         window.connect('close-request', () => {
@@ -139,8 +139,9 @@ class RandomWallpaperSettings extends ExtensionPreferences {
      * @param {Settings.Settings} backendConnection Settings object holding backend settings
      * @param {Gtk.Builder} builder Gtk builder of the preference window
      * @param {string[]} sources String array of sources to process
+     * @param {Adw.PreferencesWindow} window Current preferences window
      */
-    private _bindButtons(settings: Settings.Settings, backendConnection: Settings.Settings, builder: Gtk.Builder, sources: string[]): void {
+    private _bindButtons(settings: Settings.Settings, backendConnection: Settings.Settings, builder: Gtk.Builder, sources: string[], window: Adw.PreferencesWindow): void {
         const newWallpaperButton = this._getAs<Adw.ActionRow>(builder, 'request_new_wallpaper');
         const newWallpaperButtonLabel = newWallpaperButton.get_child() as Gtk.Label | null;
         const origNewWallpaperText = newWallpaperButtonLabel?.get_label() ?? 'Request New Wallpaper';
@@ -173,6 +174,27 @@ class RandomWallpaperSettings extends ExtensionPreferences {
                 Utils.removeItemOnce(sources, sourceRow.id);
                 this._saveSources(settings, sources);
             });
+        });
+
+        const extensionObject = ExtensionPreferences.lookupByURL(import.meta.url);
+        if (!extensionObject) {
+            Logger.error('Own extension object not found!', this);
+            throw new Error('Own extension object not found!');
+        }
+        builder.get_object('open_about')?.connect('activated', () => {
+            const about_window = new Adw.AboutWindow({
+                title: 'About',
+                transient_for: window,
+                modal: true,
+                licenseType: Gtk.License.MIT_X11,
+                application_name: extensionObject.metadata['name'],
+                website: extensionObject.metadata.url,
+                issue_url: extensionObject.metadata['issue-url'],
+                comments: extensionObject.metadata.description,
+                version: `${extensionObject.metadata['semantic-version']} (${extensionObject.metadata.version})`,
+            });
+
+            about_window.show();
         });
     }
 
