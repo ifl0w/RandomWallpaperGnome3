@@ -72,20 +72,25 @@ class RandomWallpaperMenu {
 
         // Temporarily pause timer
         const pauseTimerItem = new PopupMenu.PopupSwitchMenuItem('Pause timer', false);
-        pauseTimerItem.sensitive = this._settings.getBoolean('auto-fetch');
-        pauseTimerItem.setToggleState(this._backendConnection.getBoolean('pause-timer'));
 
         pauseTimerItem.connect('toggled', (_, state: boolean) => {
             this._backendConnection.setBoolean('pause-timer', state);
         });
 
-        this._observedValues.push(this._settings.observe('auto-fetch', () => {
-            pauseTimerItem.sensitive = this._settings.getBoolean('auto-fetch');
-        }));
+        const autoFetchChangedCallback = (): void => {
+            if (this._settings.getBoolean('auto-fetch'))
+                pauseTimerItem.show();
+            else
+                pauseTimerItem.hide();
+        };
+        this._observedValues.push(this._settings.observe('auto-fetch', autoFetchChangedCallback));
+        autoFetchChangedCallback();
 
-        this._observedBackgroundValues.push(this._backendConnection.observe('pause-timer', () => {
+        const pauseTimerChangedCallback = (): void => {
             pauseTimerItem.setToggleState(this._backendConnection.getBoolean('pause-timer'));
-        }));
+        };
+        this._observedBackgroundValues.push(this._backendConnection.observe('pause-timer', pauseTimerChangedCallback));
+        pauseTimerChangedCallback();
 
         this._panelMenu.menu.addMenuItem(pauseTimerItem);
 
