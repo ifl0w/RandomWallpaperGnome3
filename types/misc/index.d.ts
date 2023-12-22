@@ -14,6 +14,13 @@ declare module 'sharedInternals' {
         readonly metadata: {
             'settings-schema': string,
             uuid: string,
+            name: string,
+            version: string,
+            'semantic-version': string,
+            url: string,
+            description: string,
+            url: strint,
+            'issue-url': string,
             // …
         };
 
