@@ -33,9 +33,7 @@ template $SourceConfigModal: Adw.Window {
             }
         }
 
-        content: Adw.PreferencesPage {
-            Adw.PreferencesGroup settings_container { }
-        };
+        content: ScrolledWindow settings_container {};
 
         [bottom]
         ActionBar {
