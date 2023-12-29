@@ -24,46 +24,15 @@ Adw.PreferencesPage page_general {
     }
 
     Adw.PreferencesGroup {
-        title: _("General Settings");
+        title: _("Wallpaper Settings");
 
         Adw.ComboRow combo_background_type {
-            title: _("Change type");
+            title: _("Change Type");
             use-subtitle: true;
         }
 
-        Adw.ActionRow {
-            title: _("Hide the panel icon");
-            subtitle: _("You won't be able to access the history and the settings through the panel menu. Enabling this option currently is only reasonable in conjunction with the Auto-Fetching feature.\n<b>Only enable this option if you know how to open the settings without the panel icon!</b>");
-
-            Switch hide_panel_icon {
-                valign: center;
-            }
-        }
-
-        Adw.ActionRow {
-            title: _("Show notifications");
-            subtitle: _("System notifications will be displayed to provide information, such as when a new wallpaper is set.");
-
-            Switch show_notifications {
-                valign: center;
-            }
-        }
-
-        Adw.ActionRow {
-            title: _("Disable hover preview");
-            subtitle: _("Disable the desktop preview of the background while hovering the history items. Try enabling if you encounter crashes or lags of the gnome-shell while using the extension.");
-
-            Switch disable_hover_preview {
-                valign: center;
-            }
-        }
-
-        Adw.EntryRow general_post_command {
-            title: _("Run post-command - available variables: %wallpaper_path%");
-        }
-
         Adw.ActionRow multiple_displays_row {
-            title: _("Different wallpapers on multiple displays");
+            title: _("Different Wallpapers on Multiple Displays");
             subtitle: _("Requires HydraPaper or Superpaper.\nFills from History.");
             sensitive: false;
 
@@ -72,14 +41,13 @@ Adw.PreferencesPage page_general {
             }
         }
 
-        Adw.ComboRow log_level {
-            title: _("Log level");
-            subtitle: _("Set the tier of warnings appearing in the journal");
+        Adw.EntryRow general_post_command {
+            title: _("Run post-command - available variables: %wallpaper_path%");
         }
     }
 
     Adw.PreferencesGroup {
-        title: _("History");
+        title: _("History Settings");
 
         header-suffix: Box {
             spacing: 5;
@@ -103,8 +71,20 @@ Adw.PreferencesPage page_general {
             }
         };
 
+        Adw.EntryRow row_favorites_folder{
+            title: _("Save for Later Folder");
+
+            Button button_favorites_folder {
+                valign: center;
+
+                Adw.ButtonContent {
+                    icon-name: "folder-open-symbolic";
+                }
+            }
+        }
+
         Adw.ActionRow {
-            title: _("History length");
+            title: _("History Length");
             subtitle: _("The number of wallpapers that will be shown in the history and stored in the wallpaper folder of this extension.");
 
             SpinButton {
@@ -118,18 +98,6 @@ Adw.PreferencesPage page_general {
                     step-increment: 1;
                     page-increment: 10;
                 };
-            }
-        }
-
-        Adw.EntryRow row_favorites_folder{
-            title: _("Save for later folder");
-
-            Button button_favorites_folder {
-                valign: center;
-
-                Adw.ButtonContent {
-                    icon-name: "folder-open-symbolic";
-                }
             }
         }
     }
@@ -182,7 +150,7 @@ Adw.PreferencesPage page_general {
         }
 
         Adw.ActionRow {
-            title: _("Fetch on startup");
+            title: _("Fetch on Startup");
             subtitle: _("Fetch a new wallpaper during the startup of the extension (i.e., after login, or when enabling the extension).\n<b>IMPORTANT: Do not enable this feature if you observe crashes when requesting new wallpapers because your system could crash on startup! In case you run into this issue, you might have to disable the extension or this feature from the commandline.</b>");
 
             Switch fetch_on_startup {
@@ -192,6 +160,40 @@ Adw.PreferencesPage page_general {
     }
 
     Adw.PreferencesGroup {
+        title: _("General Settings");
+
+        Adw.ActionRow {
+            title: _("Hide Panel Icon");
+            subtitle: _("You won't be able to access the history and the settings through the panel menu. Enabling this option currently is only reasonable in conjunction with the Auto-Fetching feature.\n<b>Only enable this option if you know how to open the settings without the panel icon!</b>");
+
+            Switch hide_panel_icon {
+                valign: center;
+            }
+        }
+
+        Adw.ActionRow {
+            title: _("Show Notifications");
+            subtitle: _("System notifications will be displayed to provide information, such as when a new wallpaper is set.");
+
+            Switch show_notifications {
+                valign: center;
+            }
+        }
+
+        Adw.ActionRow {
+            title: _("Disable Hover Preview");
+            subtitle: _("Disable the desktop preview of the background while hovering the history items. Try enabling if you encounter crashes or lags of the gnome-shell while using the extension.");
+
+            Switch disable_hover_preview {
+                valign: center;
+            }
+        }
+
+        Adw.ComboRow log_level {
+            title: _("Log Level");
+            subtitle: _("Set the tier of warnings appearing in the journal");
+        }
+
         Adw.ActionRow open_about {
             title: _("About");
             activatable: true;

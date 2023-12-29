@@ -197,7 +197,7 @@ class AFTimer {
     }
 
     /**
-     * Sets the last activation time to [now]. This doesn't affect an already running timer.
+     * Sets the last activation time to [now]. This doesn't effect an already running timer.
      */
     private _reset(): void {
         this._settings.setInt64('timer-last-trigger', new Date().getTime());
