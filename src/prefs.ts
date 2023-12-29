@@ -116,20 +116,12 @@ class RandomWallpaperSettings extends ExtensionPreferences {
         window.add(this._getAs<Adw.PreferencesPage>(builder, 'page_general'));
         window.add(this._getAs<Adw.PreferencesPage>(builder, 'page_sources'));
 
+        if (sources.length === 0)
+            this._getAs<Adw.ActionRow>(builder, 'placeholder_no_source').show();
+
         sources.forEach(id => {
             const sourceRow = new SourceRow(id);
-            this._getAs<Adw.PreferencesGroup>(builder, 'sources_list').add(sourceRow);
-
-            sourceRow.button_remove.connect('clicked', () => {
-                sourceRow.clearConfig();
-                this._getAs<Adw.PreferencesGroup>(builder, 'sources_list').remove(sourceRow);
-                Utils.removeItemOnce(sources, sourceRow.id);
-                this._saveSources(settings, sources);
-            });
-
-            sourceRow.button_edit.connect('clicked', () => {
-                void new SourceConfigModal(window, sourceRow).open();
-            });
+            this._addSourceRow(window, settings, builder, sources, sourceRow);
         });
 
         const manager = Utils.getWallpaperManager();
@@ -166,24 +158,12 @@ class RandomWallpaperSettings extends ExtensionPreferences {
             backendConnection.setBoolean('request-new-wallpaper', true);
         });
 
-        const sourceRowList = this._getAs<Adw.PreferencesGroup>(builder, 'sources_list');
         builder.get_object('button_new_source')?.connect('clicked', () => {
             new SourceConfigModal(window).open()
                 .then((sourceRow: SourceRow) => {
-                    sourceRowList.add(sourceRow);
                     sources.push(String(sourceRow.id));
                     this._saveSources(settings, sources);
-
-                    sourceRow.button_edit.connect('clicked', () => {
-                        void new SourceConfigModal(window, sourceRow).open();
-                    });
-
-                    sourceRow.button_remove.connect('clicked', () => {
-                        sourceRow.clearConfig();
-                        sourceRowList.remove(sourceRow);
-                        Utils.removeItemOnce(sources, sourceRow.id);
-                        this._saveSources(settings, sources);
-                    });
+                    this._addSourceRow(window, settings, builder, sources, sourceRow);
                 }).catch(() => {
                     // nothing to do
                 });
@@ -307,6 +287,34 @@ class RandomWallpaperSettings extends ExtensionPreferences {
      */
     private _saveSources(settings: Settings.Settings, sources: string[]): void {
         settings.setStrv('sources', sources);
+    }
+
+    /**
+     * Add and configure a new source in the source list.
+     *
+     * @param {Adw.PreferencesWindow} window The current preferences window
+     * @param {Settings.Settings} settings Settings object holding backend settings
+     * @param {Gtk.Builder} builder Gtk builder of the preference window
+     * @param {string[]} sources The IDs of the currently configured sources
+     * @param {SourceRow} sourceRow The new source to add
+     */
+    private _addSourceRow(window: Adw.PreferencesWindow, settings: Settings.Settings, builder: Gtk.Builder, sources: string[], sourceRow: SourceRow): void {
+        this._getAs<Adw.PreferencesGroup>(builder, 'sources_list').add(sourceRow);
+        this._getAs<Adw.ActionRow>(builder, 'placeholder_no_source').hide();
+
+        sourceRow.button_remove.connect('clicked', () => {
+            sourceRow.clearConfig();
+            Utils.removeItemOnce(sources, sourceRow.id);
+            this._saveSources(settings, sources);
+            this._getAs<Adw.PreferencesGroup>(builder, 'sources_list').remove(sourceRow);
+
+            if (sources.length === 0)
+                this._getAs<Adw.ActionRow>(builder, 'placeholder_no_source').show();
+        });
+
+        sourceRow.button_edit.connect('clicked', () => {
+            void new SourceConfigModal(window, sourceRow).open();
+        });
     }
 
     /**
