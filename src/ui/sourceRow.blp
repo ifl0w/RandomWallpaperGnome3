@@ -2,69 +2,53 @@ using Gtk 4.0;
 using Adw 1;
 
 template $SourceRow : Adw.ExpanderRow {
-    title: bind source_name.text;
-    show-enable-switch: true;
+    title: _("Name");
+    subtitle: _("Type");
 
-    // Doesn't look good and prone to missclicks
-    // [action]
-    // Button button_delete {
-    //   valign: center;
+    [prefix]
+    Gtk.Switch switch_enable {
+        valign: center;
+    }
 
-    //   styles [
-    //     "destructive-action",
-    //   ]
+    [suffix]
+    Adw.ActionRow {
+        Button button_remove {
+            valign: center;
+            halign: start;
 
-    //   Adw.ButtonContent {
-    //     icon-name: "user-trash-symbolic";
-    //     valign: center;
-    //   }
-    // }
+            styles [
+                "destructive-action",
+            ]
 
-    Box {
-        orientation: vertical;
-        spacing: 14;
-
-        Adw.Clamp {
-            Adw.PreferencesGroup {
-                title: _("Meta");
-
-                Adw.EntryRow source_name {
-                    title: _("Name");
-                    input-purpose: free_form;
-                    text: _("My Source - (1080p)");
-                }
-
-                Adw.ComboRow combo {
-                    title: _("Type");
-                }
-
-                Adw.ActionRow {
-                    title: _("Delete this source");
-
-                    Button button_delete {
-                        valign: center;
-
-                        styles [
-                            "destructive-action",
-                        ]
-
-                        Adw.ButtonContent {
-                            icon-name: "user-trash-symbolic";
-                            valign: center;
-                        }
-                    }
-                }
-
-                Adw.ExpanderRow blocked_images_list {
-                    title: _("Blocked Images");
-                    sensitive: false;
-                }
+            Adw.ButtonContent {
+                icon-name: "user-trash-symbolic";
+                valign: center;
+                label: _("Remove");
             }
         }
 
-        Adw.Clamp settings_container { }
+        Button button_edit {
+            valign: center;
+            halign: end;
 
-        // Additional PreferencesGroup solely for spacing to the next row when expanded
-        Adw.PreferencesGroup { }
+            Adw.ButtonContent {
+                icon-name: "edit-symbolic";
+                valign: center;
+                label: _("Edit");
+            }
+        }
+    }
+
+    Adw.PreferencesGroup blocked_images_list {
+        title: _("Blocked Images");
+        margin-top: 5;
+        margin-bottom: 5;
+        margin-start: 5;
+        margin-end: 5;
+
+        Adw.ActionRow placeholder_no_blocked {
+            title: _("No Blocked Images");
+            sensitive: false;
+        }
     }
 }
