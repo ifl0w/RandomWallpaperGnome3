@@ -3,7 +3,8 @@ using Adw 1;
 
 template $GenericJsonSettings: Adw.PreferencesPage {
     Adw.PreferencesGroup {
-        description: _("This feature requires some know how. However, many different wallpaper providers can be used with this generic JSON source.\nYou have to specify an URL to a JSON response and a path to the target image URL within the JSON response.\nYou can also define a prefix that will be added to the image URL.");
+        title: _("Disclaimer");
+        description: _("This wallpaper sources requires some know how. However, many different wallpaper providers can be used with the generic JSON source. You will have to specify an URL with a JSON response and a path to the target image URL within the JSON response. You can also define a prefix that will be added to the image URL.");
 
         header-suffix: LinkButton {
             valign: center;
@@ -69,7 +70,7 @@ template $GenericJsonSettings: Adw.PreferencesPage {
         }
 
         Adw.EntryRow image_prefix {
-            title: _("URL prefix");
+            title: _("URL Prefix");
             input-purpose: free_form;
         }
     }
@@ -102,7 +103,7 @@ template $GenericJsonSettings: Adw.PreferencesPage {
         }
 
         Adw.EntryRow author_url_prefix {
-            title: _("URL prefix");
+            title: _("URL Prefix");
             input-purpose: free_form;
         }
     }

@@ -7,12 +7,12 @@ template $WallhavenSettings: Adw.PreferencesPage {
         title: _("General");
 
         Adw.EntryRow keyword {
-            title: _("Keywords - Comma seperated");
+            title: _("Keywords - Comma Separated");
             input-purpose: free_form;
         }
 
         Adw.PasswordEntryRow api_key {
-            title: _("API key");
+            title: _("API Key");
             input-purpose: password;
 
             LinkButton {
@@ -30,13 +30,13 @@ template $WallhavenSettings: Adw.PreferencesPage {
         }
 
         Adw.EntryRow minimal_resolution {
-            title: _("Minimal resolution: 1920x1080");
+            title: _("Minimal Resolution: 1920x1080");
             input-purpose: free_form;
             text: "";
         }
 
         Adw.EntryRow aspect_ratios {
-            title: _("Allowed aspect ratios: 16x9,16x10");
+            title: _("Allowed Aspect Ratios: 16x9,16x10");
             input-purpose: free_form;
             text: "";
         }
@@ -69,7 +69,7 @@ template $WallhavenSettings: Adw.PreferencesPage {
         }
 
         Adw.ActionRow {
-            title: _("Allow AI generated images");
+            title: _("Allow AI Generated Images");
 
             Switch ai_art {
                 valign: center;
@@ -78,7 +78,7 @@ template $WallhavenSettings: Adw.PreferencesPage {
     }
 
     Adw.PreferencesGroup {
-        title: _("Allowed content ratings");
+        title: _("Allowed Content Ratings");
 
         Adw.ActionRow {
             title: "SFW";
