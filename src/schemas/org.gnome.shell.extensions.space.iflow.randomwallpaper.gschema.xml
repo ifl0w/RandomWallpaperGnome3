@@ -108,6 +108,12 @@
     <schema path="/org/gnome/shell/extensions/space-iflow-randomwallpaper/backend-connection/"
         id='org.gnome.shell.extensions.space.iflow.randomwallpaper.backend-connection'>
 
+        <key type='b' name='backend-connection-available'>
+            <default>false</default>
+            <summary>Connection available flag</summary>
+            <description>Wether the backend connection is available or not.</description>
+        </key>
+
         <key type='b' name='clear-history'>
             <default>false</default>
             <summary>Clear history request</summary>
