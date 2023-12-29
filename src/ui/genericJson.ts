@@ -10,10 +10,10 @@ import * as Settings from './../settings.js';
 /* eslint-disable no-unused-expressions */
 
 /**
- * Subclass containing the preferences group for GenericJson adapter
+ * Subclass containing the preferences for GenericJson adapter
  */
-class GenericJsonSettingsGroup extends Adw.PreferencesGroup {
-    static [GObject.GTypeName] = 'GenericJsonSettingsGroup';
+class GenericJsonSettings extends Adw.PreferencesPage {
+    static [GObject.GTypeName] = 'GenericJsonSettings';
     // @ts-expect-error Gtk.template is not in the type definitions files yet
     static [Gtk.template] = GLib.uri_resolve_relative(import.meta.url, './genericJson.ui', GLib.UriFlags.NONE);
     // @ts-expect-error Gtk.internalChildren is not in the type definitions files yet
@@ -105,4 +105,4 @@ class GenericJsonSettingsGroup extends Adw.PreferencesGroup {
     }
 }
 
-export {GenericJsonSettingsGroup};
+export {GenericJsonSettings};

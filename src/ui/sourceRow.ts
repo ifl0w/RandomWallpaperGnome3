@@ -9,12 +9,12 @@ import * as Utils from './../utils.js';
 
 import {Logger} from './../logger.js';
 
-import {GenericJsonSettingsGroup} from './genericJson.js';
-import {LocalFolderSettingsGroup} from './localFolder.js';
-import {RedditSettingsGroup} from './reddit.js';
-import {UnsplashSettingsGroup} from './unsplash.js';
-import {UrlSourceSettingsGroup} from './urlSource.js';
-import {WallhavenSettingsGroup} from './wallhaven.js';
+import {GenericJsonSettings} from './genericJson.js';
+import {LocalFolderSettings} from './localFolder.js';
+import {RedditSettings} from './reddit.js';
+import {UnsplashSettings} from './unsplash.js';
+import {UrlSourceSettings} from './urlSource.js';
+import {WallhavenSettings} from './wallhaven.js';
 
 // FIXME: Generated static class code produces a no-unused-expressions rule error
 /* eslint-disable no-unused-expressions */
@@ -98,34 +98,34 @@ class SourceRow extends Adw.ExpanderRow {
      * Get a new adapter based on an enum source type.
      *
      * @param {Utils.SourceType} type Enum of the adapter to get
-     * @returns {UnsplashSettingsGroup | WallhavenSettingsGroup | RedditSettingsGroup | GenericJsonSettingsGroup | LocalFolderSettingsGroup | UrlSourceSettingsGroup | null} Newly crafted adapter or null
+     * @returns {UnsplashSettings | WallhavenSettings | RedditSettings | GenericJsonSettings | LocalFolderSettings | UrlSourceSettings | null} Newly crafted adapter or null
      */
-    private _getSettingsGroup(type: Utils.SourceType = Utils.SourceType.UNSPLASH): UnsplashSettingsGroup
-        | WallhavenSettingsGroup
-        | RedditSettingsGroup
-        | GenericJsonSettingsGroup
-        | LocalFolderSettingsGroup
-        | UrlSourceSettingsGroup
+    private _getSettingsWidget(type: Utils.SourceType = Utils.SourceType.UNSPLASH): UnsplashSettings
+        | WallhavenSettings
+        | RedditSettings
+        | GenericJsonSettings
+        | LocalFolderSettings
+        | UrlSourceSettings
         | null {
         let targetWidget = null;
         switch (type) {
         case Utils.SourceType.UNSPLASH:
-            targetWidget = new UnsplashSettingsGroup(this.id);
+            targetWidget = new UnsplashSettings(this.id);
             break;
         case Utils.SourceType.WALLHAVEN:
-            targetWidget = new WallhavenSettingsGroup(this.id);
+            targetWidget = new WallhavenSettings(this.id);
             break;
         case Utils.SourceType.REDDIT:
-            targetWidget = new RedditSettingsGroup(this.id);
+            targetWidget = new RedditSettings(this.id);
             break;
         case Utils.SourceType.GENERIC_JSON:
-            targetWidget = new GenericJsonSettingsGroup(this.id);
+            targetWidget = new GenericJsonSettings(this.id);
             break;
         case Utils.SourceType.LOCAL_FOLDER:
-            targetWidget = new LocalFolderSettingsGroup(this.id);
+            targetWidget = new LocalFolderSettings(this.id);
             break;
         case Utils.SourceType.STATIC_URL:
-            targetWidget = new UrlSourceSettingsGroup(this.id);
+            targetWidget = new UrlSourceSettings(this.id);
             break;
         default:
             targetWidget = null;
@@ -155,7 +155,7 @@ class SourceRow extends Adw.ExpanderRow {
      */
     clearConfig(): void {
         for (const i of Array(6).keys()) {
-            const widget = this._getSettingsGroup(i);
+            const widget = this._getSettingsWidget(i);
             if (widget)
                 widget.clearConfig();
         }

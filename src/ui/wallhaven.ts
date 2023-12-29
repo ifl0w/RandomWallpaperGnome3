@@ -11,10 +11,10 @@ import * as Settings from './../settings.js';
 /* eslint-disable no-unused-expressions */
 
 /**
- * Subclass containing the preferences group for Wallhaven adapter
+ * Subclass containing the preferences for Wallhaven adapter
  */
-class WallhavenSettingsGroup extends Adw.PreferencesGroup {
-    static [GObject.GTypeName] = 'WallhavenSettingsGroup';
+class WallhavenSettings extends Adw.PreferencesPage {
+    static [GObject.GTypeName] = 'WallhavenSettings';
     // @ts-expect-error Gtk.template is not in the type definitions files yet
     static [Gtk.template] = GLib.uri_resolve_relative(import.meta.url, './wallhaven.ui', GLib.UriFlags.NONE);
     // @ts-expect-error Gtk.internalChildren is not in the type definitions files yet
@@ -146,16 +146,16 @@ class WallhavenSettingsGroup extends Adw.PreferencesGroup {
             });
             this._colorDialog.set_use_alpha(false);
 
-            if (!WallhavenSettingsGroup._colorPalette) {
-                WallhavenSettingsGroup._colorPalette = [];
+            if (!WallhavenSettings._colorPalette) {
+                WallhavenSettings._colorPalette = [];
 
-                WallhavenSettingsGroup._availableColors.forEach(hexColor => {
+                WallhavenSettings._availableColors.forEach(hexColor => {
                     const rgbaColor = new Gdk.RGBA();
                     rgbaColor.parse(hexColor);
-                    WallhavenSettingsGroup._colorPalette.push(rgbaColor);
+                    WallhavenSettings._colorPalette.push(rgbaColor);
                 });
             }
-            this._colorDialog.add_palette(Gtk.Orientation.HORIZONTAL, 10, WallhavenSettingsGroup._colorPalette);
+            this._colorDialog.add_palette(Gtk.Orientation.HORIZONTAL, 10, WallhavenSettings._colorPalette);
 
             this._colorDialog.connect('response', (dialog: Gtk.ColorChooserDialog, response_id: Gtk.ResponseType) => {
                 if (response_id === Gtk.ResponseType.OK) {
@@ -182,4 +182,4 @@ class WallhavenSettingsGroup extends Adw.PreferencesGroup {
     }
 }
 
-export {WallhavenSettingsGroup};
+export {WallhavenSettings};

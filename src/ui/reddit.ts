@@ -10,10 +10,10 @@ import * as Settings from './../settings.js';
 /* eslint-disable no-unused-expressions */
 
 /**
- * Subclass containing the preferences group for Reddit adapter
+ * Subclass containing the preferences for Reddit adapter
  */
-class RedditSettingsGroup extends Adw.PreferencesGroup {
-    static [GObject.GTypeName] = 'RedditSettingsGroup';
+class RedditSettings extends Adw.PreferencesPage {
+    static [GObject.GTypeName] = 'RedditSettings';
     // @ts-expect-error Gtk.template is not in the type definitions files yet
     static [Gtk.template] = GLib.uri_resolve_relative(import.meta.url, './reddit.ui', GLib.UriFlags.NONE);
     // @ts-expect-error Gtk.internalChildren is not in the type definitions files yet
@@ -87,4 +87,4 @@ class RedditSettingsGroup extends Adw.PreferencesGroup {
     }
 }
 
-export {RedditSettingsGroup};
+export {RedditSettings};
