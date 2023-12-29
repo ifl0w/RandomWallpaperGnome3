@@ -107,6 +107,16 @@ class RandomWallpaperSettings extends ExtensionPreferences {
         this._bindButtons(settings, backendConnection, builder, sources, window);
         this._bindHistorySection(settings, backendConnection, builder, window);
 
+        // Disable/enable features depending on the backend connection.
+        const backendAvailableChangedHandler = (): void => {
+            const backendAvailable = backendConnection.getBoolean('backend-connection-available');
+            this._getAs<Gtk.Widget>(builder, 'request_new_wallpaper').sensitive = backendAvailable;
+            this._getAs<Gtk.Widget>(builder, 'open_wallpaper_folder').sensitive = backendAvailable;
+            this._getAs<Gtk.Widget>(builder, 'clear_history').sensitive = backendAvailable;
+        };
+        backendConnection.observe('backend-connection-available', () => backendAvailableChangedHandler());
+        backendAvailableChangedHandler();
+
         window.connect('close-request', () => {
             backendConnection.setBoolean('pause-timer', false);
             Settings.Settings.extensionContext = undefined;
