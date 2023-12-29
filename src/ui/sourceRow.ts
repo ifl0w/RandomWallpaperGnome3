@@ -28,15 +28,15 @@ class SourceRow extends Adw.ExpanderRow {
     static [Gtk.template] = GLib.uri_resolve_relative(import.meta.url, './sourceRow.ui', GLib.UriFlags.NONE);
     // @ts-expect-error Gtk.children is not in the type definitions files yet
     static [Gtk.children] = [
-        'button_delete',
+        'button_remove',
+        'button_edit',
     ];
 
     // @ts-expect-error Gtk.internalChildren is not in the type definitions files yet
     static [Gtk.internalChildren] = [
+        'switch_enable',
         'blocked_images_list',
-        'combo',
-        'settings_container',
-        'source_name',
+        'placeholder_no_blocked',
     ];
 
     static {
@@ -47,17 +47,16 @@ class SourceRow extends Adw.ExpanderRow {
     static _stringList: Gtk.StringList;
 
     // Children
-    button_delete!: Gtk.Button;
+    button_edit!: Gtk.Button;
+    button_remove!: Gtk.Button;
 
     // InternalChildren
-    private _blocked_images_list!: Adw.ExpanderRow;
-    private _combo!: Adw.ComboRow;
-    private _settings_container!: Adw.Clamp;
-    private _source_name!: Adw.EntryRow;
+    private _switch_enable!: Gtk.Switch;
+    private _blocked_images_list!: Adw.PreferencesGroup;
+    private _placeholder_no_blocked!: Adw.ActionRow;
 
-    private _settings;
-
-    id = String(Date.now());
+    public id = String(Date.now());
+    public settings: Settings.Settings;
 
     /**
      * Craft a new source row using an unique ID.
@@ -74,72 +73,25 @@ class SourceRow extends Adw.ExpanderRow {
             this.id = id;
 
         const path = `${Settings.RWG_SETTINGS_SCHEMA_PATH}/sources/general/${this.id}/`;
-        this._settings = new Settings.Settings(Settings.RWG_SETTINGS_SCHEMA_SOURCES_GENERAL, path);
+        this.settings = new Settings.Settings(Settings.RWG_SETTINGS_SCHEMA_SOURCES_GENERAL, path);
 
-        if (!SourceRow._stringList) {
-            const availableTypeNames: string[] = [];
-
-            // Fill combo from enum
-            // https://stackoverflow.com/a/39372911
-            for (const type in Utils.SourceType) {
-                if (isNaN(Number(type)))
-                    continue;
-
-                availableTypeNames.push(Utils.getSourceTypeName(Number(type)));
-            }
-
-            SourceRow._stringList = Gtk.StringList.new(availableTypeNames);
-        }
-        this._combo.model = SourceRow._stringList;
-        this._combo.selected = this._settings.getInt('type');
-
-        this._settings.bind('name',
-            this._source_name,
-            'text',
-            Gio.SettingsBindFlags.DEFAULT);
-        this._settings.bind('enabled',
+        this.title = this.settings.getString('name');
+        this.subtitle = Utils.getSourceTypeName(this.settings.getInt('type'));
+        this.settings.bind('name',
             this,
-            'enable-expansion',
+            'title',
+            Gio.SettingsBindFlags.DEFAULT);
+        this.settings.observe('type', () => {
+            this.subtitle = Utils.getSourceTypeName(this.settings.getInt('type'));
+        });
+
+        this.settings.bind('enabled',
+            this._switch_enable,
+            'active',
             Gio.SettingsBindFlags.DEFAULT);
 
-        this._combo.connect('notify::selected', (comboRow: Adw.ComboRow) => {
-            this._settings.setInt('type', comboRow.selected);
-            this._fillRow(comboRow.selected);
-        });
-
-        this._fillRow(this._combo.selected);
-
-        const blockedImages: string[] = this._settings.getStrv('blocked-images');
-        blockedImages.forEach(filename => {
-            const blockedImageRow = new Adw.ActionRow();
-            blockedImageRow.set_title(filename);
-
-            const button = new Gtk.Button();
-            button.set_valign(Gtk.Align.CENTER);
-            button.connect('clicked', () => {
-                this._removeBlockedImage(filename);
-                this._blocked_images_list.remove(blockedImageRow);
-            });
-
-            const buttonContent = new Adw.ButtonContent();
-            buttonContent.set_icon_name('user-trash-symbolic');
-
-            button.set_child(buttonContent);
-            blockedImageRow.add_suffix(button);
-            this._blocked_images_list.add_row(blockedImageRow);
-            this._blocked_images_list.set_sensitive(true);
-        });
-    }
-
-    /**
-     * Fill this source row with adapter settings.
-     *
-     * @param {number} type Enum of the adapter to use
-     */
-    private _fillRow(type: number): void {
-        const targetWidget = this._getSettingsGroup(type);
-        if (targetWidget !== null)
-            this._settings_container.set_child(targetWidget);
+        this.settings.observe('blocked-images', () => this._updateBlockedImages());
+        this._updateBlockedImages();
     }
 
     /**
@@ -189,13 +141,13 @@ class SourceRow extends Adw.ExpanderRow {
      * @param {string} filename Image name to remove
      */
     private _removeBlockedImage(filename: string): void {
-        let blockedImages = this._settings.getStrv('blocked-images');
+        let blockedImages = this.settings.getStrv('blocked-images');
         if (!blockedImages.includes(filename))
             return;
 
 
         blockedImages = Utils.removeItemOnce(blockedImages, filename);
-        this._settings.setStrv('blocked-images', blockedImages);
+        this.settings.setStrv('blocked-images', blockedImages);
     }
 
     /**
@@ -208,7 +160,46 @@ class SourceRow extends Adw.ExpanderRow {
                 widget.clearConfig();
         }
 
-        this._settings.resetSchema();
+        this.settings.resetSchema();
+    }
+
+    private blockedImageWidgets: Adw.ActionRow[] = [];
+
+    /**
+     * Update the blocked images list of this source row entry.
+     */
+    private _updateBlockedImages(): void {
+        const blockedImages: string[] = this.settings.getStrv('blocked-images');
+
+        if (blockedImages.length > 0)
+            this._placeholder_no_blocked.hide();
+        else
+            this._placeholder_no_blocked.show();
+
+        // remove all widget first
+        for (const widget of this.blockedImageWidgets)
+            this._blocked_images_list.remove(widget);
+        this.blockedImageWidgets = [];
+
+        blockedImages.forEach(filename => {
+            const blockedImageRow = new Adw.ActionRow();
+            blockedImageRow.set_title(filename);
+            this.blockedImageWidgets.push(blockedImageRow);
+
+            const button = new Gtk.Button();
+            button.set_valign(Gtk.Align.CENTER);
+            button.connect('clicked', () => {
+                this._removeBlockedImage(filename);
+                this._blocked_images_list.remove(blockedImageRow);
+            });
+
+            const buttonContent = new Adw.ButtonContent();
+            buttonContent.set_icon_name('user-trash-symbolic');
+
+            button.set_child(buttonContent);
+            blockedImageRow.add_suffix(button);
+            this._blocked_images_list.add(blockedImageRow);
+        });
     }
 }
 

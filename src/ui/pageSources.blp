@@ -6,15 +6,15 @@ Adw.PreferencesPage page_sources {
     icon-name: "download-symbolic";
 
     Adw.PreferencesGroup sources_list {
-        // title: _("Configured Wallpaper Sources");
-
+        title: _("Wallpaper Sources");
+        description: _("Wallpapers are loaded from the configured sources");
         header-suffix: Button button_new_source {
             styles [
                 "suggested-action",
             ]
 
             Adw.ButtonContent {
-                icon-name: "add-symbolic";
+                icon-name: "list-add-symbolic";
                 label: _("Add Source");
             }
         };

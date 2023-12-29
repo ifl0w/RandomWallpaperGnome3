@@ -10,6 +10,7 @@ import * as WallpaperManager from './manager/wallpaperManager.js';
 
 import {Logger} from './logger.js';
 import {SourceRow} from './ui/sourceRow.js';
+import {SourceConfigModal} from './ui/sourceConfigModal.js';
 
 // https://gjs.guide/extensions/overview/anatomy.html#prefs-js
 // The code in prefs.js will be executed in a separate Gtk process
@@ -119,11 +120,15 @@ class RandomWallpaperSettings extends ExtensionPreferences {
             const sourceRow = new SourceRow(id);
             this._getAs<Adw.PreferencesGroup>(builder, 'sources_list').add(sourceRow);
 
-            sourceRow.button_delete.connect('clicked', () => {
+            sourceRow.button_remove.connect('clicked', () => {
                 sourceRow.clearConfig();
                 this._getAs<Adw.PreferencesGroup>(builder, 'sources_list').remove(sourceRow);
-                Utils.removeItemOnce(sources, id);
+                Utils.removeItemOnce(sources, sourceRow.id);
                 this._saveSources(settings, sources);
+            });
+
+            sourceRow.button_edit.connect('clicked', () => {
+                void new SourceConfigModal(window, sourceRow).open();
             });
         });
 
@@ -163,17 +168,25 @@ class RandomWallpaperSettings extends ExtensionPreferences {
 
         const sourceRowList = this._getAs<Adw.PreferencesGroup>(builder, 'sources_list');
         builder.get_object('button_new_source')?.connect('clicked', () => {
-            const sourceRow = new SourceRow(null);
-            sourceRowList.add(sourceRow);
-            sources.push(String(sourceRow.id));
-            this._saveSources(settings, sources);
+            new SourceConfigModal(window).open()
+                .then((sourceRow: SourceRow) => {
+                    sourceRowList.add(sourceRow);
+                    sources.push(String(sourceRow.id));
+                    this._saveSources(settings, sources);
 
-            sourceRow.button_delete.connect('clicked', () => {
-                sourceRow.clearConfig();
-                sourceRowList.remove(sourceRow);
-                Utils.removeItemOnce(sources, sourceRow.id);
-                this._saveSources(settings, sources);
-            });
+                    sourceRow.button_edit.connect('clicked', () => {
+                        void new SourceConfigModal(window, sourceRow).open();
+                    });
+
+                    sourceRow.button_remove.connect('clicked', () => {
+                        sourceRow.clearConfig();
+                        sourceRowList.remove(sourceRow);
+                        Utils.removeItemOnce(sources, sourceRow.id);
+                        this._saveSources(settings, sources);
+                    });
+                }).catch(() => {
+                    // nothing to do
+                });
         });
 
         const extensionObject = ExtensionPreferences.lookupByURL(import.meta.url);
