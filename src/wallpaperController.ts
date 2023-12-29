@@ -88,6 +88,7 @@ class WallpaperController {
         this._backendConnection.setBoolean('open-folder', false);
         this._backendConnection.setBoolean('pause-timer', false);
         this._backendConnection.setBoolean('request-new-wallpaper', false);
+        this._backendConnection.setBoolean('backend-connection-available', true);
 
         // Track value changes
         this._observedBackgroundValues.push(this._backendConnection.observe('clear-history', () => this._clearHistory()));
@@ -159,6 +160,8 @@ class WallpaperController {
      * Clean up extension remnants.
      */
     cleanup(): void {
+        this._backendConnection.setBoolean('backend-connection-available', false);
+
         for (const observedValue of this._observedValues)
             this._settings.disconnect(observedValue);
         this._observedValues = [];
