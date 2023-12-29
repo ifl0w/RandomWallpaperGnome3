@@ -1,0 +1,80 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $SourceConfigModal: Adw.Window {
+    content: Adw.ToolbarView {
+        top-bar-style: raised;
+        bottom-bar-style: raised;
+
+        [top]
+        Box {
+            orientation: vertical;
+            valign: fill;
+
+            styles [
+                "toolbar",
+            ]
+
+            Adw.HeaderBar { }
+
+            Box {
+                orientation: horizontal;
+                spacing: 5;
+                valign: fill;
+
+                Gtk.DropDown combo { }
+
+                Adw.EntryRow source_name {
+                    title: _("Name");
+                    hexpand: true;
+                    input-purpose: free_form;
+                    text: _("My Source");
+                }
+            }
+        }
+
+        content: Adw.PreferencesPage {
+            Adw.PreferencesGroup settings_container { }
+        };
+
+        [bottom]
+        ActionBar {
+            hexpand: true;
+            halign: fill;
+
+            [start]
+            Button button_cancel {
+                halign: start;
+                label: _("Cancel");
+            }
+
+            [end]
+            Button button_add {
+                halign: end;
+
+                styles [
+                    "suggested-action",
+                ]
+
+                Adw.ButtonContent {
+                    icon-name: "list-add-symbolic";
+                    label: _("Add Source");
+                }
+            }
+
+            [end]
+            Button button_close {
+                halign: end;
+
+                styles [
+                    "suggested-action",
+                ]
+
+                Adw.ButtonContent {
+                    label: _("Close");
+                }
+            }
+        }
+    };
+}
+
