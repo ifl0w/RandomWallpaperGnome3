@@ -1,22 +1,24 @@
 using Gtk 4.0;
 using Adw 1;
 
-template $GenericJsonSettingsGroup : Adw.PreferencesGroup {
-    // title: _("Source Settings");
-    description: _("This feature requires some know how. However, many different wallpaper providers can be used with this generic JSON source.\nYou have to specify an URL to a JSON response and a path to the target image URL within the JSON response.\nYou can also define a prefix that will be added to the image URL.");
+template $GenericJsonSettings: Adw.PreferencesPage {
+    Adw.PreferencesGroup {
+        description: _("This feature requires some know how. However, many different wallpaper providers can be used with this generic JSON source.\nYou have to specify an URL to a JSON response and a path to the target image URL within the JSON response.\nYou can also define a prefix that will be added to the image URL.");
 
-    header-suffix: LinkButton {
-        valign: center;
-        uri: "https://github.com/ifl0w/RandomWallpaperGnome3/wiki/Generic-JSON-Source";
+        header-suffix: LinkButton {
+            valign: center;
+            uri: "https://github.com/ifl0w/RandomWallpaperGnome3/wiki/Generic-JSON-Source";
 
-        Adw.ButtonContent {
-            icon-name: "globe-symbolic";
-        }
+            Adw.ButtonContent {
+                icon-name: "globe-symbolic";
+                label: _("Help");
+            }
 
-        styles [
-            "flat",
-        ]
-    };
+            styles [
+                "flat",
+            ]
+        };
+    }
 
     Adw.PreferencesGroup {
         title: _("General");

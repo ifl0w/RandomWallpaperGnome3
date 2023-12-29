@@ -20,10 +20,10 @@ enum ConstraintType {
 /* eslint-disable no-unused-expressions */
 
 /**
- * Subclass containing the preferences group for Unsplash adapter
+ * Subclass containing the preferences for Unsplash adapter
  */
-class UnsplashSettingsGroup extends Adw.PreferencesGroup {
-    static [GObject.GTypeName] = 'UnsplashSettingsGroup';
+class UnsplashSettings extends Adw.PreferencesPage {
+    static [GObject.GTypeName] = 'UnsplashSettings';
     // @ts-expect-error Gtk.template is not in the type definitions files yet
     static [Gtk.template] = GLib.uri_resolve_relative(import.meta.url, './unsplash.ui', GLib.UriFlags.NONE);
     // @ts-expect-error Gtk.internalChildren is not in the type definitions files yet
@@ -66,10 +66,10 @@ class UnsplashSettingsGroup extends Adw.PreferencesGroup {
         const path = `${Settings.RWG_SETTINGS_SCHEMA_PATH}/sources/unsplash/${id}/`;
         this._settings = new Settings.Settings(Settings.RWG_SETTINGS_SCHEMA_SOURCES_UNSPLASH, path);
 
-        if (!UnsplashSettingsGroup._stringList)
-            UnsplashSettingsGroup._stringList = Gtk.StringList.new(getConstraintTypeNameList());
+        if (!UnsplashSettings._stringList)
+            UnsplashSettings._stringList = Gtk.StringList.new(getConstraintTypeNameList());
 
-        this._constraint_type.model = UnsplashSettingsGroup._stringList;
+        this._constraint_type.model = UnsplashSettings._stringList;
 
         this._settings.bind('constraint-type',
             this._constraint_type,
@@ -174,4 +174,4 @@ function getConstraintTypeNameList(): string[] {
     return list;
 }
 
-export {UnsplashSettingsGroup};
+export {UnsplashSettings};
