@@ -10,10 +10,10 @@ import * as Settings from './../settings.js';
 /* eslint-disable no-unused-expressions */
 
 /**
- * Subclass containing the preferences group for UrlSource adapter
+ * Subclass containing the preferences for UrlSource adapter
  */
-class UrlSourceSettingsGroup extends Adw.PreferencesGroup {
-    static [GObject.GTypeName] = 'UrlSourceSettingsGroup';
+class UrlSourceSettings extends Adw.PreferencesPage  {
+    static [GObject.GTypeName] = 'UrlSourceSettings';
     // @ts-expect-error Gtk.template is not in the type definitions files yet
     static [Gtk.template] = GLib.uri_resolve_relative(import.meta.url, './urlSource.ui', GLib.UriFlags.NONE);
     // @ts-expect-error Gtk.internalChildren is not in the type definitions files yet
@@ -87,4 +87,4 @@ class UrlSourceSettingsGroup extends Adw.PreferencesGroup {
     }
 }
 
-export {UrlSourceSettingsGroup};
+export {UrlSourceSettings};

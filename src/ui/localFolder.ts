@@ -10,10 +10,10 @@ import * as Settings from './../settings.js';
 /* eslint-disable no-unused-expressions */
 
 /**
- * Subclass containing the preferences group for LocalFolder adapter
+ * Subclass containing the preferences for LocalFolder adapter
  */
-class LocalFolderSettingsGroup extends Adw.PreferencesGroup {
-    static [GObject.GTypeName] = 'LocalFolderSettingsGroup';
+class LocalFolderSettings extends Adw.PreferencesPage {
+    static [GObject.GTypeName] = 'LocalFolderSettings';
     // @ts-expect-error Gtk.template is not in the type definitions files yet
     static [Gtk.template] = GLib.uri_resolve_relative(import.meta.url, './localFolder.ui', GLib.UriFlags.NONE);
     // @ts-expect-error Gtk.internalChildren is not in the type definitions files yet
@@ -87,4 +87,4 @@ class LocalFolderSettingsGroup extends Adw.PreferencesGroup {
     }
 }
 
-export {LocalFolderSettingsGroup};
+export {LocalFolderSettings};

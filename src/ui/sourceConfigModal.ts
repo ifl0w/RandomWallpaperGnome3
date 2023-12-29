@@ -9,12 +9,12 @@ import * as Utils from './../utils.js';
 import {Logger} from './../logger.js';
 import {SourceRow} from './sourceRow.js';
 
-import {GenericJsonSettingsGroup} from './genericJson.js';
-import {LocalFolderSettingsGroup} from './localFolder.js';
-import {RedditSettingsGroup} from './reddit.js';
-import {UnsplashSettingsGroup} from './unsplash.js';
-import {UrlSourceSettingsGroup} from './urlSource.js';
-import {WallhavenSettingsGroup} from './wallhaven.js';
+import {GenericJsonSettings} from './genericJson.js';
+import {LocalFolderSettings} from './localFolder.js';
+import {RedditSettings} from './reddit.js';
+import {UnsplashSettings} from './unsplash.js';
+import {UrlSourceSettings} from './urlSource.js';
+import {WallhavenSettings} from './wallhaven.js';
 
 // FIXME: Generated static class code produces a no-unused-expressions rule error
 /* eslint-disable no-unused-expressions */
@@ -48,14 +48,13 @@ class SourceConfigModal extends Adw.Window {
     static _stringList: Gtk.StringList;
 
     private _combo!: Adw.ComboRow;
-    private _settings_container!: Adw.PreferencesGroup;
+    private _settings_container!: Gtk.ScrolledWindow;
     private _source_name!: Adw.EntryRow;
     private _button_add!: Gtk.Button;
     private _button_cancel!: Gtk.Button;
     private _button_close!: Gtk.Button;
 
     private _currentSourceRow: SourceRow;
-    private _currentSourceWidget?: Gtk.Widget;
 
     /**
      * Craft a new source row using an unique ID.
@@ -123,48 +122,43 @@ class SourceConfigModal extends Adw.Window {
      * @param {number} type Enum of the adapter to use
      */
     private _fillRow(type: number): void {
-        const targetWidget = this._getSettingsGroup(type);
-        if (targetWidget !== null) {
-            if (this._currentSourceWidget)
-                this._settings_container.remove(this._currentSourceWidget);
-
-            this._settings_container.add(targetWidget);
-            this._currentSourceWidget = targetWidget;
-        }
+        const targetWidget = this._getSettingsWidget(type);
+        if (targetWidget !== null)
+            this._settings_container.set_child(targetWidget);
     }
 
     /**
      * Get a new adapter based on an enum source type.
      *
      * @param {Utils.SourceType} type Enum of the adapter to get
-     * @returns {UnsplashSettingsGroup | WallhavenSettingsGroup | RedditSettingsGroup | GenericJsonSettingsGroup | LocalFolderSettingsGroup | UrlSourceSettingsGroup | null} Newly crafted adapter or null
+     * @returns {UnsplashSettings | WallhavenSettings | RedditSettings | GenericJsonSettings | LocalFolderSettings | UrlSourceSettings | null} Newly crafted adapter or null
      */
-    private _getSettingsGroup(type: Utils.SourceType = Utils.SourceType.UNSPLASH): UnsplashSettingsGroup
-        | WallhavenSettingsGroup
-        | RedditSettingsGroup
-        | GenericJsonSettingsGroup
-        | LocalFolderSettingsGroup
-        | UrlSourceSettingsGroup
+    private _getSettingsWidget(type: Utils.SourceType = Utils.SourceType.UNSPLASH): UnsplashSettings
+        | WallhavenSettings
+        | RedditSettings
+        | GenericJsonSettings
+        | LocalFolderSettings
+        | UrlSourceSettings
         | null {
         let targetWidget = null;
         switch (type) {
         case Utils.SourceType.UNSPLASH:
-            targetWidget = new UnsplashSettingsGroup(this._currentSourceRow.id);
+            targetWidget = new UnsplashSettings(this._currentSourceRow.id);
             break;
         case Utils.SourceType.WALLHAVEN:
-            targetWidget = new WallhavenSettingsGroup(this._currentSourceRow.id);
+            targetWidget = new WallhavenSettings(this._currentSourceRow.id);
             break;
         case Utils.SourceType.REDDIT:
-            targetWidget = new RedditSettingsGroup(this._currentSourceRow.id);
+            targetWidget = new RedditSettings(this._currentSourceRow.id);
             break;
         case Utils.SourceType.GENERIC_JSON:
-            targetWidget = new GenericJsonSettingsGroup(this._currentSourceRow.id);
+            targetWidget = new GenericJsonSettings(this._currentSourceRow.id);
             break;
         case Utils.SourceType.LOCAL_FOLDER:
-            targetWidget = new LocalFolderSettingsGroup(this._currentSourceRow.id);
+            targetWidget = new LocalFolderSettings(this._currentSourceRow.id);
             break;
         case Utils.SourceType.STATIC_URL:
-            targetWidget = new UrlSourceSettingsGroup(this._currentSourceRow.id);
+            targetWidget = new UrlSourceSettings(this._currentSourceRow.id);
             break;
         default:
             targetWidget = null;
