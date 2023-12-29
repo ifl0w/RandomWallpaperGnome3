@@ -176,7 +176,7 @@ class Settings {
     }
 
     /**
-     * Resets a key to its default value affectively removing this key.
+     * Resets a key to its default value effectively removing this key.
      *
      * @param {string} keyName Key to reset
      */
@@ -185,7 +185,7 @@ class Settings {
     }
 
     /**
-     * Reset a whole schema to its default value affectively removing this schema.
+     * Reset a whole schema to its default value effectively removing this schema.
      */
     resetSchema(): void {
         for (const key of this._settings.settings_schema.list_keys())
