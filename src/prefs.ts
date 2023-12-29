@@ -40,6 +40,7 @@ class RandomWallpaperSettings extends ExtensionPreferences {
         const sources = this._loadSources(settings);
 
         window.set_default_size(600, 720);
+        window.set_search_enabled(true);
 
         backendConnection.setBoolean('pause-timer', true);
 
