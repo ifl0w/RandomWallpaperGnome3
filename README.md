@@ -9,18 +9,29 @@ Install and try the extension at [extensions.gnome.org](https://extensions.gnome
 
 ## Features
 
-* Many different online sources with filters
-    * Unsplash (https://unsplash.com/)
-    * Wallhaven (https://alpha.wallhaven.cc/)
-    * Reddit (https://reddit.com)
+* Various configurable wallpaper sources
+    * [Unsplash](https://unsplash.com/)
+    * [Wallhaven](https://wallhaven.cc/)
+    * [Reddit](https://reddit.com)
     * Basically any JSON API/File ([Examples](https://github.com/ifl0w/RandomWallpaperGnome3/wiki/Generic-JSON-Source))
-      * Chromecast Images
-      * NASA Picture of the day
-      * Bing Picture of the day
-      * Google Earth View
+        * Chromecast Images
+        * NASA Picture of the day
+        * Bing Picture of the day
+        * Google Earth View
+    * Local folders
+    * Static URLs
+* Multiple sources to create a pool of sources
 * History of previous images
-* Set lock screen image
-* Automatic renewal (Auto-Fetching)
+    * Save your favourite wallpaper
+    * Add images to a block list
+* Set the lock screen background
+* Timer based renewal (Auto-Fetching)
+    * Load a new wallpaper on startup
+    * Pause the timer when desired
+* Support for multiple monitors using third party tools
+    * [Hydra Paper](https://hydrapaper.gabmus.org/)
+    * [Superpaper](https://github.com/hhannine/superpaper)
+* Execute a custom command after every new wallpaper 
 
 ## Installation (symlink to the repository)
 Requires [`blueprint-compiler`](https://repology.org/project/blueprint-compiler/versions) and [`npm`](https://repology.org/project/npm/versions) at install and update time.
