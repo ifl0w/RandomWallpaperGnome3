@@ -20,3 +20,10 @@
 .rwg-history-time {
     font-size: 80%;
 }
+
+.rwg-preview-image {
+    border-radius: 0.3em;
+    padding-top: 0.3em;
+    padding-bottom: 0.3em;
+    background-color: rgba(0,0,0,0.2);
+}
