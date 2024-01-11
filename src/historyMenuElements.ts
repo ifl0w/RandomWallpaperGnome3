@@ -7,6 +7,7 @@ import GObject from 'gi://GObject';
 import St from 'gi://St';
 
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
+import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
 import * as HistoryModule from './history.js';
 import * as Settings from './settings.js';
@@ -23,6 +24,86 @@ Gio._promisify(Gio.File.prototype, 'replace_contents_bytes_async', 'replace_cont
 /* eslint-disable no-unused-expressions */
 
 /**
+ * Preview widget at the top of the panel menu.
+ */
+class PreviewWidget extends St.Bin {
+    static [GObject.GTypeName] = 'PreviewWidget';
+
+    static {
+        GObject.registerClass(this);
+    }
+
+    private readonly previewWidth: number;
+    private readonly previewHeight: number;
+
+    /**
+     * Create a PreviewWidget
+     *
+     * @param {number} width Width of the loaded preview image.
+     */
+    constructor(width: number) {
+        let aspect;
+        // @ts-expect-error Members of 'Main' are not defined completely for TS
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        if (Main.layoutManager?.primaryMonitor?.height)
+            // @ts-expect-error Members of 'Main' are not defined completely for TS
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+            aspect = Main.layoutManager.primaryMonitor.height / Main.layoutManager.primaryMonitor.width;
+        else
+            aspect = 2 / (1 + Math.sqrt(5)); // inverse of golden ratio: https://en.wikipedia.org/wiki/Golden_ratio
+
+        const height = width * aspect;
+
+        super({
+            style_class: 'rwg-preview-image',
+            x_expand: true,
+            height,
+        });
+
+        this.previewWidth = width;
+        this.previewHeight = height;
+    }
+
+    /**
+     * Show the image from the provided path in the widget
+     *
+     * @param {string} path Path to the image to preview
+     */
+    preview(path: string | null): void {
+        if (!path)
+            return;
+
+        try {
+            const pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(path, this.previewWidth, this.previewHeight);
+            const height = pixbuf.get_height();
+            const width = pixbuf.get_width();
+
+            const image = new Clutter.Image();
+            const pixelFormat = pixbuf.get_has_alpha() ? Cogl.PixelFormat.RGBA_8888 : Cogl.PixelFormat.RGB_888;
+            image.set_data(
+                pixbuf.get_pixels(),
+                pixelFormat,
+                width,
+                height,
+                pixbuf.get_rowstride()
+            );
+
+            const imageActor = new St.Bin({
+                height,
+                width,
+                y_align: Clutter.ActorAlign.CENTER,
+                x_align: Clutter.ActorAlign.CENTER,
+            });
+            imageActor.set_content(image);
+
+            this.set_child(imageActor);
+        } catch (exception) {
+            Logger.error(String(exception), this);
+        }
+    }
+}
+
+/**
  * Shell menu item holding information related to a HistoryEntry
  */
 class HistoryElement extends PopupMenu.PopupSubMenuMenuItem {
@@ -37,7 +118,6 @@ class HistoryElement extends PopupMenu.PopupSubMenuMenuItem {
     private _prefixLabel;
     private _container;
     private _dateLabel;
-    private _previewActor: Clutter.Actor | null = null;
 
     protected _setAsWallpaperItem;
 
@@ -94,8 +174,6 @@ class HistoryElement extends PopupMenu.PopupSubMenuMenuItem {
         if (index !== 0)
             this.actor.insert_child_above(this._container, this._prefixLabel);
 
-        this.menu.actor.add_style_class_name('rwg-history-element-content');
-
         if (this.historyEntry.source !== null) {
             if (this.historyEntry.source.author !== null &&
                 this.historyEntry.source.authorUrl !== null) {
@@ -139,9 +217,6 @@ class HistoryElement extends PopupMenu.PopupSubMenuMenuItem {
             this.menu.addMenuItem(new PopupMenu.PopupMenuItem('Unknown source.'));
         }
 
-        const previewItem = new PopupMenu.PopupBaseMenuItem({can_focus: false, reactive: false});
-        this.menu.addMenuItem(previewItem);
-
         this._setAsWallpaperItem = new PopupMenu.PopupMenuItem('Set As Wallpaper');
         this._setAsWallpaperItem.connect('activate', () => {
             this.emit('activate', null); // Fixme: not sure what the second parameter should be. null seems to work fine for now.
@@ -168,44 +243,55 @@ class HistoryElement extends PopupMenu.PopupSubMenuMenuItem {
             });
             this.menu.addMenuItem(blockImage);
         }
+    }
 
-        /*
-            Load the image on first opening of the sub menu instead of during creation of the history list.
-         */
-        this.menu.connect('open-state-changed', (_, open) => {
-            if (typeof open === 'boolean' && open) {
-                if (this._previewActor !== null)
-                    return;
+    private static debounceID: number = -1;
+    private static readonly DEBOUNCE_DELAY: number = 150;
+    /**
+     * Debounce events based on incremented debounceID. I.e. Only the last promise created resolves when the timeout finishes.
+     *
+     * @returns {Promise<void>} The debounce promise
+     */
+    debounce(): Promise<void> {
+        HistoryElement.debounceID++;
+        // Warp ids and ignore issues when more events are queued than the ID period.
+        HistoryElement.debounceID %= 65536;
 
-                if (!this.historyEntry.path) {
-                    Logger.error('Image path in entry not found', this);
-                    return;
-                }
-
-                try {
-                    const width = 270; // 270 looks good for the now fixed 350px menu width
-                    // const width = this.menu.actor.get_width(); // This should be correct but gives different results per element?
-                    const pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(this.historyEntry.path, width, -1, true);
-                    const height = pixbuf.get_height();
-
-                    const image = new Clutter.Image();
-                    const pixelFormat = pixbuf.get_has_alpha() ? Cogl.PixelFormat.RGBA_8888 : Cogl.PixelFormat.RGB_888;
-                    image.set_data(
-                        pixbuf.get_pixels(),
-                        pixelFormat,
-                        width,
-                        height,
-                        pixbuf.get_rowstride()
-                    );
-                    this._previewActor = new Clutter.Actor({height, width});
-                    this._previewActor.set_content(image);
-
-                    previewItem.actor.add_actor(this._previewActor);
-                } catch (exception) {
-                    Logger.error(String(exception), this);
-                }
-            }
+        return new Promise(resolve => {
+            const debounceID = HistoryElement.debounceID;
+            setTimeout(() => {
+                if (debounceID === HistoryElement.debounceID)
+                    resolve();
+            }, HistoryElement.DEBOUNCE_DELAY);
         });
+    }
+
+    /**
+     * Set callbacks to be called on the enter, leave, and select events.
+     *
+     * @param {(HistoryElement) => void} onEnter Function to call on menu element key-focus-in
+     * @param {(HistoryElement) => void} onLeave Function to call on menu element key-focus-out
+     * @param {(HistoryElement) => void} onSelect Function to call on menu element enter-event
+     */
+    public setCallbacks(
+        onEnter: (entry: HistoryModule.HistoryEntry) => void,
+        onLeave: (entry: HistoryModule.HistoryEntry) => void,
+        onSelect: (entry: HistoryModule.HistoryEntry) => void
+    ): void {
+        const connect_events = (element: Clutter.Actor): void => {
+            element.connect('key-focus-in', () => void this.debounce().then(() => onEnter(this.historyEntry)).catch(err => Logger.error(err, this)));
+            element.connect('key-focus-out', () => void this.debounce().then(() => onLeave(this.historyEntry)).catch(err => Logger.error(err, this)));
+            element.connect('enter-event', () => void this.debounce().then(() => onEnter(this.historyEntry)).catch(err => Logger.error(err, this)));
+            element.connect('leave-event', () => void this.debounce().then(() => onLeave(this.historyEntry)).catch(err => Logger.error(err, this)));
+        };
+
+        connect_events(this.actor);
+
+        // the sub menu container only reacts to mouse events. Thus, we hook up the events to all menuItems.
+        for (const menuItem of this.menu.box.get_children())
+            connect_events(menuItem);
+
+        this.connect('activate', () => onSelect(this.historyEntry));
     }
 
     /**
@@ -441,9 +527,9 @@ class HistorySection extends PopupMenu.PopupMenuSection {
      */
     updateList(
         history: HistoryModule.HistoryEntry[],
-        onEnter: (actor: HistoryElement) => void,
-        onLeave: (actor: HistoryElement) => void,
-        onSelect: (actor: HistoryElement) => void
+        onEnter: (actor: HistoryModule.HistoryEntry) => void,
+        onLeave: (actor: HistoryModule.HistoryEntry) => void,
+        onSelect: (actor: HistoryModule.HistoryEntry) => void
     ): void {
         if (this._historyCache.length <= 1)
             this.removeAll(); // remove empty history element
@@ -456,17 +542,14 @@ class HistorySection extends PopupMenu.PopupMenuSection {
             if (!historyID)
                 continue;
 
-            let cachedHistoryElement = this._historySectionCache.get(historyID);
+            const cachedHistoryElement = this._historySectionCache.get(historyID);
             if (!cachedHistoryElement) {
-                cachedHistoryElement = new HistoryElement(history[i], i);
-                cachedHistoryElement.actor.connect('key-focus-in', onEnter);
-                cachedHistoryElement.actor.connect('key-focus-out', onLeave);
-                cachedHistoryElement.actor.connect('enter-event', onEnter);
+                const newHistoryElement = new HistoryElement(history[i], i);
+                newHistoryElement.setCallbacks(onEnter, onLeave, onSelect);
 
-                cachedHistoryElement.connect('activate', onSelect);
-                this._historySectionCache.set(historyID, cachedHistoryElement);
+                this._historySectionCache.set(historyID, newHistoryElement);
 
-                this.addMenuItem(cachedHistoryElement, i - 1);
+                this.addMenuItem(newHistoryElement, i - 1);
             } else {
                 cachedHistoryElement.setIndex(i);
             }
@@ -516,5 +599,6 @@ export {
     NewWallpaperElement,
     HistorySection,
     CurrentImageElement,
-    HistoryElement
+    HistoryElement,
+    PreviewWidget
 };
