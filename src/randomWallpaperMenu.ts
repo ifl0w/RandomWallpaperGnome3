@@ -19,6 +19,7 @@ import * as Utils from './utils.js';
 import {Logger} from './logger.js';
 import {WallpaperController} from './wallpaperController.js';
 import {Mode} from './manager/wallpaperManager.js';
+import {HistoryEntry} from './history.js';
 
 /**
  * PanelMenu for this extension.
@@ -31,9 +32,12 @@ class RandomWallpaperMenu {
     private _observedBackgroundValues: number[] = [];
 
     private _currentBackgroundSection;
+    private _previewBackgroundSection;
+
     private _historySection;
     private _panelMenu;
     private _wallpaperController;
+    private previewWidget: CustomElements.PreviewWidget;
 
     /**
      * Create a new PanelMenu.
@@ -58,6 +62,13 @@ class RandomWallpaperMenu {
 
         // Set fixed width so the preview images don't widen the menu
         this._panelMenu.menu.actor.set_width(350);
+
+        // Preview widget showing the current wallpaper
+        this._previewBackgroundSection = new PopupMenu.PopupMenuSection();
+        this._panelMenu.menu.addMenuItem(this._previewBackgroundSection);
+        this.previewWidget = new CustomElements.PreviewWidget(this._panelMenu.menu.actor.width);
+        this._previewBackgroundSection.actor.add_child(this.previewWidget);
+        this._panelMenu.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 
         // current background section
         this._currentBackgroundSection = new PopupMenu.PopupMenuSection();
@@ -230,6 +241,8 @@ class RandomWallpaperMenu {
         if (history.length > 0) {
             const currentImage = new CustomElements.CurrentImageElement(history[0]);
             this._currentBackgroundSection.addMenuItem(currentImage);
+
+            this.previewWidget.preview(history[0].path);
         }
     }
 
@@ -251,36 +264,38 @@ class RandomWallpaperMenu {
         /**
          * Function for events that should happen on element leave.
          *
-         * @param {CustomElements.HistoryElement} unusedActor The activating panel item
-         * @this RandomWallpaperMenu
+         * @param {HistoryEntry} _entry The left/unfocused history entry
          */
-        function onLeave(this: RandomWallpaperMenu, unusedActor: CustomElements.HistoryElement): void {
+        const onLeave = (_entry: HistoryEntry): void => {
+            if (this._savedBackgroundUri)
+                this.previewWidget.preview(GLib.filename_from_uri(this._savedBackgroundUri)[0]);
+
             if (!this._wallpaperController.prohibitNewWallpaper && this._savedBackgroundUri)
                 this._wallpaperController.resetWallpaper(this._savedBackgroundUri);
-        }
+        };
 
         /**
          * Function for events that should happen on element enter.
          *
-         * @param {CustomElements.HistoryElement} actor The activating panel item
-         * @this RandomWallpaperMenu
+         * @param {HistoryEntry} entry The hovered/focused history entry
          */
-        function onEnter(this: RandomWallpaperMenu, actor: CustomElements.HistoryElement): void {
+        const onEnter = (entry: HistoryEntry): void => {
+            this.previewWidget.preview(entry.path);
+
             if (!this._wallpaperController.prohibitNewWallpaper)
-                this._wallpaperController.previewWallpaper(actor.historyEntry.id);
-        }
+                this._wallpaperController.previewWallpaper(entry.id);
+        };
 
         /**
          * Function for events that should happen on element select.
          *
-         * @param {CustomElements.HistoryElement} actor The activating panel item
-         * @this RandomWallpaperMenu
+         * @param {HistoryEntry} entry The selected history entry
          */
-        function onSelect(this: RandomWallpaperMenu, actor: CustomElements.HistoryElement): void {
+        const onSelect = (entry: HistoryEntry): void => {
             // Make sure no other preview or reset event overwrites our setWallpaper!
             this._wallpaperController.prohibitNewWallpaper = true;
 
-            this._wallpaperController.setWallpaper(actor.historyEntry.id).then(() => {
+            this._wallpaperController.setWallpaper(entry.id).then(() => {
                 this._wallpaperController.prohibitNewWallpaper = false;
 
                 if (this._settings.getInt('change-type') as Mode === Mode.LOCKSCREEN && this._savedBackgroundUri) {
@@ -296,9 +311,9 @@ class RandomWallpaperMenu {
                 this._wallpaperController.prohibitNewWallpaper = false;
                 Logger.error(error, this);
             });
-        }
+        };
 
-        this._historySection.updateList(history, onEnter.bind(this), onLeave.bind(this), onSelect.bind(this));
+        this._historySection.updateList(history, onEnter, onLeave, onSelect);
     }
 
     /**
