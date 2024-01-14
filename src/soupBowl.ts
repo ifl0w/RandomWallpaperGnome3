@@ -38,7 +38,7 @@ class SoupBowl {
     newGetMessage(uri: string): Soup.Message {
         const message = Soup.Message.new('GET', uri);
         // set User-Agent to appear more like a standard browser
-        message.request_headers.append('User-Agent', 'Mozilla/5.0');
+        message.request_headers.append('User-Agent', 'RandomWallpaperGnome3/3.0');
         return message;
     }
 
