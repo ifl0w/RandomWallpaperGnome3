@@ -45,8 +45,6 @@ class WallpaperController {
     private _wallpaperManager = Utils.getWallpaperManager();
     private _autoFetch = {active: false, duration: 30};
     private _previewId: string | undefined;
-    private _resetWallpaper = false;
-    private _timeout: number | null = null;
     /** functions will be called upon loading a new wallpaper */
     private _startLoadingHooks: (() => void)[] = [];
     /** functions will be called when loading a new wallpaper stopped. */
@@ -634,57 +632,22 @@ class WallpaperController {
     }
 
     /**
-     * Set a background after a $delay
-     *
-     * Prohibits quick wallpaper changing by blocking additional change requests
-     * within a timeout.
-     *
-     * @param {string[] | undefined} paths Array of wallpaper paths
-     * @param {number | undefined} delay Delay, defaults to 200ms
-     */
-    private _backgroundTimeout(paths?: string[], delay?: number): void {
-        if (this._timeout || !paths)
-            return;
-
-        delay = delay || 200;
-
-        this._timeout = GLib.timeout_add(GLib.PRIORITY_DEFAULT, delay, () => {
-            this._timeout = null;
-
-            // Only change the background - the lock screen wouldn't be visible anyway
-            // because this function is only used for hover preview
-            if (this._resetWallpaper) {
-                this._wallpaperManager.setWallpaper(paths).catch(error => {
-                    Logger.error(error, this);
-                });
-                this._resetWallpaper = false;
-            } else if (this._previewId !== undefined) {
-                this._wallpaperManager.setWallpaper(paths).catch(error => {
-                    Logger.error(error, this);
-                });
-            }
-
-            return GLib.SOURCE_REMOVE;
-        });
-    }
-
-    /**
      * Preview an image in the history.
      *
      * @param {string} historyId Unique ID
-     * @param {number} delay Delay, defaults to 200ms
      */
-    previewWallpaper(historyId: string, delay?: number): void {
+    previewWallpaper(historyId: string): void {
         if (!this._settings.getBoolean('disable-hover-preview')) {
             this._previewId = historyId;
-            this._resetWallpaper = false;
 
             // Do not fill other displays here.
             // Merging images can take a long time and hurt the quick preview purpose.
             // Therefor only an array with a single wallpaper path here:
             const newWallpaperPaths = [this.wallpaperLocation + this._previewId];
 
-            this._backgroundTimeout(newWallpaperPaths, delay);
+            this._wallpaperManager.setWallpaper(newWallpaperPaths).catch(error => {
+                Logger.error(error, this);
+            });
         }
     }
 
@@ -695,9 +658,9 @@ class WallpaperController {
      */
     resetWallpaper(uri: string): void {
         if (!this._settings.getBoolean('disable-hover-preview')) {
-            this._resetWallpaper = true;
-            // FIXME: With an already running timeout this reset request will be ignored
-            this._backgroundTimeout([GLib.filename_from_uri(uri)[0]]);
+            this._wallpaperManager.setWallpaper([GLib.filename_from_uri(uri)[0]]).catch(error => {
+                Logger.error(error, this);
+            });
         }
     }
 
