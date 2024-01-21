@@ -175,13 +175,6 @@ class RandomWallpaperMenu {
             }
         });
 
-        // FIXME?: This triggers by leaving the underlying popupMenu and blocks previewing the items
-        // when entering from any side other than another item. (eg. spacer or the sides)
-        // this._panelMenu.menu.actor.connect('leave-event', () => {
-        //     if (!this._wallpaperController.prohibitNewWallpaper)
-        //         this._wallpaperController.resetWallpaper(this._savedBackgroundUri);
-        // });
-
         this._observedValues.push(this._settings.observe('history', this.setHistoryList.bind(this)));
     }
 
