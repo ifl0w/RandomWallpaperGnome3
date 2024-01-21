@@ -104,6 +104,37 @@ class PreviewWidget extends St.Bin {
 }
 
 /**
+ * Simple sub-menu separator item because the existing PopupSeparatorMenuItem from does not look right in a sub-menu.
+ */
+class HistoryElementSubmenuSeparator extends PopupMenu.PopupBaseMenuItem {
+    static [GObject.GTypeName] = 'HistoryElementSubmenuSeparator';
+
+    static {
+        GObject.registerClass(this);
+    }
+
+    /**
+     * Create a new sub-menu separator item.
+     */
+    constructor() {
+        super();
+
+        this.sensitive = false;
+        this.x_expand = true;
+
+        const line = new St.BoxLayout({
+            style_class: 'rwg-submenu-separator',
+            height: 1,
+            x_expand: true,
+            x_align: Clutter.ActorAlign.FILL,
+            y_align: Clutter.ActorAlign.CENTER,
+        });
+
+        this.actor.add_child(line);
+    }
+}
+
+/**
  * Shell menu item holding information related to a HistoryEntry
  */
 class HistoryElement extends PopupMenu.PopupSubMenuMenuItem {
@@ -217,6 +248,8 @@ class HistoryElement extends PopupMenu.PopupSubMenuMenuItem {
             this.menu.addMenuItem(new PopupMenu.PopupMenuItem('Unknown source.'));
         }
 
+        this.menu.addMenuItem(new HistoryElementSubmenuSeparator());
+
         this._setAsWallpaperItem = new PopupMenu.PopupMenuItem('Set As Wallpaper');
         this._setAsWallpaperItem.connect('activate', () => {
             this.emit('activate', null); // Fixme: not sure what the second parameter should be. null seems to work fine for now.
@@ -234,6 +267,8 @@ class HistoryElement extends PopupMenu.PopupSubMenuMenuItem {
             });
         });
         this.menu.addMenuItem(copyToFavorites);
+
+        this.menu.addMenuItem(new HistoryElementSubmenuSeparator());
 
         // Static URLs can't block images (yet?)
         if (this.historyEntry.adapter?.type !== Utils.SourceType.STATIC_URL) {
@@ -290,6 +325,15 @@ class HistoryElement extends PopupMenu.PopupSubMenuMenuItem {
         // the sub menu container only reacts to mouse events. Thus, we hook up the events to all menuItems.
         for (const menuItem of this.menu.box.get_children())
             connect_events(menuItem);
+
+        // Add events to the sub-menu container to handle non-sensitive children correctly
+        connect_events(this.menu.actor);
+        // Also execute the leave callback when sub-menu is closed.
+        // Note that this is a workaround for the enter event being triggered as the last event for some reason.
+        this.menu.connect('open-state-changed', (_, open) => void this.debounce().then(() => {
+            if (!open)
+                onLeave(this.historyEntry);
+        }).catch(err => Logger.error(err, this)));
 
         this.connect('activate', () => onSelect(this.historyEntry));
     }
