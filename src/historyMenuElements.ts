@@ -549,14 +549,10 @@ class HistorySection extends PopupMenu.PopupMenuSection {
      */
     clear(): void {
         this.removeAll();
-        this.addMenuItem(
-            new PopupMenu.PopupMenuItem('No recent wallpaper ...', {
-                activate: false,
-                hover: false,
-                style_class: 'rwg-recent-label',
-                can_focus: false,
-            })
-        );
+
+        const noHistory = new PopupMenu.PopupMenuItem('No Wallpaper History');
+        noHistory.sensitive = false;
+        this.addMenuItem(noHistory);
     }
 }
 
