@@ -31,11 +31,12 @@ class RandomWallpaperMenu {
     private _observedValues: number[] = [];
     private _observedBackgroundValues: number[] = [];
 
-    private _previewBackgroundSection;
-
     private _historySection;
     private _panelMenu;
     private _wallpaperController;
+
+    private previewSection = new PopupMenu.PopupMenuSection();
+    private previewSeparator = new PopupMenu.PopupSeparatorMenuItem();
     private previewWidget: CustomElements.PreviewWidget;
 
     /**
@@ -63,11 +64,10 @@ class RandomWallpaperMenu {
         this._panelMenu.menu.actor.set_width(350);
 
         // Preview widget showing the current wallpaper
-        this._previewBackgroundSection = new PopupMenu.PopupMenuSection();
-        this._panelMenu.menu.addMenuItem(this._previewBackgroundSection);
+        this._panelMenu.menu.addMenuItem(this.previewSection);
         this.previewWidget = new CustomElements.PreviewWidget(this._panelMenu.menu.actor.width);
-        this._previewBackgroundSection.actor.add_child(this.previewWidget);
-        this._panelMenu.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+        this.previewSection.actor.add_child(this.previewWidget);
+        this._panelMenu.menu.addMenuItem(this.previewSeparator);
 
         // history section
         this._historySection = new CustomElements.HistorySection();
@@ -243,8 +243,8 @@ class RandomWallpaperMenu {
          * @param {HistoryEntry} _entry The left/unfocused history entry
          */
         const onLeave = (_entry: HistoryEntry): void => {
-            if (this._savedBackgroundUri)
-                this.previewWidget.preview(GLib.filename_from_uri(this._savedBackgroundUri)[0]);
+            if (history.length > 0)
+                this.previewWidget.preview(history[0].path);
 
             if (!this._wallpaperController.prohibitNewWallpaper && this._savedBackgroundUri)
                 this._wallpaperController.resetWallpaper(this._savedBackgroundUri);
@@ -283,6 +283,8 @@ class RandomWallpaperMenu {
                     const backgroundSettings = new Settings.Settings('org.gnome.desktop.background');
                     this._savedBackgroundUri = backgroundSettings.getString('picture-uri');
                 }
+
+                this.setHistoryList();
             }).catch(error => {
                 this._wallpaperController.prohibitNewWallpaper = false;
                 Logger.error(error, this);
@@ -290,12 +292,18 @@ class RandomWallpaperMenu {
         };
 
         this._historySection.updateList(history, onEnter, onLeave, onSelect);
+
+        this.previewWidget.preview(history[0].path);
+        this.previewWidget.show();
+        this.previewSeparator.show();
     }
 
     /**
      * Remove the history section
      */
     clearHistoryList(): void {
+        this.previewWidget.hide();
+        this.previewSeparator.hide();
         this._historySection.clear();
     }
 }
