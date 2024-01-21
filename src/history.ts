@@ -208,8 +208,7 @@ class HistoryController {
     clear(): void {
         const firstHistoryElement = this.history[0];
 
-        if (firstHistoryElement)
-            this.history = [firstHistoryElement];
+        this.history = [];
 
         const directory = Gio.file_new_for_path(_wallpaperLocation);
         const enumerator = directory.enumerate_children('', Gio.FileQueryInfoFlags.NONE, null);
