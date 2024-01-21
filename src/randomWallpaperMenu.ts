@@ -31,7 +31,6 @@ class RandomWallpaperMenu {
     private _observedValues: number[] = [];
     private _observedBackgroundValues: number[] = [];
 
-    private _currentBackgroundSection;
     private _previewBackgroundSection;
 
     private _historySection;
@@ -68,11 +67,6 @@ class RandomWallpaperMenu {
         this._panelMenu.menu.addMenuItem(this._previewBackgroundSection);
         this.previewWidget = new CustomElements.PreviewWidget(this._panelMenu.menu.actor.width);
         this._previewBackgroundSection.actor.add_child(this.previewWidget);
-        this._panelMenu.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
-
-        // current background section
-        this._currentBackgroundSection = new PopupMenu.PopupMenuSection();
-        this._panelMenu.menu.addMenuItem(this._currentBackgroundSection);
         this._panelMenu.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 
         // history section
@@ -230,33 +224,15 @@ class RandomWallpaperMenu {
     }
 
     /**
-     * Recreates the current background section based on the history.
-     */
-    setCurrentBackgroundElement(): void {
-        this._currentBackgroundSection.removeAll();
-
-        const historyController = this._wallpaperController.getHistoryController();
-        const history = historyController.history;
-
-        if (history.length > 0) {
-            const currentImage = new CustomElements.CurrentImageElement(history[0]);
-            this._currentBackgroundSection.addMenuItem(currentImage);
-
-            this.previewWidget.preview(history[0].path);
-        }
-    }
-
-    /**
      * Recreates the history list based on the history.
      */
     setHistoryList(): void {
         this._wallpaperController.update();
-        this.setCurrentBackgroundElement();
 
         const historyController = this._wallpaperController.getHistoryController();
         const history = historyController.history;
 
-        if (history.length <= 1) {
+        if (history.length === 0) {
             this.clearHistoryList();
             return;
         }

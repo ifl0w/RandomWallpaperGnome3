@@ -173,18 +173,14 @@ class HistoryElement extends PopupMenu.PopupSubMenuMenuItem {
         const timeString = date.toLocaleTimeString();
         const dateString = date.toLocaleDateString();
 
-        const prefixText = `${String(index)}.`;
+        const prefixText = `${String(index + 1)}.`;
         this._prefixLabel = new St.Label({
             text: prefixText,
             style_class: 'rwg-history-index',
         });
 
-        if (index === 0) {
-            this.label.text = 'Current Background';
-        } else {
-            this.actor.insert_child_above(this._prefixLabel, this.label);
-            this.label.destroy();
-        }
+        this.actor.insert_child_above(this._prefixLabel, this.label);
+        this.label.destroy();
 
         this._container = new St.BoxLayout({
             vertical: true,
@@ -202,8 +198,7 @@ class HistoryElement extends PopupMenu.PopupSubMenuMenuItem {
         });
         this._container.add_child(timeLabel);
 
-        if (index !== 0)
-            this.actor.insert_child_above(this._container, this._prefixLabel);
+        this.actor.insert_child_above(this._container, this._prefixLabel);
 
         if (this.historyEntry.source !== null) {
             if (this.historyEntry.source.author !== null &&
@@ -255,10 +250,8 @@ class HistoryElement extends PopupMenu.PopupSubMenuMenuItem {
             this.emit('activate', null); // Fixme: not sure what the second parameter should be. null seems to work fine for now.
         });
 
-        if (index !== 0) {
-            // this.menu.addMenuItem(new PopupMenu.PopupBaseMenuItem({ can_focus: false, reactive: false })); // theme independent spacing
-            this.menu.addMenuItem(this._setAsWallpaperItem);
-        }
+        // this.menu.addMenuItem(new PopupMenu.PopupBaseMenuItem({ can_focus: false, reactive: false })); // theme independent spacing
+        this.menu.addMenuItem(this._setAsWallpaperItem);
 
         const copyToFavorites = new PopupMenu.PopupMenuItem('Save For Later');
         copyToFavorites.connect('activate', () => {
@@ -396,38 +389,6 @@ class HistoryElement extends PopupMenu.PopupSubMenuMenuItem {
         if (!success)
             throw new Error(`Failed writing file contents: ${message}`);
     }
-
-    /**
-     * Prefix the menu label with a number.
-     *
-     * @param {number} index Number to prefix
-     */
-    setIndex(index: number): void {
-        this._prefixLabel.set_text(`${String(index)}.`);
-    }
-}
-
-/**
- * Special shell menu element for the current wallpaper HistoryEntry
- */
-class CurrentImageElement extends HistoryElement {
-    static [GObject.GTypeName] = 'CurrentImageElement';
-
-    static {
-        GObject.registerClass(this);
-    }
-
-    /**
-     * Create a new image element for the currently active wallpaper.
-     *
-     * @param {HistoryModule.HistoryEntry} historyEntry History entry this menu is for
-     */
-    constructor(historyEntry: HistoryModule.HistoryEntry) {
-        super(historyEntry, 0);
-
-        if (this._setAsWallpaperItem)
-            this._setAsWallpaperItem.destroy();
-    }
 }
 
 /**
@@ -542,12 +503,6 @@ class StatusElement {
  */
 class HistorySection extends PopupMenu.PopupMenuSection {
     /**
-     * Cache HistoryElements for performance of long histories.
-     */
-    private _historySectionCache = new Map<string, HistoryElement>();
-    private _historyCache: HistoryModule.HistoryEntry[] = [];
-
-    /**
      * Create a new history section.
      */
     constructor() {
@@ -575,55 +530,25 @@ class HistorySection extends PopupMenu.PopupMenuSection {
         onLeave: (actor: HistoryModule.HistoryEntry) => void,
         onSelect: (actor: HistoryModule.HistoryEntry) => void
     ): void {
-        if (this._historyCache.length <= 1)
-            this.removeAll(); // remove empty history element
+        this.removeAll();
 
-        const existingHistoryElements = [];
-
-        for (let i = 1; i < history.length; i++) {
+        for (let i = 0; i < history.length; i++) {
             const historyID = history[i].id;
 
             if (!historyID)
                 continue;
 
-            const cachedHistoryElement = this._historySectionCache.get(historyID);
-            if (!cachedHistoryElement) {
-                const newHistoryElement = new HistoryElement(history[i], i);
-                newHistoryElement.setCallbacks(onEnter, onLeave, onSelect);
+            const newHistoryElement = new HistoryElement(history[i], i);
+            newHistoryElement.setCallbacks(onEnter, onLeave, onSelect);
 
-                this._historySectionCache.set(historyID, newHistoryElement);
-
-                this.addMenuItem(newHistoryElement, i - 1);
-            } else {
-                cachedHistoryElement.setIndex(i);
-            }
-
-            existingHistoryElements.push(historyID);
+            this.addMenuItem(newHistoryElement, i);
         }
-
-        this._cleanupHistoryCache(existingHistoryElements);
-        this._historyCache = history;
-    }
-
-    /**
-     * Cleanup the cache for entries not in $existingIDs.
-     *
-     * @param {string[]} existingIDs List with IDs that exists in the history
-     */
-    private _cleanupHistoryCache(existingIDs: string[]): void {
-        const destroyIDs = Array.from(this._historySectionCache.keys()).filter(i => existingIDs.indexOf(i) === -1);
-
-        destroyIDs.forEach(id => {
-            this._historySectionCache.get(id)?.destroy();
-            this._historySectionCache.delete(id);
-        });
     }
 
     /**
      * Clear and remove all history elements.
      */
     clear(): void {
-        this._cleanupHistoryCache([]);
         this.removeAll();
         this.addMenuItem(
             new PopupMenu.PopupMenuItem('No recent wallpaper ...', {
@@ -633,8 +558,6 @@ class HistorySection extends PopupMenu.PopupMenuSection {
                 can_focus: false,
             })
         );
-
-        this._historyCache = [];
     }
 }
 
@@ -642,7 +565,6 @@ export {
     StatusElement,
     NewWallpaperElement,
     HistorySection,
-    CurrentImageElement,
     HistoryElement,
     PreviewWidget
 };
