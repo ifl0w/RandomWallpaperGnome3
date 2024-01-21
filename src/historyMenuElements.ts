@@ -250,7 +250,6 @@ class HistoryElement extends PopupMenu.PopupSubMenuMenuItem {
             this.emit('activate', null); // Fixme: not sure what the second parameter should be. null seems to work fine for now.
         });
 
-        // this.menu.addMenuItem(new PopupMenu.PopupBaseMenuItem({ can_focus: false, reactive: false })); // theme independent spacing
         this.menu.addMenuItem(this._setAsWallpaperItem);
 
         const copyToFavorites = new PopupMenu.PopupMenuItem('Save For Later');
