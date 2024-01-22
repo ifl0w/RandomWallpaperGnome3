@@ -508,8 +508,8 @@ class HistorySection extends PopupMenu.PopupMenuSection {
         super();
 
         this.actor = new St.ScrollView({
-            hscrollbar_policy: St.PolicyType.NEVER,
             vscrollbar_policy: St.PolicyType.AUTOMATIC,
+            overlay_scrollbars: true,
         });
 
         this.actor.add_actor(this.box);
