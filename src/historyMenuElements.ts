@@ -270,6 +270,22 @@ class HistoryElement extends PopupMenu.PopupSubMenuMenuItem {
             });
             this.menu.addMenuItem(blockImage);
         }
+
+        // The private function _needsScrollbar defines whether a scrollbar is added to the sub-menu.
+        // It is overwritten here since this forces the sub-menu to expand to its natural height.
+        // Otherwise, with long histories, the scrollView is very narrow and scrolling in it isn't really possible.
+        // The outer scrollView encapsulating all history entries should be the only scrollable element.
+        // Source: https://gitlab.gnome.org/GNOME/gnome-shell/-/blob/c76b18a04282e48f6196ad1f9f1ab6f08c492599/js/ui/popupMenu.js#L1028-1035
+        //
+        // FIXME: Need to find a proper solution to this problem since this approach might eventually break. Setting "max-height" in CSS
+        // on the right element should work as well but didn't work for me for some reason.
+        // @ts-expect-error private function overwritten
+        this.menu._needsScrollbar = (): boolean => {
+            return false;
+        };
+        // Disable scrolling in inner scrollView.
+        // This causes the outer scrollView to be the only scrollable area.
+        this.menu.actor.enableMouseScrolling = false;
     }
 
     private static debounceID: number = -1;
