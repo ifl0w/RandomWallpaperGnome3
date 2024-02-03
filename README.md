@@ -33,7 +33,22 @@ Install and try the extension at [extensions.gnome.org](https://extensions.gnome
     * [Superpaper](https://github.com/hhannine/superpaper)
 * Execute a custom command after every new wallpaper 
 
-## Installation (symlink to the repository)
+## Installation
+### Release Archives
+Archives from the [release page](https://github.com/ifl0w/RandomWallpaperGnome3/releases) can be installed and uninstalled using the gnome-extensions command line tool with the commands below.
+```
+gnome-extensions install <path-to-archive>
+```
+
+```
+gnome-extensions uninstall randomwallpaper@iflow.space
+```
+
+### Symlink to the Repository
+__Installing this way has following advantages:__
+* Updating the extension using git (`git pull && ./build.sh`)
+* Switching between versions and branches using git (run `./build.sh` after switching branch).
+
 Requires [`blueprint-compiler`](https://repology.org/project/blueprint-compiler/versions) and [`npm`](https://repology.org/project/npm/versions) at install and update time.
 
 Clone the repository and run `./build.sh && ./install.sh` in the repository folder to make a symbolic link from the extensions folder to the git repository.
@@ -44,11 +59,9 @@ In the case you are using Wayland, then no restart should be required.
 
 Now you should be able to activate the extension through the gnome-tweak-tool.
 
-__Installing this way has various advantages:__
-* Switching between versions and branches.
-* Updating the extension with `git pull && ./build.sh`
+To uninstall the extension, run `./install uninstall` or manually delete the corresponding symbolic link.
 
-## Installation (manually)
+## Build From Source
 Requires [`blueprint-compiler`](https://repology.org/project/blueprint-compiler/versions) and [`npm`](https://repology.org/project/npm/versions) at install and update time.
 
 Clone or download the repository and copy the folder `randomwallpaper@iflow.space` in the repository to `$XDG_DATA_HOME/gnome-shell/extensions/` (usually `$HOME/.local/share/gnome-shell/extensions/`).
@@ -57,11 +70,7 @@ Run `./build.sh` inside the repository.
 Then open the command prompt (Alt+F2) end enter `r` to restart the gnome session.
 In the case you are using Wayland, then no restart should be required.
 
-Now you should be able to activate the extension through the gnome-tweak-tool.
-
-## Uninstall
-Run `./install uninstall` to delete the symbolic link.
-If you installed the extension manually you have to delete the extension folder `randomwallpaper@iflow.space` in `$XDG_DATA_HOME/gnome-shell/extensions/` (usually `$HOME/.local/share/gnome-shell/extensions/`).
+Now, you should be able to activate the extension through the gnome-tweak-tool.
 
 ## Debugging
 You can follow the output of the extension with `./debug.sh`. Information should be printed using the existing logger class but can also be printed with `global.log()` (not recommended).
