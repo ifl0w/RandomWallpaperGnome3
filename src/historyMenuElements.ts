@@ -252,11 +252,22 @@ class HistoryElement extends PopupMenu.PopupSubMenuMenuItem {
 
         this.menu.addMenuItem(this._setAsWallpaperItem);
 
-        const copyToFavorites = new PopupMenu.PopupMenuItem('Save For Later');
+        const copyToFavoritesLabelText = 'Save for Later';
+        const copyToFavorites = new PopupMenu.PopupMenuItem(copyToFavoritesLabelText);
         copyToFavorites.connect('activate', () => {
             this._saveImage().catch(error => {
                 Logger.error(error, this);
             });
+        });
+        // Disable copy option if the file was already saved.
+        this.menu.connect('open-state-changed', (_, open) => {
+            if (open && this._checkAlreadySaved()) {
+                copyToFavorites.sensitive = false;
+                copyToFavorites.label.set_text('Already Saved!');
+            } else {
+                copyToFavorites.sensitive = true;
+                copyToFavorites.label.set_text(copyToFavoritesLabelText);
+            }
         });
         this.menu.addMenuItem(copyToFavorites);
 
@@ -403,6 +414,21 @@ class HistoryElement extends PopupMenu.PopupSubMenuMenuItem {
 
         if (!success)
             throw new Error(`Failed writing file contents: ${message}`);
+    }
+
+    /**
+     * Checks if the file of this history entry was already saved.
+     *
+     * @returns {boolean} Whether the target file exists already.
+     */
+    private _checkAlreadySaved(): boolean {
+        if (!this.historyEntry || !this.historyEntry.name)
+            return false;
+
+        const targetFolder = Gio.File.new_for_path(this._settings.getString('favorites-folder'));
+        const targetFile = targetFolder.get_child(this.historyEntry.name);
+
+        return targetFile.query_exists(null);
     }
 }
 
