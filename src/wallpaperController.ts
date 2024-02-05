@@ -450,32 +450,25 @@ class WallpaperController {
     /**
      * Set an existing history entry as wallpaper.
      *
-     * @param {string} historyId Unique ID
+     * @param {HistoryModule.HistoryEntry} historyEntry The history entry to set as wallpaper.
      */
-    async setWallpaper(historyId: string): Promise<void> {
-        const historyElement = this._historyController.get(historyId);
+    async setWallpaper(historyEntry: HistoryModule.HistoryEntry): Promise<void> {
+        const changeType = this._settings.getInt('change-type') as Mode;
+        const usedWallpaperPaths = this._fillDisplaysFromHistory([historyEntry.path]);
 
-        if (historyElement?.id && historyElement.path && this._historyController.promoteToActive(historyElement.id)) {
-            const changeType = this._settings.getInt('change-type') as Mode;
-            const usedWallpaperPaths = this._fillDisplaysFromHistory([historyElement.path]);
+        // ignore changeType === Mode.BACKGROUND_AND_LOCKSCREEN_INDEPENDENT because that doesn't make sense
+        // when requesting a specific history entry
+        if (changeType > Mode.BACKGROUND_AND_LOCKSCREEN)
+            await this._wallpaperManager.setWallpaper(usedWallpaperPaths, Mode.BACKGROUND_AND_LOCKSCREEN);
+        else
+            await this._wallpaperManager.setWallpaper(usedWallpaperPaths, changeType);
 
-            // ignore changeType === Mode.BACKGROUND_AND_LOCKSCREEN_INDEPENDENT because that doesn't make sense
-            // when requesting a specific history entry
-            if (changeType > Mode.BACKGROUND_AND_LOCKSCREEN)
-                await this._wallpaperManager.setWallpaper(usedWallpaperPaths, Mode.BACKGROUND_AND_LOCKSCREEN);
-            else
-                await this._wallpaperManager.setWallpaper(usedWallpaperPaths, changeType);
-
-            this._runPostCommands();
-            usedWallpaperPaths.reverse().forEach(path => {
-                const id = this._historyController.getEntryByPath(path)?.id;
-                if (id)
-                    this._historyController.promoteToActive(id);
-            });
-        } else {
-            Logger.warn(`The history id (${historyId}) could not be found.`, this);
-        }
-        // TODO: Error handling history id not found.
+        this._runPostCommands();
+        usedWallpaperPaths.reverse().forEach(path => {
+            const id = this._historyController.getEntryByPath(path)?.id;
+            if (id)
+                this._historyController.promoteToActive(id);
+        });
     }
 
     /**

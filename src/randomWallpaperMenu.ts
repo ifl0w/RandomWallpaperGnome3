@@ -264,7 +264,7 @@ class RandomWallpaperMenu {
             // Make sure no other preview or reset event overwrites our setWallpaper!
             this._wallpaperController.prohibitNewWallpaper = true;
 
-            this._wallpaperController.setWallpaper(entry.id).then(() => {
+            this._wallpaperController.setWallpaper(entry).then(() => {
                 this._wallpaperController.prohibitNewWallpaper = false;
 
                 if (this._settings.getInt('change-type') as Mode === Mode.LOCKSCREEN && this._savedBackgroundUri) {
