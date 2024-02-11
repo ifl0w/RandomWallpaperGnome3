@@ -76,7 +76,7 @@ class RandomWallpaperMenu {
         this._panelMenu.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 
         // Temporarily pause timer
-        const pauseTimerItem = new PopupMenu.PopupSwitchMenuItem('Pause timer', false);
+        const pauseTimerItem = new PopupMenu.PopupSwitchMenuItem('Pause Timer', false);
 
         pauseTimerItem.connect('toggled', (_, state: boolean) => {
             this._backendConnection.setBoolean('pause-timer', state);

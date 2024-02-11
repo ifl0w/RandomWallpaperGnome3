@@ -229,7 +229,7 @@ class HistoryElement extends PopupMenu.PopupSubMenuMenuItem {
                 this.menu.addMenuItem(sourceItem);
             }
 
-            const imageUrlItem = new PopupMenu.PopupMenuItem('Open Image In Browser');
+            const imageUrlItem = new PopupMenu.PopupMenuItem('Open Image in Browser');
             imageUrlItem.connect('activate', () => {
                 if (this.historyEntry.source.imageLinkUrl) {
                     Utils.execCheck(['xdg-open', this.historyEntry.source.imageLinkUrl]).catch(error => {
@@ -240,7 +240,7 @@ class HistoryElement extends PopupMenu.PopupSubMenuMenuItem {
 
             this.menu.addMenuItem(imageUrlItem);
         } else {
-            this.menu.addMenuItem(new PopupMenu.PopupMenuItem('Unknown source.'));
+            this.menu.addMenuItem(new PopupMenu.PopupMenuItem('Unknown Source'));
         }
 
         this.menu.addMenuItem(new HistoryElementSubmenuSeparator());
@@ -275,7 +275,7 @@ class HistoryElement extends PopupMenu.PopupSubMenuMenuItem {
 
         // Static URLs can't block images (yet?)
         if (this.historyEntry.adapter?.type !== Utils.SourceType.STATIC_URL) {
-            const blockImage = new PopupMenu.PopupMenuItem('Add To Blocklist');
+            const blockImage = new PopupMenu.PopupMenuItem('Add to Blocklist');
             blockImage.connect('activate', () => {
                 this._addToBlocklist();
             });
