@@ -201,7 +201,7 @@
         </key>
 
         <key type='b' name='featured-only'>
-            <default>false</default>
+            <default>true</default>
             <summary>Featured images only</summary>
             <description>This results in a smaller wallpaper pool but the images are considered to have higher quality.</description>
         </key>
