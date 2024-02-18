@@ -23,6 +23,9 @@ import {SourceConfigModal} from './ui/sourceConfigModal.js';
 class RandomWallpaperSettings extends ExtensionPreferences {
     private _saveDialog?: Gtk.FileChooserNative;
 
+    // timer state before the settings where opened
+    private pauseTimerState = false;
+
     /**
      * This function is called when the preferences window is first created to fill
      * the `Adw.PreferencesWindow`.
@@ -42,7 +45,14 @@ class RandomWallpaperSettings extends ExtensionPreferences {
         window.set_default_size(600, 720);
         window.set_search_enabled(true);
 
+        // save the current pause-timer state before pausing
+        this.pauseTimerState = backendConnection.getBoolean('pause-timer');
+        // pause timer while in settings
         backendConnection.setBoolean('pause-timer', true);
+        // observe the pause-timer
+        backendConnection.observe('pause-timer', () => {
+            this.pauseTimerState = backendConnection.getBoolean('pause-timer');
+        });
 
         const extensionObject = ExtensionPreferences.lookupByURL(import.meta.url);
         if (!extensionObject) {
@@ -119,7 +129,7 @@ class RandomWallpaperSettings extends ExtensionPreferences {
         backendAvailableChangedHandler();
 
         window.connect('close-request', () => {
-            backendConnection.setBoolean('pause-timer', false);
+            backendConnection.setBoolean('pause-timer', this.pauseTimerState);
             Settings.Settings.extensionContext = undefined;
             Logger.destroy();
         });
