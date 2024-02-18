@@ -29,7 +29,7 @@ class UnsplashAdapter extends BaseAdapter {
         'query': '',
         'w': 1920,
         'h': 1080,
-        'featured': false,
+        'featured': true,
         'constraintType': 0,
         'constraintValue': '',
     };
