@@ -6,6 +6,7 @@ import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
 import * as HistoryModule from './history.js';
 import * as SettingsModule from './settings.js';
 import * as Utils from './utils.js';
+import * as Settings from './settings.js';
 
 import {AFTimer as Timer} from './timer.js';
 import {Logger} from './logger.js';
@@ -36,7 +37,6 @@ interface RandomAdapterResult {
  */
 class WallpaperController {
     wallpaperLocation: string;
-    prohibitNewWallpaper = false;
 
     private _backendConnection = new SettingsModule.Settings(SettingsModule.RWG_SETTINGS_SCHEMA_BACKEND_CONNECTION);
     private _settings = new SettingsModule.Settings();
@@ -51,6 +51,8 @@ class WallpaperController {
     private _stopLoadingHooks: (() => void)[] = [];
     private _observedValues: number[] = [];
     private _observedBackgroundValues: number[] = [];
+
+    private savedBackgroundURI: string | null = null;
 
     /**
      * Create a new controller.
@@ -195,23 +197,10 @@ class WallpaperController {
      * Pause or resume the timer. (Background settings observer edition)
      */
     private _pauseTimer(): void {
-        if (this._backendConnection.getBoolean('pause-timer')) {
+        if (this._backendConnection.getBoolean('pause-timer'))
             this._timer.pause();
-        } else {
+        else
             this._timer.continue();
-
-            // Switching the switch in the menu closes the menu which triggers a hover event
-            // Prohibit that from emitting because a paused timer could have surpassed the interval
-            // and try to fetch new wallpaper which would be interrupted by a wallpaper reset caused
-            // by the closing menu event.
-            this.prohibitNewWallpaper = true;
-
-            // And activate emitting again after a second
-            GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, 1, () => {
-                this.prohibitNewWallpaper = false;
-                return GLib.SOURCE_REMOVE;
-            });
-        }
     }
 
     /**
@@ -463,6 +452,11 @@ class WallpaperController {
         else
             await this._wallpaperManager.setWallpaper(usedWallpaperPaths, changeType);
 
+        // Saved the new background when it was changed (i.e., when the mode isn't lock-screen only) and
+        // when it is required for resetting to the correct state.
+        if (this.savedBackgroundURI && changeType !== Mode.LOCKSCREEN)
+            this.rememberCurrentWallpaper();
+
         this._runPostCommands();
         usedWallpaperPaths.reverse().forEach(path => {
             const id = this._historyController.getEntryByPath(path)?.id;
@@ -548,6 +542,11 @@ class WallpaperController {
 
             await this._wallpaperManager.setWallpaper(usedWallpaperPaths, changeType);
 
+            // Saved the new background when it was changed (i.e., when the mode isn't lock-screen only) and
+            // when it is required for resetting to the correct state.
+            if (this.savedBackgroundURI && changeType !== Mode.LOCKSCREEN)
+                this.rememberCurrentWallpaper();
+
             usedWallpaperPaths.reverse().forEach(path => {
                 const id = this._historyController.getEntryByPath(path)?.id;
                 if (id)
@@ -630,6 +629,12 @@ class WallpaperController {
      * @param {string} historyId Unique ID
      */
     previewWallpaper(historyId: string): void {
+        // only store the background if it wasn't stored yet
+        if (!this.savedBackgroundURI) {
+            // Saved the current background so we can revert to it when the reset function is called
+            this.rememberCurrentWallpaper();
+        }
+
         if (!this._settings.getBoolean('disable-hover-preview')) {
             this._previewId = historyId;
 
@@ -645,16 +650,30 @@ class WallpaperController {
     }
 
     /**
-     * Set the wallpaper to an URI.
-     *
-     * @param {string} uri Wallpaper URI
+     * Reset the wallpaper to the last known URI.
      */
-    resetWallpaper(uri: string): void {
-        if (!this._settings.getBoolean('disable-hover-preview')) {
-            this._wallpaperManager.setWallpaper([GLib.filename_from_uri(uri)[0]]).catch(error => {
+    resetPreview(): void {
+        if (!this._settings.getBoolean('disable-hover-preview') && this.savedBackgroundURI) {
+            Logger.debug(`Resetting desktop preview to: ${this.savedBackgroundURI}`, this);
+
+            this._wallpaperManager.setWallpaper([GLib.filename_from_uri(this.savedBackgroundURI)[0]]).catch(error => {
                 Logger.error(error, this);
             });
         }
+
+        this.savedBackgroundURI = null;
+    }
+
+    /**
+     * Store the current wallpaper that will be used to reset the preview.
+     */
+    private rememberCurrentWallpaper(): void {
+        // Update saved background with newly set background image
+        // so we don't revert to an older state when closing the menu
+        const backgroundSettings = new Settings.Settings('org.gnome.desktop.background');
+        this.savedBackgroundURI = backgroundSettings.getString('picture-uri');
+
+        Logger.debug(`Saved current background for reset: ${this.savedBackgroundURI}`, this);
     }
 
     /**

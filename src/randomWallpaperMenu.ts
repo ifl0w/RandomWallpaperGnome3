@@ -18,7 +18,6 @@ import * as Utils from './utils.js';
 
 import {Logger} from './logger.js';
 import {WallpaperController} from './wallpaperController.js';
-import {Mode} from './manager/wallpaperManager.js';
 import {HistoryEntry} from './history.js';
 
 /**
@@ -26,7 +25,6 @@ import {HistoryEntry} from './history.js';
  */
 class RandomWallpaperMenu {
     private _backendConnection = new Settings.Settings(Settings.RWG_SETTINGS_SCHEMA_BACKEND_CONNECTION);
-    private _savedBackgroundUri: string | null = null;
     private _settings = new Settings.Settings();
     private _observedValues: number[] = [];
     private _observedBackgroundValues: number[] = [];
@@ -118,14 +116,11 @@ class RandomWallpaperMenu {
 
         // new wallpaper event
         newWallpaperItem.connect('activate', () => {
-            // Make sure no other preview or reset event overwrites our setWallpaper!
-            this._wallpaperController.prohibitNewWallpaper = true;
-            this._wallpaperController.fetchNewWallpaper().then(() => {
-            }).catch(error => {
-                Logger.error(error, this);
-            }).finally(() => {
-                this._wallpaperController.prohibitNewWallpaper = false;
-            });
+            this._wallpaperController.fetchNewWallpaper()
+                .then(() => { /* nothing to do */ })
+                .catch(error => {
+                    Logger.error(error, this);
+                });
         });
 
         // clear history event
@@ -157,22 +152,8 @@ class RandomWallpaperMenu {
         });
 
         this._panelMenu.menu.connect('open-state-changed', (_, open) => {
-            if (open) {
-                // Save currently used background so we can reset to this
-                // in case only the lock screen was changed while the preview
-                // used the normal background
-                const backgroundSettings = new Settings.Settings('org.gnome.desktop.background');
-                this._savedBackgroundUri = backgroundSettings.getString('picture-uri');
-
-                // Update remaining time label
+            if (open)
                 newWallpaperItem.show();
-            } else {
-                // Reset to the saved background image on popup closing
-                if (!this._wallpaperController.prohibitNewWallpaper && this._savedBackgroundUri)
-                    this._wallpaperController.resetWallpaper(this._savedBackgroundUri);
-
-                this._savedBackgroundUri = null;
-            }
         });
 
         this._observedValues.push(this._settings.observe('history', this.setHistoryList.bind(this)));
@@ -239,8 +220,7 @@ class RandomWallpaperMenu {
             if (history.length > 0)
                 this.previewWidget.preview(history[0].path);
 
-            if (!this._wallpaperController.prohibitNewWallpaper && this._savedBackgroundUri)
-                this._wallpaperController.resetWallpaper(this._savedBackgroundUri);
+            this._wallpaperController.resetPreview();
         };
 
         /**
@@ -250,9 +230,7 @@ class RandomWallpaperMenu {
          */
         const onEnter = (entry: HistoryEntry): void => {
             this.previewWidget.preview(entry.path);
-
-            if (!this._wallpaperController.prohibitNewWallpaper)
-                this._wallpaperController.previewWallpaper(entry.id);
+            this._wallpaperController.previewWallpaper(entry.id);
         };
 
         /**
@@ -261,25 +239,11 @@ class RandomWallpaperMenu {
          * @param {HistoryEntry} entry The selected history entry
          */
         const onSelect = (entry: HistoryEntry): void => {
-            // Make sure no other preview or reset event overwrites our setWallpaper!
-            this._wallpaperController.prohibitNewWallpaper = true;
-
+            Logger.debug(`Selected entry from history as wallpaper (source: ${entry.source.source})`, this);
+            this._wallpaperController.resetPreview();
             this._wallpaperController.setWallpaper(entry).then(() => {
-                this._wallpaperController.prohibitNewWallpaper = false;
-
-                if (this._settings.getInt('change-type') as Mode === Mode.LOCKSCREEN && this._savedBackgroundUri) {
-                    // Reset background after previewing the lock screen options
-                    this._wallpaperController.resetWallpaper(this._savedBackgroundUri);
-                } else {
-                    // Update saved background with newly set background image
-                    // so we don't revert to an older state when closing the menu
-                    const backgroundSettings = new Settings.Settings('org.gnome.desktop.background');
-                    this._savedBackgroundUri = backgroundSettings.getString('picture-uri');
-                }
-
                 this.setHistoryList();
             }).catch(error => {
-                this._wallpaperController.prohibitNewWallpaper = false;
                 Logger.error(error, this);
             });
         };
