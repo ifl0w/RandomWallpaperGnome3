@@ -26,11 +26,11 @@ import {WallhavenAdapter} from './adapter/wallhaven.js';
 Gio._promisify(Gio.File.prototype, 'move_async', 'move_finish');
 
 interface RandomAdapterResult {
-            adapter: BaseAdapter,
-            id: string,
-            type: number,
-            imageCount: number
-        }
+    adapter: BaseAdapter,
+    id: string,
+    type: number,
+    imageCount: number
+}
 
 /**
  * The main wallpaper handler.
