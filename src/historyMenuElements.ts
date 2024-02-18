@@ -299,8 +299,11 @@ class HistoryElement extends PopupMenu.PopupSubMenuMenuItem {
         this.menu.actor.enableMouseScrolling = false;
     }
 
-    private static debounceID: number = -1;
     private static readonly DEBOUNCE_DELAY: number = 150;
+    private static readonly DEBOUNCE_ERROR_MSG: string = 'debounce';
+    private static debounceID: number = -1;
+    private static clearLastDebounceTimeout: (() => void) | undefined;
+    private static lastDebounceTimeout: number | undefined;
     /**
      * Debounce events based on incremented debounceID. I.e. Only the last promise created resolves when the timeout finishes.
      *
@@ -311,13 +314,43 @@ class HistoryElement extends PopupMenu.PopupSubMenuMenuItem {
         // Warp ids and ignore issues when more events are queued than the ID period.
         HistoryElement.debounceID %= 65536;
 
-        return new Promise(resolve => {
+        return new Promise((resolve, reject) => {
             const debounceID = HistoryElement.debounceID;
-            setTimeout(() => {
+
+            HistoryElement.cleanupDebounce();
+
+            // set up timeout
+            HistoryElement.lastDebounceTimeout = setTimeout(() => {
                 if (debounceID === HistoryElement.debounceID)
                     resolve();
+                else
+                    reject(new Error(HistoryElement.DEBOUNCE_ERROR_MSG));
+
+                HistoryElement.lastDebounceTimeout = undefined;
+                HistoryElement.clearLastDebounceTimeout = undefined;
             }, HistoryElement.DEBOUNCE_DELAY);
+
+            // set up cleanup function
+            HistoryElement.clearLastDebounceTimeout = (): void => {
+                reject(new Error(HistoryElement.DEBOUNCE_ERROR_MSG));
+            };
         });
+    }
+
+    /**
+     * Remove and cleanup any running debounce timeout.
+     */
+    public static cleanupDebounce(): void {
+        // clear last timeout if it exists
+        if (HistoryElement.lastDebounceTimeout)
+            clearTimeout(HistoryElement.lastDebounceTimeout);
+
+        // call cleanup function of latest timeout
+        if (HistoryElement.clearLastDebounceTimeout)
+            HistoryElement.clearLastDebounceTimeout();
+
+        HistoryElement.lastDebounceTimeout = undefined;
+        HistoryElement.clearLastDebounceTimeout = undefined;
     }
 
     /**
@@ -332,11 +365,16 @@ class HistoryElement extends PopupMenu.PopupSubMenuMenuItem {
         onLeave: (entry: HistoryModule.HistoryEntry) => void,
         onSelect: (entry: HistoryModule.HistoryEntry) => void
     ): void {
+        const debounceCatch = (err: Error): void => {
+            if (err.message !== HistoryElement.DEBOUNCE_ERROR_MSG)
+                Logger.error(err, this);
+        };
+
         const connect_events = (element: Clutter.Actor): void => {
-            element.connect('key-focus-in', () => void this.debounce().then(() => onEnter(this.historyEntry)).catch(err => Logger.error(err, this)));
-            element.connect('key-focus-out', () => void this.debounce().then(() => onLeave(this.historyEntry)).catch(err => Logger.error(err, this)));
-            element.connect('enter-event', () => void this.debounce().then(() => onEnter(this.historyEntry)).catch(err => Logger.error(err, this)));
-            element.connect('leave-event', () => void this.debounce().then(() => onLeave(this.historyEntry)).catch(err => Logger.error(err, this)));
+            element.connect('key-focus-in', () => void this.debounce().then(() => onEnter(this.historyEntry)).catch(debounceCatch));
+            element.connect('key-focus-out', () => void this.debounce().then(() => onLeave(this.historyEntry)).catch(debounceCatch));
+            element.connect('enter-event', () => void this.debounce().then(() => onEnter(this.historyEntry)).catch(debounceCatch));
+            element.connect('leave-event', () => void this.debounce().then(() => onLeave(this.historyEntry)).catch(debounceCatch));
         };
 
         connect_events(this.actor);
@@ -352,9 +390,12 @@ class HistoryElement extends PopupMenu.PopupSubMenuMenuItem {
         this.menu.connect('open-state-changed', (_, open) => void this.debounce().then(() => {
             if (!open)
                 onLeave(this.historyEntry);
-        }).catch(err => Logger.error(err, this)));
+        }).catch(debounceCatch));
 
-        this.connect('activate', () => onSelect(this.historyEntry));
+        this.connect('activate', () => {
+            HistoryElement.cleanupDebounce();
+            onSelect(this.historyEntry);
+        });
     }
 
     /**
@@ -590,6 +631,9 @@ class HistorySection extends PopupMenu.PopupMenuSection {
      * Clear and remove all history elements.
      */
     clear(): void {
+        // ensure UI debounce timeouts are cleaned up
+        HistoryElement.cleanupDebounce();
+
         this.removeAll();
 
         const noHistory = new PopupMenu.PopupMenuItem('No Wallpaper History');
