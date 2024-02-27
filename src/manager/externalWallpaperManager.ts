@@ -45,7 +45,7 @@ abstract class ExternalWallpaperManager extends WallpaperManager {
      * @param {string[]} wallpaperPaths Array of paths to the desired wallpapers, should match the display count
      * @param {Mode} mode Enum indicating what images to change
      */
-    async setWallpaper(wallpaperPaths: string[], mode: Mode): Promise<void> {
+    async setWallpaper(wallpaperPaths: string[], mode: Mode = Mode.BACKGROUND): Promise<void> {
         if (wallpaperPaths.length < 1)
             throw new Error('Empty wallpaper array');
 
