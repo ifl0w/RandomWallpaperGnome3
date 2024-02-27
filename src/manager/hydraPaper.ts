@@ -84,7 +84,7 @@ class HydraPaper extends ExternalWallpaperManager {
         if (HydraPaper._versionIsOld === undefined || HydraPaper._versionIsOld === null)
             await this._getVersion();
 
-        // The old version only sets light mode and we can sync simply sync to dark mode
+        // The old version only sets light mode and we can simply sync to dark mode
         if (HydraPaper._versionIsOld) {
             Utils.setPictureUriOfSettingsObject(targetSettings, sourceSettings.getString('picture-uri'));
             return;
@@ -107,7 +107,8 @@ class HydraPaper extends ExternalWallpaperManager {
     }
 
     /**
-     * Really really really annoying and awkward version detection because HydraPaper doesn't state it anywhere… at all.
+     * Workaround for detecting old HydraPaper versions by testing supported command-line options.
+     * This has to be done because there is no dedicated way to list the version (i.e., there is no --version option).
      *
      * This tests if the argument '--dark' is known:
      * Versions < 3.3.2 know that argument
