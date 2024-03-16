@@ -271,8 +271,29 @@ function isImageMerged(filename: string): boolean {
         Superpaper.isImageMerged(filename);
 }
 
+/**
+ * Get all possible enum values from a gsettings schema.
+ *
+ * @param {Settings} settings The gsettings containing the enum
+ * @param {string} key The key of the enum in the schema
+ * @returns {string[]} A list of strings with all possible values for a key
+ */
+function getEnumFromSettings(settings: Settings, key: string): string[] {
+    // Fill combo from settings enum
+
+    const availableTypes = settings.getSchema().get_key(key).get_range(); // GLib.Variant (sv)
+    // (sv) = Tuple(%G_VARIANT_TYPE_STRING, %G_VARIANT_TYPE_VARIANT)
+    // s should be 'enum'
+    // v should be an array enumerating the possible values. Each item in the array is a possible valid value and no other values are valid.
+    // v is 'as' (array of strings)
+    const availableTypeNames = availableTypes.get_child_value(1).get_variant().get_strv();
+
+    return availableTypeNames;
+}
+
 export {
     SourceType,
+    getEnumFromSettings,
     getSourceTypeName,
     getWallpaperManager,
     isImageMerged,

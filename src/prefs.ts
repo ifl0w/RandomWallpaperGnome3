@@ -71,6 +71,13 @@ class RandomWallpaperSettings extends ExtensionPreferences {
             'selected',
             Gio.SettingsBindFlags.DEFAULT);
 
+        const comboZoomMode = this._getAs<Adw.ComboRow>(builder, 'combo_zoom_mode');
+        comboZoomMode.model = Gtk.StringList.new(WallpaperManager.getZoomModeEnum());
+        settings.bind('zoom-mode',
+            comboZoomMode,
+            'selected',
+            Gio.SettingsBindFlags.DEFAULT);
+
         const comboLogLevel = this._getAs<Adw.ComboRow>(builder, 'log_level');
         comboLogLevel.model = Gtk.StringList.new(Logger.getLogLevelNameList());
         settings.bind('log-level',

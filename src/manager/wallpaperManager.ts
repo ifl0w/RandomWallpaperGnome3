@@ -1,4 +1,5 @@
 import {Settings} from './../settings.js';
+import {getEnumFromSettings} from './../utils.js';
 
 // Generated code produces a no-shadow rule error
 /* eslint-disable */
@@ -104,8 +105,32 @@ function getModeNameList(): string[] {
     return list;
 }
 
+/**
+ * Get a list of all the valid enum entries and return them as an array of strings
+ *
+ * Note: The list gets pre-filtered of unwanted values.
+ *
+ * @returns {string[]} Array of string containing valid enum values
+ */
+function getZoomModeEnum(): string[] {
+    return getEnumFromSettings(new Settings('org.gnome.desktop.background'), 'picture-options').filter(s => {
+        const negatives = [
+            'none',         // No wallpaper
+            'wallpaper',    // Tiled wallpapers, repeating pattern
+            'stretched',    // Ignoring aspect ratio
+            'spanned',      // Ignoring aspect ratio
+        ];
+
+        if (negatives.includes(s))
+            return false;
+
+        return true;
+    });
+}
+
 export {
     WallpaperManager,
     Mode,
-    getModeNameList
+    getModeNameList,
+    getZoomModeEnum
 };
