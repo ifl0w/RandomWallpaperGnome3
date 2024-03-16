@@ -1,8 +1,8 @@
 import * as Utils from '../utils.js';
 
-import {WallpaperManager} from './wallpaperManager.js';
+import {WallpaperManager, getZoomModeEnum} from './wallpaperManager.js';
 import {Logger} from '../logger.js';
-import type {Settings} from '../settings.js';
+import {Settings} from '../settings.js';
 
 /**
  * A general default wallpaper manager.
@@ -54,8 +54,7 @@ class DefaultWallpaperManager extends WallpaperManager {
             // merged wallpapers need mode "spanned"
             backgroundSettings.setString('picture-options', 'spanned');
         else
-            // single wallpapers need mode "zoom"
-            backgroundSettings.setString('picture-options', 'zoom');
+            backgroundSettings.setString('picture-options', getZoomModeEnum()[new Settings().getInt('zoom-mode')]);
 
         Utils.setPictureUriOfSettingsObject(backgroundSettings, wallpaperURI);
         return Promise.resolve();
@@ -74,8 +73,7 @@ class DefaultWallpaperManager extends WallpaperManager {
             // merged wallpapers need mode "spanned"
             screensaverSettings.setString('picture-options', 'spanned');
         else
-            // single wallpapers need mode "zoom"
-            screensaverSettings.setString('picture-options', 'zoom');
+            screensaverSettings.setString('picture-options', getZoomModeEnum()[new Settings().getInt('zoom-mode')]);
 
         Utils.setPictureUriOfSettingsObject(screensaverSettings, wallpaperURI);
         return Promise.resolve();
