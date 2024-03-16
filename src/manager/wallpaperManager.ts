@@ -13,6 +13,27 @@ enum Mode {
     /** Change each - the desktop and lock screen background - to different images. */
     BACKGROUND_AND_LOCKSCREEN_INDEPENDENT,
 }
+
+enum ZoomMode {
+    /** No wallpaper. Literally. */
+    // Deactivated because this doesn't make sense
+    // NONE,
+    /** Mosaic style, probably for tiling images. */
+    WALLPAPER,
+    /** Centered image, no scaling. */
+    CENTERED,
+    /** Scales to fit, with black borders. */
+    SCALED,
+    /** Stretches the image to fit, without considering aspect ratio. */
+    STRETCHED,
+    /** Scales to fit, without black borders. */
+    ZOOM,
+    /**
+     * Stretches one image across a whole (multi-monitor) canvas, without considering aspect ratio.
+     * Crafting a correctly sized image allows for multiple images on different displays.
+    */
+    SPANNED,
+}
 /* eslint-enable */
 
 /**
@@ -104,8 +125,65 @@ function getModeNameList(): string[] {
     return list;
 }
 
+/**
+ * Retrieve the human readable enum name.
+ *
+ * @param {ZoomMode} mode The zoom mode to name
+ * @returns {string} Name
+ */
+function getZoomName(mode: ZoomMode): string {
+    let name: string;
+
+    switch (mode) {
+    // case ZoomMode.NONE:
+    //     name = 'none';
+    //     break;
+    case ZoomMode.WALLPAPER:
+        name = 'wallpaper';
+        break;
+    case ZoomMode.CENTERED:
+        name = 'centered';
+        break;
+    case ZoomMode.SCALED:
+        name = 'scaled';
+        break;
+    case ZoomMode.STRETCHED:
+        name = 'stretched';
+        break;
+    case ZoomMode.ZOOM:
+        name = 'zoom';
+        break;
+    case ZoomMode.SPANNED:
+        name = 'spanned';
+        break;
+
+    default:
+        name = 'Mode name not found';
+        break;
+    }
+
+    return name;
+}
+
+/**
+ * Get a list of human readable enum entries.
+ *
+ * @returns {string[]} Array with key names
+ */
+function getZoomModeNameList(): string[] {
+    const list: string[] = [];
+
+    const values = Object.values(ZoomMode).filter(v => !isNaN(Number(v)));
+    for (const i of values)
+        list.push(getZoomName(i as ZoomMode));
+
+    return list;
+}
+
 export {
     WallpaperManager,
     Mode,
-    getModeNameList
+    getModeNameList,
+    getZoomModeNameList,
+    getZoomName
 };
