@@ -114,6 +114,10 @@ class RandomWallpaperSettings extends ExtensionPreferences {
             this._getAs(builder, 'enable_multiple_displays'),
             'active',
             Gio.SettingsBindFlags.DEFAULT);
+        settings.bind('fit-display',
+            this._getAs(builder, 'fit-display'),
+            'active',
+            Gio.SettingsBindFlags.DEFAULT);
 
         this._bindButtons(settings, backendConnection, builder, sources, window);
         this._bindHistorySection(settings, backendConnection, builder, window);

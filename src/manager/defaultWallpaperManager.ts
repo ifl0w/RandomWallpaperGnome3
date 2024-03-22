@@ -53,8 +53,9 @@ class DefaultWallpaperManager extends WallpaperManager {
         if (Utils.isImageMerged(wallpaperURI))
             // merged wallpapers need mode "spanned"
             backgroundSettings.setString('picture-options', 'spanned');
+        else if("fit-display")
+            backgroundSettings.setString('picture-options', 'scaled');
         else
-            // single wallpapers need mode "zoom"
             backgroundSettings.setString('picture-options', 'zoom');
 
         Utils.setPictureUriOfSettingsObject(backgroundSettings, wallpaperURI);
@@ -73,8 +74,9 @@ class DefaultWallpaperManager extends WallpaperManager {
         if (Utils.isImageMerged(wallpaperURI))
             // merged wallpapers need mode "spanned"
             screensaverSettings.setString('picture-options', 'spanned');
+        else if("fit-display")
+            backgroundSettings.setString('picture-options', 'scaled');
         else
-            // single wallpapers need mode "zoom"
             screensaverSettings.setString('picture-options', 'zoom');
 
         Utils.setPictureUriOfSettingsObject(screensaverSettings, wallpaperURI);
