@@ -595,7 +595,7 @@ class HistorySection extends PopupMenu.PopupMenuSection {
             overlay_scrollbars: true,
         });
 
-        this.actor.add_actor(this.box);
+        this.actor.add_child(this.box);
     }
 
     /**
