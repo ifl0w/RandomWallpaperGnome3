@@ -4,8 +4,8 @@
   "settings-schema": "org.gnome.shell.extensions.space.iflow.randomwallpaper",
   "name": "Random Wallpaper",
   "description": "Load new desktop wallpapers from various online sources with ease!",
-  "version": 34,
-  "semantic-version": "3.0.1",
+  "version": 35,
+  "semantic-version": "3.0.2",
   "url": "https://github.com/ifl0w/RandomWallpaperGnome3",
   "issue-url": "https://github.com/ifl0w/RandomWallpaperGnome3/issues"
 }
