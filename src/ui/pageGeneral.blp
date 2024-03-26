@@ -31,6 +31,15 @@ Adw.PreferencesPage page_general {
             use-subtitle: true;
         }
 
+        Adw.ActionRow fit_display_row {
+            title: _("Fit Entire Into Screen");
+            subtitle: _("Fit the entire image into the screen, leaving black stripes around the Image if it does not have the same ratio. If unset, the images are instead cropped to fit your screen. If you're using hydrapaper, the black strip are replaced with the blurred zoom image.")
+
+            Switch fit_display {
+                valign: center;
+            }
+        }
+
         Adw.ActionRow multiple_displays_row {
             title: _("Different Wallpapers on Multiple Displays");
             subtitle: _("Requires HydraPaper or Superpaper.");

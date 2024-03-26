@@ -69,6 +69,10 @@ class HydraPaper extends ExternalWallpaperManager {
         // hydrapaper --cli PATH PATH PATH
         command.push('--cli');
         command = command.concat(wallpaperArray);
+        if ("fit-display")
+            command.push('--modes');
+            command = command.concat(Array(wallpaperArray.length).fill("fit_blur"))
+        }
 
         await this._runExternal(command);
     }
