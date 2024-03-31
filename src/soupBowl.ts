@@ -50,19 +50,24 @@ class SoupBowl {
      */
     private _send_and_receive_soup24(soupMessage: Soup.Message): Promise<Uint8Array> {
         return new Promise((resolve, reject) => {
-            /* eslint-disable */
-            // Incompatible version of Soup types. Ignoring type checks.
-            // @ts-ignore
-            this._session.queue_message(soupMessage, (_, msg) => {
-                if (!msg.response_body) {
-                    reject(new Error('Message has no response body'));
-                    return;
-                }
+            try {
+                /* eslint-disable */
+                // Incompatible version of Soup types. Ignoring type checks.
+                // @ts-ignore
+                this._session.queue_message(soupMessage, (_, msg) => {
+                    if (!msg.response_body) {
+                        reject(new Error('Message has no response body'));
+                        return;
+                    }
 
-                const response_body_bytes = msg.response_body.flatten().get_data();
-                resolve(response_body_bytes);
-            });
-            /* eslint-enable */
+                    const response_body_bytes = msg.response_body.flatten().get_data();
+                    resolve(response_body_bytes);
+                });
+                /* eslint-enable */
+            } catch (error) {
+                Logger.error(error, this);
+                reject(new Error('Request failed'));
+            }
         });
     }
 
@@ -81,6 +86,7 @@ class SoupBowl {
                     reject(new Error('Empty response'));
             }).catch(error => {
                 Logger.error(error, this);
+                reject(new Error('Request failed'));
             });
         });
     }
