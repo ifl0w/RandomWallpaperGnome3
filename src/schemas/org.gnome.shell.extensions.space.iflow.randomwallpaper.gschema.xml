@@ -56,7 +56,7 @@
         </key>
 
         <key type='i' name='zoom-mode'>
-            <default>4</default>
+            <default>2</default>
             <summary>Choose which zoom mode wallpapers get</summary>
             <description>Allows to choose what setting 'picture-options' will get.</description>
         </key>
