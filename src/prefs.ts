@@ -77,6 +77,12 @@ class RandomWallpaperSettings extends ExtensionPreferences {
             comboZoomMode,
             'selected',
             Gio.SettingsBindFlags.DEFAULT);
+        settings.observe('zoom-mode', () => {
+            new Settings.Settings('org.gnome.desktop.background')
+                .setString('picture-options', WallpaperManager.getZoomModeEnum()[settings.getInt('zoom-mode')]);
+            new Settings.Settings('org.gnome.desktop.screensaver')
+                .setString('picture-options', WallpaperManager.getZoomModeEnum()[settings.getInt('zoom-mode')]);
+        });
 
         const comboLogLevel = this._getAs<Adw.ComboRow>(builder, 'log_level');
         comboLogLevel.model = Gtk.StringList.new(Logger.getLogLevelNameList());
