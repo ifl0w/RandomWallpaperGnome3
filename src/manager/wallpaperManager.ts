@@ -113,19 +113,15 @@ function getModeNameList(): string[] {
  * @returns {string[]} Array of string containing valid enum values
  */
 function getZoomModeEnum(): string[] {
-    return getEnumFromSettings(new Settings('org.gnome.desktop.background'), 'picture-options').filter(s => {
-        const negatives = [
-            'none',         // No wallpaper
-            'wallpaper',    // Tiled wallpapers, repeating pattern
-            'stretched',    // Ignoring aspect ratio
-            'spanned',      // Ignoring aspect ratio
-        ];
+    const excludes = [
+        'none',         // No wallpaper
+        'wallpaper',    // Tiled wallpapers, repeating pattern
+        'stretched',    // Ignoring aspect ratio
+        'spanned',      // Ignoring aspect ratio
+    ];
 
-        if (negatives.includes(s))
-            return false;
-
-        return true;
-    });
+    return getEnumFromSettings(new Settings('org.gnome.desktop.background'), 'picture-options')
+        .filter(s => !excludes.includes(s));
 }
 
 export {
