@@ -562,6 +562,8 @@ class WallpaperController {
                 Notification.newWallpaper(newImageEntries.reverse());
         } catch (error) {
             Logger.error(error, this);
+            if (this._settings.getBoolean('show-notifications'))
+                Notification.fetchWallpaperFailed(error);
         } finally {
             this._stopLoadingHooks.forEach(element => element());
         }
