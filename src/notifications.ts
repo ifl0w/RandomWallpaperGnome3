@@ -16,6 +16,20 @@ class Notification {
         const message = `A new wallpaper was set!\n${infoString}`;
         notify('New Wallpaper', message);
     }
+
+    /**
+     * Show an error notification for failing to download the next wallpaper.
+     *
+     * @param {unknown} error The error that was thrown when fetching a new wallpaper
+     */
+    static fetchWallpaperFailed(error: unknown): void {
+        let errorMessage = String(error);
+
+        if (error instanceof Error)
+            errorMessage = error.message;
+
+        notify('Download Failed!', errorMessage);
+    }
 }
 
 export {Notification};
