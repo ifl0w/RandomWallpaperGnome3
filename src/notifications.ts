@@ -18,7 +18,7 @@ class Notification {
     }
 
     /**
-     * Show an error notification for failing to download the next wallpaper.
+     * Show an error notification for failed wallpaper downloads.
      *
      * @param {unknown} error The error that was thrown when fetching a new wallpaper
      */
@@ -28,7 +28,7 @@ class Notification {
         if (error instanceof Error)
             errorMessage = error.message;
 
-        notify('Download Failed!', errorMessage);
+        notify('RandomWallpaperGnome3: Wallpaper Download Failed!', errorMessage);
     }
 }
 
