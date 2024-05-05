@@ -55,8 +55,8 @@
             <description>Allows to choose what backgrounds will be changed.</description>
         </key>
 
-        <key type='i' name='zoom-mode'>
-            <default>2</default>
+        <key type='s' name='scaling-mode'>
+            <default>""</default>
             <summary>Choose which zoom mode wallpapers get</summary>
             <description>Allows to choose what setting 'picture-options' will get.</description>
         </key>
