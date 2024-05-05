@@ -112,11 +112,10 @@ function getModeNameList(): string[] {
  *
  * @returns {string[]} Array of string containing valid enum values
  */
-function getZoomModeEnum(): string[] {
+function getScalingModeEnum(): string[] {
     const excludes = [
         'none',         // No wallpaper
         'wallpaper',    // Tiled wallpapers, repeating pattern
-        'stretched',    // Ignoring aspect ratio
         'spanned',      // Ignoring aspect ratio
     ];
 
@@ -128,5 +127,5 @@ export {
     WallpaperManager,
     Mode,
     getModeNameList,
-    getZoomModeEnum
+    getScalingModeEnum
 };
