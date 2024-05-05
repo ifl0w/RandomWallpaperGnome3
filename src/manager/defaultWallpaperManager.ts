@@ -1,6 +1,6 @@
 import * as Utils from '../utils.js';
 
-import {WallpaperManager, getZoomModeEnum} from './wallpaperManager.js';
+import {WallpaperManager} from './wallpaperManager.js';
 import {Logger} from '../logger.js';
 import {Settings} from '../settings.js';
 
@@ -50,11 +50,12 @@ class DefaultWallpaperManager extends WallpaperManager {
      * @returns {Promise<void>} Only resolves
      */
     static setSingleBackground(wallpaperURI: string, backgroundSettings: Settings): Promise<void> {
+        const storedScalingMode = new Settings().getString('scaling-mode');
         if (Utils.isImageMerged(wallpaperURI))
             // merged wallpapers need mode "spanned"
             backgroundSettings.setString('picture-options', 'spanned');
-        else
-            backgroundSettings.setString('picture-options', getZoomModeEnum()[new Settings().getInt('zoom-mode')]);
+        else if (storedScalingMode)
+            backgroundSettings.setString('picture-options', storedScalingMode);
 
         Utils.setPictureUriOfSettingsObject(backgroundSettings, wallpaperURI);
         return Promise.resolve();
@@ -69,11 +70,12 @@ class DefaultWallpaperManager extends WallpaperManager {
      * @returns {Promise<void>} Only resolves
      */
     static setSingleLockScreen(wallpaperURI: string, backgroundSettings: Settings, screensaverSettings: Settings): Promise<void> {
+        const storedScalingMode = new Settings().getString('scaling-mode');
         if (Utils.isImageMerged(wallpaperURI))
             // merged wallpapers need mode "spanned"
             screensaverSettings.setString('picture-options', 'spanned');
-        else
-            screensaverSettings.setString('picture-options', getZoomModeEnum()[new Settings().getInt('zoom-mode')]);
+        else if (storedScalingMode)
+            screensaverSettings.setString('picture-options', storedScalingMode);
 
         Utils.setPictureUriOfSettingsObject(screensaverSettings, wallpaperURI);
         return Promise.resolve();

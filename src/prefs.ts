@@ -71,17 +71,23 @@ class RandomWallpaperSettings extends ExtensionPreferences {
             'selected',
             Gio.SettingsBindFlags.DEFAULT);
 
-        const comboZoomMode = this._getAs<Adw.ComboRow>(builder, 'combo_zoom_mode');
-        comboZoomMode.model = Gtk.StringList.new(WallpaperManager.getZoomModeEnum());
-        settings.bind('zoom-mode',
-            comboZoomMode,
-            'selected',
-            Gio.SettingsBindFlags.DEFAULT);
-        settings.observe('zoom-mode', () => {
-            new Settings.Settings('org.gnome.desktop.background')
-                .setString('picture-options', WallpaperManager.getZoomModeEnum()[settings.getInt('zoom-mode')]);
-            new Settings.Settings('org.gnome.desktop.screensaver')
-                .setString('picture-options', WallpaperManager.getZoomModeEnum()[settings.getInt('zoom-mode')]);
+        const comboScalingMode = this._getAs<Adw.ComboRow>(builder, 'combo_scaling_mode');
+        comboScalingMode.model = Gtk.StringList.new(WallpaperManager.getScalingModeEnum());
+        const gnomeDesktopSettings = new Settings.Settings('org.gnome.desktop.background');
+        const gnomeScreensaverSettings = new Settings.Settings('org.gnome.desktop.screensaver');
+
+        let storedScalingModeIdx = WallpaperManager.getScalingModeEnum().indexOf(settings.getString('scaling-mode'));
+        if (storedScalingModeIdx < 0)
+            // fallback to the current value set in gnome-shell for the desktop
+            storedScalingModeIdx = WallpaperManager.getScalingModeEnum().indexOf(gnomeDesktopSettings.getString('picture-options'));
+
+        // can't bind a string to "selected" and "active-item" is not available on Adw.ComboRow, binding is implemented manually below
+        comboScalingMode.selected = storedScalingModeIdx >= 0 ? storedScalingModeIdx : Gtk.INVALID_LIST_POSITION;
+        comboScalingMode.connect('notify::selected', () => {
+            const selectedString = WallpaperManager.getScalingModeEnum()[comboScalingMode.selected];
+            gnomeDesktopSettings.setString('picture-options', selectedString);
+            gnomeScreensaverSettings.setString('picture-options', selectedString);
+            settings.setString('scaling-mode', selectedString);
         });
 
         const comboLogLevel = this._getAs<Adw.ComboRow>(builder, 'log_level');
