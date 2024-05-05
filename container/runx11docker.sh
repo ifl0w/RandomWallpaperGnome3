@@ -18,6 +18,6 @@ $SCRIPT_DIR/x11docker/x11docker \
 	--network \
 	--init=systemd \
 	--user=RETAIN \
-	--runasuser="journalctl -f &" \
+	--runasuser="gnome-extensions enable randomwallpaper@iflow.space; journalctl -f &" \
 	-- --mount type=bind,source=$SRC_DIR,target=$DST_DIR,readonly -- \
 	$1
