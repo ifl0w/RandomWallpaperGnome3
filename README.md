@@ -31,7 +31,7 @@ Install and try the extension at [extensions.gnome.org](https://extensions.gnome
 * Support for multiple monitors using third party tools
     * [Hydra Paper](https://hydrapaper.gabmus.org/)
     * [Superpaper](https://github.com/hhannine/superpaper)
-* Execute a custom command after every new wallpaper 
+* Execute a custom command after every new wallpaper ([Examples](https://github.com/ifl0w/RandomWallpaperGnome3/wiki/Post-commands))
 
 ## Installation
 ### Release Archives
