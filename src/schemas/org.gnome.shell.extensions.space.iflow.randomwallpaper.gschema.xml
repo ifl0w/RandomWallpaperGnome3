@@ -258,20 +258,20 @@
             <description>The Wallhaven API key.</description>
         </key>
 
-        <key type='b' name='category-anime'>
-            <default>true</default>
-            <summary>Category Anime</summary>
-            <description>Whether the anime category should be searched.</description>
-        </key>
-
         <key type='b' name='category-general'>
             <default>true</default>
             <summary>Category General</summary>
             <description>Whether the general category should be searched.</description>
         </key>
 
+        <key type='b' name='category-anime'>
+            <default>false</default>
+            <summary>Category Anime</summary>
+            <description>Whether the anime category should be searched.</description>
+        </key>
+
         <key type='b' name='category-people'>
-            <default>true</default>
+            <default>false</default>
             <summary>Category People</summary>
             <description>Whether the people category should be searched.</description>
         </key>
@@ -289,13 +289,13 @@
         </key>
 
         <key type='s' name='minimal-resolution'>
-            <default>"1920x1080"</default>
+            <default>""</default>
             <summary>Minimal Resolution</summary>
             <description>The least acceptable resolution.</description>
         </key>
 
         <key type='s' name='aspect-ratios'>
-            <default>"16x9,16x10"</default>
+            <default>""</default>
             <summary>Aspect ratios</summary>
             <description>List of acceptable aspect ratios.</description>
         </key>
