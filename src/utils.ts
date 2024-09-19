@@ -12,6 +12,8 @@ import {type WallpaperManager} from './manager/wallpaperManager.js';
 // Generated code produces a no-shadow rule error:
 // 'SourceType' is already declared in the upper scope on line 7 column 5  no-shadow
 /* eslint-disable */
+// TODO: Eventually the enum should be string based as the order/value of the enum shouldn't be used/assumed anywhere.
+// Currently the order is defined by the SourceTypeMapping array as a workaround.
 enum SourceType {
     UNSPLASH = 0,
     WALLHAVEN,
@@ -23,29 +25,64 @@ enum SourceType {
 /* eslint-enable */
 
 /**
+ * The type ID shouldn't be used directly for ordering in the UI.
+ */
+const SourceTypeMapping: Array<[SourceType, string]> = [
+    [SourceType.WALLHAVEN, 'Wallhaven'],
+    [SourceType.REDDIT, 'Reddit'],
+    [SourceType.UNSPLASH, 'Unsplash'],
+    [SourceType.LOCAL_FOLDER, 'Local Folder'],
+    [SourceType.STATIC_URL, 'Static URL'],
+    [SourceType.GENERIC_JSON, 'Generic JSON'],
+];
+
+/**
+ * Get source type mapping for an enum SourceType.
+ * This mapping maps the enum type to the user interface index and name used in source listings.
+ *
+ * @param {SourceType} type The enum value for which the mapping is requested
+ * @returns {[SourceType, string]} mapping for the corresponding source type
+ */
+function getSourceTypeMapping(type: SourceType): [SourceType, string] {
+    let mapping = SourceTypeMapping.find(elem => elem[0] === type);
+
+    if (!mapping)
+        // default to the first element in the mapping
+        mapping = SourceTypeMapping[0];
+
+    return mapping;
+}
+
+/**
  * Get the string representation of an enum SourceType.
  *
- * @param {SourceType} value The enum value to request
+ * @param {SourceType} type The enum value to request
  * @returns {string} Name of the corresponding source type
  */
-function getSourceTypeName(value: SourceType): string {
-    switch (value) {
-    case SourceType.UNSPLASH:
-        return 'Unsplash';
-    case SourceType.WALLHAVEN:
-        return 'Wallhaven';
-    case SourceType.REDDIT:
-        return 'Reddit';
-    case SourceType.GENERIC_JSON:
-        return 'Generic JSON';
-    case SourceType.LOCAL_FOLDER:
-        return 'Local Folder';
-    case SourceType.STATIC_URL:
-        return 'Static URL';
+function getSourceTypeName(type: SourceType): string {
+    return getSourceTypeMapping(type)[1];
+}
 
-    default:
-        return 'Unsplash';
-    }
+/**
+ * Get the user interface listing index of an enum SourceType.
+ *
+ * @param {SourceType} type The enum value to request
+ * @returns {number} Index of the corresponding source type
+ */
+function getInterfaceIndexForSourceType(type: SourceType): number {
+    const index = SourceTypeMapping.findIndex(elem => elem[0] === type);
+    // default to the first element in the mapping
+    return Math.max(index, 0);
+}
+
+/**
+ * Get the SourceType for an user interface index.
+ *
+ * @param {number} index The index to get the type for
+ * @returns {SourceType} Type of the corresponding user interface index
+ */
+function getSourceTypeForInterfaceIndex(index: number): SourceType {
+    return SourceTypeMapping[index][0];
 }
 
 /**
@@ -293,8 +330,11 @@ function getEnumFromSettings(settings: Settings, key: string): string[] {
 
 export {
     SourceType,
+    SourceTypeMapping,
     getEnumFromSettings,
     getSourceTypeName,
+    getInterfaceIndexForSourceType,
+    getSourceTypeForInterfaceIndex,
     getWallpaperManager,
     isImageMerged,
     execCheck,

@@ -100,7 +100,7 @@ class SourceRow extends Adw.ExpanderRow {
      * @param {Utils.SourceType} type Enum of the adapter to get
      * @returns {UnsplashSettings | WallhavenSettings | RedditSettings | GenericJsonSettings | LocalFolderSettings | UrlSourceSettings | null} Newly crafted adapter or null
      */
-    private _getSettingsWidget(type: Utils.SourceType = Utils.SourceType.UNSPLASH): UnsplashSettings
+    private _getSettingsWidget(type: Utils.SourceType = Utils.SourceType.WALLHAVEN): UnsplashSettings
         | WallhavenSettings
         | RedditSettings
         | GenericJsonSettings
@@ -154,8 +154,11 @@ class SourceRow extends Adw.ExpanderRow {
      * Clear all keys associated to this ID across all adapter
      */
     clearConfig(): void {
-        for (const i of Array(6).keys()) {
-            const widget = this._getSettingsWidget(i);
+        for (const sourceType in Utils.SourceType) {
+            if (isNaN(Number(sourceType)))
+                continue;
+
+            const widget = this._getSettingsWidget(Number(sourceType));
             if (widget)
                 widget.clearConfig();
         }

@@ -89,31 +89,26 @@ class SourceConfigModal extends Adw.Window {
         if (!SourceConfigModal._stringList) {
             const availableTypeNames: string[] = [];
 
-            // Fill combo from enum
-            // https://stackoverflow.com/a/39372911
-            for (const type in Utils.SourceType) {
-                if (isNaN(Number(type)))
-                    continue;
-
-                availableTypeNames.push(Utils.getSourceTypeName(Number(type)));
-            }
+            for (const mapping of Utils.SourceTypeMapping)
+                availableTypeNames.push(Utils.getSourceTypeName(mapping[0]));
 
             SourceConfigModal._stringList = Gtk.StringList.new(availableTypeNames);
         }
         this._combo.model = SourceConfigModal._stringList;
-        this._combo.selected = this._currentSourceRow.settings.getInt('type');
+        const storedSourceType = this._currentSourceRow.settings.getInt('type');
+        this._combo.selected = Utils.getInterfaceIndexForSourceType(storedSourceType);
 
         this._currentSourceRow.settings.bind('name',
             this._source_name,
             'text',
             Gio.SettingsBindFlags.DEFAULT);
 
-        this._combo.connect('notify::selected', (comboRow: Adw.ComboRow) => {
-            this._currentSourceRow.settings.setInt('type', comboRow.selected);
-            this._fillRow(comboRow.selected);
-        });
-
-        this._fillRow(this._combo.selected);
+        const storeSourceType = (uiIndex: number): void => {
+            this._currentSourceRow.settings.setInt('type', Utils.getSourceTypeForInterfaceIndex(uiIndex));
+            this._fillRow(Utils.getSourceTypeForInterfaceIndex(uiIndex));
+        };
+        this._combo.connect('notify::selected', (comboRow: Adw.ComboRow) => storeSourceType(comboRow.selected));
+        storeSourceType(this._combo.selected);
     }
 
     /**
@@ -121,7 +116,7 @@ class SourceConfigModal extends Adw.Window {
      *
      * @param {number} type Enum of the adapter to use
      */
-    private _fillRow(type: number): void {
+    private _fillRow(type: Utils.SourceType): void {
         const targetWidget = this._getSettingsWidget(type);
         if (targetWidget !== null)
             this._settings_container.set_child(targetWidget);
@@ -133,7 +128,7 @@ class SourceConfigModal extends Adw.Window {
      * @param {Utils.SourceType} type Enum of the adapter to get
      * @returns {UnsplashSettings | WallhavenSettings | RedditSettings | GenericJsonSettings | LocalFolderSettings | UrlSourceSettings | null} Newly crafted adapter or null
      */
-    private _getSettingsWidget(type: Utils.SourceType = Utils.SourceType.UNSPLASH): UnsplashSettings
+    private _getSettingsWidget(type: Utils.SourceType = Utils.SourceType.WALLHAVEN): UnsplashSettings
         | WallhavenSettings
         | RedditSettings
         | GenericJsonSettings
