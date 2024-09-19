@@ -39,9 +39,9 @@ class WallhavenAdapter extends BaseAdapter {
     private _options: QueryOptions = {
         ai_art_filter: '1',
         q: '',
-        purity: '110', // SFW, sketchy
+        purity: '100', // SFW
         sorting: 'random',
-        categories: '111', // General, Anime, People
+        categories: '100', // General
         atleast: '1920x1080',
         ratios: ['16x9'],
         colors: '',
