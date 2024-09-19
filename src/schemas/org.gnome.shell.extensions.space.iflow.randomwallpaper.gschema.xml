@@ -167,7 +167,7 @@
         </key>
 
         <key type='i' name='type'>
-            <default>0</default>
+            <default>-1</default>
             <summary>Type</summary>
             <description>The type of this source.</description>
         </key>
