@@ -55,9 +55,9 @@ class WallhavenAdapter extends BaseAdapter {
      * @param {string} id Unique ID
      * @param {string} name Custom name of this adapter
      */
-    constructor(id: string, name: string) {
+    constructor(id: string | null, name: string | null) {
         super({
-            id,
+            id: id ?? '-1',
             schemaID: SettingsModule.RWG_SETTINGS_SCHEMA_SOURCES_WALLHAVEN,
             schemaPath: `${SettingsModule.RWG_SETTINGS_SCHEMA_PATH}/sources/wallhaven/${id}/`,
             name,

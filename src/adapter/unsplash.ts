@@ -40,10 +40,10 @@ class UnsplashAdapter extends BaseAdapter {
      * @param {string} id Unique ID
      * @param {string} name Custom name of this adapter
      */
-    constructor(id: string | null, name: string | null) {
+    constructor(id: string, name: string) {
         super({
             defaultName: 'Unsplash',
-            id: id ?? '-1',
+            id,
             name,
             schemaID: SettingsModule.RWG_SETTINGS_SCHEMA_SOURCES_UNSPLASH,
             schemaPath: `${SettingsModule.RWG_SETTINGS_SCHEMA_PATH}/sources/unsplash/${id ?? '-1'}/`,
