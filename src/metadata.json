@@ -1,11 +1,11 @@
 {
-  "shell-version": [ "45", "46" ],
+  "shell-version": [ "45", "46", "47" ],
   "uuid": "randomwallpaper@iflow.space",
   "settings-schema": "org.gnome.shell.extensions.space.iflow.randomwallpaper",
   "name": "Random Wallpaper",
   "description": "Load new desktop wallpapers from various online sources with ease!",
-  "version": 35,
-  "semantic-version": "3.0.2",
+  "version": 36,
+  "semantic-version": "3.1.0",
   "url": "https://github.com/ifl0w/RandomWallpaperGnome3",
   "issue-url": "https://github.com/ifl0w/RandomWallpaperGnome3/issues",
   "gettext-domain": "org.gnome.shell.extensions.space.iflow.randomwallpaper"
