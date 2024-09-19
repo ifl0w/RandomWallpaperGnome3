@@ -8,30 +8,33 @@ import {Logger} from './../logger.js';
 /** How many times the service should be queried at maximum. */
 const MAX_SERVICE_RETRIES = 5;
 
-// Generated code produces a no-shadow rule error
-/* eslint-disable */
-enum ConstraintType {
-    UNCONSTRAINED,
-    USER,
-    USERS_LIKES,
-    COLLECTION_ID,
-}
-/* eslint-enable */
+// not exhaustive, only what is needed by this extension
+type UnsplashResponse = [
+    {
+        urls: { raw: 'string' },
+        links: { html: 'string' },
+        user: {
+            name: 'string',
+            links: { html: string },
+        },
+    }
+];
 
 /**
  * Adapter for image sources using Unsplash.
  */
 class UnsplashAdapter extends BaseAdapter {
-    private _sourceUrl = 'https://source.unsplash.com';
+    private _sourceUrl = 'https://unsplash.com';
 
     // default query options
     private _options = {
+        'api_key': '',
         'query': '',
-        'w': 1920,
-        'h': 1080,
-        'featured': true,
-        'constraintType': 0,
-        'constraintValue': '',
+        'collections': '',
+        'topics': '',
+        'username': '',
+        'orientation': '',
+        'content_filter': '',
     };
 
     /**
@@ -60,35 +63,36 @@ class UnsplashAdapter extends BaseAdapter {
         this._readOptionsFromSettings();
         const optionsString = this._generateOptionsString();
 
-        let url = `https://source.unsplash.com${optionsString}`;
+        let url = `https://api.unsplash.com/photos/random?count=1${optionsString}`;
         url = encodeURI(url);
 
         Logger.debug(`Unsplash request to: ${url}`, this);
 
         const message = this._bowl.newGetMessage(url);
-
-        // unsplash redirects to actual file; we only want the file location
-        message.set_flags(this._bowl.MessageFlags.NO_REDIRECT);
-
         await this._bowl.send_and_receive(message);
 
-        // expecting redirect
-        if (message.status_code !== 302)
-            throw new Error('Unexpected response status code (expected 302)');
+        let response_body;
+        try {
+            const response_body_bytes = await this._bowl.send_and_receive(message);
+            response_body = JSON.parse(new TextDecoder().decode(response_body_bytes)) as UnsplashResponse;
+        } catch (error) {
+            throw new Error(`Could not parse response for ${url}!\n${String(error)}`);
+        }
 
-        const imageLinkUrl = message.response_headers.get_one('Location');
-        if (!imageLinkUrl)
+        const imageDownloadURL = response_body[0].urls.raw;
+        if (!imageDownloadURL)
             throw new Error('No image link in response.');
 
-
-        if (this._isImageBlocked(Utils.fileName(imageLinkUrl))) {
+        if (this._isImageBlocked(Utils.fileName(imageDownloadURL))) {
             // Abort and try again
             throw new Error('Image blocked');
         }
 
-        const historyEntry = new HistoryEntry(null, this._sourceName, imageLinkUrl);
+        const historyEntry = new HistoryEntry(null, this._sourceName, imageDownloadURL);
         historyEntry.source.sourceUrl = this._sourceUrl;
-        historyEntry.source.imageLinkUrl = imageLinkUrl;
+        historyEntry.source.author = response_body[0].user.name;
+        historyEntry.source.authorUrl = response_body[0].user.links.html;
+        historyEntry.source.imageLinkUrl = response_body[0].links.html;
 
         return historyEntry;
     }
@@ -141,31 +145,26 @@ class UnsplashAdapter extends BaseAdapter {
         const options = this._options;
         let optionsString = '';
 
-        switch (options.constraintType) {
-        case ConstraintType.USER:
-            optionsString = `/user/${options.constraintValue}/`;
-            break;
-        case ConstraintType.USERS_LIKES:
-            optionsString = `/user/${options.constraintValue}/likes/`;
-            break;
-        case ConstraintType.COLLECTION_ID:
-            optionsString = `/collection/${options.constraintValue}/`;
-            break;
-        default:
-            if (options.featured)
-                optionsString = '/featured/';
-            else
-                optionsString = '/random/';
-        }
+        if (options.api_key)
+            optionsString += `&client_id=${options.api_key}`;
 
-        if (options.w && options.h)
-            optionsString += `${options.w}x${options.h}`;
+        if (options.username)
+            optionsString += `&username=${options.username}`;
 
+        if (options.orientation)
+            optionsString += `&orientation=${options.orientation}`;
 
-        if (options.query) {
-            const q = options.query.replace(/\W/, ',');
-            optionsString += `?${q}`;
-        }
+        if (options.content_filter)
+            optionsString += `&content_filter=${options.content_filter}`;
+
+        if (options.collections)
+            optionsString += `&collections=${options.collections}`;
+
+        if (options.topics)
+            optionsString += `&topics=${options.topics}`;
+
+        if (options.query)
+            optionsString += `&query=${options.query}`;
 
         return optionsString;
     }
@@ -174,23 +173,16 @@ class UnsplashAdapter extends BaseAdapter {
      * Freshly read the user settings options.
      */
     private _readOptionsFromSettings(): void {
-        this._options.w = this._settings.getInt('image-width');
-        this._options.h = this._settings.getInt('image-height');
-
-        this._options.constraintType = this._settings.getInt('constraint-type');
-        this._options.constraintValue = this._settings.getString('constraint-value');
-
-        const keywords = this._settings.getString('keyword').split(',');
-        if (keywords.length > 0) {
-            const randomKeyword = keywords[Utils.getRandomNumber(keywords.length)];
-            this._options.query = randomKeyword.trim();
-        }
-
-        this._options.featured = this._settings.getBoolean('featured-only');
+        this._options.api_key = this._settings.getString('api-key');
+        this._options.username = this._settings.getString('username');
+        this._options.query = this._settings.getString('query');
+        this._options.collections = this._settings.getString('collections');
+        this._options.topics = this._settings.getString('topics');
+        this._options.orientation = this._settings.getString('orientation');
+        this._options.content_filter = this._settings.getString('content-filter');
     }
 }
 
 export {
-    UnsplashAdapter,
-    ConstraintType
+    UnsplashAdapter
 };
