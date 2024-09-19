@@ -174,54 +174,48 @@
 
     </schema>
 
-    <schema id='org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.unsplash'>
+    <schema id='org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.unsplash-api-key'>
 
-        <key type='s' name='keyword'>
+        <key type='s' name='api-key'>
             <default>""</default>
-            <summary>Keyword</summary>
-            <description>The keyword will be used to search images.</description>
+            <summary>API Key</summary>
+            <description>The Unsplash API key.</description>
+        </key>
+
+        <key type='s' name='query'>
+            <default>""</default>
+            <summary>Query</summary>
+            <description>Limit selection to photos matching a search term.</description>
         </key>
 
         <key type='s' name='username'>
             <default>""</default>
             <summary>Username</summary>
-            <description>Only fetch random images of a given user.</description>
+            <description>Limit selection to a single user.</description>
+        </key>
+
+        <key type='s' name='topics'>
+            <default>""</default>
+            <summary>Topics</summary>
+            <description>Public topic ID(‘s) to filter selection. If multiple, comma-separated</description>
         </key>
 
         <key type='s' name='collections'>
             <default>""</default>
             <summary>Collections</summary>
-            <description>Only fetch random images from a comma separated list of collections.</description>
+            <description>Public collection ID(‘s) to filter selection. If multiple, comma-separated</description>
         </key>
 
-        <key type='i' name='image-width'>
-            <default>1920</default>
-            <summary>Image Width</summary>
-            <description>The width of the image.</description>
+        <key type='s' name='orientation'>
+            <default>''</default>
+            <summary>Orientation</summary>
+            <description>Filter by photo orientation. (Valid values: landscape (0), portrait (1), squarish (2))</description>
         </key>
 
-        <key type='i' name='image-height'>
-            <default>1080</default>
-            <summary>Image Width</summary>
-            <description>The height of the image.</description>
-        </key>
-
-        <key type='b' name='featured-only'>
-            <default>true</default>
-            <summary>Featured images only</summary>
-            <description>This results in a smaller wallpaper pool but the images are considered to have higher quality.</description>
-        </key>
-
-        <key type='i' name='constraint-type'>
-            <default>0</default>
-            <summary>Constraint Type</summary>
-            <description>The constraint of the Unsplash Source API.</description>
-        </key>
-
-        <key type='s' name='constraint-value'>
-            <default>""</default>
-            <summary>Constraint Value</summary>
-            <description>This value should match the constraint type for. Has no effect in the case of an unconstrained search.</description>
+        <key type='s' name='content-filter'>
+            <default>''</default>
+            <summary>Content Safety</summary>
+            <description>Limit results by content safety. Default: low (0). Valid values are low (0) and high (1).</description>
         </key>
 
     </schema>
