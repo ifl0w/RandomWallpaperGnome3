@@ -2,7 +2,8 @@ import Adw from 'gi://Adw';
 import Gio from 'gi://Gio';
 import Gtk from 'gi://Gtk';
 
-import {ExtensionPreferences} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
+import {ExtensionPreferences, gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
+import Gettext from 'gettext';
 
 import * as Settings from './settings.js';
 import * as Utils from './utils.js';
@@ -60,7 +61,14 @@ class RandomWallpaperSettings extends ExtensionPreferences {
             throw new Error('Own extension object not found!');
         }
 
-        // this._builder.set_translation_domain(extensionObject.metadata['gettext-domain']);
+        // Set translation context so UI files are translated correctly
+        builder.set_translation_domain(extensionObject.metadata['gettext-domain']);
+        // The text domain doesn't seem to be passed down to template instances correctly.
+        // Setting the text domain directly on the Gettext object works but doesn't seem like the intended solution.
+        // This is based on example code in GJS: https://gitlab.gnome.org/GNOME/gjs/blob/50723b9876820e9a889e1254635687a6b832551b/examples/gettext.js#L19
+        // TODO: investigate further and open issue when problem is confirmed.
+        Gettext.textdomain(extensionObject.metadata['gettext-domain']);
+
         builder.add_from_file(`${extensionObject.path}/ui/pageGeneral.ui`);
         builder.add_from_file(`${extensionObject.path}/ui/pageSources.ui`);
 
@@ -183,7 +191,7 @@ class RandomWallpaperSettings extends ExtensionPreferences {
         const newWallpaperButtonLabel = newWallpaperButton.get_child() as Gtk.Label | null;
         const origNewWallpaperText = newWallpaperButtonLabel?.get_label() ?? 'Request New Wallpaper';
         newWallpaperButton.connect('activated', () => {
-            newWallpaperButtonLabel?.set_label('Loading ...');
+            newWallpaperButtonLabel?.set_label(_('Loading ...'));
             newWallpaperButton.set_sensitive(false);
 
             // The backend sets this back to false after fetching the image - listen for that event.
@@ -216,7 +224,7 @@ class RandomWallpaperSettings extends ExtensionPreferences {
         }
         builder.get_object('open_about')?.connect('activated', () => {
             const about_window = new Adw.AboutWindow({
-                title: 'About',
+                title: _('About'),
                 transient_for: window,
                 modal: true,
                 licenseType: Gtk.License.MIT_X11,
@@ -266,10 +274,10 @@ class RandomWallpaperSettings extends ExtensionPreferences {
 
             // https://stackoverflow.com/a/54487948
             this._saveDialog = new Gtk.FileChooserNative({
-                title: 'Choose a Wallpaper Folder',
+                title: _('Choose a Wallpaper Folder'),
                 action: Gtk.FileChooserAction.SELECT_FOLDER,
-                accept_label: 'Open',
-                cancel_label: 'Cancel',
+                accept_label: _('Open'),
+                cancel_label: _('Cancel'),
                 transient_for: window,
                 modal: true,
             });
