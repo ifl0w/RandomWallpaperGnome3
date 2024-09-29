@@ -1,6 +1,8 @@
 import {Settings} from './../settings.js';
 import {getEnumFromSettings} from './../utils.js';
 
+import {gettext as _} from 'gettext';
+
 // Generated code produces a no-shadow rule error
 /* eslint-disable */
 enum Mode {
@@ -70,16 +72,16 @@ function _getModeName(mode: Mode): string {
 
     switch (mode) {
     case Mode.BACKGROUND:
-        name = 'Background';
+        name = _('Background');
         break;
     case Mode.LOCKSCREEN:
-        name = 'Lockscreen';
+        name = _('Lockscreen');
         break;
     case Mode.BACKGROUND_AND_LOCKSCREEN:
-        name = 'Background and lockscreen';
+        name = `${_('Background')} ${_('and')} ${_('Lockscreen')}`;
         break;
     case Mode.BACKGROUND_AND_LOCKSCREEN_INDEPENDENT:
-        name = 'Background and lockscreen independently';
+        name = `${_('Background')} ${_('and')} ${_('Lockscreen')} ${_('Independently')}`;
         break;
 
     default:

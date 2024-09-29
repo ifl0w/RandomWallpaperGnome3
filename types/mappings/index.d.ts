@@ -26,3 +26,7 @@ declare module 'gi://GLib' {
 declare module 'gi://Adw' {
     export * from '@girs/adw-1';
 }
+
+declare module 'gi://gjs' {
+    export * from '@girs/gjs';
+}

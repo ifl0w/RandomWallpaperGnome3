@@ -10,7 +10,7 @@ import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 
-import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
+import {Extension, gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
 
 import * as CustomElements from './historyMenuElements.js';
 import * as Settings from './settings.js';
@@ -74,9 +74,9 @@ class RandomWallpaperMenu {
         this._panelMenu.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 
         // Temporarily pause timer
-        const pauseTimerItem = new PopupMenu.PopupSwitchMenuItem('Pause Timer', false);
+        const pauseTimerItem = new PopupMenu.PopupSwitchMenuItem(_('Pause Timer'), false);
 
-        pauseTimerItem.connect('toggled', (_, state: boolean) => {
+        pauseTimerItem.connect('toggled', (_unused, state: boolean) => {
             this._backendConnection.setBoolean('pause-timer', state);
         });
 
@@ -98,15 +98,15 @@ class RandomWallpaperMenu {
         this._panelMenu.menu.addMenuItem(pauseTimerItem);
 
         // clear history button
-        const clearHistoryItem = new PopupMenu.PopupMenuItem('Clear History');
+        const clearHistoryItem = new PopupMenu.PopupMenuItem(_('Clear History'));
         this._panelMenu.menu.addMenuItem(clearHistoryItem);
 
         // open wallpaper folder button
-        const openFolder = new PopupMenu.PopupMenuItem('Open Wallpaper Folder');
+        const openFolder = new PopupMenu.PopupMenuItem(_('Open Wallpaper Folder'));
         this._panelMenu.menu.addMenuItem(openFolder);
 
         // settings button
-        const openSettings = new PopupMenu.PopupMenuItem('Settings');
+        const openSettings = new PopupMenu.PopupMenuItem(_('Settings'));
         this._panelMenu.menu.addMenuItem(openSettings);
 
         // add eventlistener
@@ -151,7 +151,7 @@ class RandomWallpaperMenu {
                 extensionObject.openPreferences();
         });
 
-        this._panelMenu.menu.connect('open-state-changed', (_, open) => {
+        this._panelMenu.menu.connect('open-state-changed', (_unused, open) => {
             if (open)
                 newWallpaperItem.show();
         });

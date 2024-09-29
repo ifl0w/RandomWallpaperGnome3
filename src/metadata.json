@@ -7,5 +7,6 @@
   "version": 35,
   "semantic-version": "3.0.2",
   "url": "https://github.com/ifl0w/RandomWallpaperGnome3",
-  "issue-url": "https://github.com/ifl0w/RandomWallpaperGnome3/issues"
+  "issue-url": "https://github.com/ifl0w/RandomWallpaperGnome3/issues",
+  "gettext-domain": "org.gnome.shell.extensions.space.iflow.randomwallpaper"
 }

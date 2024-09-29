@@ -95,6 +95,15 @@ copy_static_files() {
     cp "$SRCDIR/stylesheet.css" "$DESTDIR/"
 }
 
+update_translation_template() {
+    # get relative paths so comments in pot do not depend on local folder structure
+    RELATIVE_SRC_DIR=$(realpath --relative-to="$PWD" "$SRCDIR/po/org.gnome.shell.extensions.space.iflow.randomwallpaper.pot")
+    RELATIVE_DST_DIR=$(realpath --relative-to="$PWD" "$DESTDIR")
+
+    # generate template
+    xgettext --from-code=UTF-8 --from-code=UTF-8 --add-comments --keyword=_ --keyword=C_:1c,2 --output=./$RELATIVE_SRC_DIR ./$RELATIVE_DST_DIR/**/*.js ./$RELATIVE_DST_DIR/**/*.ui
+}
+
 pack() {
     check_command "gnome-extensions"
 
@@ -104,7 +113,10 @@ pack() {
         extra_source+=("--extra-source=$file")
     done
 
-    gnome-extensions pack --force "${extra_source[@]}" "$DESTDIR"
+    gnome-extensions pack --force "${extra_source[@]}" --podir=$SRCDIR/po "$DESTDIR"
+
+    # unpack again over generated files to populate locale directory
+    unzip -ou -d $DESTDIR $DESTDIR".shell-extension.zip"
 }
 
 if [ $# -eq 0 ]; then
@@ -115,6 +127,7 @@ if [ $# -eq 0 ]; then
     compile_schemas
     format_js
     check_ts
+    update_translation_template
     copy_static_files
     pack
 elif [ "$1" == "check" ]; then
@@ -126,7 +139,15 @@ elif [ "$1" == "build_local" ]; then
     compile_ui
     compile_js
     compile_schemas
+    update_translation_template
     copy_static_files
+elif [ "$1" == "dev" ]; then
+    compile_ui
+    compile_js
+    compile_schemas
+    update_translation_template
+    copy_static_files
+    pack
 elif [ "$1" == "format" ]; then
     format_js
 elif [ "$1" == "pack" ]; then
@@ -135,4 +156,6 @@ elif [ "$1" == "setup_env" ]; then
     setup_environment
 elif [ "$1" == "copy_static" ]; then
     copy_static_files
+elif [ "$1" == "update_translation" ]; then
+    update_translation_template
 fi

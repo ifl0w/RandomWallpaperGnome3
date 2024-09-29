@@ -7,6 +7,8 @@ import Gtk from 'gi://Gtk';
 
 import * as Settings from './../settings.js';
 
+import {gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
+
 // FIXME: Generated static class code produces a no-unused-expressions rule error
 /* eslint-disable no-unused-expressions */
 
@@ -140,7 +142,7 @@ class WallhavenSettings extends Adw.PreferencesPage {
 
             // https://stackoverflow.com/a/54487948
             this._colorDialog = new Gtk.ColorChooserDialog({
-                title: 'Choose a Color',
+                title: _('Choose a Color'),
                 transient_for: this.get_root() as Gtk.Window ?? undefined,
                 modal: true,
             });
