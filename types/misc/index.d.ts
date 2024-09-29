@@ -4,6 +4,13 @@ declare module 'sharedInternals' {
     // https://gitlab.gnome.org/GNOME/gnome-shell/-/blob/main/js/extensions/sharedInternals.js
     import type Gio from 'gi://Gio';
 
+    // Note that the prototype String is not declared in GJS module
+    declare global {
+        interface String {
+            format(...args: any[]): string
+        }
+    }
+
     export class ExtensionBase {
         /**
          * @param {object} metadata - metadata passed in when loading the extension
