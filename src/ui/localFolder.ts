@@ -6,6 +6,8 @@ import Gtk from 'gi://Gtk';
 
 import * as Settings from './../settings.js';
 
+import {gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
+
 // FIXME: Generated static class code produces a no-unused-expressions rule error
 /* eslint-disable no-unused-expressions */
 
@@ -57,10 +59,10 @@ class LocalFolderSettings extends Adw.PreferencesPage {
 
             // https://stackoverflow.com/a/54487948
             this._saveDialog = new Gtk.FileChooserNative({
-                title: 'Choose a Wallpaper Folder',
+                title: _('Choose a Wallpaper Folder'),
                 action: Gtk.FileChooserAction.SELECT_FOLDER,
-                accept_label: 'Open',
-                cancel_label: 'Cancel',
+                accept_label: _('Open'),
+                cancel_label: _('Cancel'),
                 transient_for: this.get_root() as Gtk.Window ?? undefined,
                 modal: true,
             });

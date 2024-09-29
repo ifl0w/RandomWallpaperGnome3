@@ -3,6 +3,7 @@
 declare module 'sharedInternals' {
     // https://gitlab.gnome.org/GNOME/gnome-shell/-/blob/main/js/extensions/sharedInternals.js
     import type Gio from 'gi://Gio';
+    import 'gi://gjs';
 
     // Note that the prototype String is not declared in GJS module
     declare global {
@@ -27,6 +28,7 @@ declare module 'sharedInternals' {
             url: string,
             description: string,
             'issue-url': string,
+            'gettext-domain': string,
             // …
         };
 
@@ -57,38 +59,6 @@ declare module 'sharedInternals' {
          */
         initTranslations(domain?: string | undefined): void;
 
-        /**
-         * Translate `str` using the extension's gettext domain
-         *
-         * @param {string} str - the string to translate
-         *
-         * @returns {string} the translated string
-         */
-        gettext(str: string): string;
-
-        /**
-         * Translate `str` and choose plural form using the extension's
-         * gettext domain
-         *
-         * @param {string} str - the string to translate
-         * @param {string} strPlural - the plural form of the string
-         * @param {number} n - the quantity for which translation is needed
-         *
-         * @returns {string} the translated string
-         */
-        ngettext(str: string, strPlural: string, n: number): string;
-
-        /**
-         * Translate `str` in the context of `context` using the extension's
-         * gettext domain
-         *
-         * @param {string} context - context to disambiguate `str`
-         * @param {string} str - the string to translate
-         *
-         * @returns {string} the translated string
-         */
-        pgettext(context: string, str: string): string;
-
         /** lookup the extension object from any module by using the static method */
         static lookupByUUID(uuid: string): ExtensionBase | null;
         /** lookup the extension object from any module by using the static method */
@@ -96,8 +66,43 @@ declare module 'sharedInternals' {
     }
 }
 
+declare module 'shared' {
+    /**
+     * Translate `str` using the extension's gettext domain
+     *
+     * @param {string} str - the string to translate
+     *
+     * @returns {string} the translated string
+     */
+    export function gettext(str: string): string;
+
+    /**
+     * Translate `str` and choose plural form using the extension's
+     * gettext domain
+     *
+     * @param {string} str - the string to translate
+     * @param {string} strPlural - the plural form of the string
+     * @param {number} n - the quantity for which translation is needed
+     *
+     * @returns {string} the translated string
+     */
+    export function ngettext(str: string, strPlural: string, n: number): string;
+
+    /**
+     * Translate `str` in the context of `context` using the extension's
+     * gettext domain
+     *
+     * @param {string} context - context to disambiguate `str`
+     * @param {string} str - the string to translate
+     *
+     * @returns {string} the translated string
+     */
+    export function pgettext(context: string, str: string): string;
+}
+
 declare module 'resource:///org/gnome/shell/extensions/extension.js' {
     import {ExtensionBase} from 'sharedInternals';
+    export * from 'shared';
 
     /**
      * An object describing the extension and various properties available for extensions to use.
@@ -134,6 +139,7 @@ declare module 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js' {
     import type Gtk from 'gi://Gtk';
 
     import {ExtensionBase} from 'sharedInternals';
+    export * from 'shared';
 
     export class ExtensionPreferences extends ExtensionBase {
         constructor(metadata: ExtensionMetadata) {

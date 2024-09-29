@@ -8,6 +8,9 @@ import * as Utils from './../utils.js';
 
 import {SourceRow} from './sourceRow.js';
 
+// Imports for initializing the translation domain in templates
+import {gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
+
 // FIXME: Generated static class code produces a no-unused-expressions rule error
 /* eslint-disable no-unused-expressions */
 
@@ -59,7 +62,7 @@ class SourceConfigModal extends Adw.Window {
      */
     constructor(parentWindow: Adw.Window, source?: SourceRow) {
         super({
-            title: source ? 'Edit Source' : 'Add New Source',
+            title: source ? _('Edit Source') : _('Add New Source'),
             transient_for: parentWindow,
             modal: true,
             defaultHeight: parentWindow.get_height() * 0.9,
