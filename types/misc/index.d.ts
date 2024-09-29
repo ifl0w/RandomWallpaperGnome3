@@ -19,7 +19,6 @@ declare module 'sharedInternals' {
             'semantic-version': string,
             url: string,
             description: string,
-            url: strint,
             'issue-url': string,
             // …
         };
