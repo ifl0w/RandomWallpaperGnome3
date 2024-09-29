@@ -10,12 +10,20 @@ if [ -z "$1" ]
     exit 22
 fi
 
+CONTAINER_LANG="en"
+if [ ! -z "$2" ]
+  then
+    CONTAINER_LANG=$2
+    echo "Using '$CONTAINER_LANG' as locale"
+fi
+
 echo "$(basename $0): You might have to move the X window around before GNOME is fully loaded"
 sleep 3
 
 $SCRIPT_DIR/x11docker/x11docker \
 	--desktop \
 	--network \
+	--lang=$CONTAINER_LANG \
 	--init=systemd \
 	--user=RETAIN \
 	--runasuser="gnome-extensions enable randomwallpaper@iflow.space; journalctl -f &" \
