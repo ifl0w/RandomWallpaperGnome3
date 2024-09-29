@@ -1,0 +1,615 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-01-06 17:01+0100\n"
+"PO-Revision-Date: 2025-01-06 17:06+0100\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 3.5\n"
+
+#: randomwallpaper@iflow.space/historyMenuElements.js:188
+msgid "Open Image in Browser"
+msgstr "Bild im Browser öffnen"
+
+#: randomwallpaper@iflow.space/historyMenuElements.js:198
+#: randomwallpaper@iflow.space/notifications.js:14
+msgid "Unknown Source"
+msgstr "Unbekannte Quelle"
+
+#: randomwallpaper@iflow.space/historyMenuElements.js:202
+msgid "Set As Wallpaper"
+msgstr "Als Hintergrundbild festlegen"
+
+#: randomwallpaper@iflow.space/historyMenuElements.js:207
+msgid "Save for Later"
+msgstr "Für später speichern"
+
+#: randomwallpaper@iflow.space/historyMenuElements.js:219
+msgid "Already Saved!"
+msgstr "Bereits gespeichert!"
+
+#: randomwallpaper@iflow.space/historyMenuElements.js:231
+msgid "Add to Blocklist"
+msgstr "Zur Sperrliste hinzufügen"
+
+#: randomwallpaper@iflow.space/historyMenuElements.js:444
+#: randomwallpaper@iflow.space/notifications.js:16
+msgid "New Wallpaper"
+msgstr "Neues Hintergrundbild"
+
+#: randomwallpaper@iflow.space/historyMenuElements.js:461
+#, javascript-format
+msgid "%d hour"
+msgid_plural "%d hours"
+msgstr[0] "%d Stunde"
+msgstr[1] "%d Stunden"
+
+#: randomwallpaper@iflow.space/historyMenuElements.js:462
+#, javascript-format
+msgid "%d minute"
+msgid_plural "%d minutes"
+msgstr[0] "%d Minute"
+msgstr[1] "%d Minuten"
+
+#: randomwallpaper@iflow.space/historyMenuElements.js:465
+#: randomwallpaper@iflow.space/manager/wallpaperManager.js:82
+#: randomwallpaper@iflow.space/manager/wallpaperManager.js:85
+msgid "and"
+msgstr "und"
+
+#: randomwallpaper@iflow.space/historyMenuElements.js:465
+#: randomwallpaper@iflow.space/historyMenuElements.js:467
+msgid "remaining"
+msgstr "verbleibend"
+
+#: randomwallpaper@iflow.space/historyMenuElements.js:572
+msgid "No Wallpaper History"
+msgstr "Kein Hintergrundverlauf"
+
+#: randomwallpaper@iflow.space/manager/wallpaperManager.js:76
+#: randomwallpaper@iflow.space/manager/wallpaperManager.js:82
+#: randomwallpaper@iflow.space/manager/wallpaperManager.js:85
+msgid "Background"
+msgstr "Hintergrund"
+
+#: randomwallpaper@iflow.space/manager/wallpaperManager.js:79
+#: randomwallpaper@iflow.space/manager/wallpaperManager.js:82
+#: randomwallpaper@iflow.space/manager/wallpaperManager.js:85
+msgid "Lockscreen"
+msgstr "Sperrbildschirm"
+
+#: randomwallpaper@iflow.space/manager/wallpaperManager.js:85
+msgid "Independently"
+msgstr "separat"
+
+#: randomwallpaper@iflow.space/notifications.js:14
+msgid "Source"
+msgstr "Quelle"
+
+#: randomwallpaper@iflow.space/notifications.js:15
+msgid "A new wallpaper was set!"
+msgstr "Ein neues Hintergrundbild wurde eingestell!"
+
+#: randomwallpaper@iflow.space/notifications.js:30
+msgid "Wallpaper Download Failed!"
+msgstr "Hintergrundbild-Download fehlgeschlagen!"
+
+#: randomwallpaper@iflow.space/prefs.js:156
+msgid "Loading ..."
+msgstr "Lädt ..."
+
+#: randomwallpaper@iflow.space/prefs.js:188
+#: randomwallpaper@iflow.space/ui/pageGeneral.ui:248
+msgid "About"
+msgstr "Über"
+
+#: randomwallpaper@iflow.space/prefs.js:226
+#: randomwallpaper@iflow.space/ui/localFolder.js:33
+msgid "Choose a Wallpaper Folder"
+msgstr "Wählen Sie einen Hintergrundbildordner"
+
+#: randomwallpaper@iflow.space/prefs.js:228
+#: randomwallpaper@iflow.space/ui/localFolder.js:35
+#: randomwallpaper@iflow.space/ui/pageGeneral.ui:77
+msgid "Open"
+msgstr "Öffnen"
+
+#: randomwallpaper@iflow.space/prefs.js:229
+#: randomwallpaper@iflow.space/ui/localFolder.js:36
+#: randomwallpaper@iflow.space/ui/sourceConfigModal.ui:54
+msgid "Cancel"
+msgstr "Abbrechen"
+
+#. Temporarily pause timer
+#: randomwallpaper@iflow.space/randomWallpaperMenu.js:60
+msgid "Pause Timer"
+msgstr "Pause-Timer"
+
+#. clear history button
+#: randomwallpaper@iflow.space/randomWallpaperMenu.js:80
+msgid "Clear History"
+msgstr "Verlauf löschen"
+
+#. open wallpaper folder button
+#: randomwallpaper@iflow.space/randomWallpaperMenu.js:84
+msgid "Open Wallpaper Folder"
+msgstr "Hintergrundordner öffnen"
+
+#. settings button
+#: randomwallpaper@iflow.space/randomWallpaperMenu.js:88
+msgid "Settings"
+msgstr "Einstellungen"
+
+#: randomwallpaper@iflow.space/ui/sourceConfigModal.js:30
+msgid "Edit Source"
+msgstr "Quelle bearbeiten"
+
+#: randomwallpaper@iflow.space/ui/sourceConfigModal.js:30
+msgid "Add New Source"
+msgstr "Neue Quelle hinzufügen"
+
+#: randomwallpaper@iflow.space/ui/unsplash.js:52
+msgid "Low"
+msgstr "Niedrig"
+
+#: randomwallpaper@iflow.space/ui/unsplash.js:55
+msgid "High"
+msgstr "Hoch"
+
+#: randomwallpaper@iflow.space/ui/unsplash.js:76
+msgid "Portrait"
+msgstr "Porträt"
+
+#: randomwallpaper@iflow.space/ui/unsplash.js:79
+msgid "Landscape"
+msgstr "Landschaft"
+
+#: randomwallpaper@iflow.space/ui/unsplash.js:82
+msgid "Squarish"
+msgstr "Quadratisch"
+
+#: randomwallpaper@iflow.space/ui/wallhaven.js:48
+msgid "Choose a Color"
+msgstr "Wähle eine Farbe"
+
+#: randomwallpaper@iflow.space/ui/genericJson.ui:12
+msgid "Disclaimer"
+msgstr "Hinweis"
+
+#: randomwallpaper@iflow.space/ui/genericJson.ui:13
+msgid ""
+"This wallpaper sources requires some know how. However, many different "
+"wallpaper providers can be used with the generic JSON source. You will have "
+"to specify an URL with a JSON response and a path to the target image URL "
+"within the JSON response. You can also define a prefix that will be added to "
+"the image URL."
+msgstr ""
+"Diese Wallpaper-Quelle erfordert etwas Know-how. Allerdings können viele "
+"verschiedene Wallpaper-Anbieter mit der generischen JSON-Quelle verwendet "
+"werden. Sie müssen eine URL mit einer JSON-Antwort und einen Pfad zur "
+"Zielbild-URL innerhalb der JSON-Antwort angeben. Sie können auch ein Präfix "
+"definieren, das der Bild-URL hinzugefügt wird."
+
+#: randomwallpaper@iflow.space/ui/genericJson.ui:21
+msgid "Help"
+msgstr "Hilfe"
+
+#: randomwallpaper@iflow.space/ui/genericJson.ui:33
+#: randomwallpaper@iflow.space/ui/localFolder.ui:12
+#: randomwallpaper@iflow.space/ui/pageGeneral.ui:10
+#: randomwallpaper@iflow.space/ui/reddit.ui:12
+#: randomwallpaper@iflow.space/ui/urlSource.ui:12
+#: randomwallpaper@iflow.space/ui/wallhaven.ui:12
+#: randomwallpaper@iflow.space/ui/wallhaven.ui:140
+msgid "General"
+msgstr "Allgemein"
+
+#: randomwallpaper@iflow.space/ui/genericJson.ui:36
+#: randomwallpaper@iflow.space/ui/urlSource.ui:15
+msgid "Domain"
+msgstr "Domäne"
+
+#: randomwallpaper@iflow.space/ui/genericJson.ui:56
+msgid "Request URL"
+msgstr "Request URL"
+
+#: randomwallpaper@iflow.space/ui/genericJson.ui:78
+msgid "Image"
+msgstr "Bild"
+
+#: randomwallpaper@iflow.space/ui/genericJson.ui:81
+#: randomwallpaper@iflow.space/ui/genericJson.ui:98
+msgid "JSON Path"
+msgstr "JSON Path"
+
+#: randomwallpaper@iflow.space/ui/genericJson.ui:87
+#: randomwallpaper@iflow.space/ui/genericJson.ui:104
+#: randomwallpaper@iflow.space/ui/genericJson.ui:127
+msgid "URL Prefix"
+msgstr "URL Prefix"
+
+#: randomwallpaper@iflow.space/ui/genericJson.ui:95
+msgid "Post"
+msgstr "Beitrag"
+
+#: randomwallpaper@iflow.space/ui/genericJson.ui:112
+#: randomwallpaper@iflow.space/ui/urlSource.ui:87
+msgid "Author"
+msgstr "Autor"
+
+#: randomwallpaper@iflow.space/ui/genericJson.ui:115
+msgid "Name JSON Path"
+msgstr "Name JSON Path"
+
+#: randomwallpaper@iflow.space/ui/genericJson.ui:121
+msgid "URL JSON Path"
+msgstr "URL JSON Path"
+
+#: randomwallpaper@iflow.space/ui/localFolder.ui:15
+msgid "Folder"
+msgstr "Ordner"
+
+#: randomwallpaper@iflow.space/ui/pageGeneral.ui:16
+#: randomwallpaper@iflow.space/ui/pageGeneral.ui:24
+msgid "Request New Wallpaper"
+msgstr "Neues Hintergrundbild anfordern"
+
+#: randomwallpaper@iflow.space/ui/pageGeneral.ui:34
+msgid "Wallpaper Settings"
+msgstr "Hintergrundeinstellungen"
+
+#: randomwallpaper@iflow.space/ui/pageGeneral.ui:37
+msgid "Change Type"
+msgstr "Änderungsverhalten"
+
+#: randomwallpaper@iflow.space/ui/pageGeneral.ui:43
+msgid "Wallpaper Scaling Mode"
+msgstr "Hintergrundskalierungsmodus"
+
+#: randomwallpaper@iflow.space/ui/pageGeneral.ui:49
+msgid "Different Wallpapers on Multiple Displays"
+msgstr "Unterschiedliche Hintergrundbilder auf mehreren Displays"
+
+#: randomwallpaper@iflow.space/ui/pageGeneral.ui:50
+msgid "Requires HydraPaper or Superpaper."
+msgstr "Erfordert HydraPaper oder Superpaper."
+
+#: randomwallpaper@iflow.space/ui/pageGeneral.ui:61
+msgid "Run post-command - available variables: %wallpaper_path%"
+msgstr "Nachbefehl ausführen – verfügbare Variablen: %wallpaper_path%"
+
+#: randomwallpaper@iflow.space/ui/pageGeneral.ui:68
+msgid "History Settings"
+msgstr "Verlaufseinstellungen"
+
+#: randomwallpaper@iflow.space/ui/pageGeneral.ui:87
+msgid "Delete"
+msgstr "Löschen"
+
+#: randomwallpaper@iflow.space/ui/pageGeneral.ui:99
+msgid "Save for Later Folder"
+msgstr "\"Für später speichern\" Ordner"
+
+#: randomwallpaper@iflow.space/ui/pageGeneral.ui:114
+msgid "History Length"
+msgstr "Verlaufslänge"
+
+#: randomwallpaper@iflow.space/ui/pageGeneral.ui:115
+msgid ""
+"The number of wallpapers that will be shown in the history and stored in the "
+"wallpaper folder of this extension."
+msgstr ""
+"Die Anzahl der Hintergrundbilder, die im Verlauf angezeigt und im Wallpaper-"
+"Ordner dieser Erweiterung gespeichert werden."
+
+#: randomwallpaper@iflow.space/ui/pageGeneral.ui:140
+msgid "Auto-Fetching"
+msgstr "Automatische Aktualisierung"
+
+#: randomwallpaper@iflow.space/ui/pageGeneral.ui:141
+msgid "Automatically fetch new wallpapers based on an interval."
+msgstr ""
+"Hintergrundbilder werden automatisch basierend auf einem Intervall "
+"aktualisiert."
+
+#: randomwallpaper@iflow.space/ui/pageGeneral.ui:145
+msgid "Hours"
+msgstr "Stunden"
+
+#: randomwallpaper@iflow.space/ui/pageGeneral.ui:167
+msgid "Minutes"
+msgstr "Minuten"
+
+#: randomwallpaper@iflow.space/ui/pageGeneral.ui:191
+msgid "Fetch on Startup"
+msgstr "Beim Start aktualisieren"
+
+#: randomwallpaper@iflow.space/ui/pageGeneral.ui:192
+msgid ""
+"Fetch a new wallpaper during the startup of the extension (i.e., after "
+"login, or when enabling the extension).\n"
+"<b>IMPORTANT: Do not enable this feature if you observe crashes when "
+"requesting new wallpapers because your system could crash on startup! In "
+"case you run into this issue, you might have to disable the extension or "
+"this feature from the commandline.</b>"
+msgstr ""
+"Ein neues Wallpaper beim Start der Erweiterung abrufen (d.h. nach dem Login "
+"oder beim Aktivieren der Erweiterung).\n"
+"<b>WICHTIG: Aktivieren Sie diese Funktion nicht, wenn Sie Abstürze "
+"beobachten, wenn neue Wallpapers angefordert werden, da Ihr System beim "
+"Start abstürzen könnte! Falls Sie auf dieses Problem stoßen, müssen Sie "
+"vielleicht die Erweiterung oder diese Funktion über die Kommandozeile "
+"deaktivieren.</b>"
+
+#: randomwallpaper@iflow.space/ui/pageGeneral.ui:205
+msgid "General Settings"
+msgstr "Allgemeine Einstellungen"
+
+#: randomwallpaper@iflow.space/ui/pageGeneral.ui:208
+msgid "Hide Panel Icon"
+msgstr "Panel-Symbol ausblenden"
+
+#: randomwallpaper@iflow.space/ui/pageGeneral.ui:209
+msgid ""
+"You won't be able to access the history and the settings through the panel "
+"menu. Enabling this option currently is only reasonable in conjunction with "
+"the Auto-Fetching feature.\n"
+"<b>Only enable this option if you know how to open the settings without the "
+"panel icon!</b>"
+msgstr ""
+"Sie können nicht auf den Verlauf und die Einstellungen über das Panelmenü "
+"zugreifen. Diese Option zu aktivieren, ist derzeit nur in Verbindung mit der "
+"Auto-Fetching-Funktion sinnvoll.\n"
+"<b>Aktivieren Sie diese Option nur, wenn Sie wissen, wie Sie die "
+"Einstellungen ohne das Panel-Symbol öffnen können!</b>"
+
+#: randomwallpaper@iflow.space/ui/pageGeneral.ui:220
+msgid "Show Notifications"
+msgstr "Benachrichtigungen anzeigen"
+
+#: randomwallpaper@iflow.space/ui/pageGeneral.ui:221
+msgid ""
+"System notifications will be displayed to provide information, such as when "
+"a new wallpaper is set."
+msgstr ""
+"Systembenachrichtigungen werden angezeigt, um Informationen bereitzustellen, "
+"z.B. wann ein neues Hintergrundbild gesetzt wird."
+
+#: randomwallpaper@iflow.space/ui/pageGeneral.ui:231
+msgid "Disable Hover Preview"
+msgstr "Hover-Vorschau deaktivieren"
+
+#: randomwallpaper@iflow.space/ui/pageGeneral.ui:232
+msgid ""
+"Disable the desktop preview of the background while hovering the history "
+"items. Try enabling if you encounter crashes or lags of the gnome-shell "
+"while using the extension."
+msgstr ""
+"Deaktivieren Sie die Desktopvorschau des Hintergrunds, während Sie mit dem "
+"Mauszeiger über die Verlaufsobjekte fahren. Versuchen Sie, dies zu "
+"aktivieren, wenn Sie Abstürze oder Verzögerungen der Gnome-Shell beim "
+"Verwenden der Erweiterung erleben."
+
+#: randomwallpaper@iflow.space/ui/pageGeneral.ui:242
+msgid "Log Level"
+msgstr "Protokollstufe"
+
+#: randomwallpaper@iflow.space/ui/pageGeneral.ui:243
+msgid "Set the tier of warnings appearing in the journal"
+msgstr ""
+"Legen Sie die Stufe der Warnungen fest, die im Journal angezeigt werden"
+
+#: randomwallpaper@iflow.space/ui/pageSources.ui:10
+#: randomwallpaper@iflow.space/ui/pageSources.ui:14
+msgid "Wallpaper Sources"
+msgstr "Hintergrundquellen"
+
+#: randomwallpaper@iflow.space/ui/pageSources.ui:15
+msgid "Wallpapers are loaded from the configured sources"
+msgstr "Hintergrundbilder werden aus den konfigurierten Quellen geladen"
+
+#: randomwallpaper@iflow.space/ui/pageSources.ui:24
+#: randomwallpaper@iflow.space/ui/sourceConfigModal.ui:66
+msgid "Add Source"
+msgstr "Quelle hinzufügen"
+
+#: randomwallpaper@iflow.space/ui/pageSources.ui:31
+msgid "No Sources Configured!"
+msgstr "Keine Quellen konfiguriert!"
+
+#: randomwallpaper@iflow.space/ui/pageSources.ui:32
+msgid ""
+"Random images will be requested from \"wallhaven.com\" until a source is "
+"added and enabled!"
+msgstr ""
+"Zufällige Bilder werden von \"wallhaven.com\" angefordert, bis eine Quelle "
+"hinzugefügt und aktiviert wird!"
+
+#: randomwallpaper@iflow.space/ui/reddit.ui:15
+msgid "Subreddits - e.g.: wallpaper, wallpapers, minimalwallpaper"
+msgstr "Subreddits – z. B.: wallpaper, wallpapers, minimalwallpaper"
+
+#: randomwallpaper@iflow.space/ui/reddit.ui:20
+msgid "Minimal Resolution"
+msgstr "Minimale Auflösung"
+
+#: randomwallpaper@iflow.space/ui/reddit.ui:58
+msgid "Minimal Image Ratio"
+msgstr "Minimales Bildverhältnis"
+
+#: randomwallpaper@iflow.space/ui/reddit.ui:96
+#: randomwallpaper@iflow.space/ui/wallhaven.ui:103
+msgid "SFW"
+msgstr "SFW"
+
+#: randomwallpaper@iflow.space/ui/reddit.ui:97
+#: randomwallpaper@iflow.space/ui/wallhaven.ui:104
+msgid "Safe for work"
+msgstr "Sicher für die Arbeit"
+
+#: randomwallpaper@iflow.space/ui/sourceConfigModal.ui:34
+#: randomwallpaper@iflow.space/ui/sourceRow.ui:10
+#: randomwallpaper@iflow.space/ui/urlSource.ui:90
+msgid "Name"
+msgstr "Name"
+
+#: randomwallpaper@iflow.space/ui/sourceConfigModal.ui:37
+msgid "My Source"
+msgstr "Meine Quelle"
+
+#: randomwallpaper@iflow.space/ui/sourceConfigModal.ui:80
+msgid "Close"
+msgstr "Schließen"
+
+#: randomwallpaper@iflow.space/ui/sourceRow.ui:11
+msgid "Type"
+msgstr "Typ"
+
+#: randomwallpaper@iflow.space/ui/sourceRow.ui:30
+msgid "Remove"
+msgstr "Entfernen"
+
+#: randomwallpaper@iflow.space/ui/sourceRow.ui:43
+msgid "Edit"
+msgstr "Bearbeiten"
+
+#: randomwallpaper@iflow.space/ui/sourceRow.ui:52
+msgid "Blocked Images"
+msgstr "Blockierte Bilder"
+
+#: randomwallpaper@iflow.space/ui/sourceRow.ui:59
+msgid "No Blocked Images"
+msgstr "Keine blockierten Bilder"
+
+#: randomwallpaper@iflow.space/ui/unsplash.ui:12
+#: randomwallpaper@iflow.space/ui/wallhaven.ui:21
+msgid "API Key"
+msgstr "API-Schlüssel"
+
+#: randomwallpaper@iflow.space/ui/unsplash.ui:13
+msgid "An API key is required to use Unsplash as source."
+msgstr ""
+"Ein API-Schlüssel ist erforderlich, um Unsplash als Quelle zu verwenden."
+
+#: randomwallpaper@iflow.space/ui/unsplash.ui:16
+msgid "API Key - Required"
+msgstr "API-Schlüssel – Erforderlich"
+
+#: randomwallpaper@iflow.space/ui/unsplash.ui:24
+msgid "Search Criteria"
+msgstr "Suchkriterien"
+
+#: randomwallpaper@iflow.space/ui/unsplash.ui:25
+msgid ""
+"Note: You can’t use the collections or topics filtering with query "
+"parameters in the same request."
+msgstr ""
+"Hinweis: Sie können die Filterung von Sammlungen oder Themen nicht mit "
+"Suchparametern in derselben Anfrage verwenden."
+
+#: randomwallpaper@iflow.space/ui/unsplash.ui:28
+msgid "Query"
+msgstr "Abfrage"
+
+#: randomwallpaper@iflow.space/ui/unsplash.ui:34
+msgid "Username"
+msgstr "Benutzername"
+
+#: randomwallpaper@iflow.space/ui/unsplash.ui:40
+msgid "Collections"
+msgstr "Sammlungen"
+
+#: randomwallpaper@iflow.space/ui/unsplash.ui:46
+msgid "Topics"
+msgstr "Themen"
+
+#: randomwallpaper@iflow.space/ui/unsplash.ui:52
+msgid "Content Safety"
+msgstr "Inhaltssicherheit"
+
+#: randomwallpaper@iflow.space/ui/unsplash.ui:57
+msgid "Orientation"
+msgstr "Orientierung"
+
+#: randomwallpaper@iflow.space/ui/urlSource.ui:35
+msgid "Image URL"
+msgstr "Bild-URL"
+
+#: randomwallpaper@iflow.space/ui/urlSource.ui:54
+msgid "Post URL"
+msgstr "Beitrags-URL"
+
+#: randomwallpaper@iflow.space/ui/urlSource.ui:74
+msgid "Yields Different Images"
+msgstr "Ergibt verschiedene Bilder"
+
+#: randomwallpaper@iflow.space/ui/urlSource.ui:75
+msgid "...on consecutive request in a short amount of time."
+msgstr "..auf fortlaufende Anfrage in kurzer Zeit."
+
+#: randomwallpaper@iflow.space/ui/urlSource.ui:96
+msgid "URL"
+msgstr "URL"
+
+#: randomwallpaper@iflow.space/ui/wallhaven.ui:15
+msgid "Keywords - Comma Separated"
+msgstr "Schlüsselwörter – durch Kommas getrennt"
+
+#: randomwallpaper@iflow.space/ui/wallhaven.ui:41
+msgid "Minimal Resolution (e.g., 1920x1080)"
+msgstr "Minimale Auflösung (z.B.: 1920x1080)"
+
+#: randomwallpaper@iflow.space/ui/wallhaven.ui:48
+msgid "Allowed Aspect Ratios (e.g., 16x9,16x10)"
+msgstr "Zulässige Seitenverhältnisse (z.B.: 16x9,16x10)"
+
+#: randomwallpaper@iflow.space/ui/wallhaven.ui:55
+msgid "Search by color"
+msgstr "Suche nach Farbe"
+
+#: randomwallpaper@iflow.space/ui/wallhaven.ui:88
+msgid "Allow AI Generated Images"
+msgstr "KI-generierte Bilder zulassen"
+
+#: randomwallpaper@iflow.space/ui/wallhaven.ui:100
+msgid "Allowed Content Ratings"
+msgstr "Zulässige Inhaltsbewertungen"
+
+#: randomwallpaper@iflow.space/ui/wallhaven.ui:114
+msgid "Sketchy"
+msgstr "Grenzwertig/Unangebracht"
+
+#: randomwallpaper@iflow.space/ui/wallhaven.ui:124
+msgid "NSFW"
+msgstr "NSFW"
+
+#: randomwallpaper@iflow.space/ui/wallhaven.ui:125
+msgid "Not safe for work"
+msgstr "Nicht arbeitssicher"
+
+#: randomwallpaper@iflow.space/ui/wallhaven.ui:137
+msgid "Categories"
+msgstr "Kategorien"
+
+#: randomwallpaper@iflow.space/ui/wallhaven.ui:150
+msgid "Anime"
+msgstr "Anime"
+
+#: randomwallpaper@iflow.space/ui/wallhaven.ui:160
+msgid "People"
+msgstr "Menschen"
+
+#~ msgid "high"
+#~ msgstr "hoch"

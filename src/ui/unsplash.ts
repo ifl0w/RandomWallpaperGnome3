@@ -6,16 +6,7 @@ import Gtk from 'gi://Gtk';
 
 import * as Settings from './../settings.js';
 
-/**
- * Local shim of translate function until supported with import below:
- * import {gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
- *
- * @param {string} text to translate
- * @returns {string} same text
- */
-function _(text: string): string {
-    return text;
-}
+import {gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
 // Generated code produces a no-shadow rule error
 /* eslint-disable */
