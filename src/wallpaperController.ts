@@ -273,7 +273,7 @@ class WallpaperController {
 
         if (sourceIDs.length < 1 || sourceIDs[0] === '-1') {
             randomAdapterResult.push({
-                adapter: new UnsplashAdapter(null, null),
+                adapter: new WallhavenAdapter(null, null),
                 id: '-1',
                 type: 0,
                 imageCount: count,
@@ -335,14 +335,14 @@ class WallpaperController {
                     imageSourceAdapter = new UrlSourceAdapter(sourceID, sourceName);
                     break;
                 default:
-                    imageSourceAdapter = new UnsplashAdapter(null, null);
+                    imageSourceAdapter = new WallhavenAdapter(null, null);
                     sourceType = 0;
                     break;
                 }
             } catch (error) {
                 Logger.warn('Had errors, fetching with default settings.', this);
-                imageSourceAdapter = new UnsplashAdapter(null, null);
-                sourceType = Utils.SourceType.UNSPLASH;
+                imageSourceAdapter = new WallhavenAdapter(null, null);
+                sourceType = Utils.SourceType.WALLHAVEN;
             }
 
             randomAdapterResult.push({

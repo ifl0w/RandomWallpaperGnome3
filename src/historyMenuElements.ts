@@ -6,6 +6,7 @@ import GLib from 'gi://GLib';
 import GObject from 'gi://GObject';
 import St from 'gi://St';
 
+import {gettext as _, ngettext} from 'resource:///org/gnome/shell/extensions/extension.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
@@ -232,7 +233,7 @@ class HistoryElement extends PopupMenu.PopupSubMenuMenuItem {
                 this.menu.addMenuItem(sourceItem);
             }
 
-            const imageUrlItem = new PopupMenu.PopupMenuItem('Open Image in Browser');
+            const imageUrlItem = new PopupMenu.PopupMenuItem(_('Open Image in Browser'));
             imageUrlItem.connect('activate', () => {
                 if (this.historyEntry.source.imageLinkUrl) {
                     Utils.execCheck(['xdg-open', this.historyEntry.source.imageLinkUrl]).catch(error => {
@@ -243,19 +244,19 @@ class HistoryElement extends PopupMenu.PopupSubMenuMenuItem {
 
             this.menu.addMenuItem(imageUrlItem);
         } else {
-            this.menu.addMenuItem(new PopupMenu.PopupMenuItem('Unknown Source'));
+            this.menu.addMenuItem(new PopupMenu.PopupMenuItem(_('Unknown Source')));
         }
 
         this.menu.addMenuItem(new HistoryElementSubmenuSeparator());
 
-        this._setAsWallpaperItem = new PopupMenu.PopupMenuItem('Set As Wallpaper');
+        this._setAsWallpaperItem = new PopupMenu.PopupMenuItem(_('Set As Wallpaper'));
         this._setAsWallpaperItem.connect('activate', () => {
             this.emit('activate', null); // Fixme: not sure what the second parameter should be. null seems to work fine for now.
         });
 
         this.menu.addMenuItem(this._setAsWallpaperItem);
 
-        const copyToFavoritesLabelText = 'Save for Later';
+        const copyToFavoritesLabelText = _('Save for Later');
         const copyToFavorites = new PopupMenu.PopupMenuItem(copyToFavoritesLabelText);
         copyToFavorites.connect('activate', () => {
             this._saveImage().catch(error => {
@@ -263,10 +264,10 @@ class HistoryElement extends PopupMenu.PopupSubMenuMenuItem {
             });
         });
         // Disable copy option if the file was already saved.
-        this.menu.connect('open-state-changed', (_, open) => {
+        this.menu.connect('open-state-changed', (_unused, open) => {
             if (open && this._checkAlreadySaved()) {
                 copyToFavorites.sensitive = false;
-                copyToFavorites.label.set_text('Already Saved!');
+                copyToFavorites.label.set_text(_('Already Saved!'));
             } else {
                 copyToFavorites.sensitive = true;
                 copyToFavorites.label.set_text(copyToFavoritesLabelText);
@@ -278,7 +279,7 @@ class HistoryElement extends PopupMenu.PopupSubMenuMenuItem {
 
         // Static URLs can't block images (yet?)
         if (this.historyEntry.adapter?.type !== Utils.SourceType.STATIC_URL) {
-            const blockImage = new PopupMenu.PopupMenuItem('Add to Blocklist');
+            const blockImage = new PopupMenu.PopupMenuItem(_('Add to Blocklist'));
             blockImage.connect('activate', () => {
                 this._addToBlocklist();
             });
@@ -390,7 +391,7 @@ class HistoryElement extends PopupMenu.PopupSubMenuMenuItem {
         connect_events(this.menu.actor);
         // Also execute the leave callback when sub-menu is closed.
         // Note that this is a workaround for the enter event being triggered as the last event for some reason.
-        this.menu.connect('open-state-changed', (_, open) => void this.debounce().then(() => {
+        this.menu.connect('open-state-changed', (_unused, open) => void this.debounce().then(() => {
             if (!open)
                 onLeave(this.historyEntry);
         }).catch(debounceCatch));
@@ -502,14 +503,12 @@ class NewWallpaperElement extends PopupMenu.PopupBaseMenuItem {
         });
 
         const newWPLabel = new St.Label({
-            text: 'New Wallpaper',
+            text: _('New Wallpaper'),
             style_class: 'rwg-new-label',
         });
         container.add_child(newWPLabel);
 
-        this._remainingLabel = new St.Label({
-            text: '1 minute remaining',
-        });
+        this._remainingLabel = new St.Label();
         container.add_child(this._remainingLabel);
 
         this.actor.add_child(container);
@@ -524,15 +523,13 @@ class NewWallpaperElement extends PopupMenu.PopupBaseMenuItem {
             const minutes = remainingMinutes % 60;
             const hours = Math.floor(remainingMinutes / 60);
 
-            let hoursText = hours.toString();
-            hoursText += hours === 1 ? ' hour' : ' hours';
-            let minText = minutes.toString();
-            minText += minutes === 1 ? ' minute' : ' minutes';
+            const hoursText = ngettext('%d hour', '%d hours', hours).format(hours);
+            const minText = ngettext('%d minute', '%d minutes', minutes).format(minutes);
 
             if (hours >= 1)
-                this._remainingLabel.text = `... ${hoursText} and ${minText} remaining.`;
+                this._remainingLabel.text = `... ${hoursText} ${_('and')} ${minText} ${_('remaining')}.`;
             else
-                this._remainingLabel.text = `... ${minText} remaining.`;
+                this._remainingLabel.text = `... ${minText} ${_('remaining')}.`;
 
 
             this._remainingLabel.show();
@@ -643,7 +640,7 @@ class HistorySection extends PopupMenu.PopupMenuSection {
 
         this.removeAll();
 
-        const noHistory = new PopupMenu.PopupMenuItem('No Wallpaper History');
+        const noHistory = new PopupMenu.PopupMenuItem(_('No Wallpaper History'));
         noHistory.sensitive = false;
         this.addMenuItem(noHistory);
     }

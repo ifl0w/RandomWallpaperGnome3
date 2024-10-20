@@ -13,9 +13,9 @@ import {type WallpaperManager} from './manager/wallpaperManager.js';
 // 'SourceType' is already declared in the upper scope on line 7 column 5  no-shadow
 /* eslint-disable */
 enum SourceType {
-    UNSPLASH = 0,
-    WALLHAVEN,
+    WALLHAVEN = 0,
     REDDIT,
+    UNSPLASH,
     GENERIC_JSON,
     LOCAL_FOLDER,
     STATIC_URL,

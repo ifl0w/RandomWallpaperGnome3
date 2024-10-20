@@ -1,5 +1,7 @@
 import Gio from 'gi://Gio';
 
+import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+
 import * as SettingsModule from './../settings.js';
 import * as Utils from './../utils.js';
 
@@ -39,9 +41,9 @@ class WallhavenAdapter extends BaseAdapter {
     private _options: QueryOptions = {
         ai_art_filter: '1',
         q: '',
-        purity: '110', // SFW, sketchy
+        purity: '100', // SFW
         sorting: 'random',
-        categories: '111', // General, Anime, People
+        categories: '100', // General
         atleast: '1920x1080',
         ratios: ['16x9'],
         colors: '',
@@ -53,9 +55,9 @@ class WallhavenAdapter extends BaseAdapter {
      * @param {string} id Unique ID
      * @param {string} name Custom name of this adapter
      */
-    constructor(id: string, name: string) {
+    constructor(id: string | null, name: string | null) {
         super({
-            id,
+            id: id ?? '-1',
             schemaID: SettingsModule.RWG_SETTINGS_SCHEMA_SOURCES_WALLHAVEN,
             schemaPath: `${SettingsModule.RWG_SETTINGS_SCHEMA_PATH}/sources/wallhaven/${id}/`,
             name,
@@ -215,6 +217,14 @@ class WallhavenAdapter extends BaseAdapter {
         }
 
         this._options.atleast = this._settings.getString('minimal-resolution');
+
+        /* eslint-disable */
+        // @ts-expect-error Members of 'Main' are not defined completely for TS
+        const primaryMonitor = Main.layoutManager?.primaryMonitor;
+        if (!this._options.atleast && primaryMonitor)
+            this._options.atleast = `${primaryMonitor.width}x${primaryMonitor.height}`;
+        /* eslint-enable */
+
         this._options.ratios = this._settings.getString('aspect-ratios').split(',');
         this._options.ratios = this._options.ratios.map(elem => {
             return elem.trim();

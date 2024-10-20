@@ -2,65 +2,48 @@ using Gtk 4.0;
 using Adw 1;
 
 template $UnsplashSettings: Adw.PreferencesPage {
-    Adw.PreferencesGroup {
-        title: _("General");
 
-        Adw.EntryRow keyword {
-            title: _("Keywords - Comma Separated");
+    Adw.PreferencesGroup {
+        title: _("API Key");
+        description: _("An API key is required to use Unsplash as source.");
+
+        Adw.EntryRow api_key {
+            title: _("API Key - Required");
+            input-purpose: free_form;
+        }
+    }
+
+    Adw.PreferencesGroup {
+        title: _("Search Criteria");
+        description: _("Note: You can’t use the collections or topics filtering with query parameters in the same request.");
+
+        Adw.EntryRow query {
+            title: _("Query");
             input-purpose: free_form;
         }
 
-        Adw.ActionRow {
-            title: _("Only Featured Images");
-            subtitle: _("This option results in a smaller image pool, but the images are considered to be of higher quality.");
-
-            Switch featured_only {
-                valign: center;
-            }
+        Adw.EntryRow username {
+            title: _("Username");
+            input-purpose: free_form;
         }
 
-        Adw.ActionRow {
-            title: _("Image Dimensions");
+        Adw.EntryRow collections {
+            title: _("Collections");
+            input-purpose: free_form;
+        }
 
-            SpinButton {
-                valign: center;
-                numeric: true;
+        Adw.EntryRow topics {
+            title: _("Topics");
+            input-purpose: free_form;
+        }
 
-                adjustment: Adjustment image_width {
-                    step-increment: 1;
-                    page-increment: 10;
-                    lower: 1;
-                    upper: 1000000;
-                };
-            }
+        Adw.ComboRow content_filter {
+            title: _("Content Safety");
+        }
 
-            Label {
-                label: "x";
-            }
-
-            SpinButton {
-                valign: center;
-                numeric: true;
-
-                adjustment: Adjustment image_height {
-                    step-increment: 1;
-                    page-increment: 10;
-                    lower: 1;
-                    upper: 1000000;
-                };
-            }
+        Adw.ComboRow orientation {
+            title: _("Orientation");
         }
     }
 
-    Adw.PreferencesGroup {
-        title: _("Constraint");
-
-        Adw.ComboRow constraint_type {
-            title: _("Type");
-        }
-
-        Adw.EntryRow constraint_value {
-            title: _("Value");
-        }
-    }
 }

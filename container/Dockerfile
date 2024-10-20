@@ -41,7 +41,7 @@ exit 0\n\
 # basics
 RUN apt-get update && \
     env DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-      locales && \
+      locales locales-all && \
       echo "$LANG UTF-8" >> /etc/locale.gen && \
       locale-gen && \
     env DEBIAN_FRONTEND=noninteractive apt-get install -y \
@@ -62,6 +62,8 @@ RUN apt-get update && \
       arandr `#Lightweight utility to set resolution` \
       gnome-icon-theme \
       gnome-terminal \
+      gnome-control-center \
+      language-pack-gnome-de \
       nautilus && \
     /cleanup
 

@@ -1,4 +1,5 @@
 import {notify} from 'resource:///org/gnome/shell/ui/main.js';
+import {gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
 
 import {HistoryEntry} from './history.js';
 
@@ -12,9 +13,9 @@ class Notification {
      * @param {HistoryEntry[]} historyEntries The history elements representing the new wallpapers
      */
     static newWallpaper(historyEntries: HistoryEntry[]): void {
-        const infoString = `Source: ${historyEntries.map(h => `${h.source.source ?? 'Unknown Source'}`).join(', ')}`;
-        const message = `A new wallpaper was set!\n${infoString}`;
-        notify('New Wallpaper', message);
+        const infoString = `${_('Source')}: ${historyEntries.map(h => `${h.source.source ?? _('Unknown Source')}`).join(', ')}`;
+        const message = `${_('A new wallpaper was set!')}\n${infoString}`;
+        notify(_('New Wallpaper'), message);
     }
 
     /**
@@ -28,7 +29,7 @@ class Notification {
         if (error instanceof Error)
             errorMessage = error.message;
 
-        notify('RandomWallpaperGnome3: Wallpaper Download Failed!', errorMessage);
+        notify(`RandomWallpaperGnome3: ${_('Wallpaper Download Failed!')}`, errorMessage);
     }
 }
 
