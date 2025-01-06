@@ -294,7 +294,15 @@ class RandomWallpaperSettings extends ExtensionPreferences {
      * @returns {string[]} Array of strings of loaded sources
      */
     private _loadSources(settings: Settings.Settings): string[] {
-        const sources = settings.getStrv('sources');
+        let sources = settings.getStrv('sources');
+
+        // Ignore any source with an unset type.
+        // The default value (-1) cannot be interpreted correctly as no source type should be assumed.
+        sources = sources.filter(s => {
+            const path = `${Settings.RWG_SETTINGS_SCHEMA_PATH}/sources/general/${s}/`;
+            const settingsGeneral = new Settings.Settings(Settings.RWG_SETTINGS_SCHEMA_SOURCES_GENERAL, path);
+            return settingsGeneral.getInt('type') >= 0;
+        });
 
         // this._sources.sort((a, b) => {
         // const path1 = `${Settings.RWG_SETTINGS_SCHEMA_PATH}/sources/general/${a}/`;
