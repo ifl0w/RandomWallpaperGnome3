@@ -6,15 +6,7 @@ import GObject from 'gi://GObject';
 
 import * as Utils from './../utils.js';
 
-import {Logger} from './../logger.js';
 import {SourceRow} from './sourceRow.js';
-
-import {GenericJsonSettings} from './genericJson.js';
-import {LocalFolderSettings} from './localFolder.js';
-import {RedditSettings} from './reddit.js';
-import {UnsplashSettings} from './unsplash.js';
-import {UrlSourceSettings} from './urlSource.js';
-import {WallhavenSettings} from './wallhaven.js';
 
 // FIXME: Generated static class code produces a no-unused-expressions rule error
 /* eslint-disable no-unused-expressions */
@@ -117,50 +109,9 @@ class SourceConfigModal extends Adw.Window {
      * @param {number} type Enum of the adapter to use
      */
     private _fillRow(type: Utils.SourceType): void {
-        const targetWidget = this._getSettingsWidget(type);
+        const targetWidget = this._currentSourceRow.getSettingsWidget(type);
         if (targetWidget !== null)
             this._settings_container.set_child(targetWidget);
-    }
-
-    /**
-     * Get a new adapter based on an enum source type.
-     *
-     * @param {Utils.SourceType} type Enum of the adapter to get
-     * @returns {UnsplashSettings | WallhavenSettings | RedditSettings | GenericJsonSettings | LocalFolderSettings | UrlSourceSettings | null} Newly crafted adapter or null
-     */
-    private _getSettingsWidget(type: Utils.SourceType = Utils.SourceType.WALLHAVEN): UnsplashSettings
-        | WallhavenSettings
-        | RedditSettings
-        | GenericJsonSettings
-        | LocalFolderSettings
-        | UrlSourceSettings
-        | null {
-        let targetWidget = null;
-        switch (type) {
-        case Utils.SourceType.UNSPLASH:
-            targetWidget = new UnsplashSettings(this._currentSourceRow.id);
-            break;
-        case Utils.SourceType.WALLHAVEN:
-            targetWidget = new WallhavenSettings(this._currentSourceRow.id);
-            break;
-        case Utils.SourceType.REDDIT:
-            targetWidget = new RedditSettings(this._currentSourceRow.id);
-            break;
-        case Utils.SourceType.GENERIC_JSON:
-            targetWidget = new GenericJsonSettings(this._currentSourceRow.id);
-            break;
-        case Utils.SourceType.LOCAL_FOLDER:
-            targetWidget = new LocalFolderSettings(this._currentSourceRow.id);
-            break;
-        case Utils.SourceType.STATIC_URL:
-            targetWidget = new UrlSourceSettings(this._currentSourceRow.id);
-            break;
-        default:
-            targetWidget = null;
-            Logger.error('The selected source has no corresponding widget!', this);
-            break;
-        }
-        return targetWidget;
     }
 
     /**
