@@ -32,6 +32,7 @@ Install and try the extension at [extensions.gnome.org](https://extensions.gnome
     * [Hydra Paper](https://hydrapaper.gabmus.org/)
     * [Superpaper](https://github.com/hhannine/superpaper)
 * Execute a custom command after every new wallpaper ([Examples](https://github.com/ifl0w/RandomWallpaperGnome3/wiki/Post-commands))
+* Request new wallpapers with a keyboard shortcut/hotkey ([Guide](https://github.com/ifl0w/RandomWallpaperGnome3/wiki/Creating-a-shortcut---hotkey))
 
 ## Installation
 ### Release Archives
