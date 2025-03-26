@@ -82,13 +82,18 @@ class PreviewWidget extends St.Bin {
             const height = pixbuf.get_height();
             const width = pixbuf.get_width();
 
-            const image = new Clutter.Image();
+            const image = new St.ImageContent();
             const pixelFormat = pixbuf.get_has_alpha() ? Cogl.PixelFormat.RGBA_8888 : Cogl.PixelFormat.RGB_888;
             image.set_data(
+                // FIXME: Figure out where the 'global' thing can be imported from
+                // @ts-expect-error Figure out where the 'global' thing can be imported from
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-argument
+                global?.stage.context.get_backend().get_cogl_context(),
                 pixbuf.get_pixels(),
                 pixelFormat,
                 width,
                 height,
+                // @ts-expect-error TS2554: Typing is not correct yet with 6 arguments
                 pixbuf.get_rowstride()
             );
 
