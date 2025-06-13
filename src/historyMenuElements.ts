@@ -82,7 +82,7 @@ class PreviewWidget extends St.Bin {
             const height = pixbuf.get_height();
             const width = pixbuf.get_width();
 
-            const image = new Clutter.Image();
+            const image = new St.ImageContent();
             const pixelFormat = pixbuf.get_has_alpha() ? Cogl.PixelFormat.RGBA_8888 : Cogl.PixelFormat.RGB_888;
             image.set_data(
                 pixbuf.get_pixels(),
