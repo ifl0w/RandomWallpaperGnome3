@@ -218,12 +218,9 @@ class WallhavenAdapter extends BaseAdapter {
 
         this._options.atleast = this._settings.getString('minimal-resolution');
 
-        /* eslint-disable */
-        // @ts-expect-error Members of 'Main' are not defined completely for TS
         const primaryMonitor = Main.layoutManager?.primaryMonitor;
         if (!this._options.atleast && primaryMonitor)
             this._options.atleast = `${primaryMonitor.width}x${primaryMonitor.height}`;
-        /* eslint-enable */
 
         this._options.ratios = this._settings.getString('aspect-ratios').split(',');
         this._options.ratios = this._options.ratios.map(elem => {

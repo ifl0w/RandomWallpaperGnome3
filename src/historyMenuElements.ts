@@ -47,11 +47,7 @@ class PreviewWidget extends St.Bin {
      */
     constructor(width: number) {
         let aspect;
-        // @ts-expect-error Members of 'Main' are not defined completely for TS
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         if (Main.layoutManager?.primaryMonitor?.height)
-            // @ts-expect-error Members of 'Main' are not defined completely for TS
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             aspect = Main.layoutManager.primaryMonitor.height / Main.layoutManager.primaryMonitor.width;
         else
             aspect = 2 / (1 + Math.sqrt(5)); // inverse of golden ratio: https://en.wikipedia.org/wiki/Golden_ratio
@@ -82,9 +78,10 @@ class PreviewWidget extends St.Bin {
             const height = pixbuf.get_height();
             const width = pixbuf.get_width();
 
-            const image = new St.ImageContent();
+            const image = new St.ImageContent({preferredHeight: height, preferredWidth: width});
             const pixelFormat = pixbuf.get_has_alpha() ? Cogl.PixelFormat.RGBA_8888 : Cogl.PixelFormat.RGB_888;
             image.set_data(
+                global?.stage.context.get_backend().get_cogl_context(),
                 pixbuf.get_pixels(),
                 pixelFormat,
                 width,
@@ -264,6 +261,7 @@ class HistoryElement extends PopupMenu.PopupSubMenuMenuItem {
             });
         });
         // Disable copy option if the file was already saved.
+        // @ts-expect-error type not defined correspondingly in gits/gjs
         this.menu.connect('open-state-changed', (_unused, open) => {
             if (open && this._checkAlreadySaved()) {
                 copyToFavorites.sensitive = false;
@@ -307,7 +305,7 @@ class HistoryElement extends PopupMenu.PopupSubMenuMenuItem {
     private static readonly DEBOUNCE_ERROR_MSG: string = 'debounce';
     private static debounceID: number = -1;
     private static clearLastDebounceTimeout: (() => void) | undefined;
-    private static lastDebounceTimeout: number | undefined;
+    private static lastDebounceTimeout: GLib.Source | undefined;
     /**
      * Debounce events based on incremented debounceID. I.e. Only the last promise created resolves when the timeout finishes.
      *
@@ -391,6 +389,7 @@ class HistoryElement extends PopupMenu.PopupSubMenuMenuItem {
         connect_events(this.menu.actor);
         // Also execute the leave callback when sub-menu is closed.
         // Note that this is a workaround for the enter event being triggered as the last event for some reason.
+        // @ts-expect-error type not defined correspondingly in gits/gjs
         this.menu.connect('open-state-changed', (_unused, open) => void this.debounce().then(() => {
             if (!open)
                 onLeave(this.historyEntry);
@@ -590,13 +589,17 @@ class HistorySection extends PopupMenu.PopupMenuSection {
     constructor() {
         super();
 
+        // TODO: remove the error suppression by reworking the menu
+        // @ts-expect-error the actor is readonly but to fix this the panel menu needs to be reworked
         this.actor = new St.ScrollView({
             vscrollbar_policy: St.PolicyType.AUTOMATIC,
             overlay_scrollbars: true,
         });
 
+        this.actor.add_child(this.box);
         // https://gjs.guide/extensions/upgrading/gnome-shell-46.html#clutter-container
         if (MAJOR < 46)
+            // @ts-expect-error this was used before 46
             this.actor.add_actor(this.box);
         else
             this.actor.add_child(this.box);
