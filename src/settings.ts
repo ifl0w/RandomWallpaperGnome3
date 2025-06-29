@@ -1,7 +1,11 @@
 import Gio from 'gi://Gio';
 import GObject from 'gi://GObject';
 
-import {ExtensionBase} from 'sharedInternals';
+//import {ExtensionBase} from 'sharedInternals';
+import {ExtensionPreferences, gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
+import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
+import { ExtensionBase } from '@girs/gnome-shell/extensions/extension';
+
 
 const RWG_SETTINGS_SCHEMA_BACKEND_CONNECTION = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.backend-connection';
 const RWG_SETTINGS_SCHEMA_SOURCES_GENERAL = 'org.gnome.shell.extensions.space.iflow.randomwallpaper.sources.general';
@@ -285,7 +289,7 @@ class Settings {
      * @returns {Gio.SettingsSchema} Settings schema object for the given ID
      */
     // https://gitlab.gnome.org/GNOME/gnome-shell/-/blob/main/js/extensions/sharedInternals.js#L91
-    private _getSchema(extensionObject: ExtensionBase, schemaId?: string): Gio.SettingsSchema {
+    private _getSchema(extensionObject: Extension, schemaId?: string): Gio.SettingsSchema {
         if (!schemaId)
             schemaId = extensionObject.metadata['settings-schema'];
 

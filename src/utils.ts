@@ -115,7 +115,7 @@ function execCheck(argv: string[], cancellable?: Gio.Cancellable | null): Promis
             try {
                 if (!_proc.wait_check_finish(res)) {
                     const status = _proc.get_exit_status();
-                    throw GLib.Error.new_literal(Gio.io_error_quark(), Gio.io_error_from_errno(status), GLib.strerror(status));
+                    throw GLib.Error.new_literal(Gio.io_error_quark(), status, GLib.strerror(status));
                 }
 
                 resolve();
@@ -171,9 +171,6 @@ function findFirstDifference(str1: string, str2: string): number {
  * @returns {number} Connected display count
  */
 function getMonitorCount(): number {
-    // FIXME: Figure out where the 'global' thing can be imported from
-    // @ts-expect-error Figure out where the 'global' thing can be imported from
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     const currentDisplay = global?.display as Meta.Display;
     const count = currentDisplay?.get_n_monitors();
 
