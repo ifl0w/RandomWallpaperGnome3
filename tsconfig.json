@@ -1,40 +1,46 @@
 {
     "compilerOptions": {
-        "experimentalDecorators": true,
-        "target": "ES2020",
-        "module": "es2020",
+        //"experimentalDecorators": true,
+        //"target": "ES2020",
+        //"module": "es2020",
+        "module": "NodeNext",
+        "moduleResolution": "NodeNext",
+        "target": "ES2022",
+        "lib": [
+          "ES2022"
+        ],
         "sourceMap": false,
         "strict": true,
         "pretty": true,
         "removeComments": false,
         "baseUrl": "./src",
-        "allowSyntheticDefaultImports": true,
+        //"allowSyntheticDefaultImports": true,
         "outDir": "./randomwallpaper@iflow.space",
-        "moduleResolution": "node",
-        "skipLibCheck": true,
-        "lib": [
-            "ES2021",
-            "DOM", // FIXME: This is here for TextDecoder which should be defined by global GJS
-            // https://gjs-docs.gnome.org/gjs/encoding.md
-            // > The functions in this module are available globally, without import.
-        ],
-        "typeRoots": [
-            "./node_modules/@gi-types",
-            "./types",
-        ],
+        "skipLibCheck": true, // TODO: this should not be necessary and points to an error in the configuration
+        //"lib": [
+        //    "ES2021",
+        //    "DOM", // FIXME: This is here for TextDecoder which should be defined by global GJS
+        //    // https://gjs-docs.gnome.org/gjs/encoding.md
+        //    // > The functions in this module are available globally, without import.
+        //],
+        //"typeRoots": [
+        //    "./types",
+        //],
         "types": [
-            "mappings", // mappings 'from @girs' to 'gi://'
-            "ui", // shell import types
-            "misc", // extension import types
+        ////    "mappings", // mappings 'from @girs' to 'gi://'
+        //    "./types/ui", // shell import types
+        //    "./types/misc", // extension import types
+        //    //"./node_modules/@girs/gjs/ambient.d.ts"
+                "./types/mappings"
         ],
 
     },
     "include": [
-        "src/**/*.ts",
+        "./types/mappings/index.d.ts",
+        "./src/**/*.ts",
         "randomwallpaper@iflow.space/**/*.js"
     ],
     "exclude": [
-        "./node_modules/**",
-        "./types/**"
+    //    "./types/**"
     ],
 }

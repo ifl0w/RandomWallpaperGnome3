@@ -54,23 +54,29 @@ class RandomWallpaperMenu {
 
         // new wallpaper button
         const newWallpaperItem = new CustomElements.NewWallpaperElement();
+        //@ts-expect-error
         this._panelMenu.menu.addMenuItem(newWallpaperItem);
 
+        //@ts-expect-error
         this._panelMenu.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 
         // Set fixed width so the preview images don't widen the menu
         this._panelMenu.menu.actor.set_width(350);
 
         // Preview widget showing the current wallpaper
+        //@ts-expect-error
         this._panelMenu.menu.addMenuItem(this.previewSection);
         this.previewWidget = new CustomElements.PreviewWidget(this._panelMenu.menu.actor.width);
         this.previewSection.actor.add_child(this.previewWidget);
+        //@ts-expect-error
         this._panelMenu.menu.addMenuItem(this.previewSeparator);
 
         // history section
         this._historySection = new CustomElements.HistorySection();
+        //@ts-expect-error
         this._panelMenu.menu.addMenuItem(this._historySection);
 
+        //@ts-expect-error
         this._panelMenu.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 
         // Temporarily pause timer
@@ -95,18 +101,22 @@ class RandomWallpaperMenu {
         this._observedBackgroundValues.push(this._backendConnection.observe('pause-timer', pauseTimerChangedCallback));
         pauseTimerChangedCallback();
 
+        //@ts-expect-error
         this._panelMenu.menu.addMenuItem(pauseTimerItem);
 
         // clear history button
         const clearHistoryItem = new PopupMenu.PopupMenuItem(_('Clear History'));
+        //@ts-expect-error
         this._panelMenu.menu.addMenuItem(clearHistoryItem);
 
         // open wallpaper folder button
         const openFolder = new PopupMenu.PopupMenuItem(_('Open Wallpaper Folder'));
+        //@ts-expect-error
         this._panelMenu.menu.addMenuItem(openFolder);
 
         // settings button
         const openSettings = new PopupMenu.PopupMenuItem(_('Settings'));
+        //@ts-expect-error
         this._panelMenu.menu.addMenuItem(openSettings);
 
         // add eventlistener
@@ -151,6 +161,7 @@ class RandomWallpaperMenu {
                 extensionObject.openPreferences();
         });
 
+        //@ts-expect-error
         this._panelMenu.menu.connect('open-state-changed', (_unused, open) => {
             if (open)
                 newWallpaperItem.show();

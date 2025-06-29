@@ -33,7 +33,7 @@ class RandomWallpaperSettings extends ExtensionPreferences {
      *
      * @param {Adw.PreferencesWindow} window - The preferences window
      */
-    fillPreferencesWindow(window: Adw.PreferencesWindow): void {
+    fillPreferencesWindow(window: Adw.PreferencesWindow): Promise<void> {
         // Set statics for the current extension context (preferences window)
         Settings.Settings.extensionContext = ExtensionPreferences;
         const settings = new Settings.Settings();
@@ -67,7 +67,7 @@ class RandomWallpaperSettings extends ExtensionPreferences {
         // Setting the text domain directly on the Gettext object works but doesn't seem like the intended solution.
         // This is based on example code in GJS: https://gitlab.gnome.org/GNOME/gjs/blob/50723b9876820e9a889e1254635687a6b832551b/examples/gettext.js#L19
         // TODO: investigate further and open issue when problem is confirmed.
-        Gettext.textdomain(extensionObject.metadata['gettext-domain']);
+        Gettext.textdomain(extensionObject.metadata['gettext-domain'] || null);
 
         builder.add_from_file(`${extensionObject.path}/ui/pageGeneral.ui`);
         builder.add_from_file(`${extensionObject.path}/ui/pageSources.ui`);
@@ -175,6 +175,8 @@ class RandomWallpaperSettings extends ExtensionPreferences {
         const manager = Utils.getWallpaperManager();
         if (manager.canHandleMultipleImages)
             this._getAs<Adw.ActionRow>(builder, 'multiple_displays_row').set_sensitive(true);
+
+        return new Promise(()=>{});
     }
 
     /**
@@ -230,8 +232,10 @@ class RandomWallpaperSettings extends ExtensionPreferences {
                 licenseType: Gtk.License.MIT_X11,
                 application_name: extensionObject.metadata['name'],
                 website: extensionObject.metadata.url,
+                // @ts-expect-error
                 issue_url: extensionObject.metadata['issue-url'],
                 comments: extensionObject.metadata.description,
+                // @ts-expect-error
                 version: `${extensionObject.metadata['semantic-version']} (${extensionObject.metadata.version})`,
             });
 

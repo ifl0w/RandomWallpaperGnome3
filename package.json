@@ -1,14 +1,15 @@
 {
+  "type": "module",
   "devDependencies": {
-    "@girs/adw-1": "^1.4.0-3.2.6",
-    "@girs/gjs": "^3.2.6",
-    "@girs/gtk-4.0": "^4.12.3-3.2.6",
-    "@girs/shell-13": "^13.0.0-3.2.6",
-    "@girs/soup-3.0": "^3.4.4-3.2.6",
-    "@typescript-eslint/eslint-plugin": "^6.3.0",
-    "@typescript-eslint/parser": "^6.3.0",
-    "eslint": "^8.47.0",
-    "eslint-plugin-jsdoc": "^46.4.6",
-    "typescript": "^5.1.6"
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "eslint": "^8.57.1",
+    "eslint-plugin-jsdoc": "^46.10.1",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "@girs/gjs": "^4.0.0-beta.25",
+    "@girs/gnome-shell": "^48.0.0",
+    "@girs/soup-3.0": "^3.6.5-4.0.0-beta.25"
   }
 }
