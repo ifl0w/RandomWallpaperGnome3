@@ -74,7 +74,7 @@ class PreviewWidget extends St.Bin {
      * @param {string} path Path to the image to preview
      */
     preview(path: string | null): void {
-        if (!path)
+        if (!path  || MAJOR >= 48)
             return;
 
         try {

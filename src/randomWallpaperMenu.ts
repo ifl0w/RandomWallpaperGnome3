@@ -20,6 +20,9 @@ import {Logger} from './logger.js';
 import {WallpaperController} from './wallpaperController.js';
 import {HistoryEntry} from './history.js';
 
+import * as Config from 'resource:///org/gnome/shell/misc/config.js';
+const [MAJOR, unused_MINOR] = Config.PACKAGE_VERSION.split('.').map(s => Number(s));
+
 /**
  * PanelMenu for this extension.
  */
@@ -35,7 +38,7 @@ class RandomWallpaperMenu {
 
     private previewSection = new PopupMenu.PopupMenuSection();
     private previewSeparator = new PopupMenu.PopupSeparatorMenuItem();
-    private previewWidget: CustomElements.PreviewWidget;
+    private previewWidget: CustomElements.PreviewWidget | undefined;
 
     /**
      * Create a new PanelMenu.
@@ -62,10 +65,13 @@ class RandomWallpaperMenu {
         this._panelMenu.menu.actor.set_width(350);
 
         // Preview widget showing the current wallpaper
-        this._panelMenu.menu.addMenuItem(this.previewSection);
-        this.previewWidget = new CustomElements.PreviewWidget(this._panelMenu.menu.actor.width);
-        this.previewSection.actor.add_child(this.previewWidget);
-        this._panelMenu.menu.addMenuItem(this.previewSeparator);
+        // only supported on previous shell versions due to girs breaking changes
+        if (MAJOR < 48) {
+            this._panelMenu.menu.addMenuItem(this.previewSection);
+            this.previewWidget = new CustomElements.PreviewWidget(this._panelMenu.menu.actor.width);
+            this.previewSection.actor.add_child(this.previewWidget);
+            this._panelMenu.menu.addMenuItem(this.previewSeparator);
+        }
 
         // history section
         this._historySection = new CustomElements.HistorySection();
@@ -218,7 +224,7 @@ class RandomWallpaperMenu {
          */
         const onLeave = (_entry: HistoryEntry): void => {
             if (history.length > 0)
-                this.previewWidget.preview(history[0].path);
+                this.previewWidget?.preview(history[0].path);
 
             this._wallpaperController.resetPreview();
         };
@@ -229,7 +235,7 @@ class RandomWallpaperMenu {
          * @param {HistoryEntry} entry The hovered/focused history entry
          */
         const onEnter = (entry: HistoryEntry): void => {
-            this.previewWidget.preview(entry.path);
+            this.previewWidget?.preview(entry.path);
             this._wallpaperController.previewWallpaper(entry.id);
         };
 
@@ -250,8 +256,8 @@ class RandomWallpaperMenu {
 
         this._historySection.updateList(history, onEnter, onLeave, onSelect);
 
-        this.previewWidget.preview(history[0].path);
-        this.previewWidget.show();
+        this.previewWidget?.preview(history[0].path);
+        this.previewWidget?.show();
         this.previewSeparator.show();
     }
 
@@ -259,7 +265,7 @@ class RandomWallpaperMenu {
      * Remove the history section
      */
     clearHistoryList(): void {
-        this.previewWidget.hide();
+        this.previewWidget?.hide();
         this.previewSeparator.hide();
         this._historySection.clear();
     }
