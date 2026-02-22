@@ -54,7 +54,7 @@ abstract class BaseAdapter {
      * @returns {HistoryEntry[]} Array of crafted HistoryEntries
      * @throws {HistoryEntry[]} Array of crafted historyEntries, can be empty
      */
-    abstract requestRandomImage (count: number): Promise<HistoryEntry[]>;
+    abstract requestRandomImage (_count: number): Promise<HistoryEntry[]>;
 
     /**
      * Fetches an image according to a given HistoryEntry.

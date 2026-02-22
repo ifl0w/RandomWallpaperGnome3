@@ -78,13 +78,13 @@ format_js() {
     done
 
     # Format js using the official gjs stylesheet and a few manual quirks
-    npx eslint --no-eslintrc --config "$SCRIPTDIR/.eslintrc-gjs.yml" --fix "$DESTDIR/**/*.js"
+    npx eslint --config "$SCRIPTDIR/eslint.config.js" --fix "$DESTDIR/"
 }
 
 check_ts() {
     check_command "npm"
 
-    npx eslint "$SRCDIR/**/*.ts"
+    npx eslint --config "$SCRIPTDIR/eslint.config.mjs" "$SRCDIR/"
 }
 
 copy_static_files() {

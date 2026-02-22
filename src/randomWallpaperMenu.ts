@@ -1,8 +1,6 @@
 // These two rules contradict each other in TS and JS mode for @this in function descriptions below.
 // @this can be removed in TS but then JS complains about missing @this in documentation.
 // Disabling these rules for this specific file for now.
-/* eslint-disable jsdoc/check-tag-names */
-/* eslint-disable jsdoc/valid-types */
 
 import GLib from 'gi://GLib';
 

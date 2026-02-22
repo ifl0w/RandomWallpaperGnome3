@@ -176,7 +176,7 @@ class WallhavenAdapter extends BaseAdapter {
         let optionsString = '';
 
         for (const key in options) {
-            if (options.hasOwnProperty(key)) {
+            if (Object.prototype.hasOwnProperty.call(options, key)) {
                 if (Array.isArray(options[key]))
                     optionsString += `${key}=${(options[key] as Array<string>).join()}&`;
                 else if (typeof options[key] === 'string' && options[key] !== '')

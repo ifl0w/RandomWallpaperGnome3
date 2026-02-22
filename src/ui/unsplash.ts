@@ -23,8 +23,6 @@ enum Orientation {
 }
 /* eslint-enable */
 
-// FIXME: Generated static class code produces a no-unused-expressions rule error
-/* eslint-disable no-unused-expressions */
 /**
  * Subclass containing the preferences for Unsplash adapter
  */

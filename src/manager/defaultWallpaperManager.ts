@@ -69,7 +69,7 @@ class DefaultWallpaperManager extends WallpaperManager {
      * @param {Settings} screensaverSettings Settings containing the lock screen `picture-uri` key
      * @returns {Promise<void>} Only resolves
      */
-    static setSingleLockScreen(wallpaperURI: string, backgroundSettings: Settings, screensaverSettings: Settings): Promise<void> {
+    static setSingleLockScreen(wallpaperURI: string, _backgroundSettings: Settings, screensaverSettings: Settings): Promise<void> {
         const storedScalingMode = new Settings().getString('scaling-mode');
         if (Utils.isImageMerged(wallpaperURI))
             // merged wallpapers need mode "spanned"

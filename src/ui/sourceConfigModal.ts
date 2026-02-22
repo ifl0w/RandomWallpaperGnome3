@@ -11,9 +11,6 @@ import {SourceRow} from './sourceRow.js';
 // Imports for initializing the translation domain in templates
 import {gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
-// FIXME: Generated static class code produces a no-unused-expressions rule error
-/* eslint-disable no-unused-expressions */
-
 /**
  * Subclass of Adw.Window for configuring a single source in a modal window.
  */
@@ -123,7 +120,7 @@ class SourceConfigModal extends Adw.Window {
      * @returns {Promise<SourceRow>} Returns a promise resolving into the created/edited source row when closed/saved.
      */
     async open(): Promise<SourceRow> {
-        const promise = await new Promise<SourceRow>((resolve: (sourceRow: SourceRow) => void, reject: (error: Error) => void) => {
+        const promise = await new Promise<SourceRow>((resolve: (_sourceRow: SourceRow) => void, reject: (_error: Error) => void) => {
             this.show();
 
             this._button_add.connect('clicked', () => {
