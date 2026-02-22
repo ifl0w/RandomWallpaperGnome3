@@ -57,8 +57,8 @@ abstract class WallpaperManager {
         await Promise.allSettled(promises);
     }
 
-    protected abstract _setBackground(wallpaperPaths: string[]): Promise<void>;
-    protected abstract _setLockScreen(wallpaperPaths: string[]): Promise<void>;
+    protected abstract _setBackground(_wallpaperPaths: string[]): Promise<void>;
+    protected abstract _setLockScreen(_wallpaperPaths: string[]): Promise<void>;
 }
 
 /**

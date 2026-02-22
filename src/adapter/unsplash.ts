@@ -76,7 +76,7 @@ class UnsplashAdapter extends BaseAdapter {
             const response_body_bytes = await this._bowl.send_and_receive(message);
             response_body = JSON.parse(new TextDecoder().decode(response_body_bytes)) as UnsplashResponse;
         } catch (error) {
-            throw new Error(`Could not parse response for ${url}!\n${String(error)}`);
+            throw new Error(`Could not parse response for ${url}!\n${String(error)}`, { cause: error });
         }
 
         const imageDownloadURL = response_body[0].urls.raw;

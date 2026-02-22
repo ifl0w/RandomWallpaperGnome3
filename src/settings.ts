@@ -1,8 +1,6 @@
 import Gio from 'gi://Gio';
 import GObject from 'gi://GObject';
 
-//import {ExtensionBase} from 'sharedInternals';
-import {ExtensionPreferences, gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
 import { ExtensionBase } from '@girs/gnome-shell/extensions/extension';
 
@@ -175,7 +173,7 @@ class Settings {
      * @param {(...args: unknown[]) => unknown} callback Function to call on value changes
      * @returns {number} Handler ID, use for disconnect
      */
-    observe(key: string, callback: (...args: unknown[]) => unknown): number {
+    observe(key: string, callback: (..._args: unknown[]) => unknown): number {
         return this._settings.connect(`changed::${key}`, callback);
     }
 

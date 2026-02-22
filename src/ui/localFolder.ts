@@ -8,9 +8,6 @@ import * as Settings from './../settings.js';
 
 import {gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
-// FIXME: Generated static class code produces a no-unused-expressions rule error
-/* eslint-disable no-unused-expressions */
-
 /**
  * Subclass containing the preferences for LocalFolder adapter
  */

@@ -302,11 +302,8 @@ class WallpaperController {
             const settingsGeneral = new SettingsModule.Settings(SettingsModule.RWG_SETTINGS_SCHEMA_SOURCES_GENERAL, path);
 
             let imageSourceAdapter: BaseAdapter;
-            let sourceName = 'undefined';
-            let sourceType = -1;
-
-            sourceName = settingsGeneral.getString('name');
-            sourceType = settingsGeneral.getInt('type');
+            const sourceName = settingsGeneral.getString('name');
+            let sourceType = settingsGeneral.getInt('type');
 
             const availableAdapter = _arrayIncludes(randomAdapterResult, sourceType);
             if (availableAdapter) {
@@ -340,7 +337,7 @@ class WallpaperController {
                     break;
                 }
             } catch (error) {
-                Logger.warn('Had errors, fetching with default settings.', this);
+                Logger.warn(`Fetching with default settings due to error (err: ${String(error)}).`, this);
                 imageSourceAdapter = new WallhavenAdapter(null, null);
                 sourceType = Utils.SourceType.WALLHAVEN;
             }

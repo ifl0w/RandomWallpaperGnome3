@@ -21,9 +21,6 @@ import {Logger} from './logger.js';
 Gio._promisify(Gio.File.prototype, 'copy_async', 'copy_finish');
 Gio._promisify(Gio.File.prototype, 'replace_contents_bytes_async', 'replace_contents_finish');
 
-// FIXME: Generated static class code produces a no-unused-expressions rule error
-/* eslint-disable no-unused-expressions */
-
 /**
  * Preview widget at the top of the panel menu.
  */
@@ -360,9 +357,9 @@ class HistoryElement extends PopupMenu.PopupSubMenuMenuItem {
      * @param {(HistoryElement) => void} onSelect Function to call on menu element enter-event
      */
     public setCallbacks(
-        onEnter: (entry: HistoryModule.HistoryEntry) => void,
-        onLeave: (entry: HistoryModule.HistoryEntry) => void,
-        onSelect: (entry: HistoryModule.HistoryEntry) => void
+        onEnter: (_entry: HistoryModule.HistoryEntry) => void,
+        onLeave: (_entry: HistoryModule.HistoryEntry) => void,
+        onSelect: (_entry: HistoryModule.HistoryEntry) => void
     ): void {
         const debounceCatch = (err: Error): void => {
             if (err.message !== HistoryElement.DEBOUNCE_ERROR_MSG)
@@ -557,7 +554,6 @@ class StatusElement {
     startLoading(): void {
         // FIXME: Don't know where this is defined
         // @ts-expect-error Don't know where this is defined
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
         this.icon.ease({
             opacity: 20,
             duration: 1337,
@@ -606,9 +602,9 @@ class HistorySection extends PopupMenu.PopupMenuSection {
      */
     updateList(
         history: HistoryModule.HistoryEntry[],
-        onEnter: (actor: HistoryModule.HistoryEntry) => void,
-        onLeave: (actor: HistoryModule.HistoryEntry) => void,
-        onSelect: (actor: HistoryModule.HistoryEntry) => void
+        onEnter: (_actor: HistoryModule.HistoryEntry) => void,
+        onLeave: (_actor: HistoryModule.HistoryEntry) => void,
+        onSelect: (_actor: HistoryModule.HistoryEntry) => void
     ): void {
         this.removeAll();
 

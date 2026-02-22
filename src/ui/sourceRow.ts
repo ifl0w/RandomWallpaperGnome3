@@ -16,9 +16,6 @@ import {UnsplashSettings} from './unsplash.js';
 import {UrlSourceSettings} from './urlSource.js';
 import {WallhavenSettings} from './wallhaven.js';
 
-// FIXME: Generated static class code produces a no-unused-expressions rule error
-/* eslint-disable no-unused-expressions */
-
 /**
  * Class containing general settings for each adapter source as well as the adapter source
  */
@@ -107,7 +104,7 @@ class SourceRow extends Adw.ExpanderRow {
         | LocalFolderSettings
         | UrlSourceSettings
         | null {
-        let targetWidget = null;
+        let targetWidget;
         switch (type) {
         case Utils.SourceType.UNSPLASH:
             targetWidget = new UnsplashSettings(this.id);

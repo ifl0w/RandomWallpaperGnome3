@@ -6,9 +6,6 @@ import Gtk from 'gi://Gtk';
 
 import * as Settings from './../settings.js';
 
-// FIXME: Generated static class code produces a no-unused-expressions rule error
-/* eslint-disable no-unused-expressions */
-
 /**
  * Subclass containing the preferences for GenericJson adapter
  */
