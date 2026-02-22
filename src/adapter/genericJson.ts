@@ -63,10 +63,7 @@ class GenericJsonAdapter extends BaseAdapter {
         }
 
         const imageJSONPath = this._settings.getString('image-path');
-        const postJSONPath = this._settings.getString('post-path');
-        const domainUrl = this._settings.getString('domain');
         const authorNameJSONPath = this._settings.getString('author-name-path');
-        const authorUrlJSONPath = this._settings.getString('author-url-path');
 
         for (let i = 0; i < MAX_ARRAY_RETRIES + count && wallpaperResult.length < count; i++) {
             const [returnObject, resolvedPath] = JSONPath.getTarget(response_body, imageJSONPath);
@@ -90,35 +87,14 @@ class GenericJsonAdapter extends BaseAdapter {
             // A bit cumbersome to handle "unknown" in the following parts:
             // https://github.com/microsoft/TypeScript/issues/27706
 
-            let postUrl: string;
-            const postUrlObject = JSONPath.getTarget(response_body, JSONPath.replaceRandomInPath(postJSONPath, resolvedPath))[0];
-            if (typeof postUrlObject === 'string' || typeof postUrlObject === 'number')
-                postUrl = this._settings.getString('post-prefix') + String(postUrlObject);
-            else
-                postUrl = '';
-
             let authorName: string | null = null;
             const authorNameObject = JSONPath.getTarget(response_body, JSONPath.replaceRandomInPath(authorNameJSONPath, resolvedPath))[0];
             if (typeof authorNameObject === 'string' && authorNameObject !== '')
                 authorName = authorNameObject;
 
-            let authorUrl: string;
-            const authorUrlObject = JSONPath.getTarget(response_body, JSONPath.replaceRandomInPath(authorUrlJSONPath, resolvedPath))[0];
-            if (typeof authorUrlObject === 'string' || typeof authorUrlObject === 'number')
-                authorUrl = this._settings.getString('author-url-prefix') + String(authorUrlObject);
-            else
-                authorUrl = '';
-
             const historyEntry = new HistoryEntry(authorName, this._sourceName, imageDownloadUrl);
 
-            if (authorUrl !== '')
-                historyEntry.source.authorUrl = authorUrl;
-
-            if (postUrl !== '')
-                historyEntry.source.imageLinkUrl = postUrl;
-
-            if (domainUrl !== '')
-                historyEntry.source.sourceUrl = domainUrl;
+            this.fillEntryMeta(historyEntry, response_body, resolvedPath)
 
             if (!this._includesWallpaper(wallpaperResult, historyEntry.source.imageDownloadUrl))
                 wallpaperResult.push(historyEntry);
@@ -130,6 +106,35 @@ class GenericJsonAdapter extends BaseAdapter {
         }
 
         return wallpaperResult;
+    }
+
+    fillEntryMeta(historyEntry: HistoryEntry, response_body: unknown, resolvedPath: string) {
+        const domainUrl = this._settings.getString('domain');
+        const postJSONPath = this._settings.getString('post-path');
+        const authorUrlJSONPath = this._settings.getString('author-url-path');
+
+        let postUrl: string;
+        const postUrlObject = JSONPath.getTarget(response_body, JSONPath.replaceRandomInPath(postJSONPath, resolvedPath))[0];
+        if (typeof postUrlObject === 'string' || typeof postUrlObject === 'number')
+            postUrl = this._settings.getString('post-prefix') + String(postUrlObject);
+        else
+            postUrl = '';
+
+        let authorUrl: string;
+        const authorUrlObject = JSONPath.getTarget(response_body, JSONPath.replaceRandomInPath(authorUrlJSONPath, resolvedPath))[0];
+        if (typeof authorUrlObject === 'string' || typeof authorUrlObject === 'number')
+            authorUrl = this._settings.getString('author-url-prefix') + String(authorUrlObject);
+        else
+            authorUrl = '';
+
+        if (authorUrl !== '')
+            historyEntry.source.authorUrl = authorUrl;
+
+        if (postUrl !== '')
+            historyEntry.source.imageLinkUrl = postUrl;
+
+        if (domainUrl !== '')
+            historyEntry.source.sourceUrl = domainUrl;
     }
 
     /**
