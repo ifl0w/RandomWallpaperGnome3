@@ -21,9 +21,6 @@ import {Logger} from './logger.js';
 Gio._promisify(Gio.File.prototype, 'copy_async', 'copy_finish');
 Gio._promisify(Gio.File.prototype, 'replace_contents_bytes_async', 'replace_contents_finish');
 
-import * as Config from 'resource:///org/gnome/shell/misc/config.js';
-const [MAJOR, unused_MINOR] = Config.PACKAGE_VERSION.split('.').map(s => Number(s));
-
 // FIXME: Generated static class code produces a no-unused-expressions rule error
 /* eslint-disable no-unused-expressions */
 
@@ -597,12 +594,6 @@ class HistorySection extends PopupMenu.PopupMenuSection {
         });
 
         this.actor.add_child(this.box);
-        // https://gjs.guide/extensions/upgrading/gnome-shell-46.html#clutter-container
-        if (MAJOR < 46)
-            // @ts-expect-error this was used before 46
-            this.actor.add_actor(this.box);
-        else
-            this.actor.add_child(this.box);
     }
 
     /**
