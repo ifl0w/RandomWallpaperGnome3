@@ -60,8 +60,8 @@ class Logger {
      */
     private static _selectedLogLevel(): LogLevel {
         if (Logger.SETTINGS === null) {
-            this._log(LogLevel.ERROR, 'Extension context not set before first use!', Logger);
-            return LogLevel.WARNING;
+            // If settings are not available be verbose
+            return LogLevel.DEBUG;
         }
 
         return Logger.SETTINGS.getInt('log-level');
