@@ -49,7 +49,7 @@ jobs:
       - run: ${{github.workspace}}/build.sh build
       - run: ${{github.workspace}}/build.sh format
       - run: ${{github.workspace}}/build.sh copy_static
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: randomwallpaper@iflow.space.shell-extension.zip
           path: ${{github.workspace}}/randomwallpaper@iflow.space
