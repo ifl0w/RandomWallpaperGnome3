@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-06-29 18:11+0200\n"
+"POT-Creation-Date: 2026-02-23 03:52+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,71 +16,170 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
-#: randomwallpaper@iflow.space/manager/wallpaperManager.js:61
-#: randomwallpaper@iflow.space/manager/wallpaperManager.js:67
-#: randomwallpaper@iflow.space/manager/wallpaperManager.js:70
-msgid "Background"
+#: randomwallpaper@iflow.space/historyMenuElements.js:168
+msgid "Open Image in Browser"
 msgstr ""
 
-#: randomwallpaper@iflow.space/manager/wallpaperManager.js:64
-#: randomwallpaper@iflow.space/manager/wallpaperManager.js:67
-#: randomwallpaper@iflow.space/manager/wallpaperManager.js:70
-msgid "Lockscreen"
+#: randomwallpaper@iflow.space/historyMenuElements.js:179
+#: randomwallpaper@iflow.space/notifications.js:13
+msgid "Unknown Source"
 msgstr ""
 
-#: randomwallpaper@iflow.space/manager/wallpaperManager.js:67
-#: randomwallpaper@iflow.space/manager/wallpaperManager.js:70
+#: randomwallpaper@iflow.space/historyMenuElements.js:182
+msgid "Set As Wallpaper"
+msgstr ""
+
+#: randomwallpaper@iflow.space/historyMenuElements.js:187
+msgid "Save for Later"
+msgstr ""
+
+#: randomwallpaper@iflow.space/historyMenuElements.js:199
+msgid "Already Saved!"
+msgstr ""
+
+#: randomwallpaper@iflow.space/historyMenuElements.js:210
+msgid "Add to Blocklist"
+msgstr ""
+
+#: randomwallpaper@iflow.space/historyMenuElements.js:390
+#: randomwallpaper@iflow.space/notifications.js:15
+msgid "New Wallpaper"
+msgstr ""
+
+#: randomwallpaper@iflow.space/historyMenuElements.js:406
+#, javascript-format
+msgid "%d hour"
+msgid_plural "%d hours"
+msgstr[0] ""
+msgstr[1] ""
+
+#: randomwallpaper@iflow.space/historyMenuElements.js:407
+#, javascript-format
+msgid "%d minute"
+msgid_plural "%d minutes"
+msgstr[0] ""
+msgstr[1] ""
+
+#: randomwallpaper@iflow.space/historyMenuElements.js:409
+#: randomwallpaper@iflow.space/manager/wallpaperManager.js:69
+#: randomwallpaper@iflow.space/manager/wallpaperManager.js:72
 msgid "and"
 msgstr ""
 
-#: randomwallpaper@iflow.space/manager/wallpaperManager.js:70
+#: randomwallpaper@iflow.space/historyMenuElements.js:409
+#: randomwallpaper@iflow.space/historyMenuElements.js:411
+msgid "remaining"
+msgstr ""
+
+#: randomwallpaper@iflow.space/historyMenuElements.js:502
+msgid "No Wallpaper History"
+msgstr ""
+
+#: randomwallpaper@iflow.space/manager/wallpaperManager.js:63
+#: randomwallpaper@iflow.space/manager/wallpaperManager.js:69
+#: randomwallpaper@iflow.space/manager/wallpaperManager.js:72
+msgid "Background"
+msgstr ""
+
+#: randomwallpaper@iflow.space/manager/wallpaperManager.js:66
+#: randomwallpaper@iflow.space/manager/wallpaperManager.js:69
+#: randomwallpaper@iflow.space/manager/wallpaperManager.js:72
+msgid "Lockscreen"
+msgstr ""
+
+#: randomwallpaper@iflow.space/manager/wallpaperManager.js:72
 msgid "Independently"
 msgstr ""
 
-#: randomwallpaper@iflow.space/ui/localFolder.js:47
+#: randomwallpaper@iflow.space/notifications.js:13
+msgid "Source"
+msgstr ""
+
+#: randomwallpaper@iflow.space/notifications.js:14
+msgid "A new wallpaper was set!"
+msgstr ""
+
+#: randomwallpaper@iflow.space/notifications.js:26
+msgid "Wallpaper Download Failed!"
+msgstr ""
+
+#: randomwallpaper@iflow.space/prefs.js:138
+msgid "Loading ..."
+msgstr ""
+
+#: randomwallpaper@iflow.space/prefs.js:167
+#: randomwallpaper@iflow.space/ui/pageGeneral.ui:248
+msgid "About"
+msgstr ""
+
+#: randomwallpaper@iflow.space/prefs.js:206
+#: randomwallpaper@iflow.space/ui/localFolder.js:30
 msgid "Choose a Wallpaper Folder"
 msgstr ""
 
-#: randomwallpaper@iflow.space/ui/localFolder.js:49
+#: randomwallpaper@iflow.space/prefs.js:208
+#: randomwallpaper@iflow.space/ui/localFolder.js:32
 #: randomwallpaper@iflow.space/ui/pageGeneral.ui:77
 msgid "Open"
 msgstr ""
 
-#: randomwallpaper@iflow.space/ui/localFolder.js:50
+#: randomwallpaper@iflow.space/prefs.js:209
+#: randomwallpaper@iflow.space/ui/localFolder.js:33
 #: randomwallpaper@iflow.space/ui/sourceConfigModal.ui:54
 msgid "Cancel"
 msgstr ""
 
-#: randomwallpaper@iflow.space/ui/sourceConfigModal.js:53
+#. Temporarily pause timer
+#: randomwallpaper@iflow.space/randomWallpaperMenu.js:57
+msgid "Pause Timer"
+msgstr ""
+
+#. clear history button
+#: randomwallpaper@iflow.space/randomWallpaperMenu.js:77
+msgid "Clear History"
+msgstr ""
+
+#. open wallpaper folder button
+#: randomwallpaper@iflow.space/randomWallpaperMenu.js:81
+msgid "Open Wallpaper Folder"
+msgstr ""
+
+#. settings button
+#: randomwallpaper@iflow.space/randomWallpaperMenu.js:85
+msgid "Settings"
+msgstr ""
+
+#: randomwallpaper@iflow.space/ui/sourceConfigModal.js:26
 msgid "Edit Source"
 msgstr ""
 
-#: randomwallpaper@iflow.space/ui/sourceConfigModal.js:53
+#: randomwallpaper@iflow.space/ui/sourceConfigModal.js:26
 msgid "Add New Source"
 msgstr ""
 
-#: randomwallpaper@iflow.space/ui/unsplash.js:99
+#: randomwallpaper@iflow.space/ui/unsplash.js:48
 msgid "Low"
 msgstr ""
 
-#: randomwallpaper@iflow.space/ui/unsplash.js:102
+#: randomwallpaper@iflow.space/ui/unsplash.js:51
 msgid "High"
 msgstr ""
 
-#: randomwallpaper@iflow.space/ui/unsplash.js:121
+#: randomwallpaper@iflow.space/ui/unsplash.js:70
 msgid "Portrait"
 msgstr ""
 
-#: randomwallpaper@iflow.space/ui/unsplash.js:124
+#: randomwallpaper@iflow.space/ui/unsplash.js:73
 msgid "Landscape"
 msgstr ""
 
-#: randomwallpaper@iflow.space/ui/unsplash.js:127
+#: randomwallpaper@iflow.space/ui/unsplash.js:76
 msgid "Squarish"
 msgstr ""
 
-#: randomwallpaper@iflow.space/ui/wallhaven.js:95
+#: randomwallpaper@iflow.space/ui/wallhaven.js:45
 msgid "Choose a Color"
 msgstr ""
 
@@ -281,10 +380,6 @@ msgstr ""
 
 #: randomwallpaper@iflow.space/ui/pageGeneral.ui:243
 msgid "Set the tier of warnings appearing in the journal"
-msgstr ""
-
-#: randomwallpaper@iflow.space/ui/pageGeneral.ui:248
-msgid "About"
 msgstr ""
 
 #: randomwallpaper@iflow.space/ui/pageSources.ui:10
