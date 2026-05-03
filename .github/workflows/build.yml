@@ -26,10 +26,7 @@ jobs:
           sudo apt -q install --no-install-recommends npm libglib2.0-0 bash gnome-shell libgtk-4-bin libgtk-4-common libgtk-4-dev libadwaita-1-dev gir1.2-adw-1 gir1.2-gtk-4.0 zstd blueprint-compiler gettext
       - name: Check out repository code
         uses: actions/checkout@v3
-      - run: ${{github.workspace}}/build.sh setup_env
-      - run: ${{github.workspace}}/build.sh build
-      - run: ${{github.workspace}}/build.sh format
-      - run: ${{github.workspace}}/build.sh copy_static
+      - run: ${{github.workspace}}/build.sh
       - uses: actions/upload-artifact@v4
         with:
           name: randomwallpaper@iflow.space.shell-extension.zip
