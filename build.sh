@@ -117,6 +117,9 @@ pack() {
 
     # unpack again over generated files to populate locale directory
     unzip -ou -d $DESTDIR $DESTDIR".shell-extension.zip"
+
+    # pack again to include locale directory
+    gnome-extensions pack --force "${extra_source[@]}" --podir=$SRCDIR/po "$DESTDIR"
 }
 
 if [ $# -eq 0 ]; then
