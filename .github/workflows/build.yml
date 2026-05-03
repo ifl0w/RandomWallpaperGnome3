@@ -35,16 +35,6 @@ jobs:
           sudo ninja -C _build install
       - name: Check out repository code
         uses: actions/checkout@v3
-      # TODO: Remove the next step once "Jammy" (22.04) receives version 1.2+
-      # https://launchpad.net/ubuntu/+source/libadwaita-1
-      - name: Update to recent libadwaita
-        run: |
-          mkdir libadwaita
-          cd libadwaita || exit 1
-          wget https://launchpad.net/ubuntu/+source/libadwaita-1/1.4.0-1ubuntu1/+build/26712528/+files/gir1.2-adw-1_1.4.0-1ubuntu1_amd64.deb
-          wget https://launchpad.net/ubuntu/+source/libadwaita-1/1.4.0-1ubuntu1/+build/26712528/+files/libadwaita-1-0_1.4.0-1ubuntu1_amd64.deb
-          wget https://launchpad.net/ubuntu/+source/libadwaita-1/1.4.0-1ubuntu1/+build/26712528/+files/libadwaita-1-dev_1.4.0-1ubuntu1_amd64.deb
-          sudo dpkg --recursive --install --force-depends-version --force-depends .
       - run: ${{github.workspace}}/build.sh setup_env
       - run: ${{github.workspace}}/build.sh build
       - run: ${{github.workspace}}/build.sh format
