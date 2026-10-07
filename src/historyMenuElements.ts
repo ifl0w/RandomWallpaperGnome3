@@ -178,7 +178,7 @@ class HistoryElement extends PopupMenu.PopupSubMenuMenuItem {
         this.label.destroy();
 
         this._container = new St.BoxLayout({
-            vertical: true,
+            orientation: Clutter.Orientation.VERTICAL,
         });
 
         this._dateLabel = new St.Label({
@@ -492,7 +492,7 @@ class NewWallpaperElement extends PopupMenu.PopupBaseMenuItem {
         super(undefined);
 
         const container = new St.BoxLayout({
-            vertical: true,
+            orientation: Clutter.Orientation.VERTICAL,
         });
 
         const newWPLabel = new St.Label({
